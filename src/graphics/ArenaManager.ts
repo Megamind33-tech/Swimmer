@@ -20,8 +20,11 @@ import {
   PoolTheme,
   CameraView,
   TimeOfDay,
+  RaceState,
+  ISwimmerRaceState,
 } from '../types';
 import { logger, isMobileDevice, getDeviceQualityTier } from '../utils';
+import { BroadcastCamera } from './BroadcastCamera';
 
 export class ArenaManager {
   private scene: BABYLON.Scene | null = null;
@@ -38,6 +41,8 @@ export class ArenaManager {
   // Camera references
   private cameras: Map<CameraView, BABYLON.ArcRotateCamera> = new Map();
   private currentCamera: BABYLON.ArcRotateCamera | null = null;
+  private broadcastCamera: BroadcastCamera | null = null;
+  private isBroadcastMode: boolean = false;
 
   // Lighting
   private lights: BABYLON.Light[] = [];
@@ -118,6 +123,12 @@ export class ArenaManager {
 
     // Apply initial theme
     this.setTheme(this.arenaConfig.theme);
+
+    // Initialize broadcast camera (but don't activate it yet)
+    if (this.canvas) {
+      this.broadcastCamera = new BroadcastCamera(this.scene, this.canvas);
+      this.broadcastCamera.initialize();
+    }
 
     // Start render loop
     this.startRenderLoop();
@@ -479,14 +490,23 @@ export class ArenaManager {
 
     this.isRendering = true;
     let frameCount = 0;
+    let lastFrameTime = performance.now();
 
     const renderLoop = () => {
       frameCount++;
+      const currentTime = performance.now();
+      const deltaTime = currentTime - lastFrameTime;
+      lastFrameTime = currentTime;
 
       if (this.scene) {
         // Update water animation (simple)
         if (this.waterMesh && frameCount % 2 === 0) {
           this.waterMesh.rotation.z += 0.001;
+        }
+
+        // Update broadcast camera if active
+        if (this.isBroadcastMode && this.broadcastCamera) {
+          this.broadcastCamera.update(deltaTime);
         }
 
         this.scene.render();
@@ -521,6 +541,77 @@ export class ArenaManager {
   }
 
   // ============================================================================
+  // BROADCAST CAMERA CONTROL
+  // ============================================================================
+
+  /**
+   * Enable broadcast camera mode (for races)
+   */
+  public enableBroadcastMode(): void {
+    if (!this.broadcastCamera || !this.scene) return;
+
+    this.isBroadcastMode = true;
+    this.scene.activeCamera = this.broadcastCamera['currentCamera'];
+    logger.log('Broadcast camera mode enabled');
+  }
+
+  /**
+   * Disable broadcast camera mode (return to manual control)
+   */
+  public disableBroadcastMode(): void {
+    if (!this.scene) return;
+
+    this.isBroadcastMode = false;
+    this.scene.activeCamera = this.currentCamera;
+    logger.log('Broadcast camera mode disabled');
+  }
+
+  /**
+   * Update broadcast camera with race state
+   */
+  public updateBroadcastCameraRace(
+    raceState: RaceState,
+    playerSwimmer?: ISwimmerRaceState
+  ): void {
+    if (!this.broadcastCamera) return;
+
+    this.broadcastCamera.onRaceStateChange(raceState, playerSwimmer);
+  }
+
+  /**
+   * Notify broadcast camera of race progress
+   */
+  public notifyBroadcastCameraProgress(data: {
+    leader: string;
+    leaderPosition: number;
+    time: number;
+  }): void {
+    if (!this.broadcastCamera) return;
+
+    this.broadcastCamera.onRaceProgress(data);
+  }
+
+  /**
+   * Notify broadcast camera of swimmer finish
+   */
+  public notifyBroadcastCameraFinish(data: {
+    name: string;
+    rank: number;
+    time: number;
+  }): void {
+    if (!this.broadcastCamera) return;
+
+    this.broadcastCamera.onSwimmerFinished(data);
+  }
+
+  /**
+   * Get broadcast camera instance
+   */
+  public getBroadcastCamera(): BroadcastCamera | null {
+    return this.broadcastCamera;
+  }
+
+  // ============================================================================
   // CLEANUP
   // ============================================================================
 
@@ -529,6 +620,10 @@ export class ArenaManager {
    */
   public dispose(): void {
     this.stopRenderLoop();
+
+    if (this.broadcastCamera) {
+      this.broadcastCamera.dispose();
+    }
 
     if (this.scene) {
       this.scene.dispose();
