@@ -299,9 +299,14 @@ const TIME_OF_DAY_CONFIG = {
   useEffect(() => {
     if (!gameStarted) return;
     const timer = setTimeout(() => {
-      countdownRef.current = 3.0;
-      setCountdown(3.0);
-      setRaceStatus('countdown');
+      countdownRef.current = 0;
+      setCountdown(0);
+      raceActiveRef.current = true;
+      setRaceStatus('racing');
+      swimmers.forEach(s => {
+        s.state = 'diving';
+        s.diveTime = 0;
+      });
     }, 1500);
     return () => clearTimeout(timer);
   }, [gameStarted]);
@@ -1162,32 +1167,6 @@ const TIME_OF_DAY_CONFIG = {
         }
       } else {
         // Update Swimmers & Race
-        if (!raceActiveRef.current && countdownRef.current > 0) {
-            countdownRef.current -= dt;
-            setCountdown(countdownRef.current);
-            
-            // Update Start Lights
-            const step = Math.ceil(countdownRef.current); // 3, 2, 1
-            startLightMatsRef.current.forEach((mat, index) => {
-            const lightIndex = index % 3; // 0 (top), 1 (middle), 2 (bottom)
-            if (3 - step >= lightIndex) {
-                mat.emissiveColor = new Color3(1, 0, 0); // Red
-            } else {
-                mat.emissiveColor = new Color3(0, 0, 0);
-            }
-            });
-
-            if (countdownRef.current <= 0) {
-                raceActiveRef.current = true;
-                setRaceStatus('racing');
-                swimmers.forEach(s => {
-                    s.state = 'diving';
-                    s.diveTime = 0;
-                });
-            } else {
-                setRaceStatus('countdown');
-            }
-        }
 
         if (raceActiveRef.current) {
             raceTime += dt;
