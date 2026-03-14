@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 
 interface SettingsMenuProps {
   onBack: () => void;
-  onPlay: (mode: 'p2p' | 'multiplayer' | 'practice', venue: string, environment: string) => void;
+  onPlay: (mode: 'p2p' | 'multiplayer' | 'practice', venue: string, environment: string, timeOfDay: string, cameraPerspective: string) => void;
 }
 
 type VenueType = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
@@ -36,14 +36,24 @@ const TIMES_OF_DAY: Record<TimeOfDay, { name: string; description: string }> = {
   night: { name: 'Night', description: 'Artificial lighting' },
 };
 
+type CameraPerspective = 'default' | 'aerial' | 'startingBlock' | 'racing';
+
+const CAMERA_PERSPECTIVES: Record<CameraPerspective, { name: string; description: string }> = {
+  default: { name: 'Default View', description: 'Standard sideline camera' },
+  aerial: { name: 'Aerial View', description: 'Bird\'s eye overview' },
+  startingBlock: { name: 'Starting Block', description: 'From the blocks perspective' },
+  racing: { name: 'Racing View', description: 'Follow the swimmer' },
+};
+
 export const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack, onPlay }) => {
   const [selectedMode, setSelectedMode] = useState<'p2p' | 'multiplayer' | 'practice'>('p2p');
   const [selectedVenue, setSelectedVenue] = useState<VenueType>('game7');
   const [selectedEnvironment, setSelectedEnvironment] = useState<EnvironmentType>('pool');
   const [selectedTime, setSelectedTime] = useState<TimeOfDay>('afternoon');
+  const [selectedCamera, setSelectedCamera] = useState<CameraPerspective>('default');
 
   const handlePlay = () => {
-    onPlay(selectedMode, selectedVenue, selectedEnvironment);
+    onPlay(selectedMode, selectedVenue, selectedEnvironment, selectedTime, selectedCamera);
   };
 
   return (
@@ -152,6 +162,27 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack, onPlay }) =>
             </div>
           </div>
 
+          {/* Camera Perspective */}
+          <div className="bg-slate-800/30 rounded-lg p-6 border border-slate-700/50 backdrop-blur-sm">
+            <h2 className="text-xl font-bold text-white mb-4">Camera Perspective</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {(Object.entries(CAMERA_PERSPECTIVES) as [CameraPerspective, typeof CAMERA_PERSPECTIVES['default']][]).map(([key, cam]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedCamera(key)}
+                  className={`p-4 rounded-lg transition-all ${
+                    selectedCamera === key
+                      ? 'bg-orange-500 text-white ring-2 ring-orange-300'
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  <div className="font-bold text-lg">{cam.name}</div>
+                  <div className="text-sm opacity-80">{cam.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Summary */}
           <div className="bg-slate-800/50 rounded-lg p-6 border border-slate-700/50 backdrop-blur-sm">
             <h2 className="text-xl font-bold text-white mb-4">Summary</h2>
@@ -175,6 +206,10 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack, onPlay }) =>
               <p>
                 <span className="text-slate-400">Lighting:</span>{' '}
                 <span className="text-cyan-400 font-semibold">{TIMES_OF_DAY[selectedTime].name}</span>
+              </p>
+              <p>
+                <span className="text-slate-400">Camera:</span>{' '}
+                <span className="text-cyan-400 font-semibold">{CAMERA_PERSPECTIVES[selectedCamera].name}</span>
               </p>
             </div>
           </div>
