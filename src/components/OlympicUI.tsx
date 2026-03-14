@@ -12,6 +12,7 @@ interface OlympicUIProps {
   onGameStart: (mode: 'p2p' | 'multiplayer' | 'practice') => void;
   currentVenue?: string;
   onVenueChange?: (venue: string) => void;
+  onLocationSelect?: (location: string) => void;
 }
 
 interface MenuState {
@@ -23,6 +24,7 @@ export const OlympicUI: React.FC<OlympicUIProps> = ({
   onGameStart,
   currentVenue,
   onVenueChange,
+  onLocationSelect,
 }) => {
   const [menuState, setMenuState] = useState<MenuState>({ activeMenu: 'main' });
   const [selectedMode, setSelectedMode] = useState<'p2p' | 'multiplayer' | 'practice'>('p2p');
@@ -37,6 +39,9 @@ export const OlympicUI: React.FC<OlympicUIProps> = ({
   };
 
   const handleVenueSelect = (venue: string) => {
+    if (onLocationSelect) {
+      onLocationSelect(venue);
+    }
     if (onVenueChange) {
       onVenueChange(venue);
     }
@@ -61,7 +66,10 @@ export const OlympicUI: React.FC<OlympicUIProps> = ({
 
       {/* Training Menu */}
       {menuState.activeMenu === 'training' && (
-        <TrainingMenu onBack={() => handleMenuChange('main')} />
+        <TrainingMenu
+          onBack={() => handleMenuChange('main')}
+          onLocationSelect={handleVenueSelect}
+        />
       )}
 
       {/* Multiplayer Menu */}
@@ -229,9 +237,16 @@ const PlayMenu: React.FC<PlayMenuProps> = ({
 // Training Menu Component
 interface TrainingMenuProps {
   onBack: () => void;
+  onLocationSelect?: (location: string) => void;
 }
 
-const TrainingMenu: React.FC<TrainingMenuProps> = ({ onBack }) => {
+const TrainingMenu: React.FC<TrainingMenuProps> = ({ onBack, onLocationSelect }) => {
+  const handleEnter = (location: string) => {
+    if (onLocationSelect) {
+      onLocationSelect(location);
+    }
+  };
+
   return (
     <div className="olympic-menu training-menu">
       <div className="menu-header">
@@ -243,25 +258,25 @@ const TrainingMenu: React.FC<TrainingMenuProps> = ({ onBack }) => {
         <div className="training-card">
           <h3>LOCKER ROOM</h3>
           <p className="location-desc">Preparation and warm-up area</p>
-          <button className="select-button">ENTER</button>
+          <button className="select-button" onClick={() => handleEnter('locker')}>ENTER</button>
         </div>
 
         <div className="training-card">
           <h3>DRY LAND TRAINING</h3>
           <p className="location-desc">Strength and conditioning</p>
-          <button className="select-button">ENTER</button>
+          <button className="select-button" onClick={() => handleEnter('training')}>ENTER</button>
         </div>
 
         <div className="training-card">
           <h3>POOL WORKOUT</h3>
           <p className="location-desc">Swimming drills and exercises</p>
-          <button className="select-button">ENTER</button>
+          <button className="select-button" onClick={() => handleEnter('pool')}>ENTER</button>
         </div>
 
         <div className="training-card">
           <h3>COACHING SESSION</h3>
           <p className="location-desc">Personal coaching feedback</p>
-          <button className="select-button">ENTER</button>
+          <button className="select-button" onClick={() => handleEnter('school')}>ENTER</button>
         </div>
       </div>
     </div>

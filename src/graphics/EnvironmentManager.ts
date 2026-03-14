@@ -24,6 +24,7 @@ export class EnvironmentManager {
   private currentEnvironment: EnvironmentType = 'pool';
   private environments: Map<EnvironmentType, BABYLON.TransformNode | null> = new Map();
   private environmentInstances: Map<EnvironmentType, any> = new Map();
+  private poolArenaNode: BABYLON.TransformNode | null = null;
 
   // Environment references
   private lockerRoom: LockerRoomEnvironment | null = null;
@@ -75,6 +76,7 @@ export class EnvironmentManager {
         } else {
           environment = this.environments.get('locker-room')!;
         }
+        this.showEnvironment(environment);
         break;
 
       case 'training':
@@ -84,6 +86,7 @@ export class EnvironmentManager {
         } else {
           environment = this.environments.get('training')!;
         }
+        this.showEnvironment(environment);
         break;
 
       case 'school-gym':
@@ -93,17 +96,17 @@ export class EnvironmentManager {
         } else {
           environment = this.environments.get('school-gym')!;
         }
+        this.showEnvironment(environment);
         break;
 
       case 'pool':
       default:
-        // Pool is main racing environment - already exists
+        // Pool is main racing environment
+        if (this.poolArenaNode) {
+          this.poolArenaNode.setEnabled(true);
+        }
+        logger.log('Returning to pool racing environment');
         break;
-    }
-
-    // Show the environment
-    if (environment) {
-      this.showEnvironment(environment);
     }
 
     this.currentEnvironment = environmentType;
@@ -114,11 +117,16 @@ export class EnvironmentManager {
    * Hide all environments
    */
   private hideAllEnvironments(): void {
-    this.environments.forEach((env) => {
-      if (env) {
+    this.environments.forEach((env, type) => {
+      if (env && type !== 'pool') {
+        // Hide non-pool environments
         env.setEnabled(false);
       }
     });
+    // Pool is handled separately
+    if (this.poolArenaNode) {
+      this.poolArenaNode.setEnabled(false);
+    }
   }
 
   /**
@@ -176,6 +184,15 @@ export class EnvironmentManager {
    */
   public getEnvironmentRoot(environmentType: EnvironmentType): BABYLON.TransformNode | null {
     return this.environments.get(environmentType) || null;
+  }
+
+  /**
+   * Register the pool arena node for management
+   */
+  public registerPoolArena(node: BABYLON.TransformNode): void {
+    this.poolArenaNode = node;
+    this.environments.set('pool', node);
+    logger.log('Pool arena registered with EnvironmentManager');
   }
 
   /**

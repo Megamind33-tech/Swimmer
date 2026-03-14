@@ -213,6 +213,30 @@ const TIME_OF_DAY_CONFIG = {
   const [showPauseMenu, setShowPauseMenu] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
+
+  // Handle environment/location switching
+  const handleLocationSelect = (location: string) => {
+    if (!environmentManagerRef.current) return;
+
+    // Map UI locations to environment types
+    const environmentMap: { [key: string]: 'pool' | 'locker-room' | 'training' | 'school-gym' } = {
+      'olympic': 'pool',
+      'game7': 'pool',
+      'neon': 'pool',
+      'sunset': 'pool',
+      'custom': 'pool',
+      'locker': 'locker-room',
+      'training': 'training',
+      'school': 'school-gym',
+    };
+
+    const environmentType = environmentMap[location];
+    if (environmentType) {
+      environmentManagerRef.current.switchToEnvironment(environmentType);
+      setCurrentEnvironment(environmentType);
+      setCurrentVenue(location);
+    }
+  };
   const cameraPerspectiveRef = useRef(cameraPerspective);
   useEffect(() => {
     cameraPerspectiveRef.current = cameraPerspective;
@@ -396,6 +420,9 @@ const TIME_OF_DAY_CONFIG = {
     // Initialize Environment Manager
     environmentManagerRef.current = new EnvironmentManager(scene);
 
+    // Create pool arena node to be managed by EnvironmentManager
+    const poolArenaNode = new BABYLON.TransformNode('poolArena', scene);
+
     // Pool Dimensions
     const poolWidth = 20;
     const poolLength = 40;
@@ -409,14 +436,15 @@ const TIME_OF_DAY_CONFIG = {
     const hallHeight = 45;
 
     // Indoor Hall (Building)
-    const hall = MeshBuilder.CreateBox('hall', { 
-      width: hallWidth, 
-      height: hallHeight, 
+    const hall = MeshBuilder.CreateBox('hall', {
+      width: hallWidth,
+      height: hallHeight,
       depth: hallLength,
-      sideOrientation: Mesh.BACKSIDE 
+      sideOrientation: Mesh.BACKSIDE
     }, scene);
     hall.position.y = hallHeight / 2 - 0.25; // Align with deck
-    
+    hall.parent = poolArenaNode;
+
     const hallMat = new StandardMaterial('hallMat', scene);
     hallMat.diffuseColor = v.hallColor;
     hallMat.specularColor = new Color3(0.1, 0.1, 0.1);
@@ -454,9 +482,10 @@ const TIME_OF_DAY_CONFIG = {
     const floor = MeshBuilder.CreatePlane('floor', { width: poolWidth, height: poolLength }, scene);
     floor.rotation.x = Math.PI / 2;
     floor.position.y = -poolDepth;
+    floor.parent = poolArenaNode;
     const floorMat = new StandardMaterial('floorMat', scene);
     floorMat.diffuseColor = new Color3(0.5, 0.8, 1.0); // Light blue
-    floorMat.diffuseTexture = new Texture('https://playground.babylonjs.com/textures/tile.jpg', scene); 
+    floorMat.diffuseTexture = new Texture('https://playground.babylonjs.com/textures/tile.jpg', scene);
     (floorMat.diffuseTexture as Texture).uScale = 10;
     (floorMat.diffuseTexture as Texture).vScale = 20;
     floorMat.emissiveTexture = causticsTexture;
@@ -470,6 +499,7 @@ const TIME_OF_DAY_CONFIG = {
       laneLine.position.y = -poolDepth + 0.01;
       laneLine.position.x = -poolWidth / 2 + (i + 0.5) * laneWidth;
       laneLine.position.z = 0;
+      laneLine.parent = poolArenaNode;
       const lineMat = new StandardMaterial('lineMat', scene);
       lineMat.diffuseColor = new Color3(0, 0, 0.5);
       laneLine.material = lineMat;
@@ -487,24 +517,28 @@ const TIME_OF_DAY_CONFIG = {
     const wallBack = MeshBuilder.CreatePlane('wallBack', { width: poolWidth, height: poolDepth }, scene);
     wallBack.position.z = poolLength / 2;
     wallBack.position.y = -poolDepth / 2;
+    wallBack.parent = poolArenaNode;
     wallBack.material = wallMat;
 
     const wallFront = MeshBuilder.CreatePlane('wallFront', { width: poolWidth, height: poolDepth }, scene);
     wallFront.rotation.y = Math.PI;
     wallFront.position.z = -poolLength / 2;
     wallFront.position.y = -poolDepth / 2;
+    wallFront.parent = poolArenaNode;
     wallFront.material = wallMat;
 
     const wallLeft = MeshBuilder.CreatePlane('wallLeft', { width: poolLength, height: poolDepth }, scene);
     wallLeft.rotation.y = -Math.PI / 2;
     wallLeft.position.x = -poolWidth / 2;
     wallLeft.position.y = -poolDepth / 2;
+    wallLeft.parent = poolArenaNode;
     wallLeft.material = wallMat;
 
     const wallRight = MeshBuilder.CreatePlane('wallRight', { width: poolLength, height: poolDepth }, scene);
     wallRight.rotation.y = Math.PI / 2;
     wallRight.position.x = poolWidth / 2;
     wallRight.position.y = -poolDepth / 2;
+    wallRight.parent = poolArenaNode;
     wallRight.material = wallMat;
 
     // Pool Deck with Hole
@@ -523,10 +557,11 @@ const TIME_OF_DAY_CONFIG = {
     const mainDeckCSG = CSG.FromMesh(mainDeck);
     const poolHoleCSG = CSG.FromMesh(poolHole);
     const deckCSG = mainDeckCSG.subtract(poolHoleCSG);
-    
+
     const deck = deckCSG.toMesh('deck', deckMat, scene);
     deck.isPickable = false;
-    
+    deck.parent = poolArenaNode;
+
     mainDeck.dispose();
     poolHole.dispose();
 
@@ -618,6 +653,7 @@ const TIME_OF_DAY_CONFIG = {
         stepB.material = stepMat;
         stepB.parent = bleacherGroup;
       }
+      bleacherGroup.parent = poolArenaNode;
       return bleacherGroup;
     };
     const bleachers = createBleachers();
@@ -671,6 +707,7 @@ const TIME_OF_DAY_CONFIG = {
           }
         }
       }
+      railingGroup.parent = poolArenaNode;
       return railingGroup;
     };
     const railings = createRailings();
@@ -678,6 +715,7 @@ const TIME_OF_DAY_CONFIG = {
     // Stadium Scoreboard (Jumbotron)
     const scoreboard = MeshBuilder.CreateBox('scoreboard', { width: 24, height: 12, depth: 1 }, scene);
     scoreboard.position = new Vector3(0, 18, poolLength / 2 + 15);
+    scoreboard.parent = poolArenaNode;
     const sbMat = new StandardMaterial('sbMat', scene);
     const sbTex = new DynamicTexture('sbTex', { width: 1024, height: 512 }, scene);
     sbMat.diffuseTexture = sbTex;
@@ -704,6 +742,7 @@ const TIME_OF_DAY_CONFIG = {
         truss.rotation.z = Math.PI / 2;
         truss.position = new Vector3(0, hallHeight - 2, z);
         truss.material = trussMat;
+        truss.parent = poolArenaNode;
         trusses.push(truss);
     }
 
@@ -714,6 +753,7 @@ const TIME_OF_DAY_CONFIG = {
         const banner = MeshBuilder.CreatePlane(`banner_${i}`, { width: 4, height: 10, sideOrientation: Mesh.DOUBLESIDE }, scene);
         const xPos = -hallWidth/2 + 15 + i * ((hallWidth - 30) / (bannerColors.length - 1));
         banner.position = new Vector3(xPos, hallHeight - 7, -hallLength/2 + 1);
+        banner.parent = poolArenaNode;
         const bMat = new StandardMaterial(`bMat_${i}`, scene);
         bMat.diffuseColor = Color3.FromHexString(bannerColors[i]);
         banner.material = bMat;
@@ -723,6 +763,7 @@ const TIME_OF_DAY_CONFIG = {
     // Water
     const waterMesh = MeshBuilder.CreateGround('waterMesh', { width: poolWidth, height: poolLength, subdivisions: 64 }, scene);
     waterMesh.position.y = -0.2;
+    waterMesh.parent = poolArenaNode;
     const water = new WaterMaterial('water', scene, new Vector2(1024, 1024));
     water.bumpTexture = new Texture('https://playground.babylonjs.com/textures/waterbump.png', scene);
     water.windForce = 20;
@@ -1129,6 +1170,11 @@ const TIME_OF_DAY_CONFIG = {
     // Create lights on both sides of the starting blocks
     createStartLightSystem(-poolWidth / 2 - 2, true);
     createStartLightSystem(poolWidth / 2 + 2, false);
+
+    // Register pool arena with EnvironmentManager for proper scene management
+    if (environmentManagerRef.current) {
+      environmentManagerRef.current.registerPoolArena(poolArenaNode);
+    }
 
     let time = 0;
     engine.runRenderLoop(() => {
