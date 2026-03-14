@@ -1400,12 +1400,27 @@ const TIME_OF_DAY_CONFIG = {
             setShowSettings(false);
             setShowMenu(true);
           }}
-          onPlay={(mode, venue, environment) => {
+          onPlay={(mode, venue, environment, extras) => {
             setGameMode(mode);
             setCurrentVenue(venue as VenueTheme);
             setCurrentEnvironment(environment as 'pool' | 'locker-room' | 'training' | 'school-gym');
+            if (extras?.cameraPerspective) {
+              setCameraPerspective(extras.cameraPerspective as 'default' | 'aerial' | 'startingBlock' | 'racing');
+            }
+            if (extras?.timeOfDay) {
+              setTimeOfDay(extras.timeOfDay as 'morning' | 'afternoon' | 'evening' | 'night');
+            }
+            if (extras?.enableRecording) {
+              isRecordingRef.current = true;
+              recordedDataRef.current = [];
+              setIsRecording(true);
+            }
             setShowSettings(false);
             setGameStarted(true);
+            // Auto-start race countdown
+            countdownRef.current = 3.0;
+            setCountdown(3.0);
+            setRaceStatus('countdown');
           }}
         />
       )}
@@ -1430,74 +1445,6 @@ const TIME_OF_DAY_CONFIG = {
               {Math.ceil(countdown)}
             </div>
           )}
-      <header className="p-4 bg-black/50 backdrop-blur-md border-b border-white/10 z-10 flex flex-row justify-end items-center gap-4">
-        <div className="flex gap-2 sm:gap-4 text-[10px] sm:text-xs text-slate-300 items-center">
-          <button
-            onClick={() => {
-                countdownRef.current = 3.0;
-                setCountdown(3.0);
-                setRaceStatus('countdown');
-            }}
-            className="px-2 py-1 rounded border bg-emerald-500 text-white"
-          >
-            Start Race
-          </button>
-          <button
-            onClick={() => setShowPauseMenu(!showPauseMenu)}
-            className="px-2 py-1 rounded border bg-blue-500 text-white"
-            title="Press P or ESC to toggle pause"
-          >
-            {showPauseMenu ? 'Resume' : 'Pause'}
-          </button>
-          <select 
-            value={timeOfDay}
-            onChange={(e) => setTimeOfDay(e.target.value as 'morning' | 'afternoon' | 'evening' | 'night')}
-            className="bg-black/40 border border-white/20 rounded px-2 sm:px-3 py-1 text-white outline-none focus:border-emerald-500"
-          >
-            <option value="morning">Morning</option>
-            <option value="afternoon">Afternoon</option>
-            <option value="evening">Evening</option>
-            <option value="night">Night</option>
-          </select>
-          <select
-            value={cameraPerspective}
-            onChange={(e) => setCameraPerspective(e.target.value as 'default' | 'aerial' | 'startingBlock' | 'racing')}
-            className="bg-black/40 border border-white/20 rounded px-2 sm:px-3 py-1 text-white outline-none focus:border-emerald-500"
-          >
-            <option value="default">Default View</option>
-            <option value="aerial">Aerial View</option>
-            <option value="startingBlock">Starting Block</option>
-            <option value="racing">Racing View</option>
-          </select>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => {
-                isRecordingRef.current = !isRecordingRef.current;
-                if (isRecordingRef.current) recordedDataRef.current = [];
-                setIsRecording(isRecordingRef.current);
-              }}
-              className={`px-2 py-1 rounded border ${isRecording ? 'bg-red-500' : 'bg-white/10'}`}
-            >
-              {isRecording ? 'Stop' : 'Record'}
-            </button>
-            <button 
-              onClick={() => {
-                isReplayingRef.current = !isReplayingRef.current;
-                replayFrameRef.current = 0;
-                setIsReplaying(isReplayingRef.current);
-              }}
-              className={`px-2 py-1 rounded border ${isReplaying ? 'bg-blue-500' : 'bg-white/10'}`}
-            >
-              {isReplaying ? 'Stop' : 'Replay'}
-            </button>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Live Render
-          </div>
-          <div className="px-2 py-1 bg-white/10 rounded border border-white/10">
-            Lanes: 8
-          </div>
-        </div>
-      </header>
       
       <main className="flex-1 relative min-h-0">
         <canvas 
