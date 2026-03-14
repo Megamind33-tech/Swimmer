@@ -48,13 +48,13 @@ export interface TurnResult {
 }
 
 export interface TurnEvents {
-  turnDetected: (result: TurnResult) => void;
-  earlyTurn: (ms: number) => void;
-  lateTurn: (ms: number) => void;
-  perfectTurn: () => void;
-  turnApproaching: (distanceToWall: number) => void;
-  flipTurnInitiated: () => void;
-  wallCollision: () => void;
+  turnDetected: TurnResult;
+  earlyTurn: number;
+  lateTurn: number;
+  perfectTurn: void;
+  turnApproaching: number;
+  flipTurnInitiated: void;
+  wallCollision: void;
 }
 
 /**
@@ -187,7 +187,7 @@ export class TurnSystem extends EventEmitter<TurnEvents> {
 
     // Perfect turn
     if (absTimingDiff < 100) {
-      this.emit('perfectTurn');
+      this.emit('perfectTurn', undefined);
 
       return {
         success: true,

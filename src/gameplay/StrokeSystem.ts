@@ -46,14 +46,14 @@ export interface StrokeState {
 }
 
 export interface StrokeEvents {
-  strokeChanged: (stroke: SwimmingStroke) => void;
-  cycleComplete: (metrics: { taps: number; accuracy: number }) => void;
-  tapDetected: (timing: number) => void;
-  breathingCycleStart: () => void;
-  breathingCycleEnd: () => void;
-  underwaterPhaseStart: () => void;
-  underwaterPhaseEnd: () => void;
-  strokeDifficulty: (difficulty: number) => void;
+  strokeChanged: SwimmingStroke;
+  cycleComplete: { taps: number; accuracy: number };
+  tapDetected: number;
+  breathingCycleStart: void;
+  breathingCycleEnd: void;
+  underwaterPhaseStart: void;
+  underwaterPhaseEnd: void;
+  strokeDifficulty: number;
 }
 
 /**
@@ -249,9 +249,9 @@ export class StrokeSystem extends EventEmitter<StrokeEvents> {
     this.state.isUnderwater = progress < underwaterEnd;
 
     if (!wasUnderwater && this.state.isUnderwater) {
-      this.emit('underwaterPhaseStart');
+      this.emit('underwaterPhaseStart', undefined);
     } else if (wasUnderwater && !this.state.isUnderwater) {
-      this.emit('underwaterPhaseEnd');
+      this.emit('underwaterPhaseEnd', undefined);
     }
 
     return progress;

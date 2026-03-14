@@ -348,7 +348,7 @@ export class ArenaManager {
     // Hemispheric light (ambient)
     const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 1, 0), this.scene);
     hemiLight.intensity = 0.7;
-    hemiLight.diffuseColor = new BABYLON.Color3(1, 0.9, 0.7);
+    hemiLight.specular = new BABYLON.Color3(1, 0.9, 0.7);
     this.lights.push(hemiLight);
 
     // Point light for intensity
@@ -391,7 +391,8 @@ export class ArenaManager {
       camera.attachControl(this.canvas!, true);
       camera.wheelPrecision = 20;
       // Use correct ArcRotateCamera sensitivity property names
-      camera.angularSensibility = 1000;
+      camera.angularSensibilityX = 1000;
+      camera.angularSensibilityY = 1000;
       camera.inertia = 0.7;
       camera.lowerRadiusLimit = 10;
       camera.upperRadiusLimit = 100;
@@ -558,7 +559,9 @@ export class ArenaManager {
     };
 
     const config = lightConfigs[time];
-    this.lights[0].diffuseColor = config.color;
+    if (this.lights[0] instanceof BABYLON.HemisphericLight) {
+      this.lights[0].specular = config.color;
+    }
     this.lights[0].intensity = config.intensity;
 
     logger.log('Time of day set to:', time);

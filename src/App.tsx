@@ -349,6 +349,8 @@ const TIME_OF_DAY_CONFIG = {
     // Only initialize if canvas exists and game has started
     if (!canvasRef.current || !gameStarted) return;
 
+    const handleResizeRef = { current: null as any };
+
     const initializeGame = async () => {
       let v = VENUES[currentVenue];
     
@@ -1394,8 +1396,11 @@ const TIME_OF_DAY_CONFIG = {
     });
 
     const handleResize = () => {
-      engine.resize();
+      if (engineRef.current) {
+        engineRef.current.resize();
+      }
     };
+    handleResizeRef.current = handleResize;
     window.addEventListener('resize', handleResize);
     };
 
@@ -1408,7 +1413,9 @@ const TIME_OF_DAY_CONFIG = {
 
     // Return cleanup function
     return () => {
-      window.removeEventListener('resize', handleResize);
+      if (handleResizeRef.current) {
+        window.removeEventListener('resize', handleResizeRef.current);
+      }
       // Cleanup enhanced systems
       try {
         if (enhancedSwimmerManagerRef.current) {
@@ -1432,7 +1439,9 @@ const TIME_OF_DAY_CONFIG = {
         console.error('Error disposing rendering optimizer:', e);
       }
       // Cleanup scene and engine
-      engine.dispose();
+      if (engineRef.current) {
+        engineRef.current.dispose();
+      }
     };
   }, [currentVenue, customColors, gameStarted]);
 

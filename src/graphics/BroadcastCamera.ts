@@ -141,7 +141,8 @@ export class BroadcastCamera {
 
     // Disable user input - critical for broadcast camera
     this.currentCamera.inertia = 0; // no momentum
-    this.currentCamera.angularSensibility = Number.MAX_VALUE; // disable mouse/touch control
+    this.currentCamera.angularSensibilityX = Number.MAX_VALUE; // disable mouse/touch control
+    this.currentCamera.angularSensibilityY = Number.MAX_VALUE; // disable mouse/touch control
     this.currentCamera.wheelPrecision = Number.MAX_VALUE; // disable wheel zoom
     this.currentCamera.pinchPrecision = Number.MAX_VALUE; // disable pinch zoom
 
@@ -392,7 +393,7 @@ export class BroadcastCamera {
    */
   public dispose(): void {
     if (this.currentCamera) {
-      this.currentCamera.detachControl(this.canvas);
+      this.currentCamera.detachControl();
     }
     logger.log('BroadcastCamera disposed');
   }

@@ -19,15 +19,15 @@ import { RaceEngine } from './RaceEngine';
 import { IRaceSetup, IRaceState, ISwimmerRaceState, RaceState } from '../types/index';
 
 export interface RaceControllerEvents {
-  raceStart: (setup: IRaceSetup) => void;
-  raceCountdown: (count: number) => void;
-  raceBegin: () => void;
-  raceProgress: (data: { leader: string; leaderPosition: number; time: number }) => void;
-  swimmerFinished: (data: { name: string; rank: number; time: number }) => void;
-  raceFinished: (state: IRaceState) => void;
-  racePaused: (time: number) => void;
-  raceResumed: (time: number) => void;
-  error: (message: string) => void;
+  raceStart: IRaceSetup;
+  raceCountdown: number;
+  raceBegin: void;
+  raceProgress: { leader: string; leaderPosition: number; time: number };
+  swimmerFinished: { name: string; rank: number; time: number };
+  raceFinished: IRaceState;
+  racePaused: number;
+  raceResumed: number;
+  error: string;
 }
 
 /**
@@ -48,7 +48,8 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
 
   constructor() {
     super();
-    this.raceEngine = new RaceEngine();
+    // RaceEngine will be initialized when initializeRace is called with setup
+    this.raceEngine = null as any;
   }
 
   /**
@@ -57,6 +58,9 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
   public initializeRace(setup: IRaceSetup): IRaceState {
     try {
       this.raceSetup = setup;
+
+      // Initialize RaceEngine with setup
+      this.raceEngine = new RaceEngine(setup);
 
       // Initialize race state
       this.raceState = {
@@ -128,7 +132,7 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
           this.isCountdownRunning = false;
           this.raceState.state = 'RACING';
           this.raceState.startTime = currentTime;
-          this.emit('raceBegin');
+          this.emit('raceBegin', undefined);
           this.countdownTimer = 0;
           return;
         }
