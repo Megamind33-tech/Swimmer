@@ -225,14 +225,16 @@ export class SwimmerManager {
   /**
    * Reset all swimmers to starting position
    */
-  public resetAll(): void {
+  public resetAll(poolLength: number = 50): void {
     this.swimmers.forEach((swimmer, laneIndex) => {
       const laneX =
         -this.poolWidth / 2 +
         (laneIndex * this.poolWidth) / (this.laneCount - 1);
 
-      swimmer.mesh.position = new BABYLON.Vector3(laneX, 0.2, -24);
-      swimmer.mesh.rotation = new BABYLON.Vector3(Math.PI / 6, 0, 0);
+      // Position on starting blocks, not in the middle of the pool
+      const startingBlockZ = -(poolLength / 2) - 1.2;
+      swimmer.mesh.position = new BABYLON.Vector3(laneX, 1.2, startingBlockZ);
+      swimmer.mesh.rotation = new BABYLON.Vector3(Math.PI / 8, 0, 0); // Leaning forward
     });
 
     logger.log('All swimmers reset to starting position');
