@@ -178,35 +178,12 @@ export class RenderingOptimizer {
    * Prevent flickering by stabilizing render loop
    */
   public stabilizeRenderLoop(): void {
-    // Capture original render
-    this.originalRenderFunction = this.engine.runRenderLoop.bind(this.engine);
+    // Enable adaptive frame rate limiting to prevent flickering
+    // Use deterministic lock step for consistent frame timing
+    (this.engine as any).isDeterministicLockStep = true;
+    (this.engine as any)._lockstepMaxSteps = 4;
 
-    let frameCount = 0;
-    let lastFrameTime = performance.now();
-    const frameDuration = 1000 / this.config.targetFPS;
-
-    this.engine.runRenderLoop = (callback: () => void) => {
-      const now = performance.now();
-      const elapsed = now - lastFrameTime;
-
-      // Frame rate limiting
-      if (elapsed >= frameDuration) {
-        callback();
-        lastFrameTime = now;
-        frameCount++;
-
-        // Log performance every 60 frames
-        if (frameCount % 60 === 0) {
-          const fps = Math.round(frameCount / (elapsed / 1000));
-          if (fps < this.config.targetFPS * 0.9) {
-            logger.warn(`Low FPS detected: ${fps}`);
-          }
-        }
-      }
-
-      // Request next frame
-      requestAnimationFrame(() => this.engine.runRenderLoop(callback));
-    };
+    logger.log('Render loop stabilization enabled');
   }
 
   /**
@@ -260,7 +237,7 @@ export class RenderingOptimizer {
     activeVertices: number;
   } {
     const stats = this.engine.getFps();
-    const renderTime = this.engine.deltaTime;
+    const renderTime = this.engine.getDeltaTime();
     const meshCount = this.scene.meshes.length;
     let activeVertices = 0;
 

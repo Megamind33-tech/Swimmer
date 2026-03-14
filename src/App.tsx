@@ -474,10 +474,12 @@ const TIME_OF_DAY_CONFIG = {
       spotLightsRef.current.push(spotLight);
     }
 
-    // Caustics Texture
-    const causticsTexture = new Texture('https://playground.babylonjs.com/textures/waterbump.png', scene);
-    causticsTexture.uScale = 4;
-    causticsTexture.vScale = 8;
+    // Caustics Texture - use simple placeholder for faster loading
+    const causticsTexture = new DynamicTexture('causticsTexture', 256, scene);
+    const ctx = causticsTexture.getContext();
+    ctx.fillStyle = 'rgb(100, 150, 200)';
+    ctx.fillRect(0, 0, 256, 256);
+    causticsTexture.update();
 
     // Pool Floor
     const floor = MeshBuilder.CreatePlane('floor', { width: poolWidth, height: poolLength }, scene);
@@ -485,13 +487,18 @@ const TIME_OF_DAY_CONFIG = {
     floor.position.y = -poolDepth;
     floor.parent = poolArenaNode;
     const floorMat = new StandardMaterial('floorMat', scene);
-    floorMat.diffuseColor = new Color3(0.5, 0.8, 1.0); // Light blue
-    floorMat.diffuseTexture = new Texture('https://playground.babylonjs.com/textures/tile.jpg', scene);
-    (floorMat.diffuseTexture as Texture).uScale = 10;
-    (floorMat.diffuseTexture as Texture).vScale = 20;
+    floorMat.diffuseColor = new Color3(0.3, 0.7, 0.9); // Light blue
     floorMat.emissiveTexture = causticsTexture;
-    floorMat.emissiveColor = new Color3(0.2, 0.4, 0.6); // Brighter caustics
+    floorMat.emissiveColor = new Color3(0.2, 0.4, 0.6); // Caustics
     floor.material = floorMat;
+
+    // Defer texture loading to avoid blocking
+    setTimeout(() => {
+      const tileTexture = new Texture('https://playground.babylonjs.com/textures/tile.jpg', scene);
+      tileTexture.uScale = 10;
+      tileTexture.vScale = 20;
+      floorMat.diffuseTexture = tileTexture;
+    }, 2000);
 
     // Lane Markings on Floor
     for (let i = 0; i < laneCount; i++) {
@@ -509,11 +516,16 @@ const TIME_OF_DAY_CONFIG = {
     // Pool Walls
     const wallMat = new StandardMaterial('wallMat', scene);
     wallMat.diffuseColor = new Color3(0.4, 0.7, 0.9);
-    wallMat.diffuseTexture = new Texture('https://playground.babylonjs.com/textures/tile.jpg', scene);
-    (wallMat.diffuseTexture as Texture).uScale = 10;
-    (wallMat.diffuseTexture as Texture).vScale = 2;
     wallMat.emissiveTexture = causticsTexture;
     wallMat.emissiveColor = new Color3(0.1, 0.3, 0.6);
+
+    // Defer wall texture loading
+    setTimeout(() => {
+      const wallTexture = new Texture('https://playground.babylonjs.com/textures/tile.jpg', scene);
+      wallTexture.uScale = 10;
+      wallTexture.vScale = 2;
+      wallMat.diffuseTexture = wallTexture;
+    }, 2500);
 
     const wallBack = MeshBuilder.CreatePlane('wallBack', { width: poolWidth, height: poolDepth }, scene);
     wallBack.position.z = poolLength / 2;
@@ -545,26 +557,47 @@ const TIME_OF_DAY_CONFIG = {
     // Pool Deck with Hole
     const deckMat = new StandardMaterial('deckMat', scene);
     deckMat.diffuseColor = v.deckColor;
-    deckMat.diffuseTexture = new Texture('https://playground.babylonjs.com/textures/concrete.jpg', scene); 
-    (deckMat.diffuseTexture as Texture).uScale = 10;
-    (deckMat.diffuseTexture as Texture).vScale = 10;
 
-    const mainDeck = MeshBuilder.CreateBox('mainDeck', { width: hallWidth, height: 0.5, depth: hallLength }, scene);
-    const poolHole = MeshBuilder.CreateBox('poolHole', { width: poolWidth, height: 1, depth: poolLength }, scene);
-    
-    mainDeck.position.y = -0.25;
-    poolHole.position.y = -0.25;
+    // Defer deck texture loading
+    setTimeout(() => {
+      const concreteTexture = new Texture('https://playground.babylonjs.com/textures/concrete.jpg', scene);
+      concreteTexture.uScale = 10;
+      concreteTexture.vScale = 10;
+      deckMat.diffuseTexture = concreteTexture;
+    }, 3000);
 
-    const mainDeckCSG = CSG.FromMesh(mainDeck);
-    const poolHoleCSG = CSG.FromMesh(poolHole);
-    const deckCSG = mainDeckCSG.subtract(poolHoleCSG);
-
-    const deck = deckCSG.toMesh('deck', deckMat, scene);
+    // Create deck without expensive CSG - use separate pieces instead
+    const deck = new Mesh('deck', scene);
     deck.isPickable = false;
     deck.parent = poolArenaNode;
 
-    mainDeck.dispose();
-    poolHole.dispose();
+    // Front deck sections
+    const frontDeck = MeshBuilder.CreateBox('frontDeck', { width: hallWidth, height: 0.5, depth: (hallLength - poolLength) / 2 }, scene);
+    frontDeck.position.y = -0.25;
+    frontDeck.position.z = -(hallLength / 2 - (hallLength - poolLength) / 4);
+    frontDeck.material = deckMat;
+    frontDeck.parent = deck;
+
+    // Back deck sections
+    const backDeck = MeshBuilder.CreateBox('backDeck', { width: hallWidth, height: 0.5, depth: (hallLength - poolLength) / 2 }, scene);
+    backDeck.position.y = -0.25;
+    backDeck.position.z = (hallLength / 2 - (hallLength - poolLength) / 4);
+    backDeck.material = deckMat;
+    backDeck.parent = deck;
+
+    // Left deck sections
+    const leftDeck = MeshBuilder.CreateBox('leftDeck', { width: (hallWidth - poolWidth) / 2, height: 0.5, depth: poolLength }, scene);
+    leftDeck.position.y = -0.25;
+    leftDeck.position.x = -(hallWidth / 2 - (hallWidth - poolWidth) / 4);
+    leftDeck.material = deckMat;
+    leftDeck.parent = deck;
+
+    // Right deck sections
+    const rightDeck = MeshBuilder.CreateBox('rightDeck', { width: (hallWidth - poolWidth) / 2, height: 0.5, depth: poolLength }, scene);
+    rightDeck.position.y = -0.25;
+    rightDeck.position.x = (hallWidth / 2 - (hallWidth - poolWidth) / 4);
+    rightDeck.material = deckMat;
+    rightDeck.parent = deck;
 
     // Seating / Bleachers
     const createBleachers = () => {
@@ -581,6 +614,17 @@ const TIME_OF_DAY_CONFIG = {
       const crowdMat = new StandardMaterial('crowdMat', scene);
       crowdMat.diffuseColor = new Color3(0.2, 0.2, 0.2); // Dark spectators
 
+      // Create base spectator meshes once
+      const torsoBase = MeshBuilder.CreateBox("torsoBase", { width: 0.4, height: 0.6, depth: 0.3 }, scene);
+      torsoBase.position.y = 0.3;
+      torsoBase.material = crowdMat;
+      torsoBase.isVisible = false;
+
+      const headBase = MeshBuilder.CreateSphere("headBase", { diameter: 0.3, segments: 8 }, scene);
+      headBase.position.y = 0.8;
+      headBase.material = crowdMat;
+      headBase.isVisible = false;
+
       for (let i = 0; i < stepCount; i++) {
         // Left bleachers
         const stepL = MeshBuilder.CreateBox(`stepL_${i}`, { width: stepDepth, height: stepHeight * (i + 1), depth: bleacherWidth }, scene);
@@ -590,24 +634,13 @@ const TIME_OF_DAY_CONFIG = {
         stepL.material = stepMat;
         stepL.parent = bleacherGroup;
 
-        // Add crowd to Left
-        for (let j = 0; j < 20; j++) {
-            const spectatorGroup = new Mesh(`specL_${i}_${j}`, scene);
-            spectatorGroup.position = new Vector3(stepL.position.x, stepL.position.y, (Math.random() - 0.5) * bleacherWidth);
-            
-            // Torso
-            const torso = MeshBuilder.CreateBox("torso", { width: 0.4, height: 0.6, depth: 0.3 }, scene);
-            torso.position.y = 0.3;
-            torso.material = crowdMat;
-            torso.parent = spectatorGroup;
-            
-            // Head
-            const head = MeshBuilder.CreateSphere("head", { diameter: 0.3 }, scene);
-            head.position.y = 0.8;
-            head.material = crowdMat;
-            head.parent = spectatorGroup;
-            
-            spectatorGroup.parent = bleacherGroup;
+        // Add crowd to Left using instances
+        for (let j = 0; j < 10; j++) {
+            const torsoInstance = torsoBase.createInstance(`torsoL_${i}_${j}`);
+            torsoInstance.position = new Vector3(stepL.position.x, stepL.position.y + 0.3, (Math.random() - 0.5) * bleacherWidth);
+
+            const headInstance = headBase.createInstance(`headL_${i}_${j}`);
+            headInstance.position = new Vector3(stepL.position.x, stepL.position.y + 0.8, (Math.random() - 0.5) * bleacherWidth);
         }
 
         // Right bleachers
@@ -618,24 +651,13 @@ const TIME_OF_DAY_CONFIG = {
         stepR.material = stepMat;
         stepR.parent = bleacherGroup;
 
-        // Add crowd to Right
-        for (let j = 0; j < 20; j++) {
-            const spectatorGroup = new Mesh(`specR_${i}_${j}`, scene);
-            spectatorGroup.position = new Vector3(stepR.position.x, stepR.position.y, (Math.random() - 0.5) * bleacherWidth);
-            
-            // Torso
-            const torso = MeshBuilder.CreateBox("torso", { width: 0.4, height: 0.6, depth: 0.3 }, scene);
-            torso.position.y = 0.3;
-            torso.material = crowdMat;
-            torso.parent = spectatorGroup;
-            
-            // Head
-            const head = MeshBuilder.CreateSphere("head", { diameter: 0.3 }, scene);
-            head.position.y = 0.8;
-            head.material = crowdMat;
-            head.parent = spectatorGroup;
-            
-            spectatorGroup.parent = bleacherGroup;
+        // Add crowd to Right using instances
+        for (let j = 0; j < 10; j++) {
+            const torsoInstance = torsoBase.createInstance(`torsoR_${i}_${j}`);
+            torsoInstance.position = new Vector3(stepR.position.x, stepR.position.y + 0.3, (Math.random() - 0.5) * bleacherWidth);
+
+            const headInstance = headBase.createInstance(`headR_${i}_${j}`);
+            headInstance.position = new Vector3(stepR.position.x, stepR.position.y + 0.8, (Math.random() - 0.5) * bleacherWidth);
         }
 
         // Front bleachers
@@ -761,41 +783,51 @@ const TIME_OF_DAY_CONFIG = {
         banners.push(banner);
     }
 
-    // Water
-    const waterMesh = MeshBuilder.CreateGround('waterMesh', { width: poolWidth, height: poolLength, subdivisions: 64 }, scene);
+    // Water - optimized for performance
+    const waterMesh = MeshBuilder.CreateGround('waterMesh', { width: poolWidth, height: poolLength, subdivisions: 32 }, scene);
     waterMesh.position.y = -0.2;
     waterMesh.parent = poolArenaNode;
-    const water = new WaterMaterial('water', scene, new Vector2(1024, 1024));
-    water.bumpTexture = new Texture('https://playground.babylonjs.com/textures/waterbump.png', scene);
-    water.windForce = 20;
-    water.waveHeight = 0.35;
-    water.bumpHeight = 0.4;
-    water.waveLength = 0.08;
+    const water = new WaterMaterial('water', scene, new Vector2(512, 512));
+    water.windForce = 15;
+    water.waveHeight = 0.25;
+    water.bumpHeight = 0.3;
+    water.waveLength = 0.1;
     water.waterColor = v.waterColor;
-    water.colorBlendFactor = 0.4; // Increased blend factor for more reflection
-    
+    water.colorBlendFactor = 0.3;
+
+    // Only add critical objects to water render list to reduce overhead
     water.addToRenderList(hall);
-    lightPanels.forEach(p => water.addToRenderList(p));
     water.addToRenderList(floor);
     water.addToRenderList(wallBack);
     water.addToRenderList(wallFront);
     water.addToRenderList(wallLeft);
     water.addToRenderList(wallRight);
-    water.addToRenderList(bleachers);
-    water.addToRenderList(railings);
-    water.addToRenderList(scoreboard);
-    trusses.forEach(t => water.addToRenderList(t));
-    banners.forEach(b => water.addToRenderList(b));
+
+    // Defer water bump texture loading
+    setTimeout(() => {
+      const waterBumpTexture = new Texture('https://playground.babylonjs.com/textures/waterbump.png', scene);
+      water.bumpTexture = waterBumpTexture;
+    }, 3500);
+
     waterMesh.material = water;
 
-    // Ambient Splashes (Particle System)
-    const splashParticles = new ParticleSystem('splashes', 1500, scene);
-    splashParticles.particleTexture = new Texture('https://playground.babylonjs.com/textures/flare.png', scene);
-    
+    // Ambient Splashes (Particle System) - reduced for performance
+    const splashParticles = new ParticleSystem('splashes', 300, scene);
+
+    // Create simple color texture instead of loading from CDN
+    const particleTexture = new DynamicTexture('particleTexture', 64, scene);
+    const pctx = particleTexture.getContext();
+    pctx.fillStyle = 'white';
+    pctx.beginPath();
+    pctx.arc(32, 32, 30, 0, Math.PI * 2);
+    pctx.fill();
+    particleTexture.update();
+    splashParticles.particleTexture = particleTexture;
+
     // Emit from the entire surface of the pool
     splashParticles.createBoxEmitter(
-      new Vector3(0, 1, 0), // direction1
-      new Vector3(0, 1.5, 0), // direction2
+      new Vector3(0, 0.5, 0), // direction1
+      new Vector3(0, 0.8, 0), // direction2
       new Vector3(-poolWidth / 2 + 0.5, -0.2, -poolLength / 2 + 0.5), // minEmitBox
       new Vector3(poolWidth / 2 - 0.5, -0.2, poolLength / 2 - 0.5) // maxEmitBox
     );
@@ -803,25 +835,25 @@ const TIME_OF_DAY_CONFIG = {
     splashParticles.color1 = new Color4(0.8, 0.9, 1.0, 0.6);
     splashParticles.color2 = new Color4(0.9, 1.0, 1.0, 0.3);
     splashParticles.colorDead = new Color4(1, 1, 1, 0.0);
-    
+
     splashParticles.minSize = 0.02;
     splashParticles.maxSize = 0.08;
     splashParticles.minLifeTime = 0.2;
     splashParticles.maxLifeTime = 0.6;
-    splashParticles.emitRate = 200; // Subtle ambient bubbling/splashing
-    
+    splashParticles.emitRate = 75; // Reduced from 200
+
     splashParticles.blendMode = ParticleSystem.BLENDMODE_STANDARD;
     splashParticles.gravity = new Vector3(0, -9.81, 0);
     splashParticles.minEmitPower = 0.5;
     splashParticles.maxEmitPower = 1.5;
     splashParticles.updateSpeed = 0.01;
-    
+
     splashParticles.start();
 
     // Interactive Splashes & Ripples
     const createInteractiveSplash = (position: Vector3) => {
-      const splash = new ParticleSystem('interactiveSplash', 100, scene);
-      splash.particleTexture = new Texture('https://playground.babylonjs.com/textures/flare.png', scene);
+      const splash = new ParticleSystem('interactiveSplash', 50, scene);
+      splash.particleTexture = particleTexture; // Reuse existing texture
       splash.emitter = position;
       splash.minEmitBox = new Vector3(-0.5, 0, -0.5);
       splash.maxEmitBox = new Vector3(0.5, 0, 0.5);
@@ -832,7 +864,7 @@ const TIME_OF_DAY_CONFIG = {
       splash.maxSize = 0.15;
       splash.minLifeTime = 0.2;
       splash.maxLifeTime = 0.6;
-      splash.emitRate = 1000;
+      splash.emitRate = 300; // Reduced from 1000
       splash.blendMode = ParticleSystem.BLENDMODE_STANDARD;
       splash.gravity = new Vector3(0, -9.81, 0);
       splash.direction1 = new Vector3(-1.5, 3, -1.5);

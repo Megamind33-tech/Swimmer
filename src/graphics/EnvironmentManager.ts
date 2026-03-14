@@ -37,16 +37,27 @@ export class EnvironmentManager {
   }
 
   /**
-   * Initialize all environment creators
+   * Initialize environment creators (lazy loading)
    */
   private initializeEnvironments(): void {
-    this.lockerRoom = new LockerRoomEnvironment(this.scene);
-    this.trainingFacility = new TrainingFacilityEnvironment(this.scene);
-    this.schoolGym = new SchoolGymEnvironment(this.scene);
+    // Don't create environments upfront - defer until needed
+    logger.log('EnvironmentManager initialized with lazy loading');
+  }
 
-    this.environmentInstances.set('locker-room', this.lockerRoom);
-    this.environmentInstances.set('training', this.trainingFacility);
-    this.environmentInstances.set('school-gym', this.schoolGym);
+  /**
+   * Lazy initialize environment on first access
+   */
+  private ensureEnvironmentCreated(type: EnvironmentType): void {
+    if (type === 'locker-room' && !this.lockerRoom) {
+      this.lockerRoom = new LockerRoomEnvironment(this.scene);
+      this.environmentInstances.set('locker-room', this.lockerRoom);
+    } else if (type === 'training' && !this.trainingFacility) {
+      this.trainingFacility = new TrainingFacilityEnvironment(this.scene);
+      this.environmentInstances.set('training', this.trainingFacility);
+    } else if (type === 'school-gym' && !this.schoolGym) {
+      this.schoolGym = new SchoolGymEnvironment(this.scene);
+      this.environmentInstances.set('school-gym', this.schoolGym);
+    }
   }
 
   /**
@@ -70,6 +81,7 @@ export class EnvironmentManager {
 
     switch (environmentType) {
       case 'locker-room':
+        this.ensureEnvironmentCreated('locker-room');
         if (!this.environments.has('locker-room')) {
           environment = this.lockerRoom!.create();
           this.environments.set('locker-room', environment);
@@ -80,6 +92,7 @@ export class EnvironmentManager {
         break;
 
       case 'training':
+        this.ensureEnvironmentCreated('training');
         if (!this.environments.has('training')) {
           environment = this.trainingFacility!.create();
           this.environments.set('training', environment);
@@ -90,6 +103,7 @@ export class EnvironmentManager {
         break;
 
       case 'school-gym':
+        this.ensureEnvironmentCreated('school-gym');
         if (!this.environments.has('school-gym')) {
           environment = this.schoolGym!.create();
           this.environments.set('school-gym', environment);
