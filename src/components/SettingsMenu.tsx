@@ -7,12 +7,20 @@ import React, { useState } from 'react';
 
 interface SettingsMenuProps {
   onBack: () => void;
-  onPlay: (mode: 'p2p' | 'multiplayer' | 'practice', venue: string, environment: string, timeOfDay: string, cameraPerspective: string) => void;
+  onPlay: (mode: 'p2p' | 'multiplayer' | 'practice', venue: string, environment: string, extras?: { cameraPerspective?: string; timeOfDay?: string; enableRecording?: boolean }) => void;
 }
 
 type VenueType = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 type EnvironmentType = 'pool' | 'locker-room' | 'training' | 'school-gym';
 type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
+type CameraPerspective = 'default' | 'aerial' | 'startingBlock' | 'racing';
+
+const CAMERA_PERSPECTIVES: Record<CameraPerspective, { name: string; description: string }> = {
+  default: { name: 'Default View', description: 'Standard race camera' },
+  aerial: { name: 'Aerial View', description: 'Top-down perspective' },
+  startingBlock: { name: 'Starting Block', description: 'Behind the blocks' },
+  racing: { name: 'Racing View', description: 'Dynamic chase camera' },
+};
 
 const VENUES: Record<VenueType, { name: string; description: string }> = {
   olympic: { name: 'Olympic Arena', description: 'World Championships' },
@@ -51,9 +59,14 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack, onPlay }) =>
   const [selectedEnvironment, setSelectedEnvironment] = useState<EnvironmentType>('pool');
   const [selectedTime, setSelectedTime] = useState<TimeOfDay>('afternoon');
   const [selectedCamera, setSelectedCamera] = useState<CameraPerspective>('default');
+  const [enableRecording, setEnableRecording] = useState(false);
 
   const handlePlay = () => {
-    onPlay(selectedMode, selectedVenue, selectedEnvironment, selectedTime, selectedCamera);
+    onPlay(selectedMode, selectedVenue, selectedEnvironment, {
+      cameraPerspective: selectedCamera,
+      timeOfDay: selectedTime,
+      enableRecording,
+    });
   };
 
   return (
@@ -172,7 +185,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack, onPlay }) =>
                   onClick={() => setSelectedCamera(key)}
                   className={`p-4 rounded-lg transition-all ${
                     selectedCamera === key
-                      ? 'bg-orange-500 text-white ring-2 ring-orange-300'
+                      ? 'bg-amber-500 text-white ring-2 ring-amber-300'
                       : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                   }`}
                 >
@@ -181,6 +194,22 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack, onPlay }) =>
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Recording */}
+          <div className="bg-slate-800/30 rounded-lg p-6 border border-slate-700/50 backdrop-blur-sm">
+            <h2 className="text-xl font-bold text-white mb-4">Recording</h2>
+            <button
+              onClick={() => setEnableRecording(!enableRecording)}
+              className={`p-4 rounded-lg transition-all w-full ${
+                enableRecording
+                  ? 'bg-red-500 text-white ring-2 ring-red-300'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+            >
+              <div className="font-bold text-lg">{enableRecording ? 'Recording Enabled' : 'Recording Disabled'}</div>
+              <div className="text-sm opacity-80">Record your race for replay</div>
+            </button>
           </div>
 
           {/* Summary */}
@@ -210,6 +239,10 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack, onPlay }) =>
               <p>
                 <span className="text-slate-400">Camera:</span>{' '}
                 <span className="text-cyan-400 font-semibold">{CAMERA_PERSPECTIVES[selectedCamera].name}</span>
+              </p>
+              <p>
+                <span className="text-slate-400">Recording:</span>{' '}
+                <span className="text-cyan-400 font-semibold">{enableRecording ? 'On' : 'Off'}</span>
               </p>
             </div>
           </div>

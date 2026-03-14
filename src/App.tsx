@@ -1394,6 +1394,10 @@ const TIME_OF_DAY_CONFIG = {
           onPlay={() => {
             setShowMenu(false);
             setGameStarted(true);
+            // Auto-start race countdown
+            countdownRef.current = 3.0;
+            setCountdown(3.0);
+            setRaceStatus('countdown');
           }}
           onSettings={() => {
             setShowSettings(true);
@@ -1408,14 +1412,27 @@ const TIME_OF_DAY_CONFIG = {
             setShowSettings(false);
             setShowMenu(true);
           }}
-          onPlay={(mode, venue, environment, timeOfDay, cameraPerspective) => {
+          onPlay={(mode, venue, environment, extras) => {
             setGameMode(mode);
             setCurrentVenue(venue as VenueTheme);
             setCurrentEnvironment(environment as 'pool' | 'locker-room' | 'training' | 'school-gym');
-            setTimeOfDay(timeOfDay as 'morning' | 'afternoon' | 'evening' | 'night');
-            setCameraPerspective(cameraPerspective as 'default' | 'aerial' | 'startingBlock' | 'racing');
+            if (extras?.cameraPerspective) {
+              setCameraPerspective(extras.cameraPerspective as 'default' | 'aerial' | 'startingBlock' | 'racing');
+            }
+            if (extras?.timeOfDay) {
+              setTimeOfDay(extras.timeOfDay as 'morning' | 'afternoon' | 'evening' | 'night');
+            }
+            if (extras?.enableRecording) {
+              isRecordingRef.current = true;
+              recordedDataRef.current = [];
+              setIsRecording(true);
+            }
             setShowSettings(false);
             setGameStarted(true);
+            // Auto-start race countdown
+            countdownRef.current = 3.0;
+            setCountdown(3.0);
+            setRaceStatus('countdown');
           }}
         />
       )}
@@ -1436,28 +1453,15 @@ const TIME_OF_DAY_CONFIG = {
             />
           )}
 
-          {raceStatus === 'countdown' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">
-              {Math.ceil(countdown)}
-            </div>
-          )}
-
-          {/* Minimal floating pause button */}
-          <button
-            onClick={() => setShowPauseMenu(!showPauseMenu)}
-            className="absolute top-4 right-4 z-30 px-3 py-2 rounded-lg bg-black/40 backdrop-blur-sm border border-white/20 text-white text-sm font-semibold hover:bg-black/60 transition-all"
-            title="Press P or ESC to toggle pause"
-          >
-            {showPauseMenu ? '▶ Resume' : '⏸ Pause'}
-          </button>
-
-          <div className="flex-1 relative min-h-0 w-full h-full">
-            <canvas
-              ref={canvasRef}
-              className="absolute inset-0 w-full h-full block outline-none touch-none"
-              id="renderCanvas"
-            />
-          </div>
+      
+      <main className="flex-1 relative min-h-0">
+        <canvas 
+          ref={canvasRef} 
+          className="absolute inset-0 w-full h-full block outline-none touch-none"
+          id="renderCanvas"
+        />
+        
+      </main>
 
         </>
       )}
