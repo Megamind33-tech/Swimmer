@@ -152,8 +152,8 @@ export class StrokeSystem extends EventEmitter<StrokeEvents> {
     this.state.cycleProgress = 0;
 
     // Emit events (actual subscribers would be attached in game loop)
-    // this.emit('strokeChanged', stroke);
-    // this.emit('strokeDifficulty', this.metrics[stroke].difficulty);
+    this.emit('strokeChanged', stroke);
+    this.emit('strokeDifficulty', this.metrics[stroke].difficulty);
 
     // Reset tap counter
     this.state.totalTaps = 0;
@@ -197,7 +197,7 @@ export class StrokeSystem extends EventEmitter<StrokeEvents> {
       this.state.missedTaps++;
     }
 
-    // this.emit('tapDetected', accuracy);
+    this.emit('tapDetected', accuracy);
 
     // Check if cycle complete
     if (this.state.tapCount >= currentMetrics.tapsPerCycle) {
@@ -248,11 +248,11 @@ export class StrokeSystem extends EventEmitter<StrokeEvents> {
 
     this.state.isUnderwater = progress < underwaterEnd;
 
-    // if (!wasUnderwater && this.state.isUnderwater) {
-    //   this.emit('underwaterPhaseStart');
-    // } else if (wasUnderwater && !this.state.isUnderwater) {
-    //   this.emit('underwaterPhaseEnd');
-    // }
+    if (!wasUnderwater && this.state.isUnderwater) {
+      this.emit('underwaterPhaseStart');
+    } else if (wasUnderwater && !this.state.isUnderwater) {
+      this.emit('underwaterPhaseEnd');
+    }
 
     return progress;
   }
@@ -262,10 +262,10 @@ export class StrokeSystem extends EventEmitter<StrokeEvents> {
    */
   private completeCycle(): void {
     const cycleAccuracy = this.state.perfectTaps / this.state.totalTaps;
-    // this.emit('cycleComplete', {
-    //   taps: this.state.perfectTaps,
-    //   accuracy: cycleAccuracy,
-    // });
+    this.emit('cycleComplete', {
+      taps: this.state.perfectTaps,
+      accuracy: cycleAccuracy,
+    });
 
     // Reset tap counter for next cycle
     this.state.tapCount = 0;

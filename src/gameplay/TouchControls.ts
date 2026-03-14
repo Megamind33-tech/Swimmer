@@ -126,7 +126,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
       y: touch.clientY,
     };
 
-    // this.emit('touchStart', inputEvent);
+    this.emit('touchStart', inputEvent);
   }
 
   /**
@@ -158,7 +158,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
       angle: Math.atan2(dy, dx) * (180 / Math.PI),
     };
 
-    // this.emit('drag', dragEvent);
+    this.emit('drag', dragEvent);
   }
 
   /**
@@ -192,7 +192,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
           duration,
         };
         this.bufferInput(doubleTapEvent);
-        // this.emit('doubleTap', doubleTapEvent);
+        this.emit('doubleTap', doubleTapEvent);
       } else {
         // Single tap
         this.touchState.tapCount = 1;
@@ -204,7 +204,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
           duration,
         };
         this.bufferInput(tapEvent);
-        // this.emit('tap', tapEvent);
+        this.emit('tap', tapEvent);
       }
 
       this.touchState.lastTapTime = now;
@@ -218,7 +218,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
         duration,
       };
       this.bufferInput(longHoldEvent);
-      // this.emit('longHold', longHoldEvent);
+      this.emit('longHold', longHoldEvent);
     } else if (distance > this.swipeThreshold) {
       // Swipe
       const swipeEvent: TouchInputEvent = {
@@ -232,7 +232,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
         angle: Math.atan2(dy, dx) * (180 / Math.PI),
       };
       this.bufferInput(swipeEvent);
-      // this.emit('swipe', swipeEvent);
+      this.emit('swipe', swipeEvent);
     }
 
     const endEvent: TouchInputEvent = {
@@ -242,7 +242,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
       y: this.touchState.currentY,
       duration,
     };
-    // this.emit('touchEnd', endEvent);
+    this.emit('touchEnd', endEvent);
   }
 
   /**
@@ -258,7 +258,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
     };
 
     this.touchState.isTouching = false;
-    // this.emit('touchCancel', cancelEvent);
+    this.emit('touchCancel', cancelEvent);
   }
 
   /**
@@ -280,7 +280,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
       y: e.clientY,
     };
 
-    // this.emit('touchStart', inputEvent);
+    this.emit('touchStart', inputEvent);
   }
 
   /**
@@ -308,7 +308,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
       angle: Math.atan2(dy, dx) * (180 / Math.PI),
     };
 
-    // this.emit('drag', dragEvent);
+    this.emit('drag', dragEvent);
   }
 
   /**
@@ -345,7 +345,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
         distance,
       };
       this.bufferInput(swipeEvent);
-      // this.emit('swipe', swipeEvent);
+      this.emit('swipe', swipeEvent);
     }
 
     const endEvent: TouchInputEvent = {
@@ -355,7 +355,7 @@ export class TouchControls extends EventEmitter<TouchControlsEvents> {
       y: this.touchState.currentY,
       duration,
     };
-    // this.emit('touchEnd', endEvent);
+    this.emit('touchEnd', endEvent);
   }
 
   /**

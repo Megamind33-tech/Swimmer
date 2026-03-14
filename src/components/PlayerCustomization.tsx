@@ -14,7 +14,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { IPlayerSwimmer, SwimmerSpecialty, ISwimmerStats } from '../types/index';
+import { IPlayerSwimmer, SwimmerSpecialty, ISwimmerStats, IPlayerManagerHook } from '../types/index';
 
 interface AppearanceOptions {
   faces: string[];
@@ -104,7 +104,7 @@ const SPECIALTY_BONUSES: Record<SwimmerSpecialty, SpecialtyBonuses> = {
 interface PlayerCustomizationProps {
   onPlayerCreated?: (player: IPlayerSwimmer) => void;
   onCancel?: () => void;
-  playerManager: any; // usePlayerManager return type
+  playerManager: IPlayerManagerHook; // Strict typing - usePlayerManager return type
 }
 
 const PlayerCustomization: React.FC<PlayerCustomizationProps> = ({

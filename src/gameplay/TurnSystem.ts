@@ -101,7 +101,7 @@ export class TurnSystem extends EventEmitter<TurnEvents> {
     const distanceToTurn = nextTurnDistance - currentDistance;
 
     if (distanceToTurn > 0 && distanceToTurn <= approachThreshold) {
-      // this.emit('turnApproaching', distanceToTurn);
+      this.emit('turnApproaching', distanceToTurn);
       return true;
     }
 
@@ -187,7 +187,7 @@ export class TurnSystem extends EventEmitter<TurnEvents> {
 
     // Perfect turn
     if (absTimingDiff < 100) {
-      // this.emit('perfectTurn');
+      this.emit('perfectTurn');
 
       return {
         success: true,
@@ -205,9 +205,9 @@ export class TurnSystem extends EventEmitter<TurnEvents> {
     const speedMultiplier = metrics.momentumBonus - penaltyAmount;
 
     if (isEarly) {
-      // this.emit('earlyTurn', absTimingDiff);
+      this.emit('earlyTurn', absTimingDiff);
     } else {
-      // this.emit('lateTurn', absTimingDiff);
+      this.emit('lateTurn', absTimingDiff);
     }
 
     return {

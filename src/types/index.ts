@@ -297,6 +297,111 @@ export interface IGameSettings {
 }
 
 // ============================================================================
+// REACT HOOKS RETURN TYPES (STRICT TYPING)
+// ============================================================================
+
+/**
+ * PlayerManager Hook Return Type
+ * Strict interface for usePlayerManager hook to replace 'any' type
+ */
+export interface IPlayerManagerHook {
+  // Player state
+  player: IPlayerSwimmer | null;
+  isLoading: boolean;
+  error: string | null;
+
+  // Player creation & management
+  createPlayer: (
+    name: string,
+    specialty: SwimmerSpecialty,
+    attributes?: Partial<ISwimmerAttributes>
+  ) => IPlayerSwimmer | null;
+
+  loadPlayer: (playerId: string) => Promise<IPlayerSwimmer | null>;
+  updatePlayer: (player: IPlayerSwimmer) => Promise<void>;
+  deletePlayer: (playerId: string) => Promise<void>;
+
+  // XP & Progression
+  addXP: (amount: number) => void;
+  levelUp: (levels: number) => void;
+  getCurrentXPProgress: () => { current: number; required: number; percentage: number };
+
+  // Cosmetics & Equipment
+  equipCosmetic: (cosmeticId: string) => void;
+  unequipCosmetic: (cosmeticId: string) => void;
+  addEquipment: (equipment: IEquipment) => void;
+  getEquippedCosmetics: () => ICosmetics;
+
+  // Reputation & Fame
+  addReputation: (amount: number) => void;
+  addFame: (amount: number) => void;
+  clampReputation: () => void;
+  clampFame: () => void;
+
+  // Statistics
+  getStats: () => ISwimmerStats;
+  updateStats: (stats: Partial<ISwimmerStats>) => void;
+
+  // Career
+  advanceCareerTier: () => void;
+  completeCareerEvent: () => void;
+  getCareerProgress: () => { tier: number; eventIndex: number; totalEvents: number };
+
+  // Persistence
+  saveToLocalStorage: () => void;
+  loadFromLocalStorage: () => void;
+}
+
+/**
+ * GameManager Hook Return Type
+ * Strict interface for useGameManager hook
+ */
+export interface IGameManagerHook {
+  gameState: GameState;
+  currentMode: GameMode;
+  isLoading: boolean;
+  error: string | null;
+
+  // Mode management
+  switchMode: (mode: GameMode) => void;
+  startRace: (setup: IRaceSetup) => Promise<void>;
+  finishRace: (result: IRaceResult) => Promise<void>;
+  pauseGame: () => void;
+  resumeGame: () => void;
+
+  // Event listeners
+  onGameStateChange: (callback: (state: GameState) => void) => () => void;
+  onModeChange: (callback: (mode: GameMode) => void) => () => void;
+
+  // Cleanup
+  cleanup: () => void;
+}
+
+/**
+ * RivalSystem Hook Return Type
+ * Strict interface for useRivalSystem hook
+ */
+export interface IRivalSystemHook {
+  rivals: IRival[];
+  isLoading: boolean;
+  error: string | null;
+
+  // Rival management
+  unlockRival: (rivalId: string) => void;
+  getRival: (rivalId: string) => IRival | undefined;
+  getRivalsByTier: (tier: number) => IRival[];
+
+  // Race tracking
+  recordRaceAgainstRival: (rivalId: string, playerWon: boolean) => void;
+  updateRivalDifficulty: (rivalId: string, playerLevel: number) => void;
+
+  // Rival state
+  isRivalUnlocked: (rivalId: string) => boolean;
+  getRivalWinRate: (rivalId: string) => number;
+  getRivalHistory: (rivalId: string) => Array<{ date: number; playerWon: boolean }>;
+}
+
+// ============================================================================
 // ARENA & GRAPHICS TYPES
 // ============================================================================
 
