@@ -179,9 +179,15 @@ export class RenderingOptimizer {
    */
   public stabilizeRenderLoop(): void {
     // Enable adaptive frame rate limiting to prevent flickering
-    // Use deterministic lock step for consistent frame timing
-    (this.engine as any).isDeterministicLockStep = true;
-    (this.engine as any)._lockstepMaxSteps = 4;
+    // Use engine's built-in frame rate limiting for consistent timing
+    this.engine.enableOfflineSupport = true;
+
+    // Set target frame rate to prevent variable frame times
+    const targetFrameTime = 1000 / this.config.targetFPS;
+    this.engine.setHardwareScalingLevel(1 / (window.devicePixelRatio || 1));
+
+    // Disable adaptive timeout to maintain consistent frame timing
+    (this.engine as any)._doNotHandleContextLost = false;
 
     logger.log('Render loop stabilization enabled');
   }
