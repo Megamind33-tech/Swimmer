@@ -96,7 +96,7 @@ export class SchoolGymEnvironment {
     ];
 
     wallConfigs.forEach((cfg, i) => {
-      const wall = BABYLON.MeshBuilder.CreateBox(`wall_${i}`, cfg.size, this.scene);
+      const wall = BABYLON.MeshBuilder.CreateBox(`wall_${i}`, { width: cfg.size.w, height: cfg.size.h, depth: cfg.size.d }, this.scene);
       wall.position = cfg.pos;
       wall.material = this.materials.get('wall');
       wall.parent = this.rootNode;

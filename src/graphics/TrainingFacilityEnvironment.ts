@@ -94,7 +94,7 @@ export class TrainingFacilityEnvironment {
     ];
 
     walls.forEach((wall, i) => {
-      const mesh = BABYLON.MeshBuilder.CreateBox(`wall_${i}`, wall.size, this.scene);
+      const mesh = BABYLON.MeshBuilder.CreateBox(`wall_${i}`, { width: wall.size.w, height: wall.size.h, depth: wall.size.d }, this.scene);
       mesh.position = wall.pos;
       mesh.material = this.materials.get('wall');
       mesh.parent = this.rootNode;
@@ -309,12 +309,14 @@ export class TrainingFacilityEnvironment {
       // Cable
       const cable = BABYLON.MeshBuilder.CreateTube(
         `cable_${i}`,
-        [
-          new BABYLON.Vector3(xPos, 2.0, -8),
-          new BABYLON.Vector3(xPos, 0.3, -9),
-        ],
-        0.03,
-        4,
+        {
+          path: [
+            new BABYLON.Vector3(xPos, 2.0, -8),
+            new BABYLON.Vector3(xPos, 0.3, -9),
+          ],
+          radius: 0.03,
+          updatable: false,
+        },
         this.scene
       );
       const cableMat = new BABYLON.StandardMaterial(`cableMat_${i}`, this.scene);

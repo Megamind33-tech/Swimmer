@@ -40,14 +40,14 @@ export interface TouchState {
 }
 
 export interface TouchControlsEvents {
-  tap: (event: TouchInputEvent) => void;
-  doubleTap: (event: TouchInputEvent) => void;
-  longHold: (event: TouchInputEvent) => void;
-  drag: (event: TouchInputEvent) => void;
-  swipe: (event: TouchInputEvent) => void;
-  touchStart: (event: TouchInputEvent) => void;
-  touchEnd: (event: TouchInputEvent) => void;
-  touchCancel: (event: TouchInputEvent) => void;
+  tap: TouchInputEvent;
+  doubleTap: TouchInputEvent;
+  longHold: TouchInputEvent;
+  drag: TouchInputEvent;
+  swipe: TouchInputEvent;
+  touchStart: TouchInputEvent;
+  touchEnd: TouchInputEvent;
+  touchCancel: TouchInputEvent;
 }
 
 /**
