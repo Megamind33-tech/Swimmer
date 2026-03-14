@@ -38,6 +38,8 @@ import OlympicUI from './components/OlympicUI';
 import CinematicOpening from './components/CinematicOpening';
 import LoadingScreen from './components/LoadingScreen';
 import MainMenu from './components/MainMenu';
+import SettingsMenu from './components/SettingsMenu';
+import PauseMenu from './components/PauseMenu';
 
 type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 
@@ -203,10 +205,12 @@ const TIME_OF_DAY_CONFIG = {
   const [renderingQuality, setRenderingQuality] = useState<'high' | 'medium' | 'low'>('high');
   const [gameMode, setGameMode] = useState<'p2p' | 'multiplayer' | 'practice'>('multiplayer');
 
-  // Cinematic and loading states
+  // Cinematic and menu states
   const [showCinematic, setShowCinematic] = useState(true);
   const [showLoading, setShowLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showPauseMenu, setShowPauseMenu] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const cameraPerspectiveRef = useRef(cameraPerspective);
@@ -274,6 +278,22 @@ const TIME_OF_DAY_CONFIG = {
         break;
     }
   }, [cameraPerspective]);
+
+  // Keyboard handler for pause
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!gameStarted) return;
+
+      // P key or ESC to pause
+      if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+        e.preventDefault();
+        setShowPauseMenu(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameStarted]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -1361,13 +1381,30 @@ const TIME_OF_DAY_CONFIG = {
       )}
 
       {/* Main Menu */}
-      {showMenu && !gameStarted && (
+      {showMenu && !showSettings && !gameStarted && (
         <MainMenu
+          onPlay={() => {
+            setShowMenu(false);
+            setGameStarted(true);
+          }}
+          onSettings={() => {
+            setShowSettings(true);
+          }}
+        />
+      )}
+
+      {/* Settings Menu */}
+      {showSettings && (
+        <SettingsMenu
+          onBack={() => {
+            setShowSettings(false);
+            setShowMenu(true);
+          }}
           onPlay={(mode, venue, environment) => {
             setGameMode(mode);
             setCurrentVenue(venue as VenueTheme);
             setCurrentEnvironment(environment as 'pool' | 'locker-room' | 'training' | 'school-gym');
-            setShowMenu(false);
+            setShowSettings(false);
             setGameStarted(true);
           }}
         />
@@ -1376,6 +1413,18 @@ const TIME_OF_DAY_CONFIG = {
       {/* Game Content - Only show after menu starts game */}
       {gameStarted && (
         <>
+          {/* Pause Menu */}
+          {showPauseMenu && (
+            <PauseMenu
+              onResume={() => setShowPauseMenu(false)}
+              onMainMenu={() => {
+                setGameStarted(false);
+                setShowPauseMenu(false);
+                setShowMenu(true);
+              }}
+            />
+          )}
+
           {raceStatus === 'countdown' && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">
               {Math.ceil(countdown)}
@@ -1387,7 +1436,7 @@ const TIME_OF_DAY_CONFIG = {
           <p className="text-[10px] sm:text-xs text-slate-400 font-mono uppercase tracking-widest">3D Simulation • Babylon.js</p>
         </div>
         <div className="flex gap-2 sm:gap-4 text-[10px] sm:text-xs text-slate-300 items-center">
-          <button 
+          <button
             onClick={() => {
                 countdownRef.current = 3.0;
                 setCountdown(3.0);
@@ -1396,6 +1445,13 @@ const TIME_OF_DAY_CONFIG = {
             className="px-2 py-1 rounded border bg-emerald-500 text-white"
           >
             Start Race
+          </button>
+          <button
+            onClick={() => setShowPauseMenu(!showPauseMenu)}
+            className="px-2 py-1 rounded border bg-blue-500 text-white"
+            title="Press P or ESC to toggle pause"
+          >
+            {showPauseMenu ? 'Resume' : 'Pause'}
           </button>
           <select 
             value={timeOfDay}
