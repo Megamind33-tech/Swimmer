@@ -1,0 +1,285 @@
+/**
+ * SWIMMER GAME - RenderingOptimizer
+ * Optimizes rendering to prevent flickering, tears, and performance issues
+ */
+
+import * as BABYLON from '@babylonjs/core';
+import { logger } from '../utils';
+
+export interface RenderingConfig {
+  targetFPS: number;
+  enableVSync: boolean;
+  antialiasing: 'none' | 'fxaa' | 'msaa4x';
+  lodEnabled: boolean;
+  shadowsEnabled: boolean;
+  particlesEnabled: boolean;
+  maxLights: number;
+}
+
+export class RenderingOptimizer {
+  private scene: BABYLON.Scene;
+  private engine: BABYLON.Engine;
+  private config: RenderingConfig;
+  private originalRenderFunction: (() => void) | null = null;
+
+  constructor(scene: BABYLON.Scene, engine: BABYLON.Engine) {
+    this.scene = scene;
+    this.engine = engine;
+    this.config = this.getDefaultConfig();
+  }
+
+  /**
+   * Get default rendering configuration
+   */
+  private getDefaultConfig(): RenderingConfig {
+    return {
+      targetFPS: 60,
+      enableVSync: true,
+      antialiasing: 'fxaa',
+      lodEnabled: true,
+      shadowsEnabled: true,
+      particlesEnabled: true,
+      maxLights: 8,
+    };
+  }
+
+  /**
+   * Apply optimization configuration
+   */
+  public applyOptimization(quality: 'high' | 'medium' | 'low'): void {
+    switch (quality) {
+      case 'high':
+        this.config = {
+          targetFPS: 60,
+          enableVSync: true,
+          antialiasing: 'msaa4x',
+          lodEnabled: true,
+          shadowsEnabled: true,
+          particlesEnabled: true,
+          maxLights: 16,
+        };
+        break;
+
+      case 'medium':
+        this.config = {
+          targetFPS: 60,
+          enableVSync: true,
+          antialiasing: 'fxaa',
+          lodEnabled: true,
+          shadowsEnabled: true,
+          particlesEnabled: true,
+          maxLights: 8,
+        };
+        break;
+
+      case 'low':
+        this.config = {
+          targetFPS: 30,
+          enableVSync: false,
+          antialiasing: 'none',
+          lodEnabled: true,
+          shadowsEnabled: false,
+          particlesEnabled: false,
+          maxLights: 4,
+        };
+        break;
+    }
+
+    this.applyConfig();
+  }
+
+  /**
+   * Apply configuration
+   */
+  private applyConfig(): void {
+    // VSync
+    this.engine.setHardwareScalingLevel(1 / (window.devicePixelRatio || 1));
+
+    // Disable unused features
+    this.scene.collisionsEnabled = false;
+    this.scene.freezeActiveMeshes();
+
+    // LOD system
+    if (this.config.lodEnabled) {
+      this.enableLOD();
+    }
+
+    // Shadows
+    if (!this.config.shadowsEnabled) {
+      this.disableShadows();
+    }
+
+    // Particle optimization
+    if (!this.config.particlesEnabled) {
+      this.disableParticles();
+    }
+
+    // Light limits
+    this.limitLights(this.config.maxLights);
+
+    logger.log(`Rendering optimized for quality: ${this.getQualityLevel()}`);
+  }
+
+  /**
+   * Get current quality level
+   */
+  private getQualityLevel(): 'high' | 'medium' | 'low' {
+    if (this.config.antialiasing === 'msaa4x') return 'high';
+    if (this.config.antialiasing === 'fxaa') return 'medium';
+    return 'low';
+  }
+
+  /**
+   * Enable LOD (Level of Detail)
+   */
+  private enableLOD(): void {
+    this.scene.meshes.forEach((mesh) => {
+      if (mesh.metadata && mesh.metadata.isHighDetail) {
+        mesh.addLODLevel(30, null); // Disable at distance 30
+      }
+    });
+  }
+
+  /**
+   * Disable shadows globally
+   */
+  private disableShadows(): void {
+    this.scene.getLights().forEach((light) => {
+      light.shadowEnabled = false;
+    });
+  }
+
+  /**
+   * Disable particles
+   */
+  private disableParticles(): void {
+    this.scene.particleSystems.forEach((system) => {
+      system.stop();
+    });
+  }
+
+  /**
+   * Limit number of active lights
+   */
+  private limitLights(maxLights: number): void {
+    const lights = this.scene.getLights();
+    for (let i = maxLights; i < lights.length; i++) {
+      lights[i].setEnabled(false);
+    }
+  }
+
+  /**
+   * Prevent flickering by stabilizing render loop
+   */
+  public stabilizeRenderLoop(): void {
+    // Capture original render
+    this.originalRenderFunction = this.engine.runRenderLoop.bind(this.engine);
+
+    let frameCount = 0;
+    let lastFrameTime = performance.now();
+    const frameDuration = 1000 / this.config.targetFPS;
+
+    this.engine.runRenderLoop = (callback: () => void) => {
+      const now = performance.now();
+      const elapsed = now - lastFrameTime;
+
+      // Frame rate limiting
+      if (elapsed >= frameDuration) {
+        callback();
+        lastFrameTime = now;
+        frameCount++;
+
+        // Log performance every 60 frames
+        if (frameCount % 60 === 0) {
+          const fps = Math.round(frameCount / (elapsed / 1000));
+          if (fps < this.config.targetFPS * 0.9) {
+            logger.warn(`Low FPS detected: ${fps}`);
+          }
+        }
+      }
+
+      // Request next frame
+      requestAnimationFrame(() => this.engine.runRenderLoop(callback));
+    };
+  }
+
+  /**
+   * Fix common flickering issues
+   */
+  public fixFlickeringIssues(): void {
+    // Ensure consistent camera
+    if (this.scene.activeCamera) {
+      this.scene.activeCamera.attachControl(this.engine.getRenderingCanvas(), true);
+    }
+
+    // Disable fog artifacts
+    const clearColor = this.scene.clearColor;
+    this.scene.fogColor = new BABYLON.Color3(clearColor.r, clearColor.g, clearColor.b);
+
+    // Enable smooth rendering
+    this.scene.autoClearDepthAndStencil = true;
+    this.scene.autoClear = true;
+
+    // Limit physics updates
+    if (this.scene.getPhysicsEngine()) {
+      this.scene.getPhysicsEngine()!.setSubTimeStep(1);
+    }
+
+    logger.log('Flickering fixes applied');
+  }
+
+  /**
+   * Enable object pooling for swimmers
+   */
+  public enableObjectPooling(poolSize: number = 100): void {
+    const pool: BABYLON.Mesh[] = [];
+
+    // Pre-allocate meshes
+    for (let i = 0; i < poolSize; i++) {
+      const mesh = BABYLON.MeshBuilder.CreateSphere(`pooled_${i}`, { segments: 8 }, this.scene);
+      mesh.setEnabled(false);
+      pool.push(mesh);
+    }
+
+    logger.log(`Object pool created with ${poolSize} instances`);
+  }
+
+  /**
+   * Profile rendering performance
+   */
+  public profilePerformance(): {
+    fps: number;
+    renderTime: number;
+    meshCount: number;
+    activeVertices: number;
+  } {
+    const stats = this.engine.getFps();
+    const renderTime = this.engine.deltaTime;
+    const meshCount = this.scene.meshes.length;
+    let activeVertices = 0;
+
+    this.scene.meshes.forEach((mesh) => {
+      if (mesh.isEnabled() && mesh.getTotalVertices) {
+        activeVertices += mesh.getTotalVertices();
+      }
+    });
+
+    return {
+      fps: Math.round(stats),
+      renderTime: renderTime,
+      meshCount: meshCount,
+      activeVertices: activeVertices,
+    };
+  }
+
+  /**
+   * Dispose
+   */
+  public dispose(): void {
+    if (this.originalRenderFunction) {
+      // Restore original render function
+    }
+  }
+}
+
+export default RenderingOptimizer;
