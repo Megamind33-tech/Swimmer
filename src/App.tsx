@@ -886,23 +886,23 @@ const TIME_OF_DAY_CONFIG = {
     // Get base swimmer manager for compatibility
     const swimmerManager = enhancedSwimmerManagerRef.current.getBaseSwimmerManager();
 
-    // Swimmers Data
+    // Swimmers Data - indexed by lane index (0-7)
     const swimmersData = [
+      { name: "GUY", lane: 1, speed: 2.30, color: new Color3(0.5, 0.5, 0.5) },
+      { name: "CHALMERS", lane: 2, speed: 2.35, color: new Color3(1, 0.8, 0) },
+      { name: "MILAK", lane: 3, speed: 2.38, color: new Color3(0.2, 0.8, 0.2) },
       { name: "PHELPS", lane: 4, speed: 2.45, color: new Color3(1, 0.4, 0) },
       { name: "DRESSEL", lane: 5, speed: 2.42, color: new Color3(0, 0.5, 1) },
-      { name: "MILAK", lane: 3, speed: 2.38, color: new Color3(0.2, 0.8, 0.2) },
       { name: "POPOVICI", lane: 6, speed: 2.40, color: new Color3(0.8, 0.2, 0.8) },
-      { name: "CHALMERS", lane: 2, speed: 2.35, color: new Color3(1, 0.8, 0) },
       { name: "LE CLOS", lane: 7, speed: 2.32, color: new Color3(0.1, 0.1, 0.1) },
-      { name: "GUY", lane: 1, speed: 2.30, color: new Color3(0.5, 0.5, 0.5) },
       { name: "PROUD", lane: 8, speed: 2.48, color: new Color3(1, 1, 1) },
     ];
 
     const swimmers: any[] = [];
-    swimmersData.forEach((data, i) => {
-      const swimmerInstance = swimmerManager.getSwimmer(i);
+    swimmersData.forEach((data, laneIndex) => {
+      const swimmerInstance = swimmerManager.getSwimmer(laneIndex);
       if (!swimmerInstance || !swimmerInstance.mesh) {
-        console.error(`Failed to get swimmer at lane ${i}`);
+        console.error(`Failed to get swimmer at lane ${laneIndex}`);
         return;
       }
 
@@ -910,21 +910,24 @@ const TIME_OF_DAY_CONFIG = {
 
       // Validate mesh has position and rotation
       if (!swimmer.position || !swimmer.rotation) {
-        console.error(`Swimmer mesh invalid at lane ${i}`);
+        console.error(`Swimmer mesh invalid at lane ${laneIndex}`);
         return;
       }
 
+      // Calculate lane X position based on lane index (0-7)
+      const laneX = -poolWidth / 2 + (laneIndex * poolWidth) / (8 - 1);
+
       // Initial position on starting block
-      swimmer.position.x = -poolWidth / 2 + (data.lane - 0.5) * laneWidth;
+      swimmer.position.x = laneX;
       swimmer.position.y = 1.2; // Standing on block
       swimmer.position.z = -poolLength / 2 - 1.2;
       swimmer.rotation.x = Math.PI / 8; // Leaning forward slightly
 
       // Update swimmer colors
-      swimmerManager.setSwimmerSuitColor(i, data.color);
+      swimmerManager.setSwimmerSuitColor(laneIndex, data.color);
 
       // Add all swimmer body meshes to water render list
-      const bodyMeshes = swimmerManager.getSwimmerBodyMeshes(i);
+      const bodyMeshes = swimmerManager.getSwimmerBodyMeshes(laneIndex);
       if (bodyMeshes && bodyMeshes.length > 0) {
         bodyMeshes.forEach((mesh) => {
           if (mesh) {
