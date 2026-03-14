@@ -1278,7 +1278,14 @@ const TIME_OF_DAY_CONFIG = {
       engine.resize();
     };
     window.addEventListener('resize', handleResize);
+    };
 
+    // Execute the async initialization
+    initializeGame().catch(err => {
+      console.error('Game initialization failed:', err);
+    });
+
+    // Return cleanup function
     return () => {
       window.removeEventListener('resize', handleResize);
       // Cleanup enhanced systems
@@ -1306,12 +1313,6 @@ const TIME_OF_DAY_CONFIG = {
       // Cleanup scene and engine
       engine.dispose();
     };
-    };
-
-    // Execute the async initialization
-    initializeGame().catch(err => {
-      console.error('Game initialization failed:', err);
-    });
   }, [currentVenue, customColors]);
 
   return (
