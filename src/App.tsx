@@ -1229,6 +1229,13 @@ const TIME_OF_DAY_CONFIG = {
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      // Cleanup swimmers
+      try {
+        swimmerManager.dispose();
+      } catch (e) {
+        console.error('Error disposing swimmers:', e);
+      }
+      // Cleanup scene and engine
       engine.dispose();
     };
   }, [currentVenue, customColors]);
