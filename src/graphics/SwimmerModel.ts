@@ -70,34 +70,39 @@ export class SwimmerModel {
    * Create a swimmer model with customizable appearance
    */
   public create(config: SwimmerConfig = {}): BABYLON.TransformNode {
-    const defaults: SwimmerConfig = {
-      suitColor: new BABYLON.Color3(0.0, 0.2, 0.8), // Blue suit
-      capColor: new BABYLON.Color3(1.0, 1.0, 1.0),  // White cap
-      goggleColor: new BABYLON.Color3(0.1, 0.1, 0.1), // Black goggles
-      scale: 1.0,
-      skinTone: new BABYLON.Color3(0.95, 0.8, 0.7), // Natural skin tone
-    };
+    try {
+      const defaults: SwimmerConfig = {
+        suitColor: new BABYLON.Color3(0.0, 0.2, 0.8), // Blue suit
+        capColor: new BABYLON.Color3(1.0, 1.0, 1.0),  // White cap
+        goggleColor: new BABYLON.Color3(0.1, 0.1, 0.1), // Black goggles
+        scale: 1.0,
+        skinTone: new BABYLON.Color3(0.95, 0.8, 0.7), // Natural skin tone
+      };
 
-    const finalConfig = { ...defaults, ...config };
+      const finalConfig = { ...defaults, ...config };
 
-    // Create main transform node for the swimmer
-    this.mesh = new BABYLON.TransformNode('swimmer', this.scene);
-    this.mesh.scaling = new BABYLON.Vector3(finalConfig.scale!, finalConfig.scale!, finalConfig.scale!);
+      // Create main transform node for the swimmer
+      this.mesh = new BABYLON.TransformNode('swimmer', this.scene);
+      this.mesh.scaling = new BABYLON.Vector3(finalConfig.scale!, finalConfig.scale!, finalConfig.scale!);
 
-    // Create materials
-    this.createMaterials(finalConfig);
+      // Create materials
+      this.createMaterials(finalConfig);
 
-    // Build body parts
-    this.createHead(finalConfig);
-    this.createTorso(finalConfig);
-    this.createPelvis(finalConfig);
-    this.createArms(finalConfig);
-    this.createLegs(finalConfig);
-    this.createCap(finalConfig);
-    this.createGoggles(finalConfig);
+      // Build body parts
+      this.createHead(finalConfig);
+      this.createTorso(finalConfig);
+      this.createPelvis(finalConfig);
+      this.createArms(finalConfig);
+      this.createLegs(finalConfig);
+      this.createCap(finalConfig);
+      this.createGoggles(finalConfig);
 
-    logger.log('Refined swimmer model created');
-    return this.mesh;
+      logger.log('Refined swimmer model created');
+      return this.mesh;
+    } catch (error) {
+      logger.error('Failed to create swimmer model:', error);
+      throw new Error(`SwimmerModel creation failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   /**
@@ -106,27 +111,27 @@ export class SwimmerModel {
   private createMaterials(config: SwimmerConfig): void {
     // Suit material
     this.suitMaterial = new BABYLON.StandardMaterial('suitMaterial', this.scene);
-    this.suitMaterial.diffuse = config.suitColor!;
+    this.suitMaterial.diffuseColor = config.suitColor!;
     this.suitMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
     this.suitMaterial.specularPower = 24;
     this.suitMaterial.alpha = 0.95;
 
     // Cap material
     this.capMaterial = new BABYLON.StandardMaterial('capMaterial', this.scene);
-    this.capMaterial.diffuse = config.capColor!;
+    this.capMaterial.diffuseColor = config.capColor!;
     this.capMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
     this.capMaterial.specularPower = 12;
 
     // Goggle material (lens)
     this.goggleMaterial = new BABYLON.StandardMaterial('goggleMaterial', this.scene);
-    this.goggleMaterial.diffuse = config.goggleColor!;
+    this.goggleMaterial.diffuseColor = config.goggleColor!;
     this.goggleMaterial.specularColor = new BABYLON.Color3(0.6, 0.6, 0.6);
     this.goggleMaterial.specularPower = 48;
     this.goggleMaterial.alpha = 0.7;
 
     // Skin material
     this.skinMaterial = new BABYLON.StandardMaterial('skinMaterial', this.scene);
-    this.skinMaterial.diffuse = config.skinTone!;
+    this.skinMaterial.diffuseColor = config.skinTone!;
     this.skinMaterial.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
     this.skinMaterial.specularPower = 16;
   }
@@ -165,7 +170,7 @@ export class SwimmerModel {
     );
     leftEye.position = new BABYLON.Vector3(-0.065, 1.05, 0.08);
     leftEye.material = new BABYLON.StandardMaterial('eyeMat', this.scene);
-    (leftEye.material as BABYLON.StandardMaterial).diffuse = new BABYLON.Color3(0.1, 0.1, 0.1);
+    (leftEye.material as BABYLON.StandardMaterial).diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     leftEye.parent = this.mesh;
 
     const rightEye = BABYLON.MeshBuilder.CreateSphere(
@@ -569,7 +574,7 @@ export class SwimmerModel {
    */
   public setSuitColor(color: BABYLON.Color3): void {
     if (this.suitMaterial) {
-      this.suitMaterial.diffuse = color;
+      this.suitMaterial.diffuseColor = color;
     }
   }
 
@@ -578,7 +583,7 @@ export class SwimmerModel {
    */
   public setCapColor(color: BABYLON.Color3): void {
     if (this.capMaterial) {
-      this.capMaterial.diffuse = color;
+      this.capMaterial.diffuseColor = color;
     }
   }
 
@@ -587,7 +592,7 @@ export class SwimmerModel {
    */
   public setGoggleColor(color: BABYLON.Color3): void {
     if (this.goggleMaterial) {
-      this.goggleMaterial.diffuse = color;
+      this.goggleMaterial.diffuseColor = color;
     }
   }
 

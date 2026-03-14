@@ -149,7 +149,7 @@ export class ArenaManager {
 
     // Pool material
     const poolMaterial = new BABYLON.StandardMaterial('poolMaterial', this.scene);
-    (poolMaterial as any).diffuse = new BABYLON.Color3(0.0, 0.3, 0.7);
+    (poolMaterial as any).diffuseColor = new BABYLON.Color3(0.0, 0.3, 0.7);
     poolMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
     poolMaterial.specularPower = 32;
     poolMesh.material = poolMaterial;
@@ -210,7 +210,7 @@ export class ArenaManager {
 
     // Deck around pool
     const deckMaterial = new BABYLON.StandardMaterial('deckMaterial', this.scene);
-    (deckMaterial as any).diffuse = new BABYLON.Color3(0.85, 0.85, 0.85);
+    (deckMaterial as any).diffuseColor = new BABYLON.Color3(0.85, 0.85, 0.85);
     deckMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
 
     const deck = BABYLON.MeshBuilder.CreateGround(
@@ -226,7 +226,7 @@ export class ArenaManager {
     for (let lane = 0; lane < this.arenaConfig.laneCount; lane++) {
       const blockX = -this.arenaConfig.poolWidth / 2 + (lane * this.arenaConfig.poolWidth) / (this.arenaConfig.laneCount - 1);
       const blockMaterial = new BABYLON.StandardMaterial(`blockMat${lane}`, this.scene);
-      (blockMaterial as any).diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
+      (blockMaterial as any).diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
 
       const block = BABYLON.MeshBuilder.CreateBox(
         `startBlock${lane}`,
@@ -251,7 +251,7 @@ export class ArenaManager {
     // Hemispheric light (ambient)
     const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 1, 0), this.scene);
     hemiLight.intensity = 0.7;
-    hemiLight.diffuse = new BABYLON.Color3(1, 0.9, 0.7);
+    hemiLight.diffuseColor = new BABYLON.Color3(1, 0.9, 0.7);
     this.lights.push(hemiLight);
 
     // Point light for intensity
@@ -342,7 +342,7 @@ export class ArenaManager {
 
     // Water material
     const waterMaterial = new BABYLON.StandardMaterial('waterMaterial', this.scene);
-    (waterMaterial as any).diffuse = new BABYLON.Color3(0.0, 0.4, 0.8);
+    (waterMaterial as any).diffuseColor = new BABYLON.Color3(0.0, 0.4, 0.8);
     waterMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
     waterMaterial.specularPower = 64;
     waterMaterial.alpha = 0.9;
@@ -438,7 +438,7 @@ export class ArenaManager {
     };
 
     if (this.poolMaterial) {
-      (this.poolMaterial as any).diffuse = themes[theme];
+      (this.poolMaterial as any).diffuseColor = themes[theme];
     }
 
     logger.log('Theme set to:', theme);
@@ -460,7 +460,7 @@ export class ArenaManager {
     };
 
     const config = lightConfigs[time];
-    this.lights[0].diffuse = config.color;
+    this.lights[0].diffuseColor = config.color;
     this.lights[0].intensity = config.intensity;
 
     logger.log('Time of day set to:', time);

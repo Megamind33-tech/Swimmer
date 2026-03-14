@@ -72,13 +72,13 @@ export class CoachModel {
   private createMaterials(config: CoachConfig): void {
     // Clothes material (tracksuit/coaching outfit)
     this.clothesMaterial = new BABYLON.StandardMaterial('clothesMaterial', this.scene);
-    this.clothesMaterial.diffuse = config.outfitColor!;
+    this.clothesMaterial.diffuseColor = config.outfitColor!;
     this.clothesMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
     this.clothesMaterial.specularPower = 12;
 
     // Skin material
     this.skinMaterial = new BABYLON.StandardMaterial('skinMaterial', this.scene);
-    this.skinMaterial.diffuse = config.skinTone!;
+    this.skinMaterial.diffuseColor = config.skinTone!;
     this.skinMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
     this.skinMaterial.specularPower = 8;
   }
@@ -106,7 +106,7 @@ export class CoachModel {
     );
     eyes.position = new BABYLON.Vector3(0, 1.0, 0.1);
     eyes.material = new BABYLON.StandardMaterial('eyeMat', this.scene);
-    (eyes.material as BABYLON.StandardMaterial).diffuse = new BABYLON.Color3(0.1, 0.1, 0.1);
+    (eyes.material as BABYLON.StandardMaterial).diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     eyes.parent = this.mesh;
   }
 
@@ -153,7 +153,7 @@ export class CoachModel {
     );
     leftShoe.position = new BABYLON.Vector3(-0.12, -0.52, 0);
     leftShoe.material = new BABYLON.StandardMaterial('shoeMat', this.scene);
-    (leftShoe.material as BABYLON.StandardMaterial).diffuse = new BABYLON.Color3(0.1, 0.1, 0.1);
+    (leftShoe.material as BABYLON.StandardMaterial).diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     leftShoe.parent = this.mesh;
 
     const rightShoe = BABYLON.MeshBuilder.CreateBox(

@@ -40,34 +40,34 @@ export class LockerRoomEnvironment {
   private createMaterials(): void {
     // Tile floor
     const tileMat = new BABYLON.StandardMaterial('tileMaterial', this.scene);
-    tileMat.diffuse = new BABYLON.Color3(0.7, 0.7, 0.7);
+    tileMat.diffuseColor = new BABYLON.Color3(0.7, 0.7, 0.7);
     tileMat.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
     tileMat.specularPower = 16;
     this.materials.set('tile', tileMat);
 
     // Locker metal
     const metalMat = new BABYLON.StandardMaterial('metalMaterial', this.scene);
-    metalMat.diffuse = new BABYLON.Color3(0.4, 0.4, 0.4);
+    metalMat.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.4);
     metalMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
     metalMat.specularPower = 32;
     this.materials.set('metal', metalMat);
 
     // Wood bench
     const woodMat = new BABYLON.StandardMaterial('woodMaterial', this.scene);
-    woodMat.diffuse = new BABYLON.Color3(0.6, 0.4, 0.2);
+    woodMat.diffuseColor = new BABYLON.Color3(0.6, 0.4, 0.2);
     woodMat.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
     woodMat.specularPower = 8;
     this.materials.set('wood', woodMat);
 
     // Wall
     const wallMat = new BABYLON.StandardMaterial('wallMaterial', this.scene);
-    wallMat.diffuse = new BABYLON.Color3(0.85, 0.85, 0.85);
+    wallMat.diffuseColor = new BABYLON.Color3(0.85, 0.85, 0.85);
     wallMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
     this.materials.set('wall', wallMat);
 
     // Ceramic (showers)
     const ceramicMat = new BABYLON.StandardMaterial('ceramicMaterial', this.scene);
-    ceramicMat.diffuse = new BABYLON.Color3(0.9, 0.9, 0.9);
+    ceramicMat.diffuseColor = new BABYLON.Color3(0.9, 0.9, 0.9);
     ceramicMat.specularColor = new BABYLON.Color3(0.6, 0.6, 0.6);
     ceramicMat.specularPower = 20;
     this.materials.set('ceramic', ceramicMat);
@@ -104,7 +104,7 @@ export class LockerRoomEnvironment {
     floorTexture.update();
 
     const floorMat = new BABYLON.StandardMaterial('floorMat', this.scene);
-    floorMat.diffuse = new BABYLON.Color3(0.75, 0.75, 0.75);
+    floorMat.diffuseColor = new BABYLON.Color3(0.75, 0.75, 0.75);
     floorMat.diffuseTexture = floorTexture;
     floor.material = floorMat;
   }
@@ -202,7 +202,7 @@ export class LockerRoomEnvironment {
         );
         door.position = new BABYLON.Vector3(xPos, lockerHeight / 2 + 0.2, zPos + lockerDepth / 2);
         const doorMat = new BABYLON.StandardMaterial(`doorMat_${row}_${i}`, this.scene);
-        doorMat.diffuse = new BABYLON.Color3(0.2 + Math.random() * 0.4, 0.2, 0.4);
+        doorMat.diffuseColor = new BABYLON.Color3(0.2 + Math.random() * 0.4, 0.2, 0.4);
         door.material = doorMat;
         door.parent = this.rootNode;
       }
@@ -276,7 +276,7 @@ export class LockerRoomEnvironment {
       );
       showerHead.position = new BABYLON.Vector3(xPos, 2.2, 12);
       const headMat = new BABYLON.StandardMaterial(`headMat_${i}`, this.scene);
-      headMat.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
+      headMat.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
       showerHead.material = headMat;
       showerHead.parent = this.rootNode;
 
@@ -306,7 +306,7 @@ export class LockerRoomEnvironment {
     );
     tub.position = new BABYLON.Vector3(-15, 0.6, 0);
     const tubMat = new BABYLON.StandardMaterial('tubMat', this.scene);
-    tubMat.diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
+    tubMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
     tub.material = tubMat;
     tub.parent = this.rootNode;
 
@@ -318,7 +318,7 @@ export class LockerRoomEnvironment {
     );
     water.position = new BABYLON.Vector3(-15, 1.15, 0);
     const waterMat = new BABYLON.StandardMaterial('waterMat', this.scene);
-    waterMat.diffuse = new BABYLON.Color3(0.1, 0.5, 0.7);
+    waterMat.diffuseColor = new BABYLON.Color3(0.1, 0.5, 0.7);
     waterMat.alpha = 0.7;
     water.material = waterMat;
     water.parent = this.rootNode;
@@ -341,7 +341,7 @@ export class LockerRoomEnvironment {
     );
     ice.position = new BABYLON.Vector3(15, 1.15, 0);
     const iceMat = new BABYLON.StandardMaterial('iceMat', this.scene);
-    iceMat.diffuse = new BABYLON.Color3(0.7, 0.9, 1.0);
+    iceMat.diffuseColor = new BABYLON.Color3(0.7, 0.9, 1.0);
     iceMat.alpha = 0.8;
     ice.material = iceMat;
     ice.parent = this.rootNode;
