@@ -3,7 +3,7 @@
  * Simple menu with Play, Settings, and Quit
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 interface MainMenuProps {
   onPlay: () => void;
@@ -11,6 +11,13 @@ interface MainMenuProps {
 }
 
 export const MainMenu: React.FC<MainMenuProps> = ({ onPlay, onSettings }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handlePlay = () => {
+    setIsLoading(true);
+    onPlay();
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-black z-[9997] flex items-center justify-center">
       {/* Background Elements */}
@@ -33,12 +40,23 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onPlay, onSettings }) => {
         {/* Menu Buttons */}
         <div className="flex flex-col gap-4">
           <button
-            onClick={onPlay}
-            className="group relative px-16 py-5 rounded-lg overflow-hidden transition-all duration-300 hover:scale-105"
+            onClick={handlePlay}
+            disabled={isLoading}
+            className="group relative px-16 py-5 rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 disabled:hover:scale-100"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 group-hover:shadow-lg group-hover:shadow-emerald-500/50"></div>
-            <span className="relative block font-bold text-2xl text-white uppercase tracking-wide">
-              Play
+            <span className="relative flex items-center justify-center gap-3 font-bold text-2xl text-white uppercase tracking-wide">
+              {isLoading ? (
+                <>
+                  <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </>
+              ) : (
+                'Play'
+              )}
             </span>
           </button>
 
