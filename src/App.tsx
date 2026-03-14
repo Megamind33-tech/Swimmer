@@ -27,6 +27,9 @@ import {
   CSG,
 } from '@babylonjs/core';
 import { WaterMaterial } from '@babylonjs/materials';
+import useGameManager from './hooks/useGameManager';
+import usePlayerManager from './hooks/usePlayerManager';
+import useRivalSystem from './hooks/useRivalSystem';
 
 type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 
@@ -132,6 +135,11 @@ const VENUES = {
 };
 
 export default function App() {
+  // Initialize new modular systems
+  const { gameManager, isReady: gmReady } = useGameManager();
+  const { playerManager, currentPlayer, isReady: pmReady } = usePlayerManager();
+  const { rivalSystem, isReady: rsReady } = useRivalSystem();
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentVenue, setCurrentVenue] = useState<VenueTheme>('game7');
   const [customColors, setCustomColors] = useState<CustomColors>({
