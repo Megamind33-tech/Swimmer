@@ -27,6 +27,16 @@ import {
   CSG,
 } from '@babylonjs/core';
 import { WaterMaterial } from '@babylonjs/materials';
+import useGameManager from './hooks/useGameManager';
+import usePlayerManager from './hooks/usePlayerManager';
+import useRivalSystem from './hooks/useRivalSystem';
+import SwimmerManager from './graphics/SwimmerManager';
+import EnhancedSwimmerManager from './graphics/EnhancedSwimmerManager';
+import EnvironmentManager from './graphics/EnvironmentManager';
+import RenderingOptimizer from './graphics/RenderingOptimizer';
+import OlympicUI from './components/OlympicUI';
+import CinematicOpening from './components/CinematicOpening';
+import LoadingScreen from './components/LoadingScreen';
 
 type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 
@@ -132,6 +142,11 @@ const VENUES = {
 };
 
 export default function App() {
+  // Initialize new modular systems
+  const { gameManager, isReady: gmReady } = useGameManager();
+  const { playerManager, currentPlayer, isReady: pmReady } = usePlayerManager();
+  const { rivalSystem, isReady: rsReady } = useRivalSystem();
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentVenue, setCurrentVenue] = useState<VenueTheme>('game7');
   const [customColors, setCustomColors] = useState<CustomColors>({
@@ -179,6 +194,18 @@ const TIME_OF_DAY_CONFIG = {
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening' | 'night'>('afternoon');
   const [countdown, setCountdown] = useState(0);
   const [raceStatus, setRaceStatus] = useState<'idle' | 'countdown' | 'racing' | 'finished'>('idle');
+
+  // New enhanced systems state
+  const [warmupActive, setWarmupActive] = useState(false);
+  const [warmupProgress, setWarmupProgress] = useState(0);
+  const [currentEnvironment, setCurrentEnvironment] = useState<'pool' | 'locker-room' | 'training' | 'school-gym'>('pool');
+  const [renderingQuality, setRenderingQuality] = useState<'high' | 'medium' | 'low'>('high');
+  const [gameMode, setGameMode] = useState<'p2p' | 'multiplayer' | 'practice'>('multiplayer');
+
+  // Cinematic and loading states
+  const [showCinematic, setShowCinematic] = useState(true);
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const cameraPerspectiveRef = useRef(cameraPerspective);
   useEffect(() => {
     cameraPerspectiveRef.current = cameraPerspective;
@@ -195,6 +222,10 @@ const TIME_OF_DAY_CONFIG = {
   const startLightMatsRef = useRef<StandardMaterial[]>([]);
   const spotLightsRef = useRef<SpotLight[]>([]);
   const lightPanelMatRef = useRef<StandardMaterial | null>(null);
+  const enhancedSwimmerManagerRef = useRef<EnhancedSwimmerManager | null>(null);
+  const environmentManagerRef = useRef<EnvironmentManager | null>(null);
+  const renderingOptimizerRef = useRef<RenderingOptimizer | null>(null);
+  const engineRef = useRef<any>(null);
 
   useEffect(() => {
     if (!sceneRef.current || !lightRef.current) return;
@@ -244,7 +275,8 @@ const TIME_OF_DAY_CONFIG = {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    let v = VENUES[currentVenue];
+    const initializeGame = async () => {
+      let v = VENUES[currentVenue];
     
     if (currentVenue === 'custom') {
       v = {
@@ -293,7 +325,7 @@ const TIME_OF_DAY_CONFIG = {
     lightRef.current = new HemisphericLight('light', new Vector3(0, 1, 0), sceneRef.current);
     lightRef.current.diffuse = TIME_OF_DAY_CONFIG[timeOfDay].ambientLight;
     lightRef.current.intensity = TIME_OF_DAY_CONFIG[timeOfDay].lightIntensity;
-    
+
     // Initial ceiling light settings
     if (lightPanelMatRef.current) {
         lightPanelMatRef.current.emissiveColor = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightColor;
@@ -302,6 +334,18 @@ const TIME_OF_DAY_CONFIG = {
         spotLight.diffuse = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightColor;
         spotLight.intensity = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightIntensity;
     });
+
+    // Store engine ref for rendering optimizer
+    engineRef.current = engine;
+
+    // Initialize Rendering Optimizer
+    renderingOptimizerRef.current = new RenderingOptimizer(scene, engine);
+    renderingOptimizerRef.current.applyOptimization(renderingQuality);
+    renderingOptimizerRef.current.stabilizeRenderLoop();
+    renderingOptimizerRef.current.fixFlickeringIssues();
+
+    // Initialize Environment Manager
+    environmentManagerRef.current = new EnvironmentManager(scene);
 
     // Pool Dimensions
     const poolWidth = 20;
@@ -738,6 +782,19 @@ const TIME_OF_DAY_CONFIG = {
       }
     };
 
+    // Initialize EnhancedSwimmerManager with personality system
+    enhancedSwimmerManagerRef.current = new EnhancedSwimmerManager(scene, poolWidth, 8);
+    try {
+      await enhancedSwimmerManagerRef.current.initialize();
+      console.log('EnhancedSwimmerManager initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize EnhancedSwimmerManager:', error);
+      throw error;
+    }
+
+    // Get base swimmer manager for compatibility
+    const swimmerManager = enhancedSwimmerManagerRef.current.getBaseSwimmerManager();
+
     // Swimmers Data
     const swimmersData = [
       { name: "PHELPS", lane: 4, speed: 2.45, color: new Color3(1, 0.4, 0) },
@@ -752,18 +809,38 @@ const TIME_OF_DAY_CONFIG = {
 
     const swimmers: any[] = [];
     swimmersData.forEach((data, i) => {
-      const swimmer = MeshBuilder.CreateCapsule(`swimmer_${i}`, { radius: 0.3, height: 1.5 }, scene);
-      
+      const swimmerInstance = swimmerManager.getSwimmer(i);
+      if (!swimmerInstance || !swimmerInstance.mesh) {
+        console.error(`Failed to get swimmer at lane ${i}`);
+        return;
+      }
+
+      const swimmer = swimmerInstance.mesh;
+
+      // Validate mesh has position and rotation
+      if (!swimmer.position || !swimmer.rotation) {
+        console.error(`Swimmer mesh invalid at lane ${i}`);
+        return;
+      }
+
       // Initial position on starting block
       swimmer.position.x = -poolWidth / 2 + (data.lane - 0.5) * laneWidth;
       swimmer.position.y = 1.2; // Standing on block
       swimmer.position.z = -poolLength / 2 - 1.2;
       swimmer.rotation.x = Math.PI / 8; // Leaning forward slightly
-      
-      const swimmerMat = new StandardMaterial(`swimmerMat_${i}`, scene);
-      swimmerMat.diffuseColor = data.color;
-      swimmer.material = swimmerMat;
-      water.addToRenderList(swimmer);
+
+      // Update swimmer colors
+      swimmerManager.setSwimmerSuitColor(i, data.color);
+
+      // Add all swimmer body meshes to water render list
+      const bodyMeshes = swimmerManager.getSwimmerBodyMeshes(i);
+      if (bodyMeshes && bodyMeshes.length > 0) {
+        bodyMeshes.forEach((mesh) => {
+          if (mesh) {
+            water.addToRenderList(mesh);
+          }
+        });
+      }
 
       swimmers.push({
         mesh: swimmer,
@@ -779,6 +856,11 @@ const TIME_OF_DAY_CONFIG = {
         diveTime: 0
       });
     });
+
+    // Verify we have 8 swimmers
+    if (swimmers.length !== 8) {
+      console.warn(`Expected 8 swimmers but got ${swimmers.length}`);
+    }
 
     let raceTime = 0;
     let raceActive = false;
@@ -1014,14 +1096,31 @@ const TIME_OF_DAY_CONFIG = {
         causticsTexture.vOffset = time * 0.03;
       }
 
+      // Update enhanced systems
+      if (enhancedSwimmerManagerRef.current) {
+        enhancedSwimmerManagerRef.current.update();
+      }
+
+      // Update warm-up if active
+      if (warmupActive && enhancedSwimmerManagerRef.current) {
+        const { allComplete, avgProgress } = enhancedSwimmerManagerRef.current.updateWarmup();
+        setWarmupProgress(avgProgress);
+        if (allComplete) {
+          setWarmupActive(false);
+          setRaceStatus('countdown');
+        }
+      }
+
       if (isReplayingRef.current) {
         if (replayFrameRef.current < recordedDataRef.current.length) {
             const frame = recordedDataRef.current[replayFrameRef.current];
             swimmers.forEach((s, i) => {
-                s.mesh.position.x = frame[i].x;
-                s.mesh.position.y = frame[i].y;
-                s.mesh.position.z = frame[i].z;
-                s.mesh.rotation.x = frame[i].rotationX;
+                if (frame && frame[i] && s && s.mesh) {
+                    s.mesh.position.x = frame[i].x;
+                    s.mesh.position.y = frame[i].y;
+                    s.mesh.position.z = frame[i].z;
+                    s.mesh.rotation.x = frame[i].rotationX;
+                }
             });
             replayFrameRef.current++;
         } else {
@@ -1068,60 +1167,69 @@ const TIME_OF_DAY_CONFIG = {
             }
 
             swimmers.forEach(s => {
-            if (!s.finished) {
-                allFinished = false;
-                
-                if (s.state === 'diving') {
-                s.diveTime += dt;
-                const diveDuration = 0.6; // 0.6 seconds dive
-                
-                if (s.diveTime < diveDuration) {
-                    const t = s.diveTime / diveDuration;
-                    
-                    // Start: z = -poolLength/2 - 1.2, y = 1.2
-                    // End: z = -poolLength/2 + 1.0, y = -0.2
-                    const startZ = -poolLength / 2 - 1.2;
-                    const endZ = -poolLength / 2 + 1.0;
-                    const startY = 1.2;
-                    const endY = -0.2;
-                    
-                    s.z = startZ + (endZ - startZ) * t;
-                    // Parabola for Y: goes up slightly then down
-                    const height = 0.8;
-                    s.y = startY + (endY - startY) * t + Math.sin(t * Math.PI) * height;
-                    
-                    // Rotation: lean forward to flat
-                    s.mesh.rotation.x = Math.PI / 8 + (Math.PI / 2 - Math.PI / 8) * t;
-                    
-                    s.mesh.position.z = s.z;
-                    s.mesh.position.y = s.y;
-                } else {
-                    // Dive finished, enter water
-                    s.state = 'swimming';
-                    s.y = -0.2;
-                    s.mesh.position.y = s.y;
-                    s.mesh.rotation.x = Math.PI / 2;
-                    createInteractiveSplash(s.mesh.position); // Big splash on entry
-                }
-                } else if (s.state === 'swimming') {
-                s.z += s.dir * s.speed * dt;
-                
-                // Finish line check (one lap race for simplicity)
-                if (s.z >= poolLength / 2 - 2) {
-                    s.z = poolLength / 2 - 2;
-                    s.finished = true;
-                    s.time = raceTime;
-                    s.rank = swimmers.filter(sw => sw.finished).length;
-                }
-                s.mesh.position.z = s.z;
+              if (!s || !s.mesh || !s.mesh.position || !s.mesh.rotation) return;
 
-                // Generate swimmer ripples and splashes periodically
-                if (time - lastRippleTime > 0.4) {
-                    createRipple(s.mesh.position);
-                    createInteractiveSplash(s.mesh.position.add(new Vector3(0, 0, -s.dir * 0.6)));
-                }
-                }
-            }
+              if (!s.finished) {
+                  allFinished = false;
+
+                  if (s.state === 'diving') {
+                    s.diveTime += dt;
+                    const diveDuration = 0.6; // 0.6 seconds dive
+
+                    if (s.diveTime < diveDuration) {
+                        const t = s.diveTime / diveDuration;
+
+                        // Start: z = -poolLength/2 - 1.2, y = 1.2
+                        // End: z = -poolLength/2 + 1.0, y = -0.2
+                        const startZ = -poolLength / 2 - 1.2;
+                        const endZ = -poolLength / 2 + 1.0;
+                        const startY = 1.2;
+                        const endY = -0.2;
+
+                        s.z = startZ + (endZ - startZ) * t;
+                        // Parabola for Y: goes up slightly then down
+                        const height = 0.8;
+                        s.y = startY + (endY - startY) * t + Math.sin(t * Math.PI) * height;
+
+                        // Rotation: lean forward to flat
+                        s.mesh.rotation.x = Math.PI / 8 + (Math.PI / 2 - Math.PI / 8) * t;
+
+                        s.mesh.position.z = s.z;
+                        s.mesh.position.y = s.y;
+                    } else {
+                        // Dive finished, enter water
+                        s.state = 'swimming';
+                        s.y = -0.2;
+                        s.mesh.position.y = s.y;
+                        s.mesh.rotation.x = Math.PI / 2;
+                        // Update to swimming pose
+                        swimmerManager.updateSwimmerAnimation(swimmers.indexOf(s), 'freestyle');
+                        createInteractiveSplash(s.mesh.position); // Big splash on entry
+                    }
+                  } else if (s.state === 'swimming') {
+                    s.z += s.dir * s.speed * dt;
+
+                    // Oscillate swimming pose for animation effect
+                    const swimPulse = Math.sin(raceTime * 4) * 0.15;
+                    s.mesh.rotation.x = -Math.PI / 6 + swimPulse;
+
+                    // Finish line check (one lap race for simplicity)
+                    if (s.z >= poolLength / 2 - 2) {
+                        s.z = poolLength / 2 - 2;
+                        s.finished = true;
+                        s.time = raceTime;
+                        s.rank = swimmers.filter(sw => sw.finished).length;
+                    }
+                    s.mesh.position.z = s.z;
+
+                    // Generate swimmer ripples and splashes periodically
+                    if (time - lastRippleTime > 0.4) {
+                        createRipple(s.mesh.position);
+                        const splashPos = new Vector3(s.mesh.position.x, s.mesh.position.y, s.mesh.position.z - s.dir * 0.6);
+                        createInteractiveSplash(splashPos);
+                    }
+                  }
+              }
             });
 
             if (time - lastRippleTime > 0.4) {
@@ -1177,20 +1285,83 @@ const TIME_OF_DAY_CONFIG = {
       engine.resize();
     };
     window.addEventListener('resize', handleResize);
+    };
 
+    // Execute the async initialization
+    initializeGame().catch(err => {
+      console.error('Game initialization failed:', err);
+    });
+
+    // Return cleanup function
     return () => {
       window.removeEventListener('resize', handleResize);
+      // Cleanup enhanced systems
+      try {
+        if (enhancedSwimmerManagerRef.current) {
+          enhancedSwimmerManagerRef.current.dispose();
+        }
+      } catch (e) {
+        console.error('Error disposing enhanced swimmer manager:', e);
+      }
+      try {
+        if (environmentManagerRef.current) {
+          environmentManagerRef.current.dispose();
+        }
+      } catch (e) {
+        console.error('Error disposing environment manager:', e);
+      }
+      try {
+        if (renderingOptimizerRef.current) {
+          renderingOptimizerRef.current.dispose();
+        }
+      } catch (e) {
+        console.error('Error disposing rendering optimizer:', e);
+      }
+      // Cleanup scene and engine
       engine.dispose();
     };
   }, [currentVenue, customColors]);
 
   return (
     <div className="w-full h-screen bg-slate-900 flex flex-col overflow-hidden relative">
-      {raceStatus === 'countdown' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">
-          {Math.ceil(countdown)}
-        </div>
+      {/* Cinematic Opening */}
+      {showCinematic && (
+        <CinematicOpening
+          onComplete={() => {
+            setShowCinematic(false);
+            setShowLoading(true);
+            // Simulate loading
+            const interval = setInterval(() => {
+              setLoadingProgress(prev => {
+                if (prev >= 100) {
+                  clearInterval(interval);
+                  setShowLoading(false);
+                  return 100;
+                }
+                return prev + Math.random() * 30;
+              });
+            }, 500);
+          }}
+        />
       )}
+
+      {/* Loading Screen */}
+      {showLoading && (
+        <LoadingScreen
+          isLoading={true}
+          progress={loadingProgress}
+          onComplete={() => setShowLoading(false)}
+        />
+      )}
+
+      {/* Game Content - Only show after cinematic and loading */}
+      {!showCinematic && !showLoading && (
+        <>
+          {raceStatus === 'countdown' && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">
+              {Math.ceil(countdown)}
+            </div>
+          )}
       <header className="p-4 bg-black/50 backdrop-blur-md border-b border-white/10 z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="text-center sm:text-left">
           <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Olympic Swimming Arena</h1>
@@ -1362,6 +1533,8 @@ const TIME_OF_DAY_CONFIG = {
       <footer className="p-2 bg-black text-[10px] text-slate-500 text-center uppercase tracking-tighter">
         Click on the water to create splashes! • Drag to rotate • Scroll to zoom
       </footer>
+        </>
+      )}
     </div>
   );
 }
