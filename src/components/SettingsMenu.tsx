@@ -44,13 +44,6 @@ const TIMES_OF_DAY: Record<TimeOfDay, { name: string; description: string }> = {
   night: { name: 'Night', description: 'Artificial lighting' },
 };
 
-type CameraPerspective = 'default' | 'aerial' | 'startingBlock' | 'racing';
-
-const CAMERA_PERSPECTIVES: Record<CameraPerspective, { name: string; description: string }> = {
-  default: { name: 'Default View', description: 'Standard sideline camera' },
-  aerial: { name: 'Aerial View', description: 'Bird\'s eye overview' },
-  startingBlock: { name: 'Starting Block', description: 'From the blocks perspective' },
-  racing: { name: 'Racing View', description: 'Follow the swimmer' },
 };
 
 export const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack, onPlay }) => {
