@@ -132,7 +132,7 @@ export class SwimmerModel {
   }
 
   /**
-   * Create head (improved)
+   * Create head (improved with facial features)
    */
   private createHead(config: SwimmerConfig): void {
     if (!this.mesh) return;
@@ -146,6 +146,47 @@ export class SwimmerModel {
     this.head.position = new BABYLON.Vector3(0, 1.0, 0);
     this.head.material = this.skinMaterial;
     this.head.parent = this.mesh;
+
+    // Neck
+    const neck = BABYLON.MeshBuilder.CreateCylinder(
+      'neck',
+      { height: 0.12, diameter: 0.1, tessellation: 12 },
+      this.scene
+    );
+    neck.position = new BABYLON.Vector3(0, 0.88, 0);
+    neck.material = this.skinMaterial;
+    neck.parent = this.mesh;
+
+    // Eyes (simple spheres for visual clarity)
+    const leftEye = BABYLON.MeshBuilder.CreateSphere(
+      'leftEye',
+      { diameter: 0.035, segments: 8 },
+      this.scene
+    );
+    leftEye.position = new BABYLON.Vector3(-0.065, 1.05, 0.08);
+    leftEye.material = new BABYLON.StandardMaterial('eyeMat', this.scene);
+    (leftEye.material as BABYLON.StandardMaterial).diffuse = new BABYLON.Color3(0.1, 0.1, 0.1);
+    leftEye.parent = this.mesh;
+
+    const rightEye = BABYLON.MeshBuilder.CreateSphere(
+      'rightEye',
+      { diameter: 0.035, segments: 8 },
+      this.scene
+    );
+    rightEye.position = new BABYLON.Vector3(0.065, 1.05, 0.08);
+    rightEye.material = (leftEye.material as BABYLON.StandardMaterial);
+    rightEye.parent = this.mesh;
+
+    // Mouth (simple line representation)
+    const mouth = BABYLON.MeshBuilder.CreateCylinder(
+      'mouth',
+      { height: 0.04, diameter: 0.01, tessellation: 8 },
+      this.scene
+    );
+    mouth.position = new BABYLON.Vector3(0, 0.95, 0.08);
+    mouth.rotation.z = Math.PI / 2;
+    mouth.material = (leftEye.material as BABYLON.StandardMaterial);
+    mouth.parent = this.mesh;
   }
 
   /**
@@ -232,13 +273,14 @@ export class SwimmerModel {
     this.leftForearm.material = this.skinMaterial;
     this.leftForearm.parent = this.mesh;
 
-    // Hand
+    // Hand (improved paddle-like shape)
     this.leftHand = BABYLON.MeshBuilder.CreateBox(
       'leftHand',
-      { width: 0.1, height: 0.08, depth: 0.15 },
+      { width: 0.12, height: 0.08, depth: 0.18 },
       this.scene
     );
     this.leftHand.position = new BABYLON.Vector3(-0.5, 0.0, 0.05);
+    this.leftHand.scaling = new BABYLON.Vector3(1.0, 0.8, 1.1);
     this.leftHand.material = this.skinMaterial;
     this.leftHand.parent = this.mesh;
 
@@ -275,13 +317,14 @@ export class SwimmerModel {
     this.rightForearm.material = this.skinMaterial;
     this.rightForearm.parent = this.mesh;
 
-    // Hand
+    // Hand (improved paddle-like shape)
     this.rightHand = BABYLON.MeshBuilder.CreateBox(
       'rightHand',
-      { width: 0.1, height: 0.08, depth: 0.15 },
+      { width: 0.12, height: 0.08, depth: 0.18 },
       this.scene
     );
     this.rightHand.position = new BABYLON.Vector3(0.5, 0.0, 0.05);
+    this.rightHand.scaling = new BABYLON.Vector3(1.0, 0.8, 1.1);
     this.rightHand.material = this.skinMaterial;
     this.rightHand.parent = this.mesh;
   }
@@ -323,13 +366,14 @@ export class SwimmerModel {
     this.leftCalf.material = this.suitMaterial;
     this.leftCalf.parent = this.mesh;
 
-    // Foot (flipper-like)
+    // Foot (flipper-like with extended surface)
     this.leftFoot = BABYLON.MeshBuilder.CreateBox(
       'leftFoot',
-      { width: 0.18, height: 0.1, depth: 0.28 },
+      { width: 0.22, height: 0.08, depth: 0.32 },
       this.scene
     );
-    this.leftFoot.position = new BABYLON.Vector3(-0.1, -0.88, 0);
+    this.leftFoot.position = new BABYLON.Vector3(-0.1, -0.88, 0.05);
+    this.leftFoot.scaling = new BABYLON.Vector3(1.0, 0.7, 1.15);
     this.leftFoot.material = this.suitMaterial;
     this.leftFoot.parent = this.mesh;
 
@@ -364,13 +408,14 @@ export class SwimmerModel {
     this.rightCalf.material = this.suitMaterial;
     this.rightCalf.parent = this.mesh;
 
-    // Foot (flipper-like)
+    // Foot (flipper-like with extended surface)
     this.rightFoot = BABYLON.MeshBuilder.CreateBox(
       'rightFoot',
-      { width: 0.18, height: 0.1, depth: 0.28 },
+      { width: 0.22, height: 0.08, depth: 0.32 },
       this.scene
     );
-    this.rightFoot.position = new BABYLON.Vector3(0.1, -0.88, 0);
+    this.rightFoot.position = new BABYLON.Vector3(0.1, -0.88, 0.05);
+    this.rightFoot.scaling = new BABYLON.Vector3(1.0, 0.7, 1.15);
     this.rightFoot.material = this.suitMaterial;
     this.rightFoot.parent = this.mesh;
   }
