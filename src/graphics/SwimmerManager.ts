@@ -58,45 +58,55 @@ export class SwimmerManager {
   /**
    * Initialize all 8 swimmers in their lanes
    */
-  public initialize(): void {
+  public async initialize(): Promise<void> {
     logger.log(`SwimmerManager initializing ${this.laneCount} swimmers`);
 
-    for (let lane = 0; lane < this.laneCount; lane++) {
-      this.createSwimmerAtLane(lane);
-    }
+    try {
+      for (let lane = 0; lane < this.laneCount; lane++) {
+        this.createSwimmerAtLane(lane);
+      }
 
-    logger.log(`SwimmerManager initialized with ${this.swimmers.size} swimmers`);
+      logger.log(`SwimmerManager initialized with ${this.swimmers.size} swimmers`);
+    } catch (error) {
+      logger.error(`Failed to initialize SwimmerManager:`, error);
+      throw new Error(`SwimmerManager initialization failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   /**
    * Create a single swimmer at a specific lane
    */
   private createSwimmerAtLane(laneIndex: number): void {
-    // Create swimmer with color palette
-    const config: SwimmerConfig = {
-      suitColor: this.colorPalette[laneIndex],
-      capColor: this.capColors[laneIndex],
-      goggleColor: new BABYLON.Color3(0.1, 0.1, 0.1),
-      scale: 1.0 + (Math.random() * 0.15 - 0.075), // Slight height variation (±7.5%)
-      skinTone: new BABYLON.Color3(0.95, 0.8, 0.7),
-    };
+    try {
+      // Create swimmer with color palette
+      const config: SwimmerConfig = {
+        suitColor: this.colorPalette[laneIndex],
+        capColor: this.capColors[laneIndex],
+        goggleColor: new BABYLON.Color3(0.1, 0.1, 0.1),
+        scale: 1.0 + (Math.random() * 0.15 - 0.075), // Slight height variation (±7.5%)
+        skinTone: new BABYLON.Color3(0.95, 0.8, 0.7),
+      };
 
-    const swimmer = new SwimmerModel(this.scene);
-    const mesh = swimmer.create(config);
+      const swimmer = new SwimmerModel(this.scene);
+      const mesh = swimmer.create(config);
 
-    // Initialize at origin - will be positioned by App.tsx
-    mesh.position = new BABYLON.Vector3(0, 0, 0);
-    mesh.rotation = new BABYLON.Vector3(0, 0, 0);
+      // Initialize at origin - will be positioned by App.tsx
+      mesh.position = new BABYLON.Vector3(0, 0, 0);
+      mesh.rotation = new BABYLON.Vector3(0, 0, 0);
 
-    const instance: SwimmerInstance = {
-      model: swimmer,
-      mesh: mesh,
-      laneIndex: laneIndex,
-      config: config,
-    };
+      const instance: SwimmerInstance = {
+        model: swimmer,
+        mesh: mesh,
+        laneIndex: laneIndex,
+        config: config,
+      };
 
-    this.swimmers.set(laneIndex, instance);
-    logger.log(`Swimmer created for lane ${laneIndex}`);
+      this.swimmers.set(laneIndex, instance);
+      logger.log(`Swimmer created for lane ${laneIndex}`);
+    } catch (error) {
+      logger.error(`Failed to create swimmer for lane ${laneIndex}:`, error);
+      throw error;
+    }
   }
 
   /**

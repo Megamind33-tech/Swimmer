@@ -1319,7 +1319,9 @@ const TIME_OF_DAY_CONFIG = {
 
     // Execute the async initialization
     initializeGame().catch(err => {
-      console.error('Game initialization failed:', err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('Game initialization failed:', errorMessage);
+      console.error('Full error object:', err);
     });
 
     // Return cleanup function

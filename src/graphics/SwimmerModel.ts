@@ -70,34 +70,39 @@ export class SwimmerModel {
    * Create a swimmer model with customizable appearance
    */
   public create(config: SwimmerConfig = {}): BABYLON.TransformNode {
-    const defaults: SwimmerConfig = {
-      suitColor: new BABYLON.Color3(0.0, 0.2, 0.8), // Blue suit
-      capColor: new BABYLON.Color3(1.0, 1.0, 1.0),  // White cap
-      goggleColor: new BABYLON.Color3(0.1, 0.1, 0.1), // Black goggles
-      scale: 1.0,
-      skinTone: new BABYLON.Color3(0.95, 0.8, 0.7), // Natural skin tone
-    };
+    try {
+      const defaults: SwimmerConfig = {
+        suitColor: new BABYLON.Color3(0.0, 0.2, 0.8), // Blue suit
+        capColor: new BABYLON.Color3(1.0, 1.0, 1.0),  // White cap
+        goggleColor: new BABYLON.Color3(0.1, 0.1, 0.1), // Black goggles
+        scale: 1.0,
+        skinTone: new BABYLON.Color3(0.95, 0.8, 0.7), // Natural skin tone
+      };
 
-    const finalConfig = { ...defaults, ...config };
+      const finalConfig = { ...defaults, ...config };
 
-    // Create main transform node for the swimmer
-    this.mesh = new BABYLON.TransformNode('swimmer', this.scene);
-    this.mesh.scaling = new BABYLON.Vector3(finalConfig.scale!, finalConfig.scale!, finalConfig.scale!);
+      // Create main transform node for the swimmer
+      this.mesh = new BABYLON.TransformNode('swimmer', this.scene);
+      this.mesh.scaling = new BABYLON.Vector3(finalConfig.scale!, finalConfig.scale!, finalConfig.scale!);
 
-    // Create materials
-    this.createMaterials(finalConfig);
+      // Create materials
+      this.createMaterials(finalConfig);
 
-    // Build body parts
-    this.createHead(finalConfig);
-    this.createTorso(finalConfig);
-    this.createPelvis(finalConfig);
-    this.createArms(finalConfig);
-    this.createLegs(finalConfig);
-    this.createCap(finalConfig);
-    this.createGoggles(finalConfig);
+      // Build body parts
+      this.createHead(finalConfig);
+      this.createTorso(finalConfig);
+      this.createPelvis(finalConfig);
+      this.createArms(finalConfig);
+      this.createLegs(finalConfig);
+      this.createCap(finalConfig);
+      this.createGoggles(finalConfig);
 
-    logger.log('Refined swimmer model created');
-    return this.mesh;
+      logger.log('Refined swimmer model created');
+      return this.mesh;
+    } catch (error) {
+      logger.error('Failed to create swimmer model:', error);
+      throw new Error(`SwimmerModel creation failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   /**
