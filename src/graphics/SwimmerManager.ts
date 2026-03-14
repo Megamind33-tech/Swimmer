@@ -72,24 +72,21 @@ export class SwimmerManager {
    * Create a single swimmer at a specific lane
    */
   private createSwimmerAtLane(laneIndex: number): void {
-    // Calculate lane position
-    const laneX = -this.poolWidth / 2 + (laneIndex * this.poolWidth) / (this.laneCount - 1);
-
     // Create swimmer with color palette
     const config: SwimmerConfig = {
       suitColor: this.colorPalette[laneIndex],
       capColor: this.capColors[laneIndex],
       goggleColor: new BABYLON.Color3(0.1, 0.1, 0.1),
-      scale: 1.0 + (Math.random() * 0.2 - 0.1), // Slight height variation
+      scale: 1.0 + (Math.random() * 0.15 - 0.075), // Slight height variation (±7.5%)
       skinTone: new BABYLON.Color3(0.95, 0.8, 0.7),
     };
 
     const swimmer = new SwimmerModel(this.scene);
     const mesh = swimmer.create(config);
 
-    // Position swimmer in lane at starting position (ready to dive)
-    mesh.position = new BABYLON.Vector3(laneX, 0.2, -24);
-    mesh.rotation = new BABYLON.Vector3(Math.PI / 6, 0, 0); // Lean forward diving position
+    // Initialize at origin - will be positioned by App.tsx
+    mesh.position = new BABYLON.Vector3(0, 0, 0);
+    mesh.rotation = new BABYLON.Vector3(0, 0, 0);
 
     const instance: SwimmerInstance = {
       model: swimmer,
@@ -99,7 +96,7 @@ export class SwimmerManager {
     };
 
     this.swimmers.set(laneIndex, instance);
-    logger.log(`Swimmer ${laneIndex} created at lane ${laneIndex}`);
+    logger.log(`Swimmer created for lane ${laneIndex}`);
   }
 
   /**

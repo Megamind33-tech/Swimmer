@@ -766,9 +766,18 @@ const TIME_OF_DAY_CONFIG = {
     const swimmers: any[] = [];
     swimmersData.forEach((data, i) => {
       const swimmerInstance = swimmerManager.getSwimmer(i);
-      if (!swimmerInstance) return;
+      if (!swimmerInstance || !swimmerInstance.mesh) {
+        console.error(`Failed to get swimmer at lane ${i}`);
+        return;
+      }
 
       const swimmer = swimmerInstance.mesh;
+
+      // Validate mesh has position and rotation
+      if (!swimmer.position || !swimmer.rotation) {
+        console.error(`Swimmer mesh invalid at lane ${i}`);
+        return;
+      }
 
       // Initial position on starting block
       swimmer.position.x = -poolWidth / 2 + (data.lane - 0.5) * laneWidth;
@@ -781,9 +790,13 @@ const TIME_OF_DAY_CONFIG = {
 
       // Add all swimmer body meshes to water render list
       const bodyMeshes = swimmerManager.getSwimmerBodyMeshes(i);
-      bodyMeshes.forEach((mesh) => {
-        water.addToRenderList(mesh);
-      });
+      if (bodyMeshes && bodyMeshes.length > 0) {
+        bodyMeshes.forEach((mesh) => {
+          if (mesh) {
+            water.addToRenderList(mesh);
+          }
+        });
+      }
 
       swimmers.push({
         mesh: swimmer,
@@ -799,6 +812,11 @@ const TIME_OF_DAY_CONFIG = {
         diveTime: 0
       });
     });
+
+    // Verify we have 8 swimmers
+    if (swimmers.length !== 8) {
+      console.warn(`Expected 8 swimmers but got ${swimmers.length}`);
+    }
 
     let raceTime = 0;
     let raceActive = false;
@@ -1038,10 +1056,12 @@ const TIME_OF_DAY_CONFIG = {
         if (replayFrameRef.current < recordedDataRef.current.length) {
             const frame = recordedDataRef.current[replayFrameRef.current];
             swimmers.forEach((s, i) => {
-                s.mesh.position.x = frame[i].x;
-                s.mesh.position.y = frame[i].y;
-                s.mesh.position.z = frame[i].z;
-                s.mesh.rotation.x = frame[i].rotationX;
+                if (frame && frame[i] && s && s.mesh) {
+                    s.mesh.position.x = frame[i].x;
+                    s.mesh.position.y = frame[i].y;
+                    s.mesh.position.z = frame[i].z;
+                    s.mesh.rotation.x = frame[i].rotationX;
+                }
             });
             replayFrameRef.current++;
         } else {
@@ -1088,60 +1108,63 @@ const TIME_OF_DAY_CONFIG = {
             }
 
             swimmers.forEach(s => {
-            if (!s.finished) {
-                allFinished = false;
-                
-                if (s.state === 'diving') {
-                s.diveTime += dt;
-                const diveDuration = 0.6; // 0.6 seconds dive
-                
-                if (s.diveTime < diveDuration) {
-                    const t = s.diveTime / diveDuration;
-                    
-                    // Start: z = -poolLength/2 - 1.2, y = 1.2
-                    // End: z = -poolLength/2 + 1.0, y = -0.2
-                    const startZ = -poolLength / 2 - 1.2;
-                    const endZ = -poolLength / 2 + 1.0;
-                    const startY = 1.2;
-                    const endY = -0.2;
-                    
-                    s.z = startZ + (endZ - startZ) * t;
-                    // Parabola for Y: goes up slightly then down
-                    const height = 0.8;
-                    s.y = startY + (endY - startY) * t + Math.sin(t * Math.PI) * height;
-                    
-                    // Rotation: lean forward to flat
-                    s.mesh.rotation.x = Math.PI / 8 + (Math.PI / 2 - Math.PI / 8) * t;
-                    
-                    s.mesh.position.z = s.z;
-                    s.mesh.position.y = s.y;
-                } else {
-                    // Dive finished, enter water
-                    s.state = 'swimming';
-                    s.y = -0.2;
-                    s.mesh.position.y = s.y;
-                    s.mesh.rotation.x = Math.PI / 2;
-                    createInteractiveSplash(s.mesh.position); // Big splash on entry
-                }
-                } else if (s.state === 'swimming') {
-                s.z += s.dir * s.speed * dt;
-                
-                // Finish line check (one lap race for simplicity)
-                if (s.z >= poolLength / 2 - 2) {
-                    s.z = poolLength / 2 - 2;
-                    s.finished = true;
-                    s.time = raceTime;
-                    s.rank = swimmers.filter(sw => sw.finished).length;
-                }
-                s.mesh.position.z = s.z;
+              if (!s || !s.mesh || !s.mesh.position || !s.mesh.rotation) return;
 
-                // Generate swimmer ripples and splashes periodically
-                if (time - lastRippleTime > 0.4) {
-                    createRipple(s.mesh.position);
-                    createInteractiveSplash(s.mesh.position.add(new Vector3(0, 0, -s.dir * 0.6)));
-                }
-                }
-            }
+              if (!s.finished) {
+                  allFinished = false;
+
+                  if (s.state === 'diving') {
+                    s.diveTime += dt;
+                    const diveDuration = 0.6; // 0.6 seconds dive
+
+                    if (s.diveTime < diveDuration) {
+                        const t = s.diveTime / diveDuration;
+
+                        // Start: z = -poolLength/2 - 1.2, y = 1.2
+                        // End: z = -poolLength/2 + 1.0, y = -0.2
+                        const startZ = -poolLength / 2 - 1.2;
+                        const endZ = -poolLength / 2 + 1.0;
+                        const startY = 1.2;
+                        const endY = -0.2;
+
+                        s.z = startZ + (endZ - startZ) * t;
+                        // Parabola for Y: goes up slightly then down
+                        const height = 0.8;
+                        s.y = startY + (endY - startY) * t + Math.sin(t * Math.PI) * height;
+
+                        // Rotation: lean forward to flat
+                        s.mesh.rotation.x = Math.PI / 8 + (Math.PI / 2 - Math.PI / 8) * t;
+
+                        s.mesh.position.z = s.z;
+                        s.mesh.position.y = s.y;
+                    } else {
+                        // Dive finished, enter water
+                        s.state = 'swimming';
+                        s.y = -0.2;
+                        s.mesh.position.y = s.y;
+                        s.mesh.rotation.x = Math.PI / 2;
+                        createInteractiveSplash(s.mesh.position); // Big splash on entry
+                    }
+                  } else if (s.state === 'swimming') {
+                    s.z += s.dir * s.speed * dt;
+
+                    // Finish line check (one lap race for simplicity)
+                    if (s.z >= poolLength / 2 - 2) {
+                        s.z = poolLength / 2 - 2;
+                        s.finished = true;
+                        s.time = raceTime;
+                        s.rank = swimmers.filter(sw => sw.finished).length;
+                    }
+                    s.mesh.position.z = s.z;
+
+                    // Generate swimmer ripples and splashes periodically
+                    if (time - lastRippleTime > 0.4) {
+                        createRipple(s.mesh.position);
+                        const splashPos = new Vector3(s.mesh.position.x, s.mesh.position.y, s.mesh.position.z - s.dir * 0.6);
+                        createInteractiveSplash(splashPos);
+                    }
+                  }
+              }
             });
 
             if (time - lastRippleTime > 0.4) {
