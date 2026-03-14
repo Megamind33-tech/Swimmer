@@ -17,9 +17,11 @@ export class EnhancedSwimmerManager {
   private swimmerProfiles: Map<number, SwimmerProfile> = new Map();
   private warmupActive: boolean = false;
   private warmupStartTime: number = 0;
+  private laneCount: number;
 
   constructor(scene: BABYLON.Scene, poolWidth: number, laneCount: number) {
     this.scene = scene;
+    this.laneCount = laneCount;
     this.swimmerManager = new SwimmerManager(scene, poolWidth, laneCount);
     this.personalityManager = new SwimmerPersonalityManager(scene);
     this.initializeProfiles();
@@ -45,7 +47,7 @@ export class EnhancedSwimmerManager {
       logger.log('SwimmerManager initialized');
 
       // Apply personality to each swimmer
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < this.laneCount; i++) {
         const profile = this.swimmerProfiles.get(i);
         if (profile) {
           this.applyPersonalityToSwimmer(i, profile);
@@ -90,7 +92,7 @@ export class EnhancedSwimmerManager {
     this.warmupStartTime = performance.now() / 1000;
 
     // Start warm-up for each swimmer
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < this.laneCount; i++) {
       this.personalityManager.startWarmup(i);
     }
 
@@ -111,7 +113,7 @@ export class EnhancedSwimmerManager {
     let totalProgress = 0;
     let completeCount = 0;
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < this.laneCount; i++) {
       const result = this.personalityManager.updateWarmup(i, 0.016); // ~60fps deltaTime
       totalProgress += result.progress;
 
@@ -120,8 +122,8 @@ export class EnhancedSwimmerManager {
       }
     }
 
-    const avgProgress = totalProgress / 8;
-    const allComplete = completeCount === 8;
+    const avgProgress = totalProgress / this.laneCount;
+    const allComplete = completeCount === this.laneCount;
 
     if (allComplete) {
       this.warmupActive = false;

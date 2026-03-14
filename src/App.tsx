@@ -833,7 +833,7 @@ const TIME_OF_DAY_CONFIG = {
     };
 
     // Initialize EnhancedSwimmerManager with personality system
-    enhancedSwimmerManagerRef.current = new EnhancedSwimmerManager(scene, poolWidth, 8);
+    enhancedSwimmerManagerRef.current = new EnhancedSwimmerManager(scene, poolWidth, 6);
     try {
       await enhancedSwimmerManagerRef.current.initialize();
       console.log('EnhancedSwimmerManager initialized successfully');
@@ -908,9 +908,9 @@ const TIME_OF_DAY_CONFIG = {
       });
     });
 
-    // Verify we have 8 swimmers
-    if (swimmers.length !== 8) {
-      console.warn(`Expected 8 swimmers but got ${swimmers.length}`);
+    // Verify we have 6 swimmers
+    if (swimmers.length !== 6) {
+      console.warn(`Expected 6 swimmers but got ${swimmers.length}`);
     }
     swimmersRef.current = swimmers;
 
