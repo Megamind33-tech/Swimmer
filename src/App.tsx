@@ -845,12 +845,10 @@ const TIME_OF_DAY_CONFIG = {
     // Get base swimmer manager for compatibility
     const swimmerManager = enhancedSwimmerManagerRef.current.getBaseSwimmerManager();
 
-    // Swimmers Data - indexed by lane index (0-7)
+    // Swimmers Data - indexed by lane index (0-5)
     const swimmersData = [
       { name: "GUY", lane: 1, speed: 2.30, color: new Color3(0.5, 0.5, 0.5) },
       { name: "CHALMERS", lane: 2, speed: 2.35, color: new Color3(1, 0.8, 0) },
-      { name: "MILAK", lane: 3, speed: 2.38, color: new Color3(0.2, 0.8, 0.2) },
-      { name: "PHELPS", lane: 4, speed: 2.45, color: new Color3(1, 0.4, 0) },
       { name: "DRESSEL", lane: 5, speed: 2.42, color: new Color3(0, 0.5, 1) },
       { name: "POPOVICI", lane: 6, speed: 2.40, color: new Color3(0.8, 0.2, 0.8) },
       { name: "LE CLOS", lane: 7, speed: 2.32, color: new Color3(0.1, 0.1, 0.1) },
