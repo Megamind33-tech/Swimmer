@@ -233,6 +233,8 @@ const TIME_OF_DAY_CONFIG = {
   const environmentManagerRef = useRef<EnvironmentManager | null>(null);
   const renderingOptimizerRef = useRef<RenderingOptimizer | null>(null);
   const engineRef = useRef<any>(null);
+  const swimmersRef = useRef<any[]>([]);
+  const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!sceneRef.current || !lightRef.current) return;
@@ -303,13 +305,20 @@ const TIME_OF_DAY_CONFIG = {
       setCountdown(0);
       raceActiveRef.current = true;
       setRaceStatus('racing');
-      swimmers.forEach(s => {
+      swimmersRef.current.forEach(s => {
         s.state = 'diving';
         s.diveTime = 0;
       });
     }, 1500);
     return () => clearTimeout(timer);
   }, [gameStarted]);
+
+  // Cleanup loading interval on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -805,8 +814,9 @@ const TIME_OF_DAY_CONFIG = {
       rippleMat.disableLighting = true;
       ripple.material = rippleMat;
 
-      // Expand ripple
+      // Expand ripple and dispose mesh + material when done
       Animation.CreateAndStartAnimation('rippleScale', ripple, 'scaling', 60, 60, new Vector3(1, 0.05, 1), new Vector3(6, 0.05, 6), 0, undefined, () => {
+         rippleMat.dispose();
          ripple.dispose();
       });
       // Fade out ripple
@@ -900,6 +910,7 @@ const TIME_OF_DAY_CONFIG = {
     if (swimmers.length !== 8) {
       console.warn(`Expected 8 swimmers but got ${swimmers.length}`);
     }
+    swimmersRef.current = swimmers;
 
     let raceTime = 0;
     let raceActive = false;
@@ -1143,10 +1154,15 @@ const TIME_OF_DAY_CONFIG = {
       // Update warm-up if active
       if (warmupActive && enhancedSwimmerManagerRef.current) {
         const { allComplete, avgProgress } = enhancedSwimmerManagerRef.current.updateWarmup();
-        setWarmupProgress(avgProgress);
+        setWarmupProgress(Math.round(avgProgress));
         if (allComplete) {
           setWarmupActive(false);
-          setRaceStatus('countdown');
+          raceActiveRef.current = true;
+          setRaceStatus('racing');
+          swimmersRef.current.forEach(s => {
+            s.state = 'diving';
+            s.diveTime = 0;
+          });
         }
       }
 
@@ -1249,9 +1265,9 @@ const TIME_OF_DAY_CONFIG = {
                 lastRippleTime = time;
             }
 
-            if (allFinished) {
+            if (allFinished && raceActiveRef.current) {
             raceActiveRef.current = false;
-            countdownRef.current = 0; // Ensure it stays finished
+            countdownRef.current = 0;
             setRaceStatus('finished');
             }
         }
@@ -1342,12 +1358,14 @@ const TIME_OF_DAY_CONFIG = {
         <CinematicOpening
           onComplete={() => {
             setShowCinematic(false);
+            setLoadingProgress(0);
             setShowLoading(true);
-            // Simulate loading
-            const interval = setInterval(() => {
+            if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+            loadingIntervalRef.current = setInterval(() => {
               setLoadingProgress(prev => {
                 if (prev >= 100) {
-                  clearInterval(interval);
+                  clearInterval(loadingIntervalRef.current!);
+                  loadingIntervalRef.current = null;
                   setShowLoading(false);
                   return 100;
                 }
