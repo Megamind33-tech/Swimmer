@@ -144,7 +144,7 @@ export class RenderingOptimizer {
    * Disable shadows globally
    */
   private disableShadows(): void {
-    this.scene.getLights().forEach((light) => {
+    this.scene.lights.forEach((light) => {
       light.shadowEnabled = false;
     });
   }
@@ -162,7 +162,7 @@ export class RenderingOptimizer {
    * Limit number of active lights
    */
   private limitLights(maxLights: number): void {
-    const lights = this.scene.getLights();
+    const lights = this.scene.lights;
     for (let i = maxLights; i < lights.length; i++) {
       lights[i].setEnabled(false);
     }
