@@ -368,7 +368,8 @@ const TIME_OF_DAY_CONFIG = {
 
     const engine = new Engine(canvasRef.current, true);
     sceneRef.current = new Scene(engine);
-    sceneRef.current.clearColor = TIME_OF_DAY_CONFIG[timeOfDay].skyColor;
+    // Use venue sky color for visual distinction between arenas; time-of-day effect can override on change
+    sceneRef.current.clearColor = v.skyColor;
     const scene = sceneRef.current;
     
     // Fog
@@ -1212,6 +1213,10 @@ const TIME_OF_DAY_CONFIG = {
     // Register pool arena with EnvironmentManager for proper scene management
     if (environmentManagerRef.current) {
       environmentManagerRef.current.registerPoolArena(poolArenaNode);
+      // Switch to the selected environment if it's not the default pool
+      if (currentEnvironment !== 'pool') {
+        environmentManagerRef.current.switchToEnvironment(currentEnvironment);
+      }
     }
 
     let time = 0;
