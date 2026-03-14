@@ -1444,11 +1444,6 @@ const TIME_OF_DAY_CONFIG = {
             />
           )}
 
-          {raceStatus === 'countdown' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">
-              {Math.ceil(countdown)}
-            </div>
-          )}
       
       <main className="flex-1 relative min-h-0">
         <canvas 
