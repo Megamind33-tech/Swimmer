@@ -1430,11 +1430,7 @@ const TIME_OF_DAY_CONFIG = {
               {Math.ceil(countdown)}
             </div>
           )}
-      <header className="p-4 bg-black/50 backdrop-blur-md border-b border-white/10 z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="text-center sm:text-left">
-          <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Olympic Swimming Arena</h1>
-          <p className="text-[10px] sm:text-xs text-slate-400 font-mono uppercase tracking-widest">3D Simulation • Babylon.js</p>
-        </div>
+      <header className="p-4 bg-black/50 backdrop-blur-md border-b border-white/10 z-10 flex flex-row justify-end items-center gap-4">
         <div className="flex gap-2 sm:gap-4 text-[10px] sm:text-xs text-slate-300 items-center">
           <button
             onClick={() => {
@@ -1510,34 +1506,8 @@ const TIME_OF_DAY_CONFIG = {
           id="renderCanvas"
         />
         
-        <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 p-3 sm:p-4 bg-black/60 backdrop-blur-lg rounded-2xl border border-white/10 w-full max-w-[200px] sm:max-w-xs pointer-events-none">
-          <h2 className="text-xs sm:text-sm font-semibold text-white mb-1 italic serif">Pool Specifications</h2>
-          <div className="space-y-1 sm:space-y-2 text-[10px] sm:text-xs text-slate-300">
-            <div className="flex justify-between border-b border-white/5 pb-1">
-              <span>Length</span>
-              <span className="font-mono">50m</span>
-            </div>
-            <div className="flex justify-between border-b border-white/5 pb-1">
-              <span>Width</span>
-              <span className="font-mono">25m</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Water Temp</span>
-              <span className="font-mono">26°C</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
-          <div className="p-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 text-white hover:bg-white/10 transition-colors cursor-help">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          </div>
-        </div>
       </main>
 
-      <footer className="p-2 bg-black text-[10px] text-slate-500 text-center uppercase tracking-tighter">
-        Click on the water to create splashes! • Drag to rotate • Scroll to zoom
-      </footer>
         </>
       )}
     </div>
