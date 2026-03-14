@@ -90,17 +90,6 @@ export const CinematicOpening: React.FC<CinematicOpeningProps> = ({ onComplete }
             <div className="cover-text-container">
               <h2 className="game-title">SWIM 26</h2>
               <p className="game-subtitle">Championship Edition</p>
-              <p className="featured-athlete">Featuring Mia Phiri</p>
-            </div>
-
-            <div className="mia-portrait-placeholder">
-              <div className="portrait-frame">
-                <div className="portrait-text">MIRI PHIRI</div>
-                <div className="portrait-stats">
-                  <p>World Record Holder</p>
-                  <p>Olympic Champion</p>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -295,66 +284,6 @@ export const CinematicOpening: React.FC<CinematicOpeningProps> = ({ onComplete }
           color: #ffd700;
         }
 
-        .featured-athlete {
-          font-size: 2rem;
-          font-weight: 700;
-          margin: 0;
-          letter-spacing: 2px;
-          animation: fadeIn 1.5s ease-out 0.5s both;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        .mia-portrait-placeholder {
-          position: absolute;
-          right: 10%;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 2;
-          animation: slideInRight 1s ease-out;
-        }
-
-        @keyframes slideInRight {
-          from {
-            transform: translateY(-50%) translateX(100px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(-50%) translateX(0);
-            opacity: 1;
-          }
-        }
-
-        .portrait-frame {
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(10px);
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          padding: 20px;
-          border-radius: 10px;
-          text-align: center;
-          min-width: 200px;
-        }
-
-        .portrait-text {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #fff;
-          margin: 0 0 10px 0;
-          letter-spacing: 2px;
-        }
-
-        .portrait-stats {
-          font-size: 0.9rem;
-          color: #ddd;
-          line-height: 1.6;
-        }
-
-        .portrait-stats p {
-          margin: 5px 0;
-        }
 
         .skip-button {
           position: absolute;

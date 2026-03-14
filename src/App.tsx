@@ -37,6 +37,7 @@ import RenderingOptimizer from './graphics/RenderingOptimizer';
 import OlympicUI from './components/OlympicUI';
 import CinematicOpening from './components/CinematicOpening';
 import LoadingScreen from './components/LoadingScreen';
+import MainMenu from './components/MainMenu';
 
 type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 
@@ -205,7 +206,9 @@ const TIME_OF_DAY_CONFIG = {
   // Cinematic and loading states
   const [showCinematic, setShowCinematic] = useState(true);
   const [showLoading, setShowLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
   const cameraPerspectiveRef = useRef(cameraPerspective);
   useEffect(() => {
     cameraPerspectiveRef.current = cameraPerspective;
@@ -1350,12 +1353,26 @@ const TIME_OF_DAY_CONFIG = {
         <LoadingScreen
           isLoading={true}
           progress={loadingProgress}
-          onComplete={() => setShowLoading(false)}
+          onComplete={() => {
+            setShowLoading(false);
+            setShowMenu(true);
+          }}
         />
       )}
 
-      {/* Game Content - Only show after cinematic and loading */}
-      {!showCinematic && !showLoading && (
+      {/* Main Menu */}
+      {showMenu && !gameStarted && (
+        <MainMenu
+          onPlay={(mode) => {
+            setGameMode(mode);
+            setShowMenu(false);
+            setGameStarted(true);
+          }}
+        />
+      )}
+
+      {/* Game Content - Only show after menu starts game */}
+      {gameStarted && (
         <>
           {raceStatus === 'countdown' && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">

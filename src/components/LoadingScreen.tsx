@@ -71,84 +71,44 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         {/* Overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/70"></div>
 
-        {/* Content Container - Lower Right Position */}
-        <div className="relative z-10 text-right max-w-lg mr-12 mb-20">
+        {/* Content Container - Center Position */}
+        <div className="relative z-10 text-center">
 
-          {/* Loading Status - With Athlete Name During Assets Phase */}
-          <div className="mb-12">
+          {/* Loading Status */}
+          <div className="mb-8">
             {phase === 'assets' && (
-              <div className="animate-fade-in">
-                <h3 className="text-sm md:text-base text-slate-400 uppercase tracking-widest mb-2">
-                  Featured Champion
-                </h3>
-                <h2 className="text-3xl md:text-4xl font-bold text-cyan-400 mb-1">
-                  MIA PHIRI
-                </h2>
-                <p className="text-slate-300 text-lg mb-6">
-                  Loading Assets & Textures
-                </p>
-              </div>
+              <p className="text-slate-300 text-sm mb-6">
+                Loading...
+              </p>
             )}
             {phase === 'models' && (
-              <p className="text-slate-300 text-lg mb-6 animate-pulse">
-                Initializing 3D Models & Physics
+              <p className="text-slate-300 text-sm mb-6 animate-pulse">
+                Initializing...
               </p>
             )}
             {phase === 'complete' && (
-              <p className="text-green-400 text-lg mb-6 font-semibold">
-                Ready to Compete
+              <p className="text-green-400 text-sm mb-6 font-semibold">
+                Ready
               </p>
             )}
 
             {/* Progress Bar Container */}
-            <div className="relative h-3 bg-slate-800/50 rounded-full overflow-hidden backdrop-blur-sm border border-slate-700/50 w-full">
+            <div className="relative h-2 bg-slate-800/50 rounded-full overflow-hidden backdrop-blur-sm border border-slate-700/50 w-48">
               {/* Animated Background */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
 
               {/* Progress Fill */}
               <div
-                className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-full transition-all duration-300 ease-out relative overflow-hidden"
+                className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${displayProgress}%` }}
-              >
-                {/* Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
-              </div>
+              />
             </div>
 
             {/* Percentage Display */}
-            <div className="mt-4 flex items-center justify-between text-sm">
-              <span className="text-slate-400">
-                {phase === 'assets' ? '📦' : phase === 'models' ? '🎮' : '✓'}
-                {' '}
-                {['Assets', 'Models', 'Ready'][phase === 'assets' ? 0 : phase === 'models' ? 1 : 2]}
-              </span>
-              <span className="font-mono text-cyan-400 font-semibold">
-                {Math.round(displayProgress)}%
-              </span>
+            <div className="mt-3 text-center text-xs text-slate-400">
+              {Math.round(displayProgress)}%
             </div>
           </div>
-
-          {/* Stats Display - Right Aligned */}
-          <div className="space-y-3 text-right">
-            <div className="inline-block p-3 bg-slate-800/30 rounded-lg backdrop-blur-sm border border-slate-700/30">
-              <p className="text-slate-400 text-xs uppercase tracking-widest mb-1">Peak Performance</p>
-              <p className="text-cyan-400 font-bold text-lg">2.48 m/s</p>
-            </div>
-          </div>
-
-          {/* Footer Text */}
-          <div className="mt-12 text-slate-500 text-xs text-right">
-            <p>Powered by Babylon.js 3D Engine</p>
-            <p className="mt-1">© 2026 Mosty Games</p>
-          </div>
-        </div>
-
-        {/* SWIM 26 Logo - Top Left */}
-        <div className="absolute top-8 left-8 z-20">
-          <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-            SWIM <span className="text-cyan-400">26</span>
-          </h1>
-          <p className="text-xs text-slate-400 uppercase tracking-widest mt-1">Championship Edition</p>
         </div>
       </div>
 
