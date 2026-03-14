@@ -1143,10 +1143,16 @@ const TIME_OF_DAY_CONFIG = {
                         s.y = -0.2;
                         s.mesh.position.y = s.y;
                         s.mesh.rotation.x = Math.PI / 2;
+                        // Update to swimming pose
+                        swimmerManager.updateSwimmerAnimation(swimmers.indexOf(s), 'freestyle');
                         createInteractiveSplash(s.mesh.position); // Big splash on entry
                     }
                   } else if (s.state === 'swimming') {
                     s.z += s.dir * s.speed * dt;
+
+                    // Oscillate swimming pose for animation effect
+                    const swimPulse = Math.sin(raceTime * 4) * 0.15;
+                    s.mesh.rotation.x = -Math.PI / 6 + swimPulse;
 
                     // Finish line check (one lap race for simplicity)
                     if (s.z >= poolLength / 2 - 2) {

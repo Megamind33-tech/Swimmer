@@ -555,6 +555,106 @@ export class SwimmerModel {
   }
 
   /**
+   * Set pose for diving animation
+   */
+  public setPoseDiving(): void {
+    if (!this.mesh) return;
+
+    // Lean forward diving position
+    this.mesh.rotation = new BABYLON.Vector3(Math.PI / 6, 0, 0);
+
+    if (this.leftUpperArm) this.leftUpperArm.rotation.z = Math.PI / 4;
+    if (this.rightUpperArm) this.rightUpperArm.rotation.z = -Math.PI / 4;
+
+    if (this.leftThigh) this.leftThigh.rotation.z = -Math.PI / 8;
+    if (this.rightThigh) this.rightThigh.rotation.z = Math.PI / 8;
+  }
+
+  /**
+   * Set pose for freestyle swimming
+   */
+  public setPoseFreestyle(): void {
+    if (!this.mesh) return;
+
+    // Horizontal swimming position
+    this.mesh.rotation = new BABYLON.Vector3(-Math.PI / 6, 0, 0);
+
+    if (this.leftUpperArm) this.leftUpperArm.rotation.z = Math.PI / 3;
+    if (this.rightUpperArm) this.rightUpperArm.rotation.z = -Math.PI / 3;
+
+    // Flutter kick
+    if (this.leftThigh) this.leftThigh.rotation.z = -Math.PI / 12;
+    if (this.rightThigh) this.rightThigh.rotation.z = Math.PI / 12;
+  }
+
+  /**
+   * Set pose for butterfly swimming
+   */
+  public setPoseButterfly(): void {
+    if (!this.mesh) return;
+
+    // Horizontal position
+    this.mesh.rotation = new BABYLON.Vector3(-Math.PI / 8, 0, 0);
+
+    // Synchronized arm movement
+    if (this.leftUpperArm) this.leftUpperArm.rotation.z = Math.PI / 2.5;
+    if (this.rightUpperArm) this.rightUpperArm.rotation.z = -Math.PI / 2.5;
+
+    // Dolphin kick
+    if (this.leftThigh) this.leftThigh.rotation.z = -Math.PI / 6;
+    if (this.rightThigh) this.rightThigh.rotation.z = -Math.PI / 6;
+  }
+
+  /**
+   * Set pose for breaststroke swimming
+   */
+  public setPoseBreaststroke(): void {
+    if (!this.mesh) return;
+
+    // Horizontal position
+    this.mesh.rotation = new BABYLON.Vector3(-Math.PI / 8, 0, 0);
+
+    // Arms extended for pull
+    if (this.leftUpperArm) this.leftUpperArm.rotation.z = Math.PI / 5;
+    if (this.rightUpperArm) this.rightUpperArm.rotation.z = -Math.PI / 5;
+
+    // Frog kick
+    if (this.leftThigh) this.leftThigh.rotation.z = -Math.PI / 4;
+    if (this.rightThigh) this.rightThigh.rotation.z = Math.PI / 4;
+  }
+
+  /**
+   * Set pose for backstroke swimming
+   */
+  public setPoseBackstroke(): void {
+    if (!this.mesh) return;
+
+    // Back position - rotated back
+    this.mesh.rotation = new BABYLON.Vector3(Math.PI / 3, 0, 0);
+
+    // Arms extended upward
+    if (this.leftUpperArm) this.leftUpperArm.rotation.z = -Math.PI / 2;
+    if (this.rightUpperArm) this.rightUpperArm.rotation.z = Math.PI / 2;
+
+    // Flutter kick
+    if (this.leftThigh) this.leftThigh.rotation.z = Math.PI / 12;
+    if (this.rightThigh) this.rightThigh.rotation.z = -Math.PI / 12;
+  }
+
+  /**
+   * Set pose for turning/flipping
+   */
+  public setPoseTurning(): void {
+    if (!this.mesh) return;
+
+    // Compact rotation position
+    this.mesh.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
+
+    if (this.leftThigh) this.leftThigh.rotation.z = -Math.PI / 3;
+    if (this.rightThigh) this.rightThigh.rotation.z = Math.PI / 3;
+  }
+
+  /**
    * Dispose of all meshes
    */
   public dispose(): void {

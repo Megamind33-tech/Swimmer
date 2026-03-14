@@ -138,29 +138,38 @@ export class SwimmerManager {
     animationState: 'idle' | 'diving' | 'freestyle' | 'butterfly' | 'breaststroke' | 'backstroke' | 'turning' | 'finished'
   ): void {
     const swimmer = this.swimmers.get(laneIndex);
-    if (!swimmer || !swimmer.mesh) return;
+    if (!swimmer || !swimmer.model) return;
 
-    // Apply basic rotations based on stroke
+    // Use pose methods for better animations
     switch (animationState) {
       case 'idle':
-        swimmer.mesh.rotation = new BABYLON.Vector3(0, 0, 0);
+        // Default pose
+        if (swimmer.mesh) {
+          swimmer.mesh.rotation = new BABYLON.Vector3(0, 0, 0);
+        }
         break;
       case 'diving':
-        swimmer.mesh.rotation = new BABYLON.Vector3(Math.PI / 4, 0, 0);
+        swimmer.model.setPoseDiving();
         break;
       case 'freestyle':
+        swimmer.model.setPoseFreestyle();
+        break;
       case 'butterfly':
+        swimmer.model.setPoseButterfly();
+        break;
       case 'breaststroke':
-        swimmer.mesh.rotation = new BABYLON.Vector3(-Math.PI / 6, 0, 0);
+        swimmer.model.setPoseBreaststroke();
         break;
       case 'backstroke':
-        swimmer.mesh.rotation = new BABYLON.Vector3(Math.PI / 3, 0, 0);
+        swimmer.model.setPoseBackstroke();
         break;
       case 'turning':
-        swimmer.mesh.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
+        swimmer.model.setPoseTurning();
         break;
       case 'finished':
-        swimmer.mesh.rotation = new BABYLON.Vector3(0, 0, 0);
+        if (swimmer.mesh) {
+          swimmer.mesh.rotation = new BABYLON.Vector3(0, 0, 0);
+        }
         break;
     }
   }
