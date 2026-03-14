@@ -749,7 +749,13 @@ const TIME_OF_DAY_CONFIG = {
 
     // Initialize SwimmerManager for 3D models
     const swimmerManager = new SwimmerManager(scene, poolWidth, 8);
-    swimmerManager.initialize();
+    try {
+      swimmerManager.initialize();
+      console.log('SwimmerManager initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize SwimmerManager:', error);
+      throw error;
+    }
 
     // Swimmers Data
     const swimmersData = [
