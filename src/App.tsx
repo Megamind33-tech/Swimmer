@@ -1386,6 +1386,10 @@ const TIME_OF_DAY_CONFIG = {
           onPlay={() => {
             setShowMenu(false);
             setGameStarted(true);
+            // Auto-start race countdown
+            countdownRef.current = 3.0;
+            setCountdown(3.0);
+            setRaceStatus('countdown');
           }}
           onSettings={() => {
             setShowSettings(true);
