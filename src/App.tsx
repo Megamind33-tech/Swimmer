@@ -25,6 +25,7 @@ import {
   Animation,
   GlowLayer,
   CSG,
+  TransformNode,
 } from '@babylonjs/core';
 import { WaterMaterial } from '@babylonjs/materials';
 import useGameManager from './hooks/useGameManager';
@@ -421,7 +422,7 @@ const TIME_OF_DAY_CONFIG = {
     environmentManagerRef.current = new EnvironmentManager(scene);
 
     // Create pool arena node to be managed by EnvironmentManager
-    const poolArenaNode = new BABYLON.TransformNode('poolArena', scene);
+    const poolArenaNode = new TransformNode('poolArena', scene);
 
     // Pool Dimensions
     const poolWidth = 20;
