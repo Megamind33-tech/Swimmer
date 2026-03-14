@@ -1,0 +1,5 @@
+{
+  "name": "3D Olympic Swimming Pool",
+  "description": "A realistic 3D competitive swimming pool built with Babylon.js, featuring lane ropes, starting blocks, and animated water.",
+  "requestFramePermissions": []
+}
