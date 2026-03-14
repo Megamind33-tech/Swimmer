@@ -35,6 +35,8 @@ import EnhancedSwimmerManager from './graphics/EnhancedSwimmerManager';
 import EnvironmentManager from './graphics/EnvironmentManager';
 import RenderingOptimizer from './graphics/RenderingOptimizer';
 import OlympicUI from './components/OlympicUI';
+import CinematicOpening from './components/CinematicOpening';
+import LoadingScreen from './components/LoadingScreen';
 
 type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 
@@ -199,6 +201,11 @@ const TIME_OF_DAY_CONFIG = {
   const [currentEnvironment, setCurrentEnvironment] = useState<'pool' | 'locker-room' | 'training' | 'school-gym'>('pool');
   const [renderingQuality, setRenderingQuality] = useState<'high' | 'medium' | 'low'>('high');
   const [gameMode, setGameMode] = useState<'p2p' | 'multiplayer' | 'practice'>('multiplayer');
+
+  // Cinematic and loading states
+  const [showCinematic, setShowCinematic] = useState(true);
+  const [showLoading, setShowLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const cameraPerspectiveRef = useRef(cameraPerspective);
   useEffect(() => {
     cameraPerspectiveRef.current = cameraPerspective;
@@ -1317,11 +1324,44 @@ const TIME_OF_DAY_CONFIG = {
 
   return (
     <div className="w-full h-screen bg-slate-900 flex flex-col overflow-hidden relative">
-      {raceStatus === 'countdown' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">
-          {Math.ceil(countdown)}
-        </div>
+      {/* Cinematic Opening */}
+      {showCinematic && (
+        <CinematicOpening
+          onComplete={() => {
+            setShowCinematic(false);
+            setShowLoading(true);
+            // Simulate loading
+            const interval = setInterval(() => {
+              setLoadingProgress(prev => {
+                if (prev >= 100) {
+                  clearInterval(interval);
+                  setShowLoading(false);
+                  return 100;
+                }
+                return prev + Math.random() * 30;
+              });
+            }, 500);
+          }}
+        />
       )}
+
+      {/* Loading Screen */}
+      {showLoading && (
+        <LoadingScreen
+          isLoading={true}
+          progress={loadingProgress}
+          onComplete={() => setShowLoading(false)}
+        />
+      )}
+
+      {/* Game Content - Only show after cinematic and loading */}
+      {!showCinematic && !showLoading && (
+        <>
+          {raceStatus === 'countdown' && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">
+              {Math.ceil(countdown)}
+            </div>
+          )}
       <header className="p-4 bg-black/50 backdrop-blur-md border-b border-white/10 z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="text-center sm:text-left">
           <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">Olympic Swimming Arena</h1>
@@ -1493,6 +1533,8 @@ const TIME_OF_DAY_CONFIG = {
       <footer className="p-2 bg-black text-[10px] text-slate-500 text-center uppercase tracking-tighter">
         Click on the water to create splashes! • Drag to rotate • Scroll to zoom
       </footer>
+        </>
+      )}
     </div>
   );
 }
