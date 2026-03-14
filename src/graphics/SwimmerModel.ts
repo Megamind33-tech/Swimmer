@@ -326,6 +326,22 @@ export class SwimmerModel {
   }
 
   /**
+   * Get all meshes (for adding to render lists)
+   */
+  public getAllMeshes(): BABYLON.Mesh[] {
+    const meshes: BABYLON.Mesh[] = [];
+    if (this.head) meshes.push(this.head);
+    if (this.torso) meshes.push(this.torso);
+    if (this.leftArm) meshes.push(this.leftArm);
+    if (this.rightArm) meshes.push(this.rightArm);
+    if (this.leftLeg) meshes.push(this.leftLeg);
+    if (this.rightLeg) meshes.push(this.rightLeg);
+    if (this.cap) meshes.push(this.cap);
+    if (this.goggles) meshes.push(this.goggles);
+    return meshes;
+  }
+
+  /**
    * Change suit color
    */
   public setSuitColor(color: BABYLON.Color3): void {

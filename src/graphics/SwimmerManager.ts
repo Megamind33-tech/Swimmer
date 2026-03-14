@@ -198,6 +198,15 @@ export class SwimmerManager {
   }
 
   /**
+   * Get all individual meshes for a swimmer (for water reflections)
+   */
+  public getSwimmerBodyMeshes(laneIndex: number): BABYLON.Mesh[] {
+    const swimmer = this.swimmers.get(laneIndex);
+    if (!swimmer) return [];
+    return swimmer.model.getAllMeshes();
+  }
+
+  /**
    * Reset all swimmers to starting position
    */
   public resetAll(): void {

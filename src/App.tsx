@@ -779,7 +779,11 @@ const TIME_OF_DAY_CONFIG = {
       // Update swimmer colors
       swimmerManager.setSwimmerSuitColor(i, data.color);
 
-      water.addToRenderList(swimmer as any);
+      // Add all swimmer body meshes to water render list
+      const bodyMeshes = swimmerManager.getSwimmerBodyMeshes(i);
+      bodyMeshes.forEach((mesh) => {
+        water.addToRenderList(mesh);
+      });
 
       swimmers.push({
         mesh: swimmer,
