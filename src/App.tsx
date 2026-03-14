@@ -31,6 +31,10 @@ import useGameManager from './hooks/useGameManager';
 import usePlayerManager from './hooks/usePlayerManager';
 import useRivalSystem from './hooks/useRivalSystem';
 import SwimmerManager from './graphics/SwimmerManager';
+import EnhancedSwimmerManager from './graphics/EnhancedSwimmerManager';
+import EnvironmentManager from './graphics/EnvironmentManager';
+import RenderingOptimizer from './graphics/RenderingOptimizer';
+import OlympicUI from './components/OlympicUI';
 
 type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 
@@ -188,6 +192,13 @@ const TIME_OF_DAY_CONFIG = {
   const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening' | 'night'>('afternoon');
   const [countdown, setCountdown] = useState(0);
   const [raceStatus, setRaceStatus] = useState<'idle' | 'countdown' | 'racing' | 'finished'>('idle');
+
+  // New enhanced systems state
+  const [warmupActive, setWarmupActive] = useState(false);
+  const [warmupProgress, setWarmupProgress] = useState(0);
+  const [currentEnvironment, setCurrentEnvironment] = useState<'pool' | 'locker-room' | 'training' | 'school-gym'>('pool');
+  const [renderingQuality, setRenderingQuality] = useState<'high' | 'medium' | 'low'>('high');
+  const [gameMode, setGameMode] = useState<'p2p' | 'multiplayer' | 'practice'>('multiplayer');
   const cameraPerspectiveRef = useRef(cameraPerspective);
   useEffect(() => {
     cameraPerspectiveRef.current = cameraPerspective;
@@ -204,6 +215,10 @@ const TIME_OF_DAY_CONFIG = {
   const startLightMatsRef = useRef<StandardMaterial[]>([]);
   const spotLightsRef = useRef<SpotLight[]>([]);
   const lightPanelMatRef = useRef<StandardMaterial | null>(null);
+  const enhancedSwimmerManagerRef = useRef<EnhancedSwimmerManager | null>(null);
+  const environmentManagerRef = useRef<EnvironmentManager | null>(null);
+  const renderingOptimizerRef = useRef<RenderingOptimizer | null>(null);
+  const engineRef = useRef<any>(null);
 
   useEffect(() => {
     if (!sceneRef.current || !lightRef.current) return;
@@ -253,7 +268,8 @@ const TIME_OF_DAY_CONFIG = {
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    let v = VENUES[currentVenue];
+    const initializeGame = async () => {
+      let v = VENUES[currentVenue];
     
     if (currentVenue === 'custom') {
       v = {
@@ -302,7 +318,7 @@ const TIME_OF_DAY_CONFIG = {
     lightRef.current = new HemisphericLight('light', new Vector3(0, 1, 0), sceneRef.current);
     lightRef.current.diffuse = TIME_OF_DAY_CONFIG[timeOfDay].ambientLight;
     lightRef.current.intensity = TIME_OF_DAY_CONFIG[timeOfDay].lightIntensity;
-    
+
     // Initial ceiling light settings
     if (lightPanelMatRef.current) {
         lightPanelMatRef.current.emissiveColor = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightColor;
@@ -311,6 +327,18 @@ const TIME_OF_DAY_CONFIG = {
         spotLight.diffuse = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightColor;
         spotLight.intensity = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightIntensity;
     });
+
+    // Store engine ref for rendering optimizer
+    engineRef.current = engine;
+
+    // Initialize Rendering Optimizer
+    renderingOptimizerRef.current = new RenderingOptimizer(scene, engine);
+    renderingOptimizerRef.current.applyOptimization(renderingQuality);
+    renderingOptimizerRef.current.stabilizeRenderLoop();
+    renderingOptimizerRef.current.fixFlickeringIssues();
+
+    // Initialize Environment Manager
+    environmentManagerRef.current = new EnvironmentManager(scene);
 
     // Pool Dimensions
     const poolWidth = 20;
@@ -747,15 +775,18 @@ const TIME_OF_DAY_CONFIG = {
       }
     };
 
-    // Initialize SwimmerManager for 3D models
-    const swimmerManager = new SwimmerManager(scene, poolWidth, 8);
+    // Initialize EnhancedSwimmerManager with personality system
+    enhancedSwimmerManagerRef.current = new EnhancedSwimmerManager(scene, poolWidth, 8);
     try {
-      swimmerManager.initialize();
-      console.log('SwimmerManager initialized successfully');
+      await enhancedSwimmerManagerRef.current.initialize();
+      console.log('EnhancedSwimmerManager initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize SwimmerManager:', error);
+      console.error('Failed to initialize EnhancedSwimmerManager:', error);
       throw error;
     }
+
+    // Get base swimmer manager for compatibility
+    const swimmerManager = enhancedSwimmerManagerRef.current.getBaseSwimmerManager();
 
     // Swimmers Data
     const swimmersData = [
@@ -1058,6 +1089,21 @@ const TIME_OF_DAY_CONFIG = {
         causticsTexture.vOffset = time * 0.03;
       }
 
+      // Update enhanced systems
+      if (enhancedSwimmerManagerRef.current) {
+        enhancedSwimmerManagerRef.current.update();
+      }
+
+      // Update warm-up if active
+      if (warmupActive && enhancedSwimmerManagerRef.current) {
+        const { allComplete, avgProgress } = enhancedSwimmerManagerRef.current.updateWarmup();
+        setWarmupProgress(avgProgress);
+        if (allComplete) {
+          setWarmupActive(false);
+          setRaceStatus('countdown');
+        }
+      }
+
       if (isReplayingRef.current) {
         if (replayFrameRef.current < recordedDataRef.current.length) {
             const frame = recordedDataRef.current[replayFrameRef.current];
@@ -1235,15 +1281,37 @@ const TIME_OF_DAY_CONFIG = {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      // Cleanup swimmers
+      // Cleanup enhanced systems
       try {
-        swimmerManager.dispose();
+        if (enhancedSwimmerManagerRef.current) {
+          enhancedSwimmerManagerRef.current.dispose();
+        }
       } catch (e) {
-        console.error('Error disposing swimmers:', e);
+        console.error('Error disposing enhanced swimmer manager:', e);
+      }
+      try {
+        if (environmentManagerRef.current) {
+          environmentManagerRef.current.dispose();
+        }
+      } catch (e) {
+        console.error('Error disposing environment manager:', e);
+      }
+      try {
+        if (renderingOptimizerRef.current) {
+          renderingOptimizerRef.current.dispose();
+        }
+      } catch (e) {
+        console.error('Error disposing rendering optimizer:', e);
       }
       // Cleanup scene and engine
       engine.dispose();
     };
+    };
+
+    // Execute the async initialization
+    initializeGame().catch(err => {
+      console.error('Game initialization failed:', err);
+    });
   }, [currentVenue, customColors]);
 
   return (

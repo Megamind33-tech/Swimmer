@@ -217,7 +217,7 @@ export const SWIMMER_PROFILES: SwimmerProfile[] = [
       name: 'Coach James',
       style: 'supportive',
       color: new BABYLON.Color3(0.4, 0.3, 0.1),
-      quotes: ['Deep breaths', 'You've trained hard', 'Trust your training'],
+      quotes: ['Deep breaths', "You've trained hard", 'Trust your training'],
     },
     warmupQuotes: ['Nervous energy', 'Let me warm up', 'Getting ready'],
     nervousQuotes: ['I can do this', 'Calm down', 'Focus on the basics'],
