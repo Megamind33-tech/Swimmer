@@ -58,7 +58,7 @@ export class SwimmerManager {
   /**
    * Initialize all 8 swimmers in their lanes
    */
-  public async initialize(): Promise<void> {
+  public initialize(): void {
     logger.log(`SwimmerManager initializing ${this.laneCount} swimmers`);
 
     for (let lane = 0; lane < this.laneCount; lane++) {

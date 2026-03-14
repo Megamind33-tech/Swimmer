@@ -30,6 +30,7 @@ import { WaterMaterial } from '@babylonjs/materials';
 import useGameManager from './hooks/useGameManager';
 import usePlayerManager from './hooks/usePlayerManager';
 import useRivalSystem from './hooks/useRivalSystem';
+import SwimmerManager from './graphics/SwimmerManager';
 
 type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 
@@ -746,6 +747,10 @@ const TIME_OF_DAY_CONFIG = {
       }
     };
 
+    // Initialize SwimmerManager for 3D models
+    const swimmerManager = new SwimmerManager(scene, poolWidth, 8);
+    swimmerManager.initialize();
+
     // Swimmers Data
     const swimmersData = [
       { name: "PHELPS", lane: 4, speed: 2.45, color: new Color3(1, 0.4, 0) },
@@ -760,18 +765,21 @@ const TIME_OF_DAY_CONFIG = {
 
     const swimmers: any[] = [];
     swimmersData.forEach((data, i) => {
-      const swimmer = MeshBuilder.CreateCapsule(`swimmer_${i}`, { radius: 0.3, height: 1.5 }, scene);
-      
+      const swimmerInstance = swimmerManager.getSwimmer(i);
+      if (!swimmerInstance) return;
+
+      const swimmer = swimmerInstance.mesh;
+
       // Initial position on starting block
       swimmer.position.x = -poolWidth / 2 + (data.lane - 0.5) * laneWidth;
       swimmer.position.y = 1.2; // Standing on block
       swimmer.position.z = -poolLength / 2 - 1.2;
       swimmer.rotation.x = Math.PI / 8; // Leaning forward slightly
-      
-      const swimmerMat = new StandardMaterial(`swimmerMat_${i}`, scene);
-      swimmerMat.diffuseColor = data.color;
-      swimmer.material = swimmerMat;
-      water.addToRenderList(swimmer);
+
+      // Update swimmer colors
+      swimmerManager.setSwimmerSuitColor(i, data.color);
+
+      water.addToRenderList(swimmer as any);
 
       swimmers.push({
         mesh: swimmer,
