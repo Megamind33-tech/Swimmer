@@ -222,7 +222,7 @@ export class RenderingOptimizer {
 
     // Limit physics updates
     if (this.scene.getPhysicsEngine()) {
-      this.scene.getPhysicsEngine()!.setSubTimeStep(1);
+      this.scene.getPhysicsEngine()!.setTimeStep(1 / this.config.targetFPS);
     }
 
     logger.log('Flickering fixes applied');
