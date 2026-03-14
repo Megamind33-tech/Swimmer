@@ -233,6 +233,32 @@ export class ArenaManager {
     deck.material = deckMaterial;
     deck.parent = this.arenaMesh;
 
+    // Add lane divider ropes (realistic competition pool feature)
+    for (let lane = 1; lane < this.arenaConfig.laneCount; lane++) {
+      const ropePosX = -this.arenaConfig.poolWidth / 2 + (lane * this.arenaConfig.poolWidth) / this.arenaConfig.laneCount;
+      const rope = BABYLON.MeshBuilder.CreateTube(
+        `laneRope${lane}`,
+        {
+          path: [
+            new BABYLON.Vector3(ropePosX, 0.05, -this.arenaConfig.poolLength / 2),
+            new BABYLON.Vector3(ropePosX, 0.05, this.arenaConfig.poolLength / 2),
+          ],
+          radius: 0.03,
+          updatable: false,
+        },
+        this.scene
+      );
+      const ropeMat = new BABYLON.StandardMaterial(`ropeMat${lane}`, this.scene);
+      // Alternate colors for visibility
+      if (lane % 2 === 0) {
+        (ropeMat as any).diffuseColor = new BABYLON.Color3(1, 0, 0); // Red
+      } else {
+        (ropeMat as any).diffuseColor = new BABYLON.Color3(1, 1, 1); // White
+      }
+      rope.material = ropeMat;
+      rope.parent = this.arenaMesh;
+    }
+
     // Starting blocks (8 lanes)
     for (let lane = 0; lane < this.arenaConfig.laneCount; lane++) {
       const blockX = -this.arenaConfig.poolWidth / 2 + (lane * this.arenaConfig.poolWidth) / (this.arenaConfig.laneCount - 1);
@@ -250,7 +276,67 @@ export class ArenaManager {
       this.startingBlocks.push(block);
     }
 
+    // Add spectator bleachers on both sides
+    this.createBleachers();
+
     logger.log('Arena created');
+  }
+
+  /**
+   * Create spectator seating (bleachers) for realistic competition pool
+   */
+  private createBleachers(): void {
+    if (!this.scene || !this.arenaMesh) return;
+
+    const bleacherMaterial = new BABYLON.StandardMaterial('bleacherMat', this.scene);
+    (bleacherMaterial as any).diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+    bleacherMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+
+    // Side bleachers (left and right of pool)
+    const sidePositions = [
+      { x: -this.arenaConfig.poolWidth / 2 - 12, side: 'left' },
+      { x: this.arenaConfig.poolWidth / 2 + 12, side: 'right' },
+    ];
+
+    sidePositions.forEach((pos) => {
+      // Create rows of bleacher seats
+      for (let row = 0; row < 8; row++) {
+        const rowHeight = row * 0.5 + 1;
+        const rowLength = this.arenaConfig.poolLength + 10;
+
+        const bleacher = BABYLON.MeshBuilder.CreateBox(
+          `bleacher_${pos.side}_${row}`,
+          { width: 1.5, height: 0.3, depth: rowLength },
+          this.scene
+        );
+        bleacher.position = new BABYLON.Vector3(pos.x, rowHeight, 0);
+        bleacher.material = bleacherMaterial;
+        bleacher.parent = this.arenaMesh;
+      }
+    });
+
+    // End bleachers (north and south of pool)
+    const endPositions = [
+      { z: -this.arenaConfig.poolLength / 2 - 10, side: 'north' },
+      { z: this.arenaConfig.poolLength / 2 + 10, side: 'south' },
+    ];
+
+    endPositions.forEach((pos) => {
+      for (let row = 0; row < 6; row++) {
+        const rowHeight = row * 0.5 + 1;
+
+        const bleacher = BABYLON.MeshBuilder.CreateBox(
+          `bleacher_${pos.side}_${row}`,
+          { width: this.arenaConfig.poolWidth + 25, height: 0.3, depth: 1.5 },
+          this.scene
+        );
+        bleacher.position = new BABYLON.Vector3(0, rowHeight, pos.z);
+        bleacher.material = bleacherMaterial;
+        bleacher.parent = this.arenaMesh;
+      }
+    });
+
+    logger.log('Bleachers created for realistic spectator seating');
   }
 
   /**
