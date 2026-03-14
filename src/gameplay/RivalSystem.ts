@@ -36,6 +36,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'SPRINTER',
     skillTier: 2,
+    difficulty: 2,
     unlockLevel: 5,
   },
   {
@@ -56,6 +57,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'TECHNICIAN',
     skillTier: 2,
+    difficulty: 2,
     unlockLevel: 8,
   },
   {
@@ -76,6 +78,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'DISTANCE',
     skillTier: 2,
+    difficulty: 2,
     unlockLevel: 10,
   },
   {
@@ -96,6 +99,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'ALL_AROUND',
     skillTier: 2,
+    difficulty: 2,
     unlockLevel: 12,
   },
 
@@ -118,6 +122,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'SPRINTER',
     skillTier: 4,
+    difficulty: 4,
     unlockLevel: 20,
   },
   {
@@ -138,6 +143,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'DISTANCE',
     skillTier: 4,
+    difficulty: 4,
     unlockLevel: 22,
   },
   {
@@ -158,6 +164,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'TECHNICIAN',
     skillTier: 4,
+    difficulty: 4,
     unlockLevel: 25,
   },
   {
@@ -178,6 +185,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'ALL_AROUND',
     skillTier: 4,
+    difficulty: 4,
     unlockLevel: 28,
   },
 
@@ -200,6 +208,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'SPRINTER',
     skillTier: 6,
+    difficulty: 6,
     unlockLevel: 40,
   },
   {
@@ -220,6 +229,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'DISTANCE',
     skillTier: 6,
+    difficulty: 6,
     unlockLevel: 42,
   },
   {
@@ -240,6 +250,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'TECHNICIAN',
     skillTier: 6,
+    difficulty: 6,
     unlockLevel: 45,
   },
   {
@@ -260,6 +271,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'ALL_AROUND',
     skillTier: 6,
+    difficulty: 6,
     unlockLevel: 48,
   },
 
@@ -282,6 +294,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'SPRINTER',
     skillTier: 8,
+    difficulty: 8,
     unlockLevel: 50,
   },
   {
@@ -302,6 +315,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'DISTANCE',
     skillTier: 8,
+    difficulty: 8,
     unlockLevel: 52,
   },
   {
@@ -322,6 +336,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'TECHNICIAN',
     skillTier: 9,
+    difficulty: 9,
     unlockLevel: 55,
   },
   {
@@ -342,6 +357,7 @@ const RIVAL_DEFINITIONS: Array<Omit<IRival, 'racesAgainstPlayer' | 'playerWins'>
     },
     specialty: 'ALL_AROUND',
     skillTier: 10,
+    difficulty: 10,
     unlockLevel: 60,
   },
 ];

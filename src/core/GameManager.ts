@@ -34,8 +34,8 @@ export interface IGameManagerEvents {
   careerEventUnlocked: { event: ICareerEvent };
   settingsChanged: { key: keyof IGameSettings; value: any };
   playerDataChanged: { player: IPlayerSwimmer };
-  paused: never;
-  resumed: never;
+  paused: void;
+  resumed: void;
   error: { message: string; code: string };
 }
 

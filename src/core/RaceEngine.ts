@@ -143,6 +143,7 @@ export class RaceEngine {
         id: aiSwimmer.id,
         name: aiSwimmer.name,
         lane: aiSwimmer.lane,
+        stats: aiSwimmer.stats,
         position: 0,
         velocity: 0,
         stamina: RACE_PHYSICS.BASE_STAMINA,

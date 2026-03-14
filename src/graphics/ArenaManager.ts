@@ -12,7 +12,7 @@
  * - Performance optimization (LOD, render targets)
  */
 
-import * as BABYLON from 'babylonjs';
+import * as BABYLON from '@babylonjs/core';
 import {
   IArenaConfig,
   ICameraConfig,
@@ -31,7 +31,7 @@ export class ArenaManager {
   // Mesh references
   private poolMesh: BABYLON.Mesh | null = null;
   private waterMesh: BABYLON.Mesh | null = null;
-  private arenaMesh: BABYLON.Group | null = null;
+  private arenaMesh: BABYLON.TransformNode | null = null;
   private scoreboard: BABYLON.Mesh | null = null;
   private startingBlocks: BABYLON.AbstractMesh[] = [];
 
@@ -149,7 +149,7 @@ export class ArenaManager {
 
     // Pool material
     const poolMaterial = new BABYLON.StandardMaterial('poolMaterial', this.scene);
-    poolMaterial.diffuse = new BABYLON.Color3(0.0, 0.3, 0.7);
+    (poolMaterial as any).diffuse = new BABYLON.Color3(0.0, 0.3, 0.7);
     poolMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
     poolMaterial.specularPower = 32;
     poolMesh.material = poolMaterial;
@@ -210,7 +210,7 @@ export class ArenaManager {
 
     // Deck around pool
     const deckMaterial = new BABYLON.StandardMaterial('deckMaterial', this.scene);
-    deckMaterial.diffuse = new BABYLON.Color3(0.85, 0.85, 0.85);
+    (deckMaterial as any).diffuse = new BABYLON.Color3(0.85, 0.85, 0.85);
     deckMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
 
     const deck = BABYLON.MeshBuilder.CreateGround(
@@ -226,7 +226,7 @@ export class ArenaManager {
     for (let lane = 0; lane < this.arenaConfig.laneCount; lane++) {
       const blockX = -this.arenaConfig.poolWidth / 2 + (lane * this.arenaConfig.poolWidth) / (this.arenaConfig.laneCount - 1);
       const blockMaterial = new BABYLON.StandardMaterial(`blockMat${lane}`, this.scene);
-      blockMaterial.diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
+      (blockMaterial as any).diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
 
       const block = BABYLON.MeshBuilder.CreateBox(
         `startBlock${lane}`,
@@ -342,7 +342,7 @@ export class ArenaManager {
 
     // Water material
     const waterMaterial = new BABYLON.StandardMaterial('waterMaterial', this.scene);
-    waterMaterial.diffuse = new BABYLON.Color3(0.0, 0.4, 0.8);
+    (waterMaterial as any).diffuse = new BABYLON.Color3(0.0, 0.4, 0.8);
     waterMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
     waterMaterial.specularPower = 64;
     waterMaterial.alpha = 0.9;
@@ -370,7 +370,7 @@ export class ArenaManager {
 
     // Scoreboard material with dynamic texture
     const dynamicTexture = new BABYLON.DynamicTexture('scoreboardTexture', 1024, this.scene);
-    const ctx = dynamicTexture.getContext();
+    const ctx = dynamicTexture.getContext() as any as CanvasRenderingContext2D;
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, 1024, 512);
 
@@ -397,7 +397,7 @@ export class ArenaManager {
 
     if (!texture) return;
 
-    const ctx = texture.getContext();
+    const ctx = texture.getContext() as any as CanvasRenderingContext2D;
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, 1024, 512);
 
@@ -437,8 +437,8 @@ export class ArenaManager {
       CUSTOM: new BABYLON.Color3(0.5, 0.5, 0.5),
     };
 
-    if (this.poolMaterial.diffuse) {
-      this.poolMaterial.diffuse = themes[theme];
+    if (this.poolMaterial) {
+      (this.poolMaterial as any).diffuse = themes[theme];
     }
 
     logger.log('Theme set to:', theme);

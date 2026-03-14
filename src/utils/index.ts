@@ -155,7 +155,7 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
   return function (this: any, ...args: Parameters<T>) {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => {
@@ -258,7 +258,7 @@ export const logger = {
   warn: (...args: any[]) => console.warn('[SWIMMER]', ...args),
   error: (...args: any[]) => console.error('[SWIMMER]', ...args),
   debug: (...args: any[]) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') {
       console.debug('[SWIMMER]', ...args);
     }
   },

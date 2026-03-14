@@ -169,6 +169,7 @@ export interface ISwimmerRaceState {
   id: string;
   name: string;
   lane: number;
+  stats: ISwimmerStats;   // Swimmer's base stats
   position: number;       // meters into race (0-distance)
   velocity: number;       // current speed (units/sec)
   stamina: number;        // 0-100
@@ -259,6 +260,7 @@ export interface IRival {
   name: string;
   stats: ISwimmerStats;
   personality: ISwimmerPersonality;
+  specialty: SwimmerSpecialty;
   skillTier: number;
   racesAgainstPlayer: number;
   playerWins: number;
@@ -394,7 +396,7 @@ export interface IAchievement {
   cosmetics?: string[];
 }
 
-export interface IDaily Quest {
+export interface IDailyQuest {
   id: string;
   date: string;           // YYYY-MM-DD
   objective: string;
@@ -407,45 +409,7 @@ export interface IDaily Quest {
 }
 
 // ============================================================================
-// EXPORT ALL TYPES FOR BARREL IMPORT
+// TYPE EXPORTS
 // ============================================================================
-
-export default {
-  // Game modes and states
-  GameMode,
-  GameState,
-  RaceState,
-  PoolTheme,
-  CameraView,
-  TimeOfDay,
-  SwimmingStroke,
-  SwimmerSpecialty,
-  Rarity,
-
-  // Interfaces
-  ISwimmerStats,
-  ISwimmerAttributes,
-  ISwimmerPersonality,
-  IAISwimmer,
-  IPlayerSwimmer,
-  ICosmetics,
-  IEquipment,
-  IRaceSetup,
-  ISwimmerRaceState,
-  IRaceState,
-  IRaceResult,
-  ICareerEvent,
-  ISkillTree,
-  IRival,
-  IGameManager,
-  IGameSettings,
-  IArenaConfig,
-  ICameraConfig,
-  ILightingConfig,
-  IInputEvent,
-  ITapWindow,
-  ICloudSyncData,
-  ILeaderboardEntry,
-  IAchievement,
-  IDaily Quest,
-};
+// All types are exported individually above
+// Usage: import { GameMode, IPlayerSwimmer, ... } from '../types'
