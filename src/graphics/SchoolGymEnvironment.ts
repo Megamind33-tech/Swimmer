@@ -39,30 +39,30 @@ export class SchoolGymEnvironment {
   private createMaterials(): void {
     // Polished floor
     const floorMat = new BABYLON.StandardMaterial('floorMaterial', this.scene);
-    floorMat.diffuse = new BABYLON.Color3(0.8, 0.75, 0.7);
+    floorMat.diffuseColor = new BABYLON.Color3(0.8, 0.75, 0.7);
     floorMat.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
     this.materials.set('floor', floorMat);
 
     // Wall
     const wallMat = new BABYLON.StandardMaterial('wallMaterial', this.scene);
-    wallMat.diffuse = new BABYLON.Color3(0.9, 0.9, 0.9);
+    wallMat.diffuseColor = new BABYLON.Color3(0.9, 0.9, 0.9);
     wallMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
     this.materials.set('wall', wallMat);
 
     // Pool water
     const waterMat = new BABYLON.StandardMaterial('waterMaterial', this.scene);
-    waterMat.diffuse = new BABYLON.Color3(0.1, 0.5, 0.8);
+    waterMat.diffuseColor = new BABYLON.Color3(0.1, 0.5, 0.8);
     waterMat.alpha = 0.8;
     this.materials.set('water', waterMat);
 
     // Bleachers
     const bleacherMat = new BABYLON.StandardMaterial('bleacherMaterial', this.scene);
-    bleacherMat.diffuse = new BABYLON.Color3(0.6, 0.6, 0.6);
+    bleacherMat.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6);
     this.materials.set('bleacher', bleacherMat);
 
     // Storage
     const storageMat = new BABYLON.StandardMaterial('storageMaterial', this.scene);
-    storageMat.diffuse = new BABYLON.Color3(0.5, 0.3, 0.2);
+    storageMat.diffuseColor = new BABYLON.Color3(0.5, 0.3, 0.2);
     this.materials.set('storage', storageMat);
   }
 
@@ -123,7 +123,7 @@ export class SchoolGymEnvironment {
     );
     pool.position = new BABYLON.Vector3(-5, -0.75, 0);
     const poolMat = new BABYLON.StandardMaterial('poolMat', this.scene);
-    poolMat.diffuse = new BABYLON.Color3(0.1, 0.4, 0.6);
+    poolMat.diffuseColor = new BABYLON.Color3(0.1, 0.4, 0.6);
     pool.material = poolMat;
     pool.parent = this.rootNode;
 
@@ -149,7 +149,7 @@ export class SchoolGymEnvironment {
       );
       rope.position = new BABYLON.Vector3(-5 - 12 + i * laneWidth, 0.75, 0);
       const ropeMat = new BABYLON.StandardMaterial(`ropeMat_${i}`, this.scene);
-      ropeMat.diffuse = new BABYLON.Color3(1, 0.8, 0);
+      ropeMat.diffuseColor = new BABYLON.Color3(1, 0.8, 0);
       rope.material = ropeMat;
       rope.parent = this.rootNode;
     }
@@ -167,7 +167,7 @@ export class SchoolGymEnvironment {
         -14.5
       );
       const blockMat = new BABYLON.StandardMaterial(`blockMat_${i}`, this.scene);
-      blockMat.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
+      blockMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
       block.material = blockMat;
       block.parent = this.rootNode;
     }
@@ -224,7 +224,7 @@ export class SchoolGymEnvironment {
     );
     door1.position = new BABYLON.Vector3(20, 1.5, -12.2);
     const doorMat = new BABYLON.StandardMaterial('doorMat', this.scene);
-    doorMat.diffuse = new BABYLON.Color3(0.3, 0.2, 0.1);
+    doorMat.diffuseColor = new BABYLON.Color3(0.3, 0.2, 0.1);
     door1.material = doorMat;
     door1.parent = this.rootNode;
 
@@ -243,7 +243,7 @@ export class SchoolGymEnvironment {
       );
       rack.position = new BABYLON.Vector3(18 + i * 2.5, 1, -15);
       const rackMat = new BABYLON.StandardMaterial(`rackMat_${i}`, this.scene);
-      rackMat.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5);
+      rackMat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
       rack.material = rackMat;
       rack.parent = this.rootNode;
     }

@@ -40,25 +40,25 @@ export class TrainingFacilityEnvironment {
   private createMaterials(): void {
     // Rubber floor
     const rubberMat = new BABYLON.StandardMaterial('rubberMaterial', this.scene);
-    rubberMat.diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
+    rubberMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
     rubberMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
     this.materials.set('rubber', rubberMat);
 
     // Wall
     const wallMat = new BABYLON.StandardMaterial('wallMaterial', this.scene);
-    wallMat.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
+    wallMat.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
     this.materials.set('wall', wallMat);
 
     // Metal
     const metalMat = new BABYLON.StandardMaterial('metalMaterial', this.scene);
-    metalMat.diffuse = new BABYLON.Color3(0.6, 0.6, 0.6);
+    metalMat.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6);
     metalMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
     metalMat.specularPower = 16;
     this.materials.set('metal', metalMat);
 
     // Equipment color
     const equipMat = new BABYLON.StandardMaterial('equipMaterial', this.scene);
-    equipMat.diffuse = new BABYLON.Color3(0.9, 0.1, 0.1);
+    equipMat.diffuseColor = new BABYLON.Color3(0.9, 0.1, 0.1);
     equipMat.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
     this.materials.set('equipment', equipMat);
   }
@@ -142,7 +142,7 @@ export class TrainingFacilityEnvironment {
         );
         weight.rotation.z = Math.PI / 2;
         const weightMat = new BABYLON.StandardMaterial(`weight_${rack}_${i}`, this.scene);
-        weightMat.diffuse = new BABYLON.Color3(
+        weightMat.diffuseColor = new BABYLON.Color3(
           Math.min(1, 0.1 + i * 0.1),
           0.1,
           0.1
@@ -172,7 +172,7 @@ export class TrainingFacilityEnvironment {
       barbell.position = new BABYLON.Vector3(10 + (i - 1.5) * 0.7, 1.7 - i * 0.4, 0);
       barbell.rotation.z = Math.PI / 2;
       const barbellMat = new BABYLON.StandardMaterial(`barbellMat_${i}`, this.scene);
-      barbellMat.diffuse = new BABYLON.Color3(0.4, 0.4, 0.4);
+      barbellMat.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.4);
       barbell.material = barbellMat;
       barbell.parent = this.rootNode;
     }
@@ -206,7 +206,7 @@ export class TrainingFacilityEnvironment {
       );
       deck.position = new BABYLON.Vector3(xPos, 1, 10);
       const deckMat = new BABYLON.StandardMaterial(`deckMat_${i}`, this.scene);
-      deckMat.diffuse = new BABYLON.Color3(0.2, 0.2, 0.2);
+      deckMat.diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
       deck.material = deckMat;
       deck.parent = this.rootNode;
 
@@ -218,7 +218,7 @@ export class TrainingFacilityEnvironment {
       );
       console.position = new BABYLON.Vector3(xPos, 1.4, 9.3);
       const consoleMat = new BABYLON.StandardMaterial(`consoleMat_${i}`, this.scene);
-      consoleMat.diffuse = new BABYLON.Color3(0.1, 0.1, 0.1);
+      consoleMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
       console.material = consoleMat;
       console.parent = this.rootNode;
     }
@@ -242,7 +242,7 @@ export class TrainingFacilityEnvironment {
       );
       mat.position = new BABYLON.Vector3(xPos, 0.01, -12);
       const matMat = new BABYLON.StandardMaterial(`matMat_${i}`, this.scene);
-      matMat.diffuse = new BABYLON.Color3(0.2 + Math.random() * 0.3, 0.5, 0.2);
+      matMat.diffuseColor = new BABYLON.Color3(0.2 + Math.random() * 0.3, 0.5, 0.2);
       mat.material = matMat;
       mat.parent = this.rootNode;
     }
@@ -257,7 +257,7 @@ export class TrainingFacilityEnvironment {
     bar.rotation.z = Math.PI / 2;
     bar.scaling = new BABYLON.Vector3(15, 1, 1);
     const barMat = new BABYLON.StandardMaterial('barMat', this.scene);
-    barMat.diffuse = new BABYLON.Color3(0.4, 0.2, 0.1);
+    barMat.diffuseColor = new BABYLON.Color3(0.4, 0.2, 0.1);
     bar.material = barMat;
     bar.parent = this.rootNode;
   }
@@ -290,7 +290,7 @@ export class TrainingFacilityEnvironment {
       );
       weights.position = new BABYLON.Vector3(xPos, 1.0, -7);
       const weightsMat = new BABYLON.StandardMaterial(`weightsMat_${i}`, this.scene);
-      weightsMat.diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
+      weightsMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
       weights.material = weightsMat;
       weights.parent = this.rootNode;
 
@@ -302,7 +302,7 @@ export class TrainingFacilityEnvironment {
       );
       seat.position = new BABYLON.Vector3(xPos, 0.5, -9);
       const seatMat = new BABYLON.StandardMaterial(`seatMat_${i}`, this.scene);
-      seatMat.diffuse = new BABYLON.Color3(0.1, 0.1, 0.1);
+      seatMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
       seat.material = seatMat;
       seat.parent = this.rootNode;
 
@@ -318,7 +318,7 @@ export class TrainingFacilityEnvironment {
         this.scene
       );
       const cableMat = new BABYLON.StandardMaterial(`cableMat_${i}`, this.scene);
-      cableMat.diffuse = new BABYLON.Color3(0.2, 0.2, 0.2);
+      cableMat.diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
       cable.material = cableMat;
       cable.parent = this.rootNode;
     }
