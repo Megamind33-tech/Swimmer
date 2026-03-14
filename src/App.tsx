@@ -37,6 +37,9 @@ import RenderingOptimizer from './graphics/RenderingOptimizer';
 import OlympicUI from './components/OlympicUI';
 import CinematicOpening from './components/CinematicOpening';
 import LoadingScreen from './components/LoadingScreen';
+import MainMenu from './components/MainMenu';
+import SettingsMenu from './components/SettingsMenu';
+import PauseMenu from './components/PauseMenu';
 
 type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
 
@@ -202,10 +205,14 @@ const TIME_OF_DAY_CONFIG = {
   const [renderingQuality, setRenderingQuality] = useState<'high' | 'medium' | 'low'>('high');
   const [gameMode, setGameMode] = useState<'p2p' | 'multiplayer' | 'practice'>('multiplayer');
 
-  // Cinematic and loading states
+  // Cinematic and menu states
   const [showCinematic, setShowCinematic] = useState(true);
   const [showLoading, setShowLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showPauseMenu, setShowPauseMenu] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
   const cameraPerspectiveRef = useRef(cameraPerspective);
   useEffect(() => {
     cameraPerspectiveRef.current = cameraPerspective;
@@ -271,6 +278,22 @@ const TIME_OF_DAY_CONFIG = {
         break;
     }
   }, [cameraPerspective]);
+
+  // Keyboard handler for pause
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!gameStarted) return;
+
+      // P key or ESC to pause
+      if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+        e.preventDefault();
+        setShowPauseMenu(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameStarted]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -1350,13 +1373,58 @@ const TIME_OF_DAY_CONFIG = {
         <LoadingScreen
           isLoading={true}
           progress={loadingProgress}
-          onComplete={() => setShowLoading(false)}
+          onComplete={() => {
+            setShowLoading(false);
+            setShowMenu(true);
+          }}
         />
       )}
 
-      {/* Game Content - Only show after cinematic and loading */}
-      {!showCinematic && !showLoading && (
+      {/* Main Menu */}
+      {showMenu && !showSettings && !gameStarted && (
+        <MainMenu
+          onPlay={() => {
+            setShowMenu(false);
+            setGameStarted(true);
+          }}
+          onSettings={() => {
+            setShowSettings(true);
+          }}
+        />
+      )}
+
+      {/* Settings Menu */}
+      {showSettings && (
+        <SettingsMenu
+          onBack={() => {
+            setShowSettings(false);
+            setShowMenu(true);
+          }}
+          onPlay={(mode, venue, environment) => {
+            setGameMode(mode);
+            setCurrentVenue(venue as VenueTheme);
+            setCurrentEnvironment(environment as 'pool' | 'locker-room' | 'training' | 'school-gym');
+            setShowSettings(false);
+            setGameStarted(true);
+          }}
+        />
+      )}
+
+      {/* Game Content - Only show after menu starts game */}
+      {gameStarted && (
         <>
+          {/* Pause Menu */}
+          {showPauseMenu && (
+            <PauseMenu
+              onResume={() => setShowPauseMenu(false)}
+              onMainMenu={() => {
+                setGameStarted(false);
+                setShowPauseMenu(false);
+                setShowMenu(true);
+              }}
+            />
+          )}
+
           {raceStatus === 'countdown' && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-9xl font-bold z-20">
               {Math.ceil(countdown)}
@@ -1368,7 +1436,7 @@ const TIME_OF_DAY_CONFIG = {
           <p className="text-[10px] sm:text-xs text-slate-400 font-mono uppercase tracking-widest">3D Simulation • Babylon.js</p>
         </div>
         <div className="flex gap-2 sm:gap-4 text-[10px] sm:text-xs text-slate-300 items-center">
-          <button 
+          <button
             onClick={() => {
                 countdownRef.current = 3.0;
                 setCountdown(3.0);
@@ -1377,6 +1445,13 @@ const TIME_OF_DAY_CONFIG = {
             className="px-2 py-1 rounded border bg-emerald-500 text-white"
           >
             Start Race
+          </button>
+          <button
+            onClick={() => setShowPauseMenu(!showPauseMenu)}
+            className="px-2 py-1 rounded border bg-blue-500 text-white"
+            title="Press P or ESC to toggle pause"
+          >
+            {showPauseMenu ? 'Resume' : 'Pause'}
           </button>
           <select 
             value={timeOfDay}
@@ -1388,7 +1463,7 @@ const TIME_OF_DAY_CONFIG = {
             <option value="evening">Evening</option>
             <option value="night">Night</option>
           </select>
-          <select 
+          <select
             value={cameraPerspective}
             onChange={(e) => setCameraPerspective(e.target.value as 'default' | 'aerial' | 'startingBlock' | 'racing')}
             className="bg-black/40 border border-white/20 rounded px-2 sm:px-3 py-1 text-white outline-none focus:border-emerald-500"
@@ -1397,15 +1472,6 @@ const TIME_OF_DAY_CONFIG = {
             <option value="aerial">Aerial View</option>
             <option value="startingBlock">Starting Block</option>
             <option value="racing">Racing View</option>
-          </select>
-          <select 
-            value={currentVenue}
-            onChange={(e) => setCurrentVenue(e.target.value as VenueTheme)}
-            className="bg-black/40 border border-white/20 rounded px-2 sm:px-3 py-1 text-white outline-none focus:border-emerald-500"
-          >
-            {Object.entries(VENUES).map(([key, venue]) => (
-              <option key={key} value={key}>{venue.name}</option>
-            ))}
           </select>
           <div className="flex items-center gap-2">
             <button 
@@ -1462,69 +1528,8 @@ const TIME_OF_DAY_CONFIG = {
           </div>
         </div>
 
-        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex flex-col gap-2">
-          {currentVenue === 'custom' && (
-            <div className="p-3 sm:p-4 bg-black/80 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl flex flex-col gap-2 sm:gap-3 w-full max-w-[240px] sm:w-64 animate-in fade-in slide-in-from-right-4 duration-300">
-              <h3 className="text-[10px] font-bold text-white uppercase tracking-widest border-b border-white/10 pb-1 mb-1">Arena Customizer</h3>
-              
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-slate-400 uppercase">Sky</label>
-                  <input 
-                    type="color" 
-                    value={customColors.skyColor} 
-                    onChange={(e) => setCustomColors(prev => ({ ...prev, skyColor: e.target.value }))}
-                    className="w-full h-6 sm:h-8 bg-transparent border-none cursor-pointer rounded overflow-hidden"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-slate-400 uppercase">Walls</label>
-                  <input 
-                    type="color" 
-                    value={customColors.hallColor} 
-                    onChange={(e) => setCustomColors(prev => ({ ...prev, hallColor: e.target.value }))}
-                    className="w-full h-6 sm:h-8 bg-transparent border-none cursor-pointer rounded overflow-hidden"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-slate-400 uppercase">Water</label>
-                  <input 
-                    type="color" 
-                    value={customColors.waterColor} 
-                    onChange={(e) => setCustomColors(prev => ({ ...prev, waterColor: e.target.value }))}
-                    className="w-full h-6 sm:h-8 bg-transparent border-none cursor-pointer rounded overflow-hidden"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[9px] text-slate-400 uppercase">Deck</label>
-                  <input 
-                    type="color" 
-                    value={customColors.deckColor} 
-                    onChange={(e) => setCustomColors(prev => ({ ...prev, deckColor: e.target.value }))}
-                    className="w-full h-6 sm:h-8 bg-transparent border-none cursor-pointer rounded overflow-hidden"
-                  />
-                </div>
-                <div className="flex flex-col gap-1 col-span-2">
-                  <label className="text-[9px] text-slate-400 uppercase">Blocks & Signs</label>
-                  <input 
-                    type="color" 
-                    value={customColors.blockColor} 
-                    onChange={(e) => setCustomColors(prev => ({ ...prev, blockColor: e.target.value }))}
-                    className="w-full h-6 sm:h-8 bg-transparent border-none cursor-pointer rounded overflow-hidden"
-                  />
-                </div>
-              </div>
-              
-              <button 
-                onClick={() => setCurrentVenue('olympic')}
-                className="mt-1 text-[9px] text-slate-500 hover:text-white transition-colors uppercase tracking-tighter"
-              >
-                Reset to Presets
-              </button>
-            </div>
-          )}
-
-          <div className="p-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 text-white hover:bg-white/10 transition-colors cursor-help self-end">
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+          <div className="p-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 text-white hover:bg-white/10 transition-colors cursor-help">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
         </div>
