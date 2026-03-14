@@ -25,7 +25,7 @@ interface QuickRaceScreenProps {
   onBackToMenu?: () => void;
 }
 
-type QuickRacePhase = 'SETUP' | 'RACING' | 'RESULTS';
+type QuickRacePhase = 'SETUP' | 'STARTING' | 'RACING' | 'RESULTS';
 
 const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
   player,
@@ -110,7 +110,8 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
   const handleStartRace = useCallback(() => {
     if (!player) return;
 
-    setupRaceListeners();
+    // Show arena with swimmers on starting blocks first, THEN start countdown
+    setPhase('STARTING');
 
     const raceSetup: IRaceSetup = {
       mode: 'QUICK_RACE',
@@ -125,25 +126,29 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
       })),
     };
 
-    raceController.initializeRace(raceSetup);
-    setRaceState(raceController.getRaceState());
-
-    // Start race loop
-    let lastTime = performance.now();
-    const raceLoop = () => {
-      const now = performance.now();
-      const deltaTime = now - lastTime;
-      lastTime = now;
-
-      raceController.updateRace(deltaTime);
+    // Wait for swimmers to be shown on starting blocks before countdown begins
+    setTimeout(() => {
+      setupRaceListeners();
+      raceController.initializeRace(raceSetup);
       setRaceState(raceController.getRaceState());
 
-      if (!raceController.isRaceFinished()) {
-        requestAnimationFrame(raceLoop);
-      }
-    };
+      // Start race loop
+      let lastTime = performance.now();
+      const raceLoop = () => {
+        const now = performance.now();
+        const deltaTime = now - lastTime;
+        lastTime = now;
 
-    requestAnimationFrame(raceLoop);
+        raceController.updateRace(deltaTime);
+        setRaceState(raceController.getRaceState());
+
+        if (!raceController.isRaceFinished()) {
+          requestAnimationFrame(raceLoop);
+        }
+      };
+
+      requestAnimationFrame(raceLoop);
+    }, 2500);
   }, [player, selectedDistance, selectedStroke, selectedDifficulty, selectedOpponents, setupRaceListeners, raceController]);
 
   const handleReplay = useCallback(() => {
@@ -373,6 +378,109 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
           <button className="back-button" onClick={handleBackToMenu}>
             Back to Menu
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'STARTING') {
+    return (
+      <div style={{
+        width: '100%',
+        height: '100vh',
+        background: 'linear-gradient(180deg, #0a1628 0%, #0d2137 50%, #0a3d62 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Pool lanes */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '45%',
+          background: 'linear-gradient(180deg, #1565c0 0%, #0d47a1 100%)',
+          borderTop: '4px solid rgba(255,255,255,0.3)',
+        }}>
+          {/* Lane dividers */}
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: `${((i + 1) / 8) * 100}%`,
+              width: '2px',
+              background: 'rgba(255,255,255,0.25)',
+            }} />
+          ))}
+        </div>
+
+        {/* Starting blocks row */}
+        <div style={{
+          position: 'absolute',
+          bottom: '43%',
+          left: 0,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: '0 3%',
+        }}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+              {/* Swimmer on block */}
+              <div style={{
+                fontSize: '28px',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+                animation: 'none',
+              }}>
+                🏊
+              </div>
+              {/* Starting block */}
+              <div style={{
+                width: '32px',
+                height: '12px',
+                background: 'linear-gradient(180deg, #f59e0b 0%, #d97706 100%)',
+                borderRadius: '3px 3px 0 0',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+              }} />
+            </div>
+          ))}
+        </div>
+
+        {/* "Approaching starting blocks" label */}
+        <div style={{
+          position: 'absolute',
+          top: '30%',
+          textAlign: 'center',
+        }}>
+          <div style={{
+            fontSize: '22px',
+            fontWeight: 700,
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.9)',
+            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+            marginBottom: '8px',
+          }}>
+            Swimmers to Starting Blocks
+          </div>
+          <div style={{
+            fontSize: '14px',
+            color: 'rgba(255,255,255,0.5)',
+            letterSpacing: '1px',
+          }}>
+            {selectedDistance}m {selectedStroke.charAt(0) + selectedStroke.slice(1).toLowerCase()}
+          </div>
         </div>
       </div>
     );
