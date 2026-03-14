@@ -106,8 +106,8 @@ export class ArenaManager {
     // Create scene
     this.scene = new BABYLON.Scene(this.engine);
     this.scene.clearColor = new BABYLON.Color4(0.1, 0.1, 0.15, 1);
-    this.scene.collisionsEnabled = false; // No physics for performance
-    this.scene.physicsEnabled = false;
+    // Note: collisionsEnabled and physicsEnabled are not valid Scene properties
+    // Physics is managed through the physics engine, not scene-level flags
 
     // Setup environment
     await this.createArena();
@@ -293,8 +293,9 @@ export class ArenaManager {
 
       camera.attachControl(this.canvas!, true);
       camera.wheelPrecision = 20;
-      camera.angularSensibilityX = 1000;
-      camera.angularSensibilityY = 1000;
+      // Use correct ArcRotateCamera sensitivity property names
+      camera.angularSensibility = 1000;
+      camera.inertia = 0.7;
       camera.lowerRadiusLimit = 10;
       camera.upperRadiusLimit = 100;
 

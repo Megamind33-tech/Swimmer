@@ -557,7 +557,7 @@ const TIME_OF_DAY_CONFIG = {
         // Add crowd to Left
         for (let j = 0; j < 20; j++) {
             const spectatorGroup = new Mesh(`specL_${i}_${j}`, scene);
-            spectatorGroup.position.set(stepL.position.x, stepL.position.y, (Math.random() - 0.5) * bleacherWidth);
+            spectatorGroup.position = new Vector3(stepL.position.x, stepL.position.y, (Math.random() - 0.5) * bleacherWidth);
             
             // Torso
             const torso = MeshBuilder.CreateBox("torso", { width: 0.4, height: 0.6, depth: 0.3 }, scene);
@@ -585,7 +585,7 @@ const TIME_OF_DAY_CONFIG = {
         // Add crowd to Right
         for (let j = 0; j < 20; j++) {
             const spectatorGroup = new Mesh(`specR_${i}_${j}`, scene);
-            spectatorGroup.position.set(stepR.position.x, stepR.position.y, (Math.random() - 0.5) * bleacherWidth);
+            spectatorGroup.position = new Vector3(stepR.position.x, stepR.position.y, (Math.random() - 0.5) * bleacherWidth);
             
             // Torso
             const torso = MeshBuilder.CreateBox("torso", { width: 0.4, height: 0.6, depth: 0.3 }, scene);
@@ -677,7 +677,7 @@ const TIME_OF_DAY_CONFIG = {
 
     // Stadium Scoreboard (Jumbotron)
     const scoreboard = MeshBuilder.CreateBox('scoreboard', { width: 24, height: 12, depth: 1 }, scene);
-    scoreboard.position.set(0, 18, poolLength / 2 + 15);
+    scoreboard.position = new Vector3(0, 18, poolLength / 2 + 15);
     const sbMat = new StandardMaterial('sbMat', scene);
     const sbTex = new DynamicTexture('sbTex', { width: 1024, height: 512 }, scene);
     sbMat.diffuseTexture = sbTex;
@@ -702,7 +702,7 @@ const TIME_OF_DAY_CONFIG = {
     for (let z = -hallLength/2 + 10; z <= hallLength/2 - 10; z += 20) {
         const truss = MeshBuilder.CreateCylinder(`truss_${z}`, { height: hallWidth, diameter: 0.8 }, scene);
         truss.rotation.z = Math.PI / 2;
-        truss.position.set(0, hallHeight - 2, z);
+        truss.position = new Vector3(0, hallHeight - 2, z);
         truss.material = trussMat;
         trusses.push(truss);
     }
@@ -713,7 +713,7 @@ const TIME_OF_DAY_CONFIG = {
     for (let i = 0; i < bannerColors.length; i++) {
         const banner = MeshBuilder.CreatePlane(`banner_${i}`, { width: 4, height: 10, sideOrientation: Mesh.DOUBLESIDE }, scene);
         const xPos = -hallWidth/2 + 15 + i * ((hallWidth - 30) / (bannerColors.length - 1));
-        banner.position.set(xPos, hallHeight - 7, -hallLength/2 + 1);
+        banner.position = new Vector3(xPos, hallHeight - 7, -hallLength/2 + 1);
         const bMat = new StandardMaterial(`bMat_${i}`, scene);
         bMat.diffuseColor = Color3.FromHexString(bannerColors[i]);
         banner.material = bMat;
@@ -1022,7 +1022,7 @@ const TIME_OF_DAY_CONFIG = {
       frontTex.hasAlpha = true;
       
       const laneNumPlane = MeshBuilder.CreatePlane(`laneNumPlane_${laneIndex}`, { width: 0.6, height: 0.4 }, scene);
-      laneNumPlane.position.set(x, 0.3, -poolLength / 2 - 1.2 + 0.41); // Slightly in front of the base
+      laneNumPlane.position = new Vector3(x, 0.3, -poolLength / 2 - 1.2 + 0.41); // Slightly in front of the base
       laneNumPlane.material = frontMat;
       water.addToRenderList(laneNumPlane);
       
@@ -1076,13 +1076,13 @@ const TIME_OF_DAY_CONFIG = {
     // Signage / Flags
     const createFlagPost = (x: number, z: number) => {
       const post = MeshBuilder.CreateCylinder(`post_${x}_${z}`, { diameter: 0.1, height: 4 }, scene);
-      post.position.set(x, 2, z);
+      post.position = new Vector3(x, 2, z);
       const postMat = new StandardMaterial(`postMat_${x}_${z}`, scene);
       postMat.diffuseColor = new Color3(0.5, 0.5, 0.5);
       post.material = postMat;
 
       const sign = MeshBuilder.CreatePlane(`sign_${x}_${z}`, { size: 1.5 }, scene);
-      sign.position.set(x, 3.5, z);
+      sign.position = new Vector3(x, 3.5, z);
       sign.rotation.y = Math.PI / 2;
       const signMat = new StandardMaterial(`signMat_${x}_${z}`, scene);
       signMat.diffuseColor = v.signColor;
@@ -1103,13 +1103,13 @@ const TIME_OF_DAY_CONFIG = {
     startLightMatsRef.current = [];
     const createStartLightSystem = (xPos: number, facingRight: boolean) => {
       const pole = MeshBuilder.CreateCylinder(`lightPole_${xPos}`, { diameter: 0.2, height: 4 }, scene);
-      pole.position.set(xPos, 2, -poolLength / 2 - 1.2);
+      pole.position = new Vector3(xPos, 2, -poolLength / 2 - 1.2);
       const poleMat = new StandardMaterial(`lightPoleMat_${xPos}`, scene);
       poleMat.diffuseColor = new Color3(0.2, 0.2, 0.2);
       pole.material = poleMat;
 
       const box = MeshBuilder.CreateBox(`lightBox_${xPos}`, { width: 0.4, height: 1.8, depth: 0.6 }, scene);
-      box.position.set(xPos, 3, -poolLength / 2 - 1.2);
+      box.position = new Vector3(xPos, 3, -poolLength / 2 - 1.2);
       const boxMat = new StandardMaterial(`lightBoxMat_${xPos}`, scene);
       boxMat.diffuseColor = new Color3(0.1, 0.1, 0.1);
       box.material = boxMat;
@@ -1117,7 +1117,7 @@ const TIME_OF_DAY_CONFIG = {
       for (let i = 0; i < 3; i++) {
         const light = MeshBuilder.CreateSphere(`startLight_${xPos}_${i}`, { diameter: 0.4 }, scene);
         // Position slightly forward (towards the pool)
-        light.position.set(xPos + (facingRight ? 0.2 : -0.2), 3.6 - i * 0.6, -poolLength / 2 - 1.2);
+        light.position = new Vector3(xPos + (facingRight ? 0.2 : -0.2), 3.6 - i * 0.6, -poolLength / 2 - 1.2);
         const lightMat = new StandardMaterial(`startLightMat_${xPos}_${i}`, scene);
         lightMat.diffuseColor = new Color3(0.1, 0.1, 0.1);
         lightMat.emissiveColor = new Color3(0, 0, 0); // Off initially
