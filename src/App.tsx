@@ -321,7 +321,8 @@ const TIME_OF_DAY_CONFIG = {
   }, []);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    // Only initialize if canvas exists and game has started
+    if (!canvasRef.current || !gameStarted) return;
 
     const initializeGame = async () => {
       let v = VENUES[currentVenue];
@@ -1349,7 +1350,7 @@ const TIME_OF_DAY_CONFIG = {
       // Cleanup scene and engine
       engine.dispose();
     };
-  }, [currentVenue, customColors]);
+  }, [currentVenue, customColors, gameStarted]);
 
   return (
     <div className="w-full h-screen bg-slate-900 flex flex-col overflow-hidden relative">
@@ -1400,6 +1401,7 @@ const TIME_OF_DAY_CONFIG = {
             setRaceStatus('countdown');
           }}
           onSettings={() => {
+            setShowMenu(false);
             setShowSettings(true);
           }}
         />
@@ -1427,7 +1429,9 @@ const TIME_OF_DAY_CONFIG = {
               recordedDataRef.current = [];
               setIsRecording(true);
             }
+            // Hide settings first, then show menu, then start game
             setShowSettings(false);
+            setShowMenu(false);
             setGameStarted(true);
             // Auto-start race countdown
             countdownRef.current = 3.0;
@@ -1437,8 +1441,8 @@ const TIME_OF_DAY_CONFIG = {
         />
       )}
 
-      {/* Game Content - Only show after menu starts game */}
-      {gameStarted && (
+      {/* Game Content - Only show after menu starts game and not in settings */}
+      {gameStarted && !showSettings && !showMenu && (
         <>
           {/* Pause Menu */}
           {showPauseMenu && (
@@ -1453,14 +1457,14 @@ const TIME_OF_DAY_CONFIG = {
             />
           )}
 
-      
+
       <main className="flex-1 relative min-h-0">
-        <canvas 
-          ref={canvasRef} 
+        <canvas
+          ref={canvasRef}
           className="absolute inset-0 w-full h-full block outline-none touch-none"
           id="renderCanvas"
         />
-        
+
       </main>
 
         </>
