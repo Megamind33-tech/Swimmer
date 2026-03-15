@@ -16,6 +16,7 @@
 
 import { EventEmitter } from '../utils/index';
 import { RaceEngine } from './RaceEngine';
+import { RaceRecorder, IRaceReplay } from './RaceRecorder';
 import { IRaceSetup, IRaceState, ISwimmerRaceState, RaceState } from '../types/index';
 
 export interface RaceControllerEvents {
@@ -27,6 +28,7 @@ export interface RaceControllerEvents {
   raceFinished: IRaceState;
   racePaused: number;
   raceResumed: number;
+  replayRecorded: IRaceReplay;
   error: string;
 }
 
@@ -36,6 +38,7 @@ export interface RaceControllerEvents {
  */
 export class RaceController extends EventEmitter<RaceControllerEvents> {
   private raceEngine: RaceEngine;
+  private raceRecorder: RaceRecorder;
   private raceState: IRaceState | null = null;
   private raceSetup: IRaceSetup | null = null;
   private countdownTimer: number = 0;
@@ -50,6 +53,7 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
     super();
     // RaceEngine will be initialized when initializeRace is called with setup
     this.raceEngine = null as any;
+    this.raceRecorder = new RaceRecorder();
   }
 
   /**
@@ -61,6 +65,9 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
 
       // Initialize RaceEngine with setup
       this.raceEngine = new RaceEngine(setup);
+
+      // Start recording race
+      this.raceRecorder.startRecording(`race_${Date.now()}`, setup);
 
       // Initialize race state
       this.raceState = {
@@ -181,6 +188,12 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
             rank: swimmer.finishRank,
             time: swimmer.finishTime,
           });
+
+          // Record finish event
+          this.raceRecorder.recordEvent(this.raceState.currentTime, 'finish', swimmer.id, swimmer.name, {
+            rank: swimmer.finishRank,
+            time: swimmer.finishTime,
+          });
         }
       } else {
         // Track leader
@@ -190,6 +203,9 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
         }
       }
     }
+
+    // Record frame data for replay
+    this.raceRecorder.recordFrame(this.raceState.currentTime, this.raceState.swimmers);
 
     // Emit progress update (every 500ms)
     this.frameCount++;
@@ -238,6 +254,10 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
       time: swimmer.finishTime,
       pace: swimmer.finishTime > 0 ? (this.raceSetup!.distance / (swimmer.finishTime / 1000)) * 0.5 : 0, // simplified pace
     }));
+
+    // Record final race data and emit replay
+    const replay = this.raceRecorder.stopRecording(this.raceState.currentTime);
+    this.emit('replayRecorded', replay);
 
     this.emit('raceFinished', this.raceState);
   }
@@ -317,6 +337,13 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
         time: swimmer.finishTime,
       });
     }
+  }
+
+  /**
+   * Get race recorder for accessing replay data
+   */
+  public getRecorder(): RaceRecorder {
+    return this.raceRecorder;
   }
 
   /**
