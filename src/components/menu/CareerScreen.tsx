@@ -56,31 +56,32 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
   const progressPercent = ((completedTiers + 0.5) / totalTiers) * 100;
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
+    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-4xl font-black text-white mb-2">Career Journey</h1>
-          <p className="text-slate-400">Your path to becoming a championship swimmer</p>
+        <div className="animate-slide-in-down">
+          <h1 className="text-5xl font-black text-primary mb-2 text-glow">Career Journey</h1>
+          <p className="text-on-surface-variant text-lg">Your path to becoming a championship swimmer</p>
         </div>
 
         {/* Overall Progress */}
-        <div className="bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-lg p-6 border border-slate-600/30">
+        <div className="glass-panel rounded-full p-8 border border-primary/30 kinetic-border animate-slide-in-left shadow-lg shadow-primary/10">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-white">Career Progression</span>
-              <span className="text-sm text-cyan-400 font-bold">{currentTier}/{totalTiers}</span>
+              <span className="font-bold text-on-background text-lg">Career Progression</span>
+              <span className="text-sm text-primary font-bold bg-primary/20 px-3 py-1 rounded-full">{currentTier}/{totalTiers}</span>
             </div>
-            <div className="w-full bg-slate-600/50 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-surface-container-high rounded-full h-4 overflow-hidden border border-primary/20">
               <div
-                className="bg-gradient-to-r from-cyan-500 to-blue-500 h-3 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-primary via-secondary to-primary h-4 rounded-full transition-all duration-500 shadow-lg shadow-primary/50"
                 style={{ width: `${progressPercent}%` }}
               ></div>
             </div>
-            <div className="grid grid-cols-5 gap-2 text-xs text-slate-400 mt-2">
+            <div className="grid grid-cols-5 gap-2 text-xs text-on-surface-variant mt-4">
               {CareerTiers.map((tier) => (
-                <div key={tier.tier} className="text-center">
+                <div key={tier.tier} className="text-center p-2 bg-surface-container/30 rounded-lg border border-outline/20">
                   <div className="text-xs font-bold">{tier.name}</div>
+                  <div className="text-primary text-xs">{tier.events} Events</div>
                 </div>
               ))}
             </div>
@@ -94,30 +95,30 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
               key={tier.tier}
               className={`rounded-lg border transition-all ${
                 expandedTier === tier.tier
-                  ? 'border-cyan-500/50 bg-slate-700/50'
-                  : 'border-slate-600/30 bg-slate-800/30 hover:bg-slate-800/50'
+                  ? 'glass-panel border-primary/60 kinetic-border shadow-lg shadow-primary/20'
+                  : 'glass-panel border-outline/30 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10'
               }`}
             >
               {/* Tier Header */}
               <button
                 onClick={() => setExpandedTier(expandedTier === tier.tier ? -1 : tier.tier)}
-                className={`w-full px-6 py-4 flex items-center justify-between text-left transition-colors ${
-                  expandedTier === tier.tier ? 'bg-slate-700/50' : 'hover:bg-slate-700/30'
+                className={`w-full px-6 py-4 flex items-center justify-between text-left transition-all ${
+                  expandedTier === tier.tier ? 'bg-primary/10' : 'hover:bg-primary/5'
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-4 h-4 rounded-full bg-gradient-to-br ${tier.color}`}></div>
+                  <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${tier.color} border-2 border-primary/50 shadow-lg shadow-primary/20`}></div>
                   <div>
-                    <h3 className="font-bold text-white text-lg">Tier {tier.tier}: {tier.name}</h3>
-                    <p className="text-sm text-slate-400">{tier.events} Events</p>
+                    <h3 className="font-bold text-on-background text-lg">Tier {tier.tier}: {tier.name}</h3>
+                    <p className="text-sm text-on-surface-variant">{tier.events} Events</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   {idx <= completedTiers && (
-                    <span className="text-lg">✓</span>
+                    <span className="text-lg text-secondary bg-secondary/20 px-3 py-1 rounded-full">✓</span>
                   )}
                   <svg
-                    className={`w-6 h-6 text-slate-400 transition-transform ${
+                    className={`w-6 h-6 text-primary transition-transform ${
                       expandedTier === tier.tier ? 'rotate-180' : ''
                     }`}
                     fill="none"
@@ -131,33 +132,33 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
 
               {/* Events List (Expanded) */}
               {expandedTier === tier.tier && (
-                <div className="border-t border-slate-600/30 p-6 space-y-2">
+                <div className="border-t border-outline/30 p-6 space-y-3 bg-surface-container/30">
                   {CareerEvents.filter((e) => e.tier === tier.tier).map((event) => (
                     <button
                       key={event.id}
                       onClick={() => onEventSelect?.(event.id)}
-                      className={`w-full px-4 py-3 rounded-lg text-left transition-all border ${
+                      className={`w-full px-4 py-4 rounded-lg text-left transition-all border backdrop-blur-sm ${
                         event.status === 'CURRENT'
-                          ? 'bg-cyan-500/20 border-cyan-500/50 hover:bg-cyan-500/30'
+                          ? 'bg-primary/20 border-primary/50 hover:bg-primary/30 hover:shadow-lg hover:shadow-primary/20 kinetic-border'
                           : event.status === 'COMPLETED'
-                          ? 'bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/20'
-                          : 'bg-slate-600/20 border-slate-600/30 opacity-50'
+                          ? 'bg-secondary/15 border-secondary/40 hover:bg-secondary/25 kinetic-border'
+                          : 'bg-surface-container/20 border-outline/20 opacity-50 hover:opacity-60'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-bold text-white">
+                          <div className="font-bold text-on-background text-lg">
                             {event.status === 'CURRENT' && '▶ '}
                             {event.status === 'COMPLETED' && '✓ '}
                             {event.status === 'LOCKED' && '🔒 '}
                             {event.name}
                           </div>
-                          <div className="text-xs text-slate-400">{event.distance} • Difficulty: {event.difficulty}/10</div>
+                          <div className="text-xs text-on-surface-variant">{event.distance} • Difficulty: {event.difficulty}/10</div>
                         </div>
                         {event.reward && (
                           <div className="text-right">
-                            <div className="text-xs text-emerald-400">{event.reward.xp} XP</div>
-                            <div className="text-xs text-yellow-400">{event.reward.coins} Coins</div>
+                            <div className="text-xs text-secondary font-bold">{event.reward.xp} XP</div>
+                            <div className="text-xs text-primary font-bold">{event.reward.coins} Coins</div>
                           </div>
                         )}
                       </div>
@@ -170,22 +171,22 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
         </div>
 
         {/* Milestones */}
-        <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-lg p-6 border border-purple-500/30">
-          <h2 className="text-2xl font-black text-white mb-6">Milestones</h2>
+        <div className="glass-panel rounded-lg p-8 border border-secondary/40 kinetic-border animate-slide-in-right shadow-lg shadow-secondary/10">
+          <h2 className="text-3xl font-black text-secondary mb-8 text-glow">Milestones</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {Milestones.map((milestone) => (
               <div
                 key={milestone.id}
-                className={`p-4 rounded-lg text-center border transition-all ${
+                className={`p-6 rounded-lg text-center border transition-all backdrop-blur-sm ${
                   milestone.achieved
-                    ? 'bg-purple-500/30 border-purple-500/50'
-                    : 'bg-slate-600/20 border-slate-600/30 opacity-50'
+                    ? 'bg-secondary/20 border-secondary/50 shadow-lg shadow-secondary/20'
+                    : 'bg-surface-container/20 border-outline/30 opacity-50'
                 }`}
               >
-                <div className="text-3xl mb-2">{milestone.icon}</div>
-                <div className="text-sm font-bold text-white">{milestone.name}</div>
+                <div className="text-4xl mb-3">{milestone.icon}</div>
+                <div className="text-sm font-bold text-on-background">{milestone.name}</div>
                 {milestone.achieved && (
-                  <div className="text-xs text-purple-300 mt-2">Achieved</div>
+                  <div className="text-xs text-secondary mt-3 font-bold">✓ Achieved</div>
                 )}
               </div>
             ))}

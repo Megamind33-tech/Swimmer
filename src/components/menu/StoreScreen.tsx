@@ -192,34 +192,34 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             {FeaturedItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-gradient-to-br from-yellow-600/30 to-amber-600/20 rounded-lg overflow-hidden border-2 border-yellow-500/50 hover:border-yellow-500 transition-all"
+                className="glass-panel rounded-lg overflow-hidden border-2 border-secondary/50 hover:border-secondary kinetic-border shadow-lg shadow-secondary/20 hover:shadow-lg hover:shadow-secondary/40 transition-all"
               >
-                <div className="p-6 space-y-4">
+                <div className="p-6 space-y-4 bg-gradient-to-br from-secondary/15 to-primary/10">
                   <div className="flex items-start justify-between">
-                    <div className="text-5xl">{item.icon}</div>
+                    <div className="text-6xl">{item.icon}</div>
                     {item.tag && (
-                      <span className="px-3 py-1 bg-red-500 text-white text-xs font-black rounded-full">
+                      <span className="px-3 py-1 bg-error text-on-background text-xs font-black rounded-full border border-error/50">
                         {item.tag}
                       </span>
                     )}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-white mb-1">{item.name}</h3>
-                    <p className="text-sm text-slate-300">{item.description}</p>
+                    <h3 className="text-2xl font-black text-on-background mb-1">{item.name}</h3>
+                    <p className="text-sm text-on-surface-variant">{item.description}</p>
                   </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-yellow-500/30">
+                  <div className="flex items-center justify-between pt-4 border-t border-primary/30">
                     <span
-                      className={`text-xs px-3 py-1 rounded-full font-bold ${
+                      className={`text-xs px-3 py-1 rounded-full font-bold border ${
                         item.rarity === 'LEGENDARY'
-                          ? 'bg-yellow-500/30 text-yellow-300'
-                          : 'bg-purple-500/30 text-purple-300'
+                          ? 'bg-secondary/30 text-secondary border-secondary/50'
+                          : 'bg-primary/30 text-primary border-primary/50'
                       }`}
                     >
                       {item.rarity}
                     </span>
                     <button
                       onClick={() => handlePurchase(item)}
-                      className="px-6 py-2 bg-gradient-to-r from-yellow-500 to-amber-500 hover:shadow-lg hover:shadow-yellow-500/50 rounded-lg text-white font-bold transition-all flex items-center gap-2"
+                      className="px-6 py-2 bg-gradient-to-r from-secondary to-secondary/70 hover:shadow-lg hover:shadow-secondary/60 rounded-lg text-on-primary font-bold transition-all flex items-center gap-2 border border-secondary/60"
                     >
                       <span>◆ {item.price}</span>
                     </button>
@@ -235,31 +235,31 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             {CosmeticItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-slate-700/50 rounded-lg overflow-hidden border border-slate-600/30 hover:border-slate-500/50 transition-all hover:bg-slate-600/50"
+                className="glass-panel rounded-lg overflow-hidden border border-primary/30 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all hover:bg-primary/5"
               >
-                <div className="h-40 bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center">
+                <div className="h-40 bg-gradient-to-br from-primary/20 to-secondary/10 flex items-center justify-center">
                   <div className="text-6xl">{item.icon}</div>
                 </div>
                 <div className="p-4 space-y-3">
                   <div>
-                    <h3 className="font-bold text-white text-sm">{item.name}</h3>
-                    <p className="text-xs text-slate-400 mt-1">{item.description}</p>
+                    <h3 className="font-bold text-on-background text-sm">{item.name}</h3>
+                    <p className="text-xs text-on-surface-variant mt-1">{item.description}</p>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-600/30">
+                  <div className="flex items-center justify-between pt-3 border-t border-outline/20">
                     <span
-                      className={`text-xs px-2 py-1 rounded font-bold ${
+                      className={`text-xs px-2 py-1 rounded font-bold border ${
                         item.rarity === 'EPIC'
-                          ? 'bg-purple-500/30 text-purple-300'
+                          ? 'bg-secondary/30 text-secondary border-secondary/40'
                           : item.rarity === 'LEGENDARY'
-                          ? 'bg-yellow-500/30 text-yellow-300'
-                          : 'bg-blue-500/30 text-blue-300'
+                          ? 'bg-primary/30 text-primary border-primary/40'
+                          : 'bg-secondary/20 text-secondary border-secondary/30'
                       }`}
                     >
                       {item.rarity}
                     </span>
                     <button
                       onClick={() => handlePurchase(item)}
-                      className="px-3 py-1 bg-cyan-500/30 hover:bg-cyan-500/50 rounded text-xs font-bold text-cyan-300 transition-colors"
+                      className="px-3 py-1 bg-primary/40 hover:bg-primary/60 rounded text-xs font-bold text-primary transition-colors border border-primary/40"
                     >
                       ◆ {item.price}
                     </button>
@@ -272,19 +272,19 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
       case 'SEASON_PASS':
         return (
           <div className="space-y-6">
-            <div className="bg-gradient-to-r from-blue-600/30 to-cyan-600/30 rounded-lg p-8 border border-blue-500/30">
-              <h3 className="text-2xl font-black text-white mb-3">Premium Season Pass</h3>
-              <p className="text-slate-300 mb-6">Unlock 50 premium tiers with exclusive rewards</p>
+            <div className="glass-panel rounded-lg p-8 border border-secondary/50 kinetic-border shadow-lg shadow-secondary/20 bg-gradient-to-br from-secondary/15 to-primary/10">
+              <h3 className="text-3xl font-black text-secondary mb-4 text-glow">Premium Season Pass</h3>
+              <p className="text-on-surface-variant mb-6 text-lg">Unlock 50 premium tiers with exclusive rewards</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 {['Exclusive Cosmetics', '2x XP Boost', 'Premium Currency', 'Seasonal Weapon'].map((benefit) => (
-                  <div key={benefit} className="bg-blue-500/20 rounded p-3 text-center">
-                    <div className="text-sm font-bold text-white">{benefit}</div>
+                  <div key={benefit} className="glass-panel rounded-lg p-4 text-center border border-secondary/30 kinetic-border">
+                    <div className="text-sm font-bold text-on-background">{benefit}</div>
                   </div>
                 ))}
               </div>
               <button
                 onClick={() => handlePurchase({ id: 'season-pass', name: 'Premium Season Pass', description: '', price: 999, currency: 'PREMIUM', rarity: 'EPIC', icon: '⭐' })}
-                className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:shadow-lg hover:shadow-blue-500/50 rounded-lg text-white font-black text-lg transition-all"
+                className="w-full px-6 py-4 bg-gradient-to-r from-secondary to-secondary/70 hover:shadow-lg hover:shadow-secondary/60 rounded-lg text-on-primary font-black text-lg transition-all border border-secondary/60 kinetic-border"
               >
                 Unlock Pass - ◆ 999
               </button>
@@ -310,13 +310,13 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             ].map((bundle) => (
               <div
                 key={bundle.id}
-                className="bg-gradient-to-br from-purple-600/30 to-pink-600/30 rounded-lg p-6 border border-purple-500/30"
+                className="glass-panel rounded-lg p-6 border border-primary/40 kinetic-border shadow-lg shadow-primary/15 hover:shadow-lg hover:shadow-primary/30 transition-all bg-gradient-to-br from-primary/15 to-secondary/10"
               >
-                <h3 className="text-xl font-black text-white mb-2">{bundle.name}</h3>
-                <p className="text-sm text-slate-300 mb-4">{bundle.items}</p>
+                <h3 className="text-2xl font-black text-on-background mb-2">{bundle.name}</h3>
+                <p className="text-sm text-on-surface-variant mb-4 font-semibold">{bundle.items}</p>
                 <button
                   onClick={() => handlePurchase({ id: bundle.id, name: bundle.name, description: bundle.items, price: bundle.price, currency: 'PREMIUM', rarity: 'EPIC', icon: '📦' })}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/50 rounded-lg text-white font-bold transition-all"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg hover:shadow-primary/60 rounded-lg text-on-primary font-bold transition-all border border-primary/60 kinetic-border"
                 >
                   Buy Bundle - ◆ {bundle.price}
                 </button>
@@ -330,19 +330,19 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             {CelebrationPacks.map((item) => (
               <div
                 key={item.id}
-                className="bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-lg overflow-hidden border border-slate-600/30 hover:border-slate-500/50 transition-all"
+                className="glass-panel rounded-lg overflow-hidden border border-secondary/40 kinetic-border shadow-lg shadow-secondary/15 hover:shadow-lg hover:shadow-secondary/30 transition-all"
               >
-                <div className="h-40 bg-gradient-to-br from-purple-600/20 to-pink-600/20 flex items-center justify-center">
+                <div className="h-40 bg-gradient-to-br from-secondary/20 to-primary/15 flex items-center justify-center">
                   <div className="text-6xl animate-bounce">{item.icon}</div>
                 </div>
                 <div className="p-4 space-y-3">
                   <div>
-                    <h3 className="font-bold text-white text-sm">{item.name}</h3>
-                    <p className="text-xs text-slate-400 mt-1">{item.description}</p>
+                    <h3 className="font-bold text-on-background text-sm">{item.name}</h3>
+                    <p className="text-xs text-on-surface-variant mt-1">{item.description}</p>
                   </div>
                   <button
                     onClick={() => handlePurchase(item)}
-                    className="w-full px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/30 rounded text-xs font-bold text-white transition-all"
+                    className="w-full px-3 py-2 bg-gradient-to-r from-secondary to-secondary/70 hover:shadow-lg hover:shadow-secondary/50 rounded text-xs font-bold text-on-primary transition-all border border-secondary/50 kinetic-border"
                   >
                     ◆ {item.price}
                   </button>
@@ -353,18 +353,18 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
         );
       case 'EVENT_SHOP':
         return (
-          <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600/30">
-            <h3 className="text-xl font-black text-white mb-4">Event Shop - Sprint Cup</h3>
-            <p className="text-slate-400 mb-4">Limited-time items available during current event</p>
+          <div className="glass-panel rounded-lg p-6 border border-primary/40 kinetic-border shadow-lg shadow-primary/15 bg-gradient-to-br from-primary/10 to-secondary/5">
+            <h3 className="text-2xl font-black text-on-background mb-2">Event Shop - Sprint Cup</h3>
+            <p className="text-on-surface-variant mb-6 text-sm font-semibold">Limited-time items available during current event</p>
             <div className="space-y-3">
               {[
                 { name: 'Sprint Boost Pack', cost: '500 Event Tokens' },
                 { name: 'Exclusive Sprint Suit', cost: '1000 Event Tokens' },
                 { name: 'VIP Event Pass', cost: '2000 Event Tokens' },
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-slate-600/50 p-4 rounded-lg">
-                  <div className="font-bold text-white">{item.name}</div>
-                  <button className="px-4 py-2 bg-yellow-500/30 hover:bg-yellow-500/50 rounded text-yellow-300 font-bold text-sm transition-colors">
+                <div key={idx} className="flex items-center justify-between glass-panel p-4 rounded-lg border border-primary/30 kinetic-border">
+                  <div className="font-bold text-on-background text-lg">{item.name}</div>
+                  <button className="px-4 py-2 bg-primary/40 hover:bg-primary/60 rounded-lg text-primary font-bold text-sm transition-colors border border-primary/40 kinetic-border">
                     {item.cost}
                   </button>
                 </div>
@@ -378,43 +378,43 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
+    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header with Currency Display */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between animate-slide-in-down">
           <div>
-            <h1 className="text-4xl font-black text-white mb-2">Store</h1>
-            <p className="text-slate-400">Premium cosmetics and season pass</p>
+            <h1 className="text-5xl font-black text-primary mb-2 text-glow">Store</h1>
+            <p className="text-on-surface-variant text-lg">Premium cosmetics and season pass</p>
           </div>
           <div className="flex gap-4">
-            <div className="px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg border border-cyan-500/50">
-              <div className="text-xs text-cyan-200">Premium Currency</div>
-              <div className="text-2xl font-black text-white">◆ {playerPremiumCurrency}</div>
+            <div className="glass-panel px-5 py-4 bg-gradient-to-br from-primary/30 to-primary/10 rounded-lg border border-primary/50 kinetic-border shadow-lg shadow-primary/20">
+              <div className="text-xs text-secondary font-bold uppercase">Premium Currency</div>
+              <div className="text-2xl font-black text-primary">◆ {playerPremiumCurrency}</div>
             </div>
-            <div className="px-4 py-3 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-lg border border-yellow-500/50">
-              <div className="text-xs text-yellow-200">Coins</div>
-              <div className="text-2xl font-black text-white">$ {playerCoins.toLocaleString()}</div>
+            <div className="glass-panel px-5 py-4 bg-gradient-to-br from-secondary/30 to-secondary/10 rounded-lg border border-secondary/50 kinetic-border shadow-lg shadow-secondary/20">
+              <div className="text-xs text-secondary font-bold uppercase">Coins</div>
+              <div className="text-2xl font-black text-secondary">$ {playerCoins.toLocaleString()}</div>
             </div>
           </div>
         </div>
 
         {/* Notification */}
         {purchaseMessage && (
-          <div className="px-6 py-3 bg-emerald-500/20 border border-emerald-500/50 rounded-lg text-emerald-300 font-bold">
+          <div className="px-6 py-3 glass-panel bg-secondary/20 border border-secondary/60 rounded-lg text-secondary font-bold kinetic-border shadow-lg shadow-secondary/20">
             ✓ {purchaseMessage}
           </div>
         )}
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-3 flex-wrap animate-slide-in-up">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-lg font-bold uppercase text-sm transition-all ${
+              className={`flex items-center gap-2 px-4 py-3 rounded-full font-bold uppercase text-sm transition-all border ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
+                  ? 'bg-gradient-to-r from-primary to-secondary text-on-primary shadow-lg shadow-primary/40 kinetic-border border-primary/60'
+                  : 'glass-panel text-on-surface-variant border-outline/30 hover:border-primary/40 hover:bg-primary/5'
               }`}
             >
               {tab.icon}
@@ -424,7 +424,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div>{renderTab()}</div>
+        <div className="animate-slide-in-left">{renderTab()}</div>
       </div>
     </div>
   );

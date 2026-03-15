@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed": "#4f5051",
+                        "tertiary-fixed": "#ffffff",
+                        "surface-container-highest": "#1c2639",
+                        "on-error": "#490006",
+                        "tertiary-container": "#ebebeb",
+                        "primary-container": "#00e3fd",
+                        "error-container": "#9f0519",
+                        "inverse-primary": "#006976",
+                        "on-secondary-container": "#c4ceff",
+                        "error-dim": "#d7383b",
+                        "primary-fixed": "#00e3fd",
+                        "secondary-container": "#3a446f",
+                        "secondary-fixed-dim": "#b7c1f4",
+                        "primary": "#81ecff",
+                        "on-tertiary-container": "#555757",
+                        "tertiary": "#f9f9f9",
+                        "on-primary-fixed-variant": "#005762",
+                        "on-primary-fixed": "#003840",
+                        "secondary-dim": "#b2bcee",
+                        "on-tertiary-fixed-variant": "#6c6d6e",
+                        "inverse-on-surface": "#4e5565",
+                        "on-secondary-fixed": "#27325b",
+                        "on-primary-container": "#004d57",
+                        "outline-variant": "#414857",
+                        "surface-container": "#11192a",
+                        "surface-bright": "#222c41",
+                        "surface-container-lowest": "#000000",
+                        "on-background": "#e2e8fb",
+                        "primary-fixed-dim": "#00d4ec",
+                        "on-primary": "#005762",
+                        "on-secondary": "#37416c",
+                        "surface-container-high": "#172031",
+                        "secondary": "#bfcafd",
+                        "on-surface-variant": "#a5abbd",
+                        "surface-variant": "#1c2639",
+                        "tertiary-dim": "#ebebeb",
+                        "on-tertiary": "#5e5f60",
+                        "error": "#ff716c",
+                        "outline": "#6f7586",
+                        "inverse-surface": "#f9f9ff",
+                        "on-error-container": "#ffa8a3",
+                        "on-surface": "#e2e8fb",
+                        "tertiary-fixed-dim": "#f0f1f1",
+                        "secondary-fixed": "#c6cfff",
+                        "surface-tint": "#81ecff",
+                        "surface": "#070e1b",
+                        "on-secondary-fixed-variant": "#444e7a",
+                        "surface-container-low": "#0c1322",
+                        "primary-dim": "#00d4ec",
+                        "background": "#070e1b",
+                        "surface-dim": "#070e1b"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .skew-12 { transform: skewX(-12deg); }
+        .skew-12-reverse { transform: skewX(12deg); }
+        .kinetic-border {
+            border: 2px solid;
+            border-image: linear-gradient(to right, #81ecff, transparent) 1;
+        }
+        .gold-glow {
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4));
+        }
+        .glass-panel {
+            background: rgba(28, 38, 57, 0.6);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body overflow-x-hidden">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 px-4 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">waves</span>
+<span class="font-headline font-bold text-xl tracking-tighter">SWIM26</span>
+</div>
+<div class="bg-surface-container-highest px-4 py-1 skew-12 border border-primary/30">
+<div class="skew-12-reverse flex items-center gap-4 text-xs font-label font-bold text-primary">
+<span>1,250 Gold</span>
+<span class="text-on-surface-variant">|</span>
+<span>50 SP</span>
+</div>
+</div>
+</nav>
+<main class="relative min-h-screen pt-16 pb-24">
+<!-- Hero Section with Background -->
+<div class="relative h-[45vh] w-full overflow-hidden">
+<img class="absolute inset-0 w-full h-full object-cover opacity-60" data-alt="Cinematic wide shot of Olympic swimming arena" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDx1sRlpWamMkB7FEIkDklAKTT4ZjDB-b5CbRzW_FNAVeZYANVgz__S-UTlhvXXaA6PCzMCp44FK10JVYu-zVHcrqf1GBD9hKFsNpkgE5_a2uu6iWlfkxJ7tkpPipXeg5mI01qeVNqO7nxUQfKdmmRicHpCTlARKQC71hBW5AbMsItbUD4HvfhzHBuK6iDv4-mrLHWzaj1q6on4iKYeqZ59dCQXYvefWt0UF4ZB7nQYAFPjZMJUZdGcSwjyLPHar16AnmPIx43lrZaE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+<div class="mb-4 relative">
+<div class="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-full"></div>
+<span class="material-symbols-outlined text-8xl text-yellow-400 gold-glow" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+</div>
+<h1 class="font-headline text-5xl md:text-7xl font-bold italic uppercase tracking-tighter leading-none skew-12">
+                    National<br/><span class="text-primary">Championships</span>
+</h1>
+<p class="mt-4 font-label text-sm uppercase tracking-[0.3em] text-on-surface-variant">Season 26 • Elite Division</p>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="max-w-5xl mx-auto px-6 -mt-8 relative z-10">
+<div class="flex flex-col md:flex-row gap-4 items-center justify-between p-6 glass-panel border-l-4 border-primary">
+<div class="flex gap-8">
+<div>
+<p class="text-[10px] uppercase font-label text-on-surface-variant">Prize Pool</p>
+<p class="text-2xl font-headline font-bold text-yellow-400">50,000 GOLD</p>
+</div>
+<div>
+<p class="text-[10px] uppercase font-label text-on-surface-variant">Registration</p>
+<p class="text-2xl font-headline font-bold">CLOSING SOON</p>
+</div>
+</div>
+<button class="bg-primary hover:bg-primary-dim text-on-primary font-headline font-bold px-10 py-4 uppercase tracking-wider skew-12 transition-all">
+<span class="inline-block skew-12-reverse">Register Now</span>
+</button>
+</div>
+</div>
+<!-- Competition Grid -->
+<div class="max-w-5xl mx-auto px-6 mt-16 grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Top 8 Heats -->
+<div class="lg:col-span-7">
+<div class="flex items-end justify-between mb-8 border-b border-outline-variant/30 pb-2">
+<h2 class="font-headline text-3xl font-bold italic uppercase">Top 8 Heats</h2>
+<span class="font-label text-xs text-primary font-bold">LIVE UPDATES</span>
+</div>
+<div class="space-y-3">
+<!-- Heat Card 1 -->
+<div class="group flex items-center justify-between p-4 bg-surface-container-low hover:bg-surface-container-high transition-colors relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
+<div class="flex items-center gap-6">
+<span class="font-headline text-2xl font-bold italic text-on-surface-variant w-8">01</span>
+<div class="h-12 w-12 bg-surface-variant relative">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="Athlete profile headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1U9eAOoLC-Li1aeARZD1KbXaKh1pC_8GAZJqc6r0F6i5y2Po53GGVMpTSqrM_Y4cyUYj0IIjkImMol50aLiVGw5wiwHAdfNio-FoU0JxL0Cs4HvO3NgE0qEuW-TBVkGr0hF7-kK6afPohb7qyUZ_uClCaefdKN8zBfFcsFBlmr3JEnTPpGkp-lqLb3NarTsHLCMRCvR9KuPuTUcDjjLB8dVdCFfiwexYiHw_j-wAZzH-HJ2_rGw7td9CTCiws7fi-E67Ma2ke_DCE"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg leading-none">MARCUS REED</h3>
+<p class="text-xs font-label text-on-surface-variant uppercase mt-1">Titan Aquatics • Lane 4</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-xl text-primary tracking-tight">21.42s</p>
+<div class="bg-yellow-400/10 text-yellow-400 text-[10px] px-2 py-0.5 inline-block font-bold">RECORD PACE</div>
+</div>
+</div>
+<!-- Heat Card 2 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low/60 relative overflow-hidden">
+<div class="flex items-center gap-6">
+<span class="font-headline text-2xl font-bold italic text-on-surface-variant w-8">02</span>
+<div class="h-12 w-12 bg-surface-variant">
+<img class="w-full h-full object-cover grayscale opacity-50" data-alt="Athlete profile headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChq9C06fqhdjTYi-aQywidG2bgeWPkBmTlsHR98HWKoWx6AZ2Mv4gMXm1r959WOvZlzdgpeO7BajAg9XaXPo9nIIMjNWR5VY-E4j3N8fws95qEUPbYr2gMEtNsoo9C81EWzzqm4LI1UGnE1jvYfvGm--q4zEsA1ZEDg4Ens-IUNSfFIMFxFA6ilP7I8qRQkixk3uiM01ab7NiAuPGuMqpxGloE57nfOkmBiBACIeaGn6S6nLx729uQTItF3JQ-fMPJ3NgOt8F-LErU"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg leading-none">SARAH CHEN</h3>
+<p class="text-xs font-label text-on-surface-variant uppercase mt-1">Pacific Blue • Lane 5</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-xl text-on-surface tracking-tight">21.89s</p>
+</div>
+</div>
+<!-- Heat Card 3 -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low/60 relative overflow-hidden">
+<div class="flex items-center gap-6">
+<span class="font-headline text-2xl font-bold italic text-on-surface-variant w-8">03</span>
+<div class="h-12 w-12 bg-surface-variant">
+<img class="w-full h-full object-cover grayscale opacity-50" data-alt="Athlete profile headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-1kpqY6ArTnr3fkTiKHTjEc_C9OAcpsYqCiatp3Wj0ZxCmp-eKligfGHAL0zO66o_qE5oyBCbiiZEGmTcTjJmr8BmTfcnCiwHhfTUide7zyeOzBCS-NWhG3m0I8Wx-wgneOfHlYrdDjHGIv2OUcES-ren-o7H4R9hkZYG65NPKNHTORZMRIscSwXs-_iedrMODb-dwRnWzDDBkzwA122v0Oecw2JOy4vM5ykLZc3n25xrDrwMnQiw7Fssjk13l_Dx7PJ9WmTX-ZMZ"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-lg leading-none">JACK DAWSON</h3>
+<p class="text-xs font-label text-on-surface-variant uppercase mt-1">Vortex Swim • Lane 3</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline font-bold text-xl text-on-surface tracking-tight">22.01s</p>
+</div>
+</div>
+<!-- More entries simplified for brevity -->
+<div class="p-4 border border-dashed border-outline-variant/30 flex justify-center cursor-pointer hover:bg-surface-container-low transition-all">
+<span class="font-label text-xs font-bold text-on-surface-variant uppercase tracking-widest">View Full Leaderboard</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Tournament Bracket Mini & Stats -->
+<div class="lg:col-span-5 space-y-8">
+<div>
+<h2 class="font-headline text-xl font-bold italic uppercase mb-4 border-l-4 border-yellow-400 pl-4">Quarter Finals</h2>
+<div class="glass-panel p-6 space-y-6">
+<!-- Matchup 1 -->
+<div class="space-y-1">
+<div class="flex justify-between items-center bg-surface-container-highest p-2 border-r-4 border-primary">
+<span class="font-label text-xs font-bold">M. REED</span>
+<span class="font-headline font-bold text-primary">WIN</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container p-2 opacity-50">
+<span class="font-label text-xs font-bold">T. WOLFE</span>
+<span class="font-headline font-bold">22.4</span>
+</div>
+</div>
+<!-- Matchup 2 -->
+<div class="space-y-1">
+<div class="flex justify-between items-center bg-surface-container-highest p-2 border-r-4 border-yellow-400">
+<span class="font-label text-xs font-bold">S. CHEN</span>
+<span class="font-headline font-bold text-yellow-400">WIN</span>
+</div>
+<div class="flex justify-between items-center bg-surface-container p-2 opacity-50">
+<span class="font-label text-xs font-bold">V. ROSS</span>
+<span class="font-headline font-bold">22.1</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Personal Milestone Card -->
+<div class="relative group p-6 overflow-hidden bg-surface-container-highest kinetic-border">
+<div class="relative z-10">
+<p class="font-label text-[10px] uppercase text-primary font-bold mb-1">Your Standing</p>
+<h3 class="font-headline text-3xl font-bold italic mb-4">TIER: ELITE</h3>
+<div class="h-2 w-full bg-surface-container-low mb-4">
+<div class="h-full bg-primary" style="width: 75%"></div>
+</div>
+<p class="font-body text-xs text-on-surface-variant">Rank #142 globally. Need 4,500 more SP to qualify for the Semi-Finals.</p>
+</div>
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-on-surface/5 rotate-12">trending_up</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-xl border-t border-outline-variant/20 px-2 h-20 flex justify-around items-center">
+<div class="flex flex-col items-center gap-1 cursor-pointer transition-all border-t-2 border-primary px-4 pt-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label text-[10px] font-bold uppercase text-primary">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer opacity-50 hover:opacity-100 transition-all px-4 pt-2">
+<span class="material-symbols-outlined">sports_score</span>
+<span class="font-label text-[10px] font-bold uppercase">Career</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer opacity-50 hover:opacity-100 transition-all px-4 pt-2">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label text-[10px] font-bold uppercase">Social</span>
+</div>
+<div class="flex flex-col items-center gap-1 cursor-pointer opacity-50 hover:opacity-100 transition-all px-4 pt-2">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="font-label text-[10px] font-bold uppercase">Rewards</span>
+</div>
+</nav>
+</body></html>

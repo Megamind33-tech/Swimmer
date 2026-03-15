@@ -126,12 +126,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
               { label: 'FPS Target', value: settings.fps.toString(), options: ['30', '60', '120', '144'] },
               { label: 'Water Quality', value: settings.waterQuality, options: ['LOW', 'MEDIUM', 'HIGH', 'ULTRA'] },
             ].map((option, idx) => (
-              <div key={idx} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-                <label className="text-sm text-slate-300 mb-2 block">{option.label}</label>
+              <div key={idx} className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+                <label className="text-sm text-secondary font-bold mb-3 block uppercase">{option.label}</label>
                 <select
                   value={option.value}
                   onChange={(e) => setSettings({ ...settings, [option.label.toLowerCase().replace(' ', '')]: e.target.value })}
-                  className="w-full bg-slate-600/50 border border-slate-600/30 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                  className="w-full bg-surface-container/50 border border-primary/30 rounded-lg px-4 py-3 text-on-background focus:outline-none focus:border-primary/80 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-base"
                 >
                   {option.options.map((opt) => (
                     <option key={opt} value={opt}>
@@ -141,10 +141,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
                 </select>
               </div>
             ))}
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={settings.vsync} onChange={(e) => setSettings({ ...settings, vsync: e.target.checked })} className="w-5 h-5" />
-                <span className="text-white font-bold">V-Sync</span>
+                <input type="checkbox" checked={settings.vsync} onChange={(e) => setSettings({ ...settings, vsync: e.target.checked })} className="w-6 h-6 accent-primary rounded border-2 border-primary/50" />
+                <span className="text-on-background font-bold text-lg">V-Sync</span>
               </label>
             </div>
           </div>
@@ -158,10 +158,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
               { label: 'SFX Volume', key: 'sfxVolume', value: settings.sfxVolume },
               { label: 'Dialogue Volume', key: 'dialogueVolume', value: settings.dialogueVolume },
             ].map((volume, idx) => (
-              <div key={idx} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-white font-bold">{volume.label}</label>
-                  <span className="text-cyan-400 font-bold">{volume.value}%</span>
+              <div key={idx} className="glass-panel rounded-lg p-5 border border-secondary/20 kinetic-border shadow-lg shadow-secondary/10 hover:shadow-lg hover:shadow-secondary/20 transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-on-background font-bold text-lg">{volume.label}</label>
+                  <span className="text-secondary font-bold bg-secondary/20 px-3 py-1 rounded-full text-sm">{volume.value}%</span>
                 </div>
                 <input
                   type="range"
@@ -169,14 +169,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
                   max="100"
                   value={volume.value}
                   onChange={(e) => setSettings({ ...settings, [volume.key]: parseInt(e.target.value) })}
-                  className="w-full"
+                  className="w-full accent-secondary h-2 rounded-full"
                 />
               </div>
             ))}
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
+            <div className="glass-panel rounded-lg p-5 border border-secondary/20 kinetic-border shadow-lg shadow-secondary/10 hover:shadow-lg hover:shadow-secondary/20 transition-all">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={settings.announcer} onChange={(e) => setSettings({ ...settings, announcer: e.target.checked })} className="w-5 h-5" />
-                <span className="text-white font-bold">Announcer Voice</span>
+                <input type="checkbox" checked={settings.announcer} onChange={(e) => setSettings({ ...settings, announcer: e.target.checked })} className="w-6 h-6 accent-secondary rounded border-2 border-secondary/50" />
+                <span className="text-on-background font-bold text-lg">Announcer Voice</span>
               </label>
             </div>
           </div>
@@ -184,22 +184,22 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
       case 'CONTROLS':
         return (
           <div className="space-y-4">
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-              <label className="text-sm text-slate-300 mb-2 block">Touch Mode</label>
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+              <label className="text-sm text-secondary font-bold mb-3 block uppercase">Touch Mode</label>
               <select
                 value={settings.touchMode}
                 onChange={(e) => setSettings({ ...settings, touchMode: e.target.value })}
-                className="w-full bg-slate-600/50 border border-slate-600/30 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-surface-container/50 border border-primary/30 rounded-lg px-4 py-3 text-on-background focus:outline-none focus:border-primary/80 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-base"
               >
                 <option value="TAP">Tap</option>
                 <option value="HOLD">Hold</option>
                 <option value="SWIPE">Swipe</option>
               </select>
             </div>
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-white font-bold">Sensitivity</label>
-                <span className="text-cyan-400 font-bold">{settings.sensitivity}</span>
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-on-background font-bold text-lg">Sensitivity</label>
+                <span className="text-primary font-bold bg-primary/20 px-3 py-1 rounded-full text-sm">{settings.sensitivity}</span>
               </div>
               <input
                 type="range"
@@ -207,19 +207,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
                 max="100"
                 value={settings.sensitivity}
                 onChange={(e) => setSettings({ ...settings, sensitivity: parseInt(e.target.value) })}
-                className="w-full"
+                className="w-full accent-primary h-2 rounded-full"
               />
             </div>
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={settings.hapticFeedback} onChange={(e) => setSettings({ ...settings, hapticFeedback: e.target.checked })} className="w-5 h-5" />
-                <span className="text-white font-bold">Haptic Feedback</span>
+                <input type="checkbox" checked={settings.hapticFeedback} onChange={(e) => setSettings({ ...settings, hapticFeedback: e.target.checked })} className="w-6 h-6 accent-primary rounded border-2 border-primary/50" />
+                <span className="text-on-background font-bold text-lg">Haptic Feedback</span>
               </label>
             </div>
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={settings.leftHanded} onChange={(e) => setSettings({ ...settings, leftHanded: e.target.checked })} className="w-5 h-5" />
-                <span className="text-white font-bold">Left-Handed Mode</span>
+                <input type="checkbox" checked={settings.leftHanded} onChange={(e) => setSettings({ ...settings, leftHanded: e.target.checked })} className="w-6 h-6 accent-primary rounded border-2 border-primary/50" />
+                <span className="text-on-background font-bold text-lg">Left-Handed Mode</span>
               </label>
             </div>
           </div>
@@ -227,22 +227,22 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
       case 'CAMERA':
         return (
           <div className="space-y-4">
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-              <label className="text-sm text-slate-300 mb-2 block">Camera Mode</label>
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+              <label className="text-sm text-secondary font-bold mb-3 block uppercase">Camera Mode</label>
               <select
                 value={settings.cameraMode}
                 onChange={(e) => setSettings({ ...settings, cameraMode: e.target.value })}
-                className="w-full bg-slate-600/50 border border-slate-600/30 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-surface-container/50 border border-primary/30 rounded-lg px-4 py-3 text-on-background focus:outline-none focus:border-primary/80 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-base"
               >
                 <option value="BROADCAST">Broadcast View</option>
                 <option value="GAMEPLAY">Gameplay View</option>
                 <option value="HYBRID">Hybrid View</option>
               </select>
             </div>
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-white font-bold">Field of View</label>
-                <span className="text-cyan-400 font-bold">{settings.fov}°</span>
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-on-background font-bold text-lg">Field of View</label>
+                <span className="text-primary font-bold bg-primary/20 px-3 py-1 rounded-full text-sm">{settings.fov}°</span>
               </div>
               <input
                 type="range"
@@ -250,13 +250,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
                 max="120"
                 value={settings.fov}
                 onChange={(e) => setSettings({ ...settings, fov: parseInt(e.target.value) })}
-                className="w-full"
+                className="w-full accent-primary h-2 rounded-full"
               />
             </div>
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-white font-bold">Camera Distance</label>
-                <span className="text-cyan-400 font-bold">{settings.cameraDistance}</span>
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-on-background font-bold text-lg">Camera Distance</label>
+                <span className="text-primary font-bold bg-primary/20 px-3 py-1 rounded-full text-sm">{settings.cameraDistance}</span>
               </div>
               <input
                 type="range"
@@ -264,19 +264,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
                 max="100"
                 value={settings.cameraDistance}
                 onChange={(e) => setSettings({ ...settings, cameraDistance: parseInt(e.target.value) })}
-                className="w-full"
+                className="w-full accent-primary h-2 rounded-full"
               />
             </div>
           </div>
         );
       case 'LANGUAGE':
         return (
-          <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-            <label className="text-sm text-slate-300 mb-2 block">Game Language</label>
+          <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+            <label className="text-sm text-secondary font-bold mb-3 block uppercase">Game Language</label>
             <select
               value={settings.language}
               onChange={(e) => setSettings({ ...settings, language: e.target.value })}
-              className="w-full bg-slate-600/50 border border-slate-600/30 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+              className="w-full bg-surface-container/50 border border-primary/30 rounded-lg px-4 py-3 text-on-background focus:outline-none focus:border-primary/80 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-base"
             >
               <option value="English">English</option>
               <option value="Japanese">日本語 (Japanese)</option>
@@ -290,12 +290,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
       case 'ACCESSIBILITY':
         return (
           <div className="space-y-4">
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-              <label className="text-sm text-slate-300 mb-2 block">Colorblind Mode</label>
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+              <label className="text-sm text-secondary font-bold mb-3 block uppercase">Colorblind Mode</label>
               <select
                 value={settings.colorblindMode}
                 onChange={(e) => setSettings({ ...settings, colorblindMode: e.target.value })}
-                className="w-full bg-slate-600/50 border border-slate-600/30 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-surface-container/50 border border-primary/30 rounded-lg px-4 py-3 text-on-background focus:outline-none focus:border-primary/80 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-base"
               >
                 <option value="OFF">Off</option>
                 <option value="PROTANOPIA">Protanopia (Red-Green)</option>
@@ -303,12 +303,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
                 <option value="TRITANOPIA">Tritanopia (Blue-Yellow)</option>
               </select>
             </div>
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-              <label className="text-sm text-slate-300 mb-2 block">Font Size</label>
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
+              <label className="text-sm text-secondary font-bold mb-3 block uppercase">Font Size</label>
               <select
                 value={settings.fontSize}
                 onChange={(e) => setSettings({ ...settings, fontSize: e.target.value })}
-                className="w-full bg-slate-600/50 border border-slate-600/30 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                className="w-full bg-surface-container/50 border border-primary/30 rounded-lg px-4 py-3 text-on-background focus:outline-none focus:border-primary/80 focus:ring-2 focus:ring-primary/20 transition-all font-bold text-base"
               >
                 <option value="SMALL">Small</option>
                 <option value="NORMAL">Normal</option>
@@ -316,10 +316,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
                 <option value="XLARGE">Extra Large</option>
               </select>
             </div>
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
+            <div className="glass-panel rounded-lg p-5 border border-primary/20 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={settings.subtitles} onChange={(e) => setSettings({ ...settings, subtitles: e.target.checked })} className="w-5 h-5" />
-                <span className="text-white font-bold">Show Subtitles</span>
+                <input type="checkbox" checked={settings.subtitles} onChange={(e) => setSettings({ ...settings, subtitles: e.target.checked })} className="w-6 h-6 accent-primary rounded border-2 border-primary/50" />
+                <span className="text-on-background font-bold text-lg">Show Subtitles</span>
               </label>
             </div>
           </div>
@@ -327,28 +327,28 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
       case 'ACCOUNT':
         return (
           <div className="space-y-4">
-            <div className="bg-gradient-to-br from-cyan-600/20 to-blue-600/20 rounded-lg p-6 border border-cyan-500/30">
-              <h3 className="text-lg font-black text-white mb-3">Account Information</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Player Name:</span>
-                  <span className="text-white font-bold">Elite Swimmer</span>
+            <div className="glass-panel rounded-lg p-6 border border-secondary/40 kinetic-border shadow-lg shadow-secondary/10">
+              <h3 className="text-lg font-black text-secondary mb-4 text-glow uppercase">Account Information</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center border-b border-outline/20 pb-3">
+                  <span className="text-on-surface-variant font-bold">Player Name:</span>
+                  <span className="text-on-background font-bold text-base">Elite Swimmer</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Player ID:</span>
-                  <span className="text-white font-mono">PL-1847325</span>
+                <div className="flex justify-between items-center border-b border-outline/20 pb-3">
+                  <span className="text-on-surface-variant font-bold">Player ID:</span>
+                  <span className="text-on-background font-mono text-base bg-primary/10 px-3 py-1 rounded-lg">PL-1847325</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Account Created:</span>
-                  <span className="text-white">March 1, 2025</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-bold">Account Created:</span>
+                  <span className="text-on-background text-base">March 1, 2025</span>
                 </div>
               </div>
             </div>
             <button
               onClick={onLogout}
-              className="w-full px-6 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:shadow-lg hover:shadow-red-500/50 text-white font-bold uppercase rounded-lg transition-all"
+              className="w-full px-6 py-4 bg-gradient-to-r from-error to-error/70 hover:shadow-lg hover:shadow-error/50 text-on-background font-black uppercase rounded-lg transition-all kinetic-border border-error/60 text-lg"
             >
-              Logout
+              Sign Out
             </button>
           </div>
         );
@@ -358,24 +358,24 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
+    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-4xl font-black text-white mb-2">Settings</h1>
-          <p className="text-slate-400">Customize your gaming experience</p>
+        <div className="animate-slide-in-down">
+          <h1 className="text-5xl font-black text-primary mb-2 text-glow">Settings</h1>
+          <p className="text-on-surface-variant text-lg">Customize your gaming experience</p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-3 flex-wrap animate-slide-in-up">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-lg font-bold uppercase text-sm transition-all ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-full font-bold uppercase text-sm transition-all border ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
+                  ? 'bg-gradient-to-r from-primary to-secondary text-on-primary shadow-lg shadow-primary/40 kinetic-border border-primary/60'
+                  : 'glass-panel text-on-surface-variant border-outline/30 hover:border-primary/40 hover:bg-primary/5'
               }`}
             >
               {tab.icon}
@@ -385,15 +385,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
         </div>
 
         {/* Tab Content */}
-        <div>{renderTab()}</div>
+        <div className="animate-slide-in-left">{renderTab()}</div>
 
         {/* Save Button */}
-        <div className="flex gap-4">
+        <div className="flex gap-4 animate-slide-in-right">
           <button
             onClick={onSave}
-            className="flex-1 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-500/50 text-white font-black uppercase rounded-lg transition-all"
+            className="flex-1 px-6 py-4 bg-gradient-to-r from-primary via-secondary to-primary hover:shadow-lg hover:shadow-primary/60 text-on-primary font-black uppercase rounded-lg transition-all kinetic-border border-primary/60 text-lg"
           >
-            Save Settings
+            💾 Save Settings
           </button>
         </div>
       </div>
