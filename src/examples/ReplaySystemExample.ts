@@ -146,30 +146,43 @@ export class DynamicBroadcastCameraExample {
   }
 
   /**
-   * During normal racing, the camera rotates between different shots
-   * to provide broadcast-style coverage
+   * During normal racing, the camera follows event-specific sequences
+   * to provide professional broadcast-style coverage
    *
-   * Rotation sequence (every 5 seconds):
-   * 1. PLAYER_FOLLOW - Follow player closely while capturing competitors
-   * 2. WIDE_SHOT - Wide view of the entire pool
-   * 3. COMPETITORS_FOCUS - Focus on competitors and standings
-   * 4. SIDE_FOLLOW - Side perspective of the race
+   * Sequence depends on race event type:
+   * - 50m: Minimal cuts (CAM 07 → CAM 13 → CAM 10 → CAM 18)
+   * - 100m: Turn sequence included (CAM 07 → CAM 09 → CAM 14 → CAM 10)
+   * - 200m: Multiple turns (CAM 07 → CAM 10 with turn sequences)
+   * - Relay: Exchange-driven (CAM 16 overlay for exchange verification)
+   *
+   * Event-driven responses:
+   * - Turn approach (6-8m): CAM 09 (Turn Master)
+   * - Turn contact: CAM 14 (Underwater Turn)
+   * - Final 12m: CAM 18 (Finish Compression)
    */
   public enableDynamicBroadcasting(): void {
-    // Enable automatic shot rotation every 5 seconds
-    this.broadcastCamera.enableDynamicShotRotation(5000);
-
-    // The camera will now cycle through different angles automatically
-    // during the racing phase
+    // The camera will use event-specific shot sequences based on race distance
+    // and automatically respond to dramatic moments (turns, finishes, overtakes)
+    // See CAMERA_PLAN.md for complete 20-camera specification
   }
 
   /**
-   * For replay of exciting moments, manually control camera
+   * For replay of exciting moments, use professional camera angles
+   *
+   * Replay camera priority (from CAMERA_PLAN.md):
+   * 1. CAM 08 - Slow-Mo ISO for finish precision
+   * 2. CAM 13 - Underwater Start for entries & breakouts
+   * 3. CAM 14 - Underwater Turn for push-off discipline
+   * 4. CAM 15 - Underwater Tracking for elite bodyline
+   * 5. CAM 16 - Overhead Tracking for tactical view
+   * 6. CAM 18 - Finish Compression for photo finishes
+   *
+   * Example: Use CAM 14 (Underwater Turn) for dramatic turn replays
    */
   public replayUnderwaterMoment(): void {
-    // Focus on underwater perspective
-    this.broadcastCamera.focusOnUnderwater();
-    // Camera is now at underwater angle showing the swimmer's POV
+    // Transition to underwater turn camera for dramatic replay
+    this.broadcastCamera.transitionToCamera('CAM_14_UNDERWATER_TURN', 800);
+    // Camera shows push-off discipline and streamline quality
   }
 
   /**
@@ -362,23 +375,31 @@ export class CompleteRaceReplayWorkflow {
  */
 
 /**
- * Camera Angles Available
+ * Professional Camera Package (20 Cameras - CAM 01 to CAM 20)
  *
- * Static pre-defined shots:
- * - STARTING_BLOCK: Wide shot of starting blocks
- * - STARTING_BLOCK_CLOSE: Close-up on blocks
- * - AERIAL_OVERVIEW: High aerial view
- * - WIDE_SHOT: Medium wide view of entire pool
- * - FINISH_CAM: View of finish area
- * - FINISH_LINE_CAM: Dramatic finish line angle
- * - COMPETITORS_FOCUS: Focus on competitor lanes
- * - SIDE_FOLLOW: Side perspective follow
- * - UNDERWATER_PERSPECTIVE: Underwater camera angle
+ * MVP Package (7 cameras - first playable):
+ * - CAM 03: Hero Walkout - Athlete entrance (40-55° FOV)
+ * - CAM 06: Overhead Lineup - Pre-start race geography (60-75° FOV)
+ * - CAM 07: Start/Finish Master - Main broadcast race view (24-32° FOV)
+ * - CAM 10: Pool-Deck Tracking - Cinematic race follow (35-50° FOV)
+ * - CAM 14: Underwater Turn - Turn dynamics (45-60° FOV)
+ * - CAM 18: Finish Compression - Final meters drama (14-20° FOV)
+ * - CAM 19: Scoreboard Reaction - Post-race emotion (30-45° FOV)
  *
- * Dynamic follow (automatic):
- * - PLAYER_FOLLOW: Follows player with sway to capture competitors
- *   - Camera oscillates side-to-side
- *   - Follows at 20m distance
- *   - Looks 15m ahead
- *   - Captures multiple swimmers in frame
+ * Premium Package (13 additional cameras):
+ * - CAM 01: Arena Establishing (70-85° FOV) - Championship scale
+ * - CAM 02: Marshalling Camera (45-60° FOV) - Pre-race tension
+ * - CAM 04: Lane Portrait (25-40° FOV) - Athlete close-ups
+ * - CAM 05: Block Detail (20-35° FOV) - Readiness macro inserts
+ * - CAM 08: Finish Slow-Mo ISO (15-24° FOV) - Replay precision
+ * - CAM 09: Turn Master (24-34° FOV) - Wall approach drama
+ * - CAM 11: Handheld Deck A (45-60° FOV) - Walkouts & prep
+ * - CAM 12: Handheld Deck B (35-55° FOV) - Relay coverage
+ * - CAM 13: Underwater Start (45-60° FOV) - Entry & breakout
+ * - CAM 15: Underwater Tracking (35-50° FOV) - Premium signature shot
+ * - CAM 16: Overhead Tracking (55-70° FOV) - Relay precision
+ * - CAM 17: Crane/Jib (60-80° FOV) - Prestige sweeps
+ * - CAM 20: Flash Interview (35-50° FOV) - Winner reactions
+ *
+ * For complete specifications, see CAMERA_PLAN.md
  */
