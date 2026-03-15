@@ -69,7 +69,7 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
   const showRightPanel = currentScreen === 'HOME' && rightPanel;
 
   return (
-    <div className="app-race-theme w-full h-full min-h-dvh bg-background text-on-surface overflow-hidden flex flex-col">
+    <div className="app-race-theme w-screen h-dvh bg-background text-on-surface overflow-hidden flex flex-col">
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-blue-900/20 rounded-full blur-3xl"></div>
@@ -89,12 +89,12 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
           onNotificationsClick={onNotificationsClick}
         />
 
-        <div className="flex-1 min-h-0 flex overflow-hidden max-[900px]:overflow-y-auto gap-2 px-2 py-2 max-[900px]:px-1 max-[900px]:py-1">
-          <div className="w-16 max-[900px]:w-10 shrink-0 min-h-0 block">
+        <div className="flex-1 flex overflow-hidden gap-2 px-2 py-2 max-[900px]:px-0 max-[900px]:py-0">
+          <div className="max-[900px]:hidden">
             <LeftNavigationRail currentScreen={currentScreen} onScreenChange={onScreenChange} />
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-1 pb-2 max-[900px]:pb-1">{children}</div>
+          <div className="flex-1 overflow-y-auto max-[900px]:px-2 max-[900px]:pt-2">{children}</div>
 
           {showRightPanel && (
             <div className="w-72 bg-black/45 backdrop-blur-md border-l border-white/10 overflow-y-auto p-3 space-y-3 max-[900px]:hidden">
@@ -104,7 +104,7 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
         </div>
 
         {showRightPanel && (
-          <div className="hidden max-[900px]:block border-t border-white/10 bg-black/45 px-2 py-2 max-h-36 overflow-y-auto">
+          <div className="hidden max-[900px]:block border-t border-white/10 bg-black/45 px-2 py-2 max-h-44 overflow-y-auto">
             {rightPanel}
           </div>
         )}

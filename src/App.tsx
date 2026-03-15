@@ -41,33 +41,10 @@ export default function App() {
   const navigate = (screen: MenuScreen) => setCurrentScreen(screen);
 
   const [isPortrait, setIsPortrait] = useState(() => window.innerHeight > window.innerWidth);
-  const [enforceLandscape, setEnforceLandscape] = useState(() => {
-    const isTouchLike = window.matchMedia('(pointer: coarse)').matches;
-    return isTouchLike || window.innerWidth < 900;
-  });
-
-
-  useEffect(() => {
-    const setAppHeight = () => {
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-      document.documentElement.style.setProperty('--app-height', `${viewportHeight}px`);
-    };
-
-    setAppHeight();
-    window.addEventListener('resize', setAppHeight);
-    window.visualViewport?.addEventListener('resize', setAppHeight);
-
-    return () => {
-      window.removeEventListener('resize', setAppHeight);
-      window.visualViewport?.removeEventListener('resize', setAppHeight);
-    };
-  }, []);
 
   useEffect(() => {
     const updateOrientation = () => {
       setIsPortrait(window.innerHeight > window.innerWidth);
-      const isTouchLike = window.matchMedia('(pointer: coarse)').matches;
-      setEnforceLandscape(isTouchLike || window.innerWidth < 900);
     };
 
     updateOrientation();
@@ -173,14 +150,14 @@ export default function App() {
   }, [currentScreen]);
 
 
-  if (enforceLandscape && isPortrait) {
+  if (isPortrait) {
     return (
       <div className="app-race-theme flex h-dvh w-screen items-center justify-center p-6 text-center">
         <div className="glass-panel max-w-sm rounded-lg border border-white/20 p-6">
           <div className="material-symbols-outlined mb-3 text-5xl text-primary-fixed">screen_rotation</div>
           <h1 className="text-xl font-black uppercase tracking-wide text-primary-fixed">Landscape Required</h1>
           <p className="mt-2 text-sm text-on-surface-variant">
-            SWIM26 runs in landscape on phones. For browser testing on desktop, portrait is allowed.
+            SWIM26 is locked to landscape mode. Rotate your device to continue.
           </p>
         </div>
       </div>

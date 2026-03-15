@@ -186,22 +186,14 @@ body {
   padding: 0;
   overflow: hidden;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   font-family: "IBM Plex Sans", sans-serif;
   background: #070d18;
 }
 
 #root {
   width: 100%;
-  min-height: 100vh;
-  height: var(--app-height);
-  min-height: var(--app-height);
-}
-
-@supports (height: 100svh) {
-  #root {
-    min-height: 100svh;
-  }
+  height: 100%;
 }
 
 .app-race-theme {

@@ -51,7 +51,7 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = ({
   ];
 
   return (
-    <nav className="h-[74px] max-[900px]:h-[54px] bg-black/70 backdrop-blur-md border-t border-white/10 px-1 flex items-center justify-center gap-1 sticky bottom-0 z-50">
+    <nav className="h-20 max-[900px]:h-16 bg-black/60 backdrop-blur-md border-t border-white/10 px-2 max-[900px]:px-1 flex items-center justify-center gap-1 sticky bottom-0 z-50">
       {quickActions.map((action) => (
         <button
           key={action.id}
@@ -61,12 +61,12 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = ({
               onScreenChange(defaultActionRoute[action.id]);
             }
           }}
-          className="group flex flex-col items-center justify-center gap-0.5 px-1 py-1 hover:bg-white/10 transition-colors rounded-lg flex-1 border border-transparent hover:border-white/10"
+          className="group flex flex-col items-center justify-center gap-1 px-2 py-2 hover:bg-white/10 transition-colors rounded-lg flex-1 border border-transparent hover:border-white/10"
         >
           <span className="material-symbols-outlined text-white/70 group-hover:text-primary-fixed transition-colors max-[900px]:text-base">
             {action.icon}
           </span>
-          <span className="text-[9px] max-[900px]:text-[8px] font-bold text-white/70 group-hover:text-primary-fixed transition-colors uppercase tracking-tighter">
+          <span className="text-[10px] max-[900px]:text-[9px] font-bold text-white/70 group-hover:text-primary-fixed transition-colors uppercase tracking-tighter">
             {action.label}
           </span>
         </button>
