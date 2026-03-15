@@ -19,6 +19,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   const [selectedDistance, setSelectedDistance] = useState('100M');
   const [selectedStroke, setSelectedStroke] = useState('FREESTYLE');
   const [selectedVenue, setSelectedVenue] = useState('olympic');
+  const [isStarting, setIsStarting] = useState(false);
 
   const distances = ['50M', '100M', '200M', '400M', '800M', '1500M'];
   const strokes = ['FREESTYLE', 'BUTTERFLY', 'BREASTSTROKE', 'BACKSTROKE', 'IM'];
@@ -189,17 +190,62 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
         <div className="flex gap-4 max-w-4xl mx-auto">
           <button
             onClick={onCancel}
-            className="flex-1 px-8 py-4 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/50 text-white font-bold uppercase transition-all"
+            disabled={isStarting}
+            className="flex-1 px-8 py-4 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/50 hover:border-slate-500 text-white font-bold uppercase transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
-            onClick={onConfirmRace}
-            className="flex-1 px-8 py-4 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-500/50 text-white font-bold uppercase transition-all"
+            onClick={() => {
+              setIsStarting(true);
+              setTimeout(() => {
+                onConfirmRace?.();
+              }, 300);
+            }}
+            disabled={isStarting}
+            className="flex-1 group relative px-8 py-4 rounded-lg overflow-hidden text-white font-bold uppercase transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Start Race
+            {/* Animated gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 group-hover:opacity-110 transition-opacity duration-300"></div>
+
+            {/* Animated shine effect */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-gradient-to-r from-white to-transparent transition-all duration-500"></div>
+
+            {/* Loading animation */}
+            {isStarting && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+            )}
+
+            {/* Content */}
+            <span className="relative flex items-center justify-center gap-2">
+              {isStarting ? (
+                <>
+                  <span>Loading Race...</span>
+                  <span className="inline-block animate-spin">⚡</span>
+                </>
+              ) : (
+                <>
+                  <span>Start Race</span>
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                </>
+              )}
+            </span>
+
+            {/* Bottom glow */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-50 blur-sm transition-all duration-300"></div>
           </button>
         </div>
+
+        <style>{`
+          @keyframes shimmer {
+            0% {
+              transform: translateX(-100%);
+            }
+            100% {
+              transform: translateX(100%);
+            }
+          }
+        `}</style>
       </div>
     </div>
   );
