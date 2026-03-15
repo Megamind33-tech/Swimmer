@@ -33,12 +33,12 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
   onScreenChange,
 }) => {
   return (
-    <nav className="w-full h-full bg-black/45 backdrop-blur-md border-r border-white/10 flex flex-col items-center py-2 gap-1 overflow-y-auto">
+    <nav className="w-20 max-[900px]:w-14 bg-black/45 backdrop-blur-md border-r border-white/10 flex flex-col items-center py-4 max-[900px]:py-2 gap-1 overflow-y-auto sticky left-0 top-16 max-[900px]:top-12">
       {NavItems.map((item) => (
         <button
           key={item.id}
           onClick={() => onScreenChange(item.id)}
-          className={`relative w-12 h-12 max-[900px]:w-10 max-[900px]:h-10 rounded-lg flex flex-col items-center justify-center gap-1 transition-all duration-300 group border ${
+          className={`w-16 h-16 max-[900px]:w-11 max-[900px]:h-11 rounded-lg flex flex-col items-center justify-center gap-1 transition-all duration-300 group border ${
             currentScreen === item.id
               ? 'bg-primary/25 text-primary-fixed border-primary/60 scale-100 shadow-[0_0_18px_rgba(15,98,254,0.35)]'
               : 'text-white/70 hover:text-primary-fixed hover:bg-white/10 border-transparent'
@@ -48,7 +48,7 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
           <span className="material-symbols-outlined text-xl max-[900px]:text-lg transition-transform duration-300 group-hover:scale-110">
             {item.icon}
           </span>
-          <span className="sr-only">{item.label}</span>
+          <span className="text-[10px] max-[900px]:hidden font-bold text-center leading-tight">{item.label}</span>
 
           {/* Active indicator bar */}
           {currentScreen === item.id && (
