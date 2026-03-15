@@ -45,7 +45,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Profile Button */}
         <button
           onClick={onProfileClick}
-          className="flex items-center gap-3 hover:bg-surface-container-high transition-colors px-3 py-2 rounded-full group"
+          className="flex items-center gap-2 hover:bg-surface-container-high transition-colors px-1.5 py-1 rounded-full group"
         >
           {playerAvatarUrl ? (
             <img
@@ -81,7 +81,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       {/* Right Section: Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-0.5">
         {/* Notifications Bell */}
         <button
           onClick={onNotificationsClick}

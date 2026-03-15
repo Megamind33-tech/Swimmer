@@ -45,7 +45,7 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
           } active:scale-95`}
           title={item.label}
         >
-          <span className="material-symbols-outlined text-2xl transition-transform duration-300 group-hover:scale-110">
+          <span className="material-symbols-outlined text-xl max-[900px]:text-lg transition-transform duration-300 group-hover:scale-110">
             {item.icon}
           </span>
           <span className="text-[10px] max-[900px]:hidden font-bold text-center leading-tight">{item.label}</span>

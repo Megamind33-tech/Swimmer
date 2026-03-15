@@ -433,6 +433,13 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                     <button className="text-xs bg-amber-500/25 px-2 py-1 rounded font-black">Renew</button>
                     <button className="text-xs bg-red-500/30 px-2 py-1 rounded font-black">Transfer/Fire</button>
                   </div>
+                  <div className="text-[11px] text-white/90 font-bold mb-1">Targets</div>
+                  <ul className="space-y-1 mb-2 list-disc ml-4 text-[11px] text-white/75">
+                    {s.targets.map((target) => (
+                      <li key={target}>{target}</li>
+                    ))}
+                  </ul>
+                  <div className="text-[11px] p-2 rounded bg-slate-900/55 border border-white/10 text-white/80">Dynamic term: {s.dynamicTerms}</div>
                 </div>
               ))}
             </div>
@@ -647,6 +654,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                   <div className="font-black text-sm">{c.name}</div>
                   <div className="text-xs text-white/70">{c.role} • {c.level}</div>
                 </div>
+                <button className="mt-3 px-3 py-1 rounded bg-primary/35 text-xs font-black uppercase">Apply Branding Set</button>
               </div>
             ))}
           </div>
@@ -677,8 +685,8 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
     <div className="w-full h-full overflow-y-auto p-8 space-y-8">
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
-          <h1 className="text-4xl font-black text-white mb-2">Club HQ</h1>
-          <p className="text-slate-400">Manage your swimming club and dynasty</p>
+          <h1 className="text-3xl max-[900px]:text-xl font-black text-white mb-1">Club HQ</h1>
+          <p className="text-slate-300 text-sm max-[900px]:text-xs">Manage your swimming club and dynasty</p>
         </div>
 
         <div className="flex gap-2 flex-wrap">
