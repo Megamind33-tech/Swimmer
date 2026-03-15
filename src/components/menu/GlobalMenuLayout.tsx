@@ -89,22 +89,22 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
           onNotificationsClick={onNotificationsClick}
         />
 
-        <div className="flex-1 flex overflow-hidden gap-2 px-2 py-2 max-[900px]:px-0 max-[900px]:py-0">
-          <div className="max-[900px]:hidden">
+        <div className="flex-1 flex overflow-hidden gap-2 px-2 py-2 max-[1024px]:px-0 max-[1024px]:py-0">
+          <div>
             <LeftNavigationRail currentScreen={currentScreen} onScreenChange={onScreenChange} />
           </div>
 
-          <div className="flex-1 overflow-y-auto max-[900px]:px-2 max-[900px]:pt-2">{children}</div>
+          <div className="flex-1 overflow-y-auto max-[1024px]:px-2 max-[1024px]:pt-2">{children}</div>
 
           {showRightPanel && (
-            <div className="w-72 bg-black/45 backdrop-blur-md border-l border-white/10 overflow-y-auto p-3 space-y-3 max-[900px]:hidden">
+            <div className="w-72 bg-black/45 backdrop-blur-md border-l border-white/10 overflow-y-auto p-3 space-y-3 max-[1024px]:hidden">
               {rightPanel}
             </div>
           )}
         </div>
 
         {showRightPanel && (
-          <div className="hidden max-[900px]:block border-t border-white/10 bg-black/45 px-2 py-2 max-h-44 overflow-y-auto">
+          <div className="hidden max-[1024px]:block border-t border-white/10 bg-black/45 px-2 py-2 max-h-44 overflow-y-auto">
             {rightPanel}
           </div>
         )}
