@@ -8,7 +8,20 @@ import { TopBar } from './TopBar';
 import { LeftNavigationRail } from './LeftNavigationRail';
 import { BottomQuickBar } from './BottomQuickBar';
 
-export type MenuScreen = 'HOME' | 'PLAY' | 'CAREER' | 'SWIMMER' | 'CLUB' | 'LIVE_EVENTS' | 'SOCIAL' | 'STORE';
+export type MenuScreen =
+  | 'HOME'
+  | 'PLAY'
+  | 'CAREER'
+  | 'SWIMMER'
+  | 'CLUB'
+  | 'LIVE_EVENTS'
+  | 'SOCIAL'
+  | 'STORE'
+  | 'LOCKER_ROOM'
+  | 'REWARDS'
+  | 'PRE_RACE'
+  | 'SETTINGS'
+  | 'POST_GAME';
 
 interface GlobalMenuLayoutProps {
   currentScreen: MenuScreen;
@@ -20,6 +33,16 @@ interface GlobalMenuLayoutProps {
   softCurrency?: number;
   premiumCurrency?: number;
   playerAvatarUrl?: string;
+  onProfileClick?: () => void;
+  onInboxClick?: () => void;
+  onSettingsClick?: () => void;
+  onNotificationsClick?: () => void;
+  onQuickRaceClick?: () => void;
+  onTrainingClick?: () => void;
+  onRankedClick?: () => void;
+  onLockerRoomClick?: () => void;
+  onReplaysClick?: () => void;
+  onRewardsClick?: () => void;
 }
 
 export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
@@ -32,53 +55,69 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
   softCurrency = 0,
   premiumCurrency = 0,
   playerAvatarUrl,
+  onProfileClick,
+  onInboxClick,
+  onSettingsClick,
+  onNotificationsClick,
+  onQuickRaceClick,
+  onTrainingClick,
+  onRankedClick,
+  onLockerRoomClick,
+  onReplaysClick,
+  onRewardsClick,
 }) => {
-  // Show right panel only on HOME screen to maximize hero area
   const showRightPanel = currentScreen === 'HOME' && rightPanel;
 
   return (
-    <div className="w-screen h-screen bg-background text-on-surface overflow-hidden flex flex-col">
-      {/* Background Gradient Elements */}
+    <div className="app-race-theme w-screen h-dvh bg-background text-on-surface overflow-hidden flex flex-col">
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-secondary/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-tertiary/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-blue-900/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-slate-900/30 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Main Content Container */}
       <div className="relative z-10 flex flex-col h-full">
-        {/* Top Bar */}
         <TopBar
           playerLevel={playerLevel}
           playerName={playerName}
           softCurrency={softCurrency}
           premiumCurrency={premiumCurrency}
           playerAvatarUrl={playerAvatarUrl}
+          onProfileClick={onProfileClick}
+          onInboxClick={onInboxClick}
+          onSettingsClick={onSettingsClick}
+          onNotificationsClick={onNotificationsClick}
         />
 
-        {/* Middle Section: Left Nav + Center Content + Right Panel (Landscape) */}
-        <div className="flex-1 flex overflow-hidden gap-4 px-2">
-          {/* Left Navigation Rail */}
-          <LeftNavigationRail
-            currentScreen={currentScreen}
-            onScreenChange={onScreenChange}
-          />
-
-          {/* Center Content Area - Full width or flex */}
-          <div className={`${showRightPanel ? 'flex-1' : 'flex-1'} overflow-y-auto`}>
-            {children}
+        <div className="flex-1 flex overflow-hidden gap-2 px-2 py-2 max-[900px]:px-0 max-[900px]:py-0">
+          <div className="max-[900px]:hidden">
+            <LeftNavigationRail currentScreen={currentScreen} onScreenChange={onScreenChange} />
           </div>
 
-          {/* Right Utility Panel - Only on HOME */}
+          <div className="flex-1 overflow-y-auto max-[900px]:px-2 max-[900px]:pt-2">{children}</div>
+
           {showRightPanel && (
-            <div className="w-72 bg-surface-container/50 backdrop-blur-md border-l border-outline-variant/20 overflow-y-auto p-4 space-y-4">
+            <div className="w-72 bg-black/45 backdrop-blur-md border-l border-white/10 overflow-y-auto p-3 space-y-3 max-[900px]:hidden">
               {rightPanel}
             </div>
           )}
         </div>
 
-        {/* Bottom Quick Bar */}
-        <BottomQuickBar onScreenChange={onScreenChange} />
+        {showRightPanel && (
+          <div className="hidden max-[900px]:block border-t border-white/10 bg-black/45 px-2 py-2 max-h-44 overflow-y-auto">
+            {rightPanel}
+          </div>
+        )}
+
+        <BottomQuickBar
+          onScreenChange={onScreenChange}
+          onQuickRaceClick={onQuickRaceClick}
+          onTrainingClick={onTrainingClick}
+          onRankedClick={onRankedClick}
+          onLockerRoomClick={onLockerRoomClick}
+          onReplaysClick={onReplaysClick}
+          onRewardsClick={onRewardsClick}
+        />
       </div>
     </div>
   );

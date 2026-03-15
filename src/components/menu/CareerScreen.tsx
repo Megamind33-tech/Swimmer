@@ -39,6 +39,49 @@ const CareerEvents: CareerEvent[] = [
   { id: '8', index: 8, tier: 5, name: 'World Championship Final', distance: '200m', difficulty: 9, status: 'LOCKED' },
 ];
 
+
+
+
+
+const SponsorshipDeals = [
+  { brand: 'AquaPulse', status: 'Active', value: '5,000 coins / week', term: 'Ends in 3 weeks' },
+  { brand: 'BlueCurrent Energy', status: 'Incoming', value: '8,500 coins + 150 SP', term: 'Unlock at Tier 3' },
+  { brand: 'ProLane Gear', status: 'Negotiation', value: '12,000 coins + suit bonus', term: 'Need 2 podium finishes' },
+];
+
+const Partners = [
+  { name: 'National Swim Federation', role: 'National Team Pathway', state: 'Aligned' },
+  { name: 'HydroLab Performance', role: 'Sports Science Partner', state: 'Active' },
+  { name: 'WaveLens Media', role: 'Career Coverage', state: 'Prospecting' },
+];
+
+const CoachingUnit = [
+  { name: 'Coach Banda', focus: 'Sprint Mechanics', level: 'Elite' },
+  { name: 'Coach Ndlovu', focus: 'Turns & Underwater', level: 'Senior' },
+  { name: 'Dr. Phiri', focus: 'Recovery & Conditioning', level: 'Performance' },
+];
+
+const TeamContext = [
+  { label: 'Club', value: 'Lusaka Dolphins' },
+  { label: 'Role', value: 'Lead Freestyle Swimmer' },
+  { label: 'Nation', value: 'Zambia National Team' },
+  { label: 'Season Objective', value: 'Qualify for World Championships' },
+];
+
+
+const SeasonCalendar = [
+  { week: 'Week 2', event: 'Regional Meet', stage: 'Club Duty', state: 'Completed' },
+  { week: 'Week 4', event: 'National Championship', stage: 'National Duty', state: 'Current' },
+  { week: 'Week 8', event: 'World Qualifier', stage: 'National Duty', state: 'Upcoming' },
+  { week: 'Week 10', event: 'Continental Cup', stage: 'Club + Nation', state: 'Locked' },
+];
+
+const UpcomingGames = [
+  { id: 'up-1', name: 'Regional Meet - Week 2', mode: 'Club Duty', status: 'Next' },
+  { id: 'up-2', name: 'National Championship - Week 4', mode: 'National Duty', status: 'Priority' },
+  { id: 'up-3', name: 'World Qualifier - Week 8', mode: 'National Duty', status: 'Locked' },
+];
+
 const Milestones = [
   { id: 1, name: 'First Medal', icon: '🏅', achieved: true },
   { id: 2, name: 'First Sponsorship', icon: '💰', achieved: true },
@@ -56,12 +99,108 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
   const progressPercent = ((completedTiers + 0.5) / totalTiers) * 100;
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface">
+    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface relative">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="animate-slide-in-down">
           <h1 className="text-5xl font-black text-primary mb-2 text-glow">Career Journey</h1>
           <p className="text-on-surface-variant text-lg">Your path to becoming a championship swimmer</p>
+        </div>
+
+
+        {/* Career Management Hub */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div className="glass-panel rounded-lg p-4 border border-secondary/35 kinetic-border shadow-lg shadow-secondary/10">
+            <h2 className="text-2xl font-black text-secondary text-glow mb-3">Sponsors & Partners</h2>
+            <div className="space-y-2">
+              {SponsorshipDeals.map((deal) => (
+                <div key={deal.brand} className="bg-surface-container/40 border border-white/10 rounded-lg p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-bold text-on-background">{deal.brand}</div>
+                    <span className={`text-[10px] px-2 py-1 rounded-full font-black uppercase ${
+                      deal.status === 'Active' ? 'bg-secondary/30 text-secondary' : deal.status === 'Incoming' ? 'bg-primary/30 text-primary-fixed' : 'bg-amber-500/25 text-amber-300'
+                    }`}>{deal.status}</span>
+                  </div>
+                  <div className="text-xs mt-1 text-on-surface-variant">{deal.value}</div>
+                  <div className="text-[11px] mt-1 text-white/70">{deal.term}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 space-y-2">
+              {Partners.map((partner) => (
+                <div key={partner.name} className="bg-surface-container/30 border border-white/10 rounded-lg px-3 py-2 text-xs">
+                  <div className="font-bold text-white">{partner.name}</div>
+                  <div className="text-white/70">{partner.role}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-panel rounded-lg p-4 border border-primary/30 kinetic-border shadow-lg shadow-primary/10 space-y-3">
+            <h2 className="text-2xl font-black text-primary text-glow">Club, Coaches & Fixtures</h2>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {TeamContext.map((item) => (
+                <div key={item.label} className="bg-surface-container/40 border border-white/10 rounded-lg px-3 py-2">
+                  <span className="text-white/70">{item.label}:</span> <span className="font-bold">{item.value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wide text-secondary mb-2">Coaching Team</h3>
+              <div className="space-y-2">
+                {CoachingUnit.map((coach) => (
+                  <div key={coach.name} className="bg-surface-container/40 border border-white/10 rounded-lg px-3 py-2 text-xs">
+                    <div className="font-bold text-white">{coach.name} · <span className="text-secondary">{coach.level}</span></div>
+                    <div className="text-white/75">{coach.focus}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-wide text-secondary mb-2">Games to Take Part In</h3>
+              <div className="space-y-2">
+                {UpcomingGames.map((game) => (
+                  <button key={game.id} onClick={() => onEventSelect?.(game.id)} className="w-full text-left bg-surface-container/40 border border-white/10 rounded-lg px-3 py-2 hover:border-primary/40 transition-colors">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-bold text-white">{game.name}</span>
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-primary/25 text-primary-fixed font-black uppercase">{game.status}</span>
+                    </div>
+                    <div className="text-xs text-white/70">{game.mode}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Career Calendar / Season Timeline */}
+        <div className="glass-panel rounded-lg p-4 border border-primary/30 kinetic-border shadow-lg shadow-primary/10">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-2xl font-black text-primary text-glow">Career Calendar</h2>
+            <span className="text-xs px-3 py-1 rounded-full bg-primary/20 text-primary-fixed font-black uppercase">Season 1</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2">
+            {SeasonCalendar.map((item) => (
+              <div key={item.week} className="bg-surface-container/40 border border-white/10 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-black uppercase text-secondary">{item.week}</span>
+                  <span className={`text-[10px] px-2 py-1 rounded-full font-black uppercase ${
+                    item.state === 'Current'
+                      ? 'bg-primary/30 text-primary-fixed'
+                      : item.state === 'Completed'
+                      ? 'bg-secondary/30 text-secondary'
+                      : item.state === 'Upcoming'
+                      ? 'bg-amber-500/25 text-amber-300'
+                      : 'bg-white/10 text-white/70'
+                  }`}>{item.state}</span>
+                </div>
+                <div className="text-sm font-bold text-white">{item.event}</div>
+                <div className="text-xs text-white/70 mt-1">{item.stage}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Overall Progress */}

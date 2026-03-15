@@ -1,1627 +1,230 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useEffect, useMemo, useState } from 'react';
 
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Engine,
-  Scene,
-  ArcRotateCamera,
-  Vector3,
-  Vector2,
-  HemisphericLight,
-  SpotLight,
-  MeshBuilder,
-  StandardMaterial,
-  Color3,
-  Color4,
-  Texture,
-  CubeTexture,
-  Mesh,
-  PBRMaterial,
-  DynamicTexture,
-  ParticleSystem,
-  Animation,
-  GlowLayer,
-  CSG,
-  TransformNode,
-} from '@babylonjs/core';
-import { WaterMaterial } from '@babylonjs/materials';
-import useGameManager from './hooks/useGameManager';
-import usePlayerManager from './hooks/usePlayerManager';
-import useRivalSystem from './hooks/useRivalSystem';
-import SwimmerManager from './graphics/SwimmerManager';
-import EnhancedSwimmerManager from './graphics/EnhancedSwimmerManager';
-import EnvironmentManager from './graphics/EnvironmentManager';
-import RenderingOptimizer from './graphics/RenderingOptimizer';
-import CinematicOpening from './components/CinematicOpening';
-import LoadingScreen from './components/LoadingScreen';
-import MainMenu from './components/MainMenu';
-import SettingsMenu from './components/SettingsMenu';
-import PauseMenu from './components/PauseMenu';
+import GlobalMenuLayout, { MenuScreen } from './components/menu/GlobalMenuLayout';
+import HomeScreen, { HomeRightPanel } from './components/menu/HomeScreen';
+import PlayScreen from './components/menu/PlayScreen';
+import CareerScreen from './components/menu/CareerScreen';
+import SwimmerScreen from './components/menu/SwimmerScreen';
+import ClubScreen from './components/menu/ClubScreen';
+import LiveEventsScreen from './components/menu/LiveEventsScreen';
+import SocialScreen from './components/menu/SocialScreen';
+import StoreScreen from './components/menu/StoreScreen';
+import LockerRoomScreen from './components/menu/LockerRoomScreen';
+import RewardsInboxScreen from './components/menu/RewardsInboxScreen';
+import PreRaceSetupScreen from './components/menu/PreRaceSetupScreen';
+import SettingsScreen from './components/menu/SettingsScreen';
+import RaceResultScreen from './components/menu/RaceResultScreen';
 
-type VenueTheme = 'olympic' | 'game7' | 'neon' | 'sunset' | 'custom';
-
-interface CustomColors {
-  skyColor: string;
-  hallColor: string;
-  waterColor: string;
-  deckColor: string;
-  blockColor: string;
+interface IntegrationNotice {
+  id: number;
+  title: string;
+  detail: string;
 }
 
-const VENUES = {
-  olympic: {
-    name: "Olympic Arena",
-    skyColor: new Color4(0.8, 0.9, 1.0, 1),
-    ambientLight: new Color3(1, 1, 1),
-    lightIntensity: 0.8,
-    hallColor: new Color3(0.15, 0.18, 0.22),
-    ceilingLightColor: new Color3(1, 1, 1),
-    waterColor: new Color3(0.0, 0.6, 0.8),
-    waterBlend: 0.6,
-    deckColor: new Color3(0.7, 0.7, 0.7),
-    blockColor: new Color3(0.1, 0.1, 0.4),
-    ropeColors: [new Color3(1, 0, 0), new Color3(1, 1, 1)],
-    signColor: new Color3(0, 0, 0.5),
-    signTextColor: "#000066",
-    scoreboardBg: "#020210",
-    scoreboardText: "#ffffff",
-    scoreboardTitle: "WORLD CHAMPIONSHIPS",
-  },
-  game7: {
-    name: "Game 7 Championship",
-    skyColor: new Color4(0.02, 0.02, 0.02, 1),
-    ambientLight: new Color3(1, 0.9, 0.7),
-    lightIntensity: 0.4,
-    hallColor: new Color3(0.05, 0.05, 0.05),
-    ceilingLightColor: new Color3(1, 0.8, 0.4),
-    waterColor: new Color3(0.0, 0.4, 1.0),
-    waterBlend: 0.8,
-    deckColor: new Color3(0.1, 0.1, 0.1),
-    blockColor: new Color3(0.8, 0.6, 0.1),
-    ropeColors: [new Color3(0.8, 0.6, 0.1), new Color3(0.1, 0.1, 0.1)],
-    signColor: new Color3(0.8, 0.6, 0.1),
-    signTextColor: "#000000",
-    scoreboardBg: "#000000",
-    scoreboardText: "#FFD700",
-    scoreboardTitle: "GAME 7 FINALS",
-  },
-  neon: {
-    name: "Neon Night",
-    skyColor: new Color4(0.05, 0.0, 0.1, 1),
-    ambientLight: new Color3(1, 0.2, 0.8),
-    lightIntensity: 0.6,
-    hallColor: new Color3(0.02, 0.0, 0.05),
-    ceilingLightColor: new Color3(0, 1, 0.8),
-    waterColor: new Color3(0.0, 1.0, 0.8),
-    waterBlend: 0.7,
-    deckColor: new Color3(0.1, 0.05, 0.2),
-    blockColor: new Color3(1.0, 0.0, 0.8),
-    ropeColors: [new Color3(1, 0, 0.8), new Color3(0, 1, 0.8)],
-    signColor: new Color3(1.0, 0.0, 0.8),
-    signTextColor: "#ffffff",
-    scoreboardBg: "#1a0033",
-    scoreboardText: "#00ffff",
-    scoreboardTitle: "NEON INVITATIONAL",
-  },
-  sunset: {
-    name: "Sunset Open Air",
-    skyColor: new Color4(0.8, 0.4, 0.2, 1),
-    ambientLight: new Color3(1, 0.6, 0.3),
-    lightIntensity: 1.0,
-    hallColor: new Color3(0.6, 0.4, 0.3),
-    ceilingLightColor: new Color3(1, 0.5, 0),
-    waterColor: new Color3(0.1, 0.4, 0.5),
-    waterBlend: 0.5,
-    deckColor: new Color3(0.8, 0.6, 0.4),
-    blockColor: new Color3(0.8, 0.3, 0.1),
-    ropeColors: [new Color3(1, 0.5, 0), new Color3(1, 1, 0)],
-    signColor: new Color3(0.8, 0.3, 0.1),
-    signTextColor: "#ffffff",
-    scoreboardBg: "#331a00",
-    scoreboardText: "#ffcc00",
-    scoreboardTitle: "SUNSET CLASSIC",
-  },
-  custom: {
-    name: "Custom Design",
-    skyColor: new Color4(0.1, 0.1, 0.1, 1),
-    ambientLight: new Color3(1, 1, 1),
-    lightIntensity: 0.8,
-    hallColor: new Color3(0.2, 0.2, 0.2),
-    ceilingLightColor: new Color3(1, 1, 1),
-    waterColor: new Color3(0.0, 0.5, 1.0),
-    waterBlend: 0.6,
-    deckColor: new Color3(0.5, 0.5, 0.5),
-    blockColor: new Color3(0.2, 0.2, 0.2),
-    ropeColors: [new Color3(1, 0, 0), new Color3(1, 1, 1)],
-    signColor: new Color3(0.2, 0.2, 0.2),
-    signTextColor: "#ffffff",
-    scoreboardBg: "#000000",
-    scoreboardText: "#ffffff",
-    scoreboardTitle: "CUSTOM ARENA",
-  }
+const backendCapabilities = {
+  rankedMatchmaking: false,
+  trainingService: false,
+  replayService: false,
+  rewardsClaimService: false,
+  purchaseCheckout: false,
+  raceLaunchBridge: false,
 };
 
 export default function App() {
-  // Initialize new modular systems
-  const { gameManager, isReady: gmReady } = useGameManager();
-  const { playerManager, currentPlayer, isReady: pmReady } = usePlayerManager();
-  const { rivalSystem, isReady: rsReady } = useRivalSystem();
+  const [currentScreen, setCurrentScreen] = useState<MenuScreen>('HOME');
+  const [integrationNotices, setIntegrationNotices] = useState<IntegrationNotice[]>([]);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [currentVenue, setCurrentVenue] = useState<VenueTheme>('game7');
-  const [customColors, setCustomColors] = useState<CustomColors>({
-    skyColor: '#0a0a0a',
-    hallColor: '#1a1a1a',
-    waterColor: '#0088ff',
-    deckColor: '#444444',
-    blockColor: '#ffdd00',
-  });
-  const [isRecording, setIsRecording] = useState(false);
-  const [isReplaying, setIsReplaying] = useState(false);
-const TIME_OF_DAY_CONFIG = {
-  morning: {
-    ambientLight: new Color3(1, 0.9, 0.7),
-    lightIntensity: 0.8,
-    skyColor: new Color4(0.5, 0.7, 1.0, 1),
-    ceilingLightColor: new Color3(1, 1, 0.9),
-    ceilingLightIntensity: 0.4,
-  },
-  afternoon: {
-    ambientLight: new Color3(1, 1, 1),
-    lightIntensity: 1.0,
-    skyColor: new Color4(0.4, 0.6, 0.9, 1),
-    ceilingLightColor: new Color3(1, 1, 1),
-    ceilingLightIntensity: 0.5,
-  },
-  evening: {
-    ambientLight: new Color3(1, 0.5, 0.3),
-    lightIntensity: 0.6,
-    skyColor: new Color4(0.3, 0.2, 0.4, 1),
-    ceilingLightColor: new Color3(0.9, 0.8, 1),
-    ceilingLightIntensity: 0.7,
-  },
-  night: {
-    ambientLight: new Color3(0.2, 0.2, 0.5),
-    lightIntensity: 0.2,
-    skyColor: new Color4(0.05, 0.05, 0.1, 1),
-    ceilingLightColor: new Color3(0.8, 0.9, 1),
-    ceilingLightIntensity: 0.9,
-  },
-};
-
-// ...
-  const [cameraPerspective, setCameraPerspective] = useState<'default' | 'aerial' | 'startingBlock' | 'racing'>('default');
-  const [timeOfDay, setTimeOfDay] = useState<'morning' | 'afternoon' | 'evening' | 'night'>('afternoon');
-  const [countdown, setCountdown] = useState(0);
-  const [raceStatus, setRaceStatus] = useState<'idle' | 'countdown' | 'racing' | 'finished'>('idle');
-
-  // New enhanced systems state
-  const [warmupActive, setWarmupActive] = useState(false);
-  const [warmupProgress, setWarmupProgress] = useState(0);
-  const [currentEnvironment, setCurrentEnvironment] = useState<'pool' | 'locker-room' | 'training' | 'school-gym'>('pool');
-  const [renderingQuality, setRenderingQuality] = useState<'high' | 'medium' | 'low'>('high');
-  const [gameMode, setGameMode] = useState<'p2p' | 'multiplayer' | 'practice'>('multiplayer');
-
-  // Cinematic and menu states
-  const [showCinematic, setShowCinematic] = useState(true);
-  const [showLoading, setShowLoading] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showPauseMenu, setShowPauseMenu] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [gameStarted, setGameStarted] = useState(false);
-
-  // Handle environment/location switching
-  const handleLocationSelect = (location: string) => {
-    if (!environmentManagerRef.current) return;
-
-    // Map UI locations to environment types
-    const environmentMap: { [key: string]: 'pool' | 'locker-room' | 'training' | 'school-gym' } = {
-      'olympic': 'pool',
-      'game7': 'pool',
-      'neon': 'pool',
-      'sunset': 'pool',
-      'custom': 'pool',
-      'locker': 'locker-room',
-      'training': 'training',
-      'school': 'school-gym',
-    };
-
-    const environmentType = environmentMap[location];
-    if (environmentType) {
-      environmentManagerRef.current.switchToEnvironment(environmentType);
-      setCurrentEnvironment(environmentType);
-      setCurrentVenue(location);
-    }
+  const pushNotice = (title: string, detail: string) => {
+    setIntegrationNotices((prev) => [{ id: Date.now(), title, detail }, ...prev].slice(0, 4));
   };
-  const cameraPerspectiveRef = useRef(cameraPerspective);
-  useEffect(() => {
-    cameraPerspectiveRef.current = cameraPerspective;
-  }, [cameraPerspective]);
-  const countdownRef = useRef(0);
-  const raceActiveRef = useRef(false);
-  const isRecordingRef = useRef(false);
-  const isReplayingRef = useRef(false);
-  const recordedDataRef = useRef<any[]>([]);
-  const replayFrameRef = useRef(0);
-  const cameraRef = useRef<ArcRotateCamera | null>(null);
-  const lightRef = useRef<HemisphericLight | null>(null);
-  const sceneRef = useRef<Scene | null>(null);
-  const startLightMatsRef = useRef<StandardMaterial[]>([]);
-  const spotLightsRef = useRef<SpotLight[]>([]);
-  const lightPanelMatRef = useRef<StandardMaterial | null>(null);
-  const enhancedSwimmerManagerRef = useRef<EnhancedSwimmerManager | null>(null);
-  const environmentManagerRef = useRef<EnvironmentManager | null>(null);
-  const renderingOptimizerRef = useRef<RenderingOptimizer | null>(null);
-  const engineRef = useRef<any>(null);
-  const swimmersRef = useRef<any[]>([]);
-  const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const navigate = (screen: MenuScreen) => setCurrentScreen(screen);
+
+  const [isPortrait, setIsPortrait] = useState(() => window.innerHeight > window.innerWidth);
 
   useEffect(() => {
-    if (!sceneRef.current || !lightRef.current) return;
-    
-    sceneRef.current.clearColor = TIME_OF_DAY_CONFIG[timeOfDay].skyColor;
-    lightRef.current.diffuse = TIME_OF_DAY_CONFIG[timeOfDay].ambientLight;
-    lightRef.current.intensity = TIME_OF_DAY_CONFIG[timeOfDay].lightIntensity;
-    
-    if (lightPanelMatRef.current) {
-        lightPanelMatRef.current.emissiveColor = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightColor;
-    }
-    spotLightsRef.current.forEach(spotLight => {
-        spotLight.diffuse = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightColor;
-        spotLight.intensity = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightIntensity;
-    });
-  }, [timeOfDay]);
-
-  // Camera perspective switching is disabled — broadcast mode is always active.
-  // The camera automatically follows the race leader at a fixed cinematic angle.
-
-  // Keyboard handler for pause
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!gameStarted) return;
-
-      // P key or ESC to pause
-      if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
-        e.preventDefault();
-        setShowPauseMenu(prev => !prev);
-      }
+    const updateOrientation = () => {
+      setIsPortrait(window.innerHeight > window.innerWidth);
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameStarted]);
+    updateOrientation();
+    window.addEventListener('resize', updateOrientation);
+    window.addEventListener('orientationchange', updateOrientation);
 
-  // Auto-start race when game begins
-  useEffect(() => {
-    if (!gameStarted) return;
-    const timer = setTimeout(() => {
-      countdownRef.current = 0;
-      setCountdown(0);
-      raceActiveRef.current = true;
-      setRaceStatus('racing');
-      swimmersRef.current.forEach(s => {
-        s.state = 'diving';
-        s.diveTime = 0;
+    if (screen.orientation && 'lock' in screen.orientation) {
+      screen.orientation.lock('landscape').catch(() => {
+        // Some mobile browsers require fullscreen/user gesture.
       });
-    }, 8000); // Extended for dramatic cinematic intro sequence
-    return () => clearTimeout(timer);
-  }, [gameStarted]);
+    }
 
-  // Cleanup loading interval on unmount
-  useEffect(() => {
     return () => {
-      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+      window.removeEventListener('resize', updateOrientation);
+      window.removeEventListener('orientationchange', updateOrientation);
     };
   }, []);
 
-  useEffect(() => {
-    // Only initialize if canvas exists and game has started
-    if (!canvasRef.current || !gameStarted) return;
-
-    const handleResizeRef = { current: null as any };
-
-    const initializeGame = async () => {
-      let v = VENUES[currentVenue];
-    
-    if (currentVenue === 'custom') {
-      v = {
-        ...v,
-        skyColor: Color4.FromHexString(customColors.skyColor + 'FF'),
-        hallColor: Color3.FromHexString(customColors.hallColor),
-        waterColor: Color3.FromHexString(customColors.waterColor),
-        deckColor: Color3.FromHexString(customColors.deckColor),
-        blockColor: Color3.FromHexString(customColors.blockColor),
-        signColor: Color3.FromHexString(customColors.blockColor),
-      };
+  const handleModeSelect = (modeId: string) => {
+    if (modeId === 'quick-race') {
+      setCurrentScreen('PRE_RACE');
+      return;
     }
 
-    const engine = new Engine(canvasRef.current, true);
-    sceneRef.current = new Scene(engine);
-    // Use venue sky color for visual distinction between arenas; time-of-day effect can override on change
-    sceneRef.current.clearColor = v.skyColor;
-    const scene = sceneRef.current;
-    
-    // Fog
-    scene.fogMode = Scene.FOGMODE_EXP;
-    scene.fogDensity = 0.005;
-    const clearColor = scene.clearColor as Color4;
-    scene.fogColor = new Color3(clearColor.r, clearColor.g, clearColor.b);
-
-    // Camera — broadcast only, no user control ever
-    // Start positioned high above for the aerial opening shot
-    cameraRef.current = new ArcRotateCamera(
-      'camera',
-      -Math.PI / 2, // facing down the pool
-      0.22,         // near top-down for aerial opening
-      90,           // wide radius
-      new Vector3(0, 0, 0),
-      scene
-    );
-    // Strip ALL input handlers — players can never move this camera
-    cameraRef.current.inputs.clear();
-    cameraRef.current.panningSensibility = 0;
-    // No fixed limits — cinematic system drives every parameter programmatically
-
-    // Light
-    lightRef.current = new HemisphericLight('light', new Vector3(0, 1, 0), sceneRef.current);
-    lightRef.current.diffuse = TIME_OF_DAY_CONFIG[timeOfDay].ambientLight;
-    lightRef.current.intensity = TIME_OF_DAY_CONFIG[timeOfDay].lightIntensity;
-
-    // Initial ceiling light settings
-    if (lightPanelMatRef.current) {
-        lightPanelMatRef.current.emissiveColor = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightColor;
-    }
-    spotLightsRef.current.forEach(spotLight => {
-        spotLight.diffuse = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightColor;
-        spotLight.intensity = TIME_OF_DAY_CONFIG[timeOfDay].ceilingLightIntensity;
-    });
-
-    // Store engine ref for rendering optimizer
-    engineRef.current = engine;
-
-    // Initialize Rendering Optimizer
-    renderingOptimizerRef.current = new RenderingOptimizer(scene, engine);
-    renderingOptimizerRef.current.applyOptimization(renderingQuality);
-    renderingOptimizerRef.current.stabilizeRenderLoop();
-    renderingOptimizerRef.current.fixFlickeringIssues();
-
-    // Initialize Environment Manager
-    environmentManagerRef.current = new EnvironmentManager(scene);
-
-    // Create pool arena node to be managed by EnvironmentManager
-    const poolArenaNode = new TransformNode('poolArena', scene);
-
-    // Pool Dimensions
-    const poolWidth = 20;
-    const poolLength = 40;
-    const poolDepth = 3;
-    const laneCount = 8;
-    const laneWidth = poolWidth / laneCount;
-
-    // Indoor Hall Dimensions
-    const hallWidth = 100;
-    const hallLength = 140;
-    const hallHeight = 45;
-
-    // Indoor Hall (Building)
-    const hall = MeshBuilder.CreateBox('hall', {
-      width: hallWidth,
-      height: hallHeight,
-      depth: hallLength,
-      sideOrientation: Mesh.BACKSIDE
-    }, scene);
-    hall.position.y = hallHeight / 2 - 0.25; // Align with deck
-    hall.parent = poolArenaNode;
-
-    const hallMat = new StandardMaterial('hallMat', scene);
-    hallMat.diffuseColor = v.hallColor;
-    hallMat.specularColor = new Color3(0.1, 0.1, 0.1);
-    hall.material = hallMat;
-
-    // Ceiling Lights
-    const lightPanels: Mesh[] = [];
-    const lightPanelMat = new StandardMaterial('lightPanelMat', scene);
-    lightPanelMatRef.current = lightPanelMat;
-    lightPanelMat.emissiveColor = v.ceilingLightColor;
-    lightPanelMat.disableLighting = true;
-    lightPanelMat.alpha = 0.9; // Slight transparency for glow effect
-
-    for (let i = -3; i <= 3; i+=2) {
-      const panel = MeshBuilder.CreatePlane(`lightPanel${i}`, { width: 2, height: hallLength - 20 }, scene);
-      panel.rotation.x = Math.PI / 2;
-      panel.position.y = hallHeight - 0.5;
-      panel.position.x = i * 8;
-      panel.material = lightPanelMat;
-      lightPanels.push(panel);
-
-      // Add SpotLight for each panel
-      const spotLight = new SpotLight(`spotLight${i}`, new Vector3(i * 8, hallHeight - 1, 0), new Vector3(0, -1, 0), Math.PI / 2, 10, scene);
-      spotLight.diffuse = v.ceilingLightColor;
-      spotLight.intensity = 0.5;
-      spotLightsRef.current.push(spotLight);
+    if (modeId === 'career-race') {
+      setCurrentScreen('CAREER');
+      return;
     }
 
-    // Caustics Texture - use simple placeholder for faster loading
-    const causticsTexture = new DynamicTexture('causticsTexture', 256, scene);
-    const ctx = causticsTexture.getContext();
-    ctx.fillStyle = 'rgb(100, 150, 200)';
-    ctx.fillRect(0, 0, 256, 256);
-    causticsTexture.update();
-
-    // Pool Floor
-    const floor = MeshBuilder.CreatePlane('floor', { width: poolWidth, height: poolLength }, scene);
-    floor.rotation.x = Math.PI / 2;
-    floor.position.y = -poolDepth;
-    floor.parent = poolArenaNode;
-    const floorMat = new StandardMaterial('floorMat', scene);
-    floorMat.diffuseColor = new Color3(0.3, 0.7, 0.9); // Light blue
-    floorMat.emissiveTexture = causticsTexture;
-    floorMat.emissiveColor = new Color3(0.2, 0.4, 0.6); // Caustics
-    floor.material = floorMat;
-
-    // Defer texture loading to avoid blocking
-    setTimeout(() => {
-      const tileTexture = new Texture('https://playground.babylonjs.com/textures/tile.jpg', scene);
-      tileTexture.uScale = 10;
-      tileTexture.vScale = 20;
-      floorMat.diffuseTexture = tileTexture;
-    }, 2000);
-
-    // Lane Markings on Floor
-    for (let i = 0; i < laneCount; i++) {
-      const laneLine = MeshBuilder.CreatePlane(`laneLine${i}`, { width: 0.2, height: poolLength * 0.8 }, scene);
-      laneLine.rotation.x = Math.PI / 2;
-      laneLine.position.y = -poolDepth + 0.01;
-      laneLine.position.x = -poolWidth / 2 + (i + 0.5) * laneWidth;
-      laneLine.position.z = 0;
-      laneLine.parent = poolArenaNode;
-      const lineMat = new StandardMaterial('lineMat', scene);
-      lineMat.diffuseColor = new Color3(0, 0, 0.5);
-      laneLine.material = lineMat;
+    if (modeId === 'ranked-match' && !backendCapabilities.rankedMatchmaking) {
+      pushNotice('Ranked Matchmaking Missing', 'Backend endpoint for ranked queue is not connected yet.');
+      return;
     }
 
-    // Pool Walls
-    const wallMat = new StandardMaterial('wallMat', scene);
-    wallMat.diffuseColor = new Color3(0.4, 0.7, 0.9);
-    wallMat.emissiveTexture = causticsTexture;
-    wallMat.emissiveColor = new Color3(0.1, 0.3, 0.6);
-
-    // Defer wall texture loading
-    setTimeout(() => {
-      const wallTexture = new Texture('https://playground.babylonjs.com/textures/tile.jpg', scene);
-      wallTexture.uScale = 10;
-      wallTexture.vScale = 2;
-      wallMat.diffuseTexture = wallTexture;
-    }, 2500);
-
-    const wallBack = MeshBuilder.CreatePlane('wallBack', { width: poolWidth, height: poolDepth }, scene);
-    wallBack.position.z = poolLength / 2;
-    wallBack.position.y = -poolDepth / 2;
-    wallBack.parent = poolArenaNode;
-    wallBack.material = wallMat;
-
-    const wallFront = MeshBuilder.CreatePlane('wallFront', { width: poolWidth, height: poolDepth }, scene);
-    wallFront.rotation.y = Math.PI;
-    wallFront.position.z = -poolLength / 2;
-    wallFront.position.y = -poolDepth / 2;
-    wallFront.parent = poolArenaNode;
-    wallFront.material = wallMat;
-
-    const wallLeft = MeshBuilder.CreatePlane('wallLeft', { width: poolLength, height: poolDepth }, scene);
-    wallLeft.rotation.y = -Math.PI / 2;
-    wallLeft.position.x = -poolWidth / 2;
-    wallLeft.position.y = -poolDepth / 2;
-    wallLeft.parent = poolArenaNode;
-    wallLeft.material = wallMat;
-
-    const wallRight = MeshBuilder.CreatePlane('wallRight', { width: poolLength, height: poolDepth }, scene);
-    wallRight.rotation.y = Math.PI / 2;
-    wallRight.position.x = poolWidth / 2;
-    wallRight.position.y = -poolDepth / 2;
-    wallRight.parent = poolArenaNode;
-    wallRight.material = wallMat;
-
-    // Pool Deck with Hole
-    const deckMat = new StandardMaterial('deckMat', scene);
-    deckMat.diffuseColor = v.deckColor;
-
-    // Defer deck texture loading
-    setTimeout(() => {
-      const concreteTexture = new Texture('https://playground.babylonjs.com/textures/concrete.jpg', scene);
-      concreteTexture.uScale = 10;
-      concreteTexture.vScale = 10;
-      deckMat.diffuseTexture = concreteTexture;
-    }, 3000);
-
-    // Create deck without expensive CSG - use separate pieces instead
-    const deck = new Mesh('deck', scene);
-    deck.isPickable = false;
-    deck.parent = poolArenaNode;
-
-    // Front deck sections
-    const frontDeck = MeshBuilder.CreateBox('frontDeck', { width: hallWidth, height: 0.5, depth: (hallLength - poolLength) / 2 }, scene);
-    frontDeck.position.y = -0.25;
-    frontDeck.position.z = -(hallLength / 2 - (hallLength - poolLength) / 4);
-    frontDeck.material = deckMat;
-    frontDeck.parent = deck;
-
-    // Back deck sections
-    const backDeck = MeshBuilder.CreateBox('backDeck', { width: hallWidth, height: 0.5, depth: (hallLength - poolLength) / 2 }, scene);
-    backDeck.position.y = -0.25;
-    backDeck.position.z = (hallLength / 2 - (hallLength - poolLength) / 4);
-    backDeck.material = deckMat;
-    backDeck.parent = deck;
-
-    // Left deck sections
-    const leftDeck = MeshBuilder.CreateBox('leftDeck', { width: (hallWidth - poolWidth) / 2, height: 0.5, depth: poolLength }, scene);
-    leftDeck.position.y = -0.25;
-    leftDeck.position.x = -(hallWidth / 2 - (hallWidth - poolWidth) / 4);
-    leftDeck.material = deckMat;
-    leftDeck.parent = deck;
-
-    // Right deck sections
-    const rightDeck = MeshBuilder.CreateBox('rightDeck', { width: (hallWidth - poolWidth) / 2, height: 0.5, depth: poolLength }, scene);
-    rightDeck.position.y = -0.25;
-    rightDeck.position.x = (hallWidth / 2 - (hallWidth - poolWidth) / 4);
-    rightDeck.material = deckMat;
-    rightDeck.parent = deck;
-
-    // Seating / Bleachers
-    const createBleachers = () => {
-      const bleacherGroup = new Mesh('bleachers', scene);
-      const stepCount = 18;
-      const stepHeight = 0.6;
-      const stepDepth = 1.2;
-      const bleacherWidth = poolLength + 10;
-
-      const stepMat = new StandardMaterial('stepMat', scene);
-      stepMat.diffuseColor = new Color3(0.4, 0.4, 0.45);
-
-      // Crowd material
-      const crowdMat = new StandardMaterial('crowdMat', scene);
-      crowdMat.diffuseColor = new Color3(0.2, 0.2, 0.2); // Dark spectators
-
-      // Create base spectator meshes once
-      const torsoBase = MeshBuilder.CreateBox("torsoBase", { width: 0.4, height: 0.6, depth: 0.3 }, scene);
-      torsoBase.position.y = 0.3;
-      torsoBase.material = crowdMat;
-      torsoBase.isVisible = false;
-
-      const headBase = MeshBuilder.CreateSphere("headBase", { diameter: 0.3, segments: 8 }, scene);
-      headBase.position.y = 0.8;
-      headBase.material = crowdMat;
-      headBase.isVisible = false;
-
-      for (let i = 0; i < stepCount; i++) {
-        // Left bleachers
-        const stepL = MeshBuilder.CreateBox(`stepL_${i}`, { width: stepDepth, height: stepHeight * (i + 1), depth: bleacherWidth }, scene);
-        stepL.position.x = -poolWidth / 2 - 8 - (i * stepDepth);
-        stepL.position.y = (stepHeight * (i + 1)) / 2 - 0.25;
-        stepL.position.z = 0;
-        stepL.material = stepMat;
-        stepL.parent = bleacherGroup;
-
-        // Add crowd to Left using instances
-        for (let j = 0; j < 10; j++) {
-            const torsoInstance = torsoBase.createInstance(`torsoL_${i}_${j}`);
-            torsoInstance.position = new Vector3(stepL.position.x, stepL.position.y + 0.3, (Math.random() - 0.5) * bleacherWidth);
-
-            const headInstance = headBase.createInstance(`headL_${i}_${j}`);
-            headInstance.position = new Vector3(stepL.position.x, stepL.position.y + 0.8, (Math.random() - 0.5) * bleacherWidth);
-        }
-
-        // Right bleachers
-        const stepR = MeshBuilder.CreateBox(`stepR_${i}`, { width: stepDepth, height: stepHeight * (i + 1), depth: bleacherWidth }, scene);
-        stepR.position.x = poolWidth / 2 + 8 + (i * stepDepth);
-        stepR.position.y = (stepHeight * (i + 1)) / 2 - 0.25;
-        stepR.position.z = 0;
-        stepR.material = stepMat;
-        stepR.parent = bleacherGroup;
-
-        // Add crowd to Right using instances
-        for (let j = 0; j < 10; j++) {
-            const torsoInstance = torsoBase.createInstance(`torsoR_${i}_${j}`);
-            torsoInstance.position = new Vector3(stepR.position.x, stepR.position.y + 0.3, (Math.random() - 0.5) * bleacherWidth);
-
-            const headInstance = headBase.createInstance(`headR_${i}_${j}`);
-            headInstance.position = new Vector3(stepR.position.x, stepR.position.y + 0.8, (Math.random() - 0.5) * bleacherWidth);
-        }
-
-        // Front bleachers
-        const stepF = MeshBuilder.CreateBox(`stepF_${i}`, { width: poolWidth + 10, height: stepHeight * (i + 1), depth: stepDepth }, scene);
-        stepF.position.x = 0;
-        stepF.position.y = (stepHeight * (i + 1)) / 2 - 0.25;
-        stepF.position.z = -poolLength / 2 - 8 - (i * stepDepth);
-        stepF.material = stepMat;
-        stepF.parent = bleacherGroup;
-
-        // Back bleachers
-        const stepB = MeshBuilder.CreateBox(`stepB_${i}`, { width: poolWidth + 10, height: stepHeight * (i + 1), depth: stepDepth }, scene);
-        stepB.position.x = 0;
-        stepB.position.y = (stepHeight * (i + 1)) / 2 - 0.25;
-        stepB.position.z = poolLength / 2 + 8 + (i * stepDepth);
-        stepB.material = stepMat;
-        stepB.parent = bleacherGroup;
-      }
-      bleacherGroup.parent = poolArenaNode;
-      return bleacherGroup;
-    };
-    const bleachers = createBleachers();
-
-    // Railings
-    const createRailings = () => {
-      const railingGroup = new Mesh('railings', scene);
-      const railingColor = new Color3(0.9, 0.9, 0.9);
-      const railingMat = new StandardMaterial('railingMat', scene);
-      railingMat.diffuseColor = railingColor;
-      railingMat.specularColor = new Color3(1, 1, 1);
-
-      const addRailSection = (start: Vector3, end: Vector3) => {
-        const distance = Vector3.Distance(start, end);
-        const rail = MeshBuilder.CreateCylinder('rail', { height: distance, diameter: 0.1 }, scene);
-        rail.position = Vector3.Center(start, end);
-        rail.lookAt(end);
-        rail.rotate(new Vector3(1, 0, 0), Math.PI / 2);
-        rail.material = railingMat;
-        rail.parent = railingGroup;
-      };
-
-      const addPost = (pos: Vector3) => {
-        const post = MeshBuilder.CreateCylinder('post', { height: 1.2, diameter: 0.15 }, scene);
-        post.position = pos.add(new Vector3(0, 0.6, 0));
-        post.material = railingMat;
-        post.parent = railingGroup;
-      };
-
-      // Perimeter Railings
-      const corners = [
-        new Vector3(-poolWidth / 2 - 1, 0, -poolLength / 2 - 1),
-        new Vector3(poolWidth / 2 + 1, 0, -poolLength / 2 - 1),
-        new Vector3(poolWidth / 2 + 1, 0, poolLength / 2 + 1),
-        new Vector3(-poolWidth / 2 - 1, 0, poolLength / 2 + 1),
-      ];
-
-      for (let i = 0; i < corners.length; i++) {
-        const next = corners[(i + 1) % corners.length];
-        // Skip the sides with bleachers
-        if (i === 1 || i === 3) continue; 
-        
-        const segments = 10;
-        for (let j = 0; j <= segments; j++) {
-          const pos = Vector3.Lerp(corners[i], next, j / segments);
-          addPost(pos);
-          if (j < segments) {
-            const nextPos = Vector3.Lerp(corners[i], next, (j + 1) / segments);
-            addRailSection(pos.add(new Vector3(0, 1.1, 0)), nextPos.add(new Vector3(0, 1.1, 0)));
-            addRailSection(pos.add(new Vector3(0, 0.6, 0)), nextPos.add(new Vector3(0, 0.6, 0)));
-          }
-        }
-      }
-      railingGroup.parent = poolArenaNode;
-      return railingGroup;
-    };
-    const railings = createRailings();
-
-    // Stadium Scoreboard (Jumbotron)
-    const scoreboard = MeshBuilder.CreateBox('scoreboard', { width: 24, height: 12, depth: 1 }, scene);
-    scoreboard.position = new Vector3(0, 18, poolLength / 2 + 15);
-    scoreboard.parent = poolArenaNode;
-    const sbMat = new StandardMaterial('sbMat', scene);
-    const sbTex = new DynamicTexture('sbTex', { width: 1024, height: 512 }, scene);
-    sbMat.diffuseTexture = sbTex;
-    sbMat.emissiveTexture = sbTex; // Use texture for emissive to make text glow
-    sbMat.emissiveColor = new Color3(0.6, 0.6, 0.6);
-    scoreboard.material = sbMat;
-    
-    // Glow Layer for scoreboard and lights
-    const glow = new GlowLayer("glow", scene);
-    glow.intensity = 0.8;
-    
-    sbTex.drawText(v.scoreboardTitle, null, 80, "bold 60px Arial", v.scoreboardText, v.scoreboardBg, true, true);
-    sbTex.drawText("1. PHELPS      49.82", null, 180, "bold 40px Arial", v.scoreboardText, null, true, true);
-    sbTex.drawText("2. DRESSEL     49.88", null, 250, "bold 40px Arial", v.scoreboardText, null, true, true);
-    sbTex.drawText("3. MILAK       50.14", null, 320, "bold 40px Arial", v.scoreboardText, null, true, true);
-    sbTex.drawText("TIME: 00:49.82", null, 450, "bold 50px Arial", v.scoreboardText, null, true, true);
-
-    // Roof Trusses
-    const trusses: Mesh[] = [];
-    const trussMat = new StandardMaterial('trussMat', scene);
-    trussMat.diffuseColor = new Color3(0.15, 0.15, 0.15);
-    for (let z = -hallLength/2 + 10; z <= hallLength/2 - 10; z += 20) {
-        const truss = MeshBuilder.CreateCylinder(`truss_${z}`, { height: hallWidth, diameter: 0.8 }, scene);
-        truss.rotation.z = Math.PI / 2;
-        truss.position = new Vector3(0, hallHeight - 2, z);
-        truss.material = trussMat;
-        truss.parent = poolArenaNode;
-        trusses.push(truss);
+    if (modeId === 'time-trial' || modeId === 'relay-mode' || modeId === 'ghost-race') {
+      pushNotice('Gameplay Hook Missing', `${modeId} still needs gameplay bridge wiring from menu to race engine.`);
+      return;
     }
-
-    // Banners
-    const banners: Mesh[] = [];
-    const bannerColors = ["#e6194B", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4", "#42d4f4"];
-    for (let i = 0; i < bannerColors.length; i++) {
-        const banner = MeshBuilder.CreatePlane(`banner_${i}`, { width: 4, height: 10, sideOrientation: Mesh.DOUBLESIDE }, scene);
-        const xPos = -hallWidth/2 + 15 + i * ((hallWidth - 30) / (bannerColors.length - 1));
-        banner.position = new Vector3(xPos, hallHeight - 7, -hallLength/2 + 1);
-        banner.parent = poolArenaNode;
-        const bMat = new StandardMaterial(`bMat_${i}`, scene);
-        bMat.diffuseColor = Color3.FromHexString(bannerColors[i]);
-        banner.material = bMat;
-        banners.push(banner);
-    }
-
-    // Water - optimized for performance
-    const waterMesh = MeshBuilder.CreateGround('waterMesh', { width: poolWidth, height: poolLength, subdivisions: 32 }, scene);
-    waterMesh.position.y = -0.2;
-    waterMesh.parent = poolArenaNode;
-    const water = new WaterMaterial('water', scene, new Vector2(512, 512));
-    water.windForce = 15;
-    water.waveHeight = 0.25;
-    water.bumpHeight = 0.3;
-    water.waveLength = 0.1;
-    water.waterColor = v.waterColor;
-    water.colorBlendFactor = 0.3;
-
-    // Only add critical objects to water render list to reduce overhead
-    water.addToRenderList(hall);
-    water.addToRenderList(floor);
-    water.addToRenderList(wallBack);
-    water.addToRenderList(wallFront);
-    water.addToRenderList(wallLeft);
-    water.addToRenderList(wallRight);
-
-    // Defer water bump texture loading
-    setTimeout(() => {
-      const waterBumpTexture = new Texture('https://playground.babylonjs.com/textures/waterbump.png', scene);
-      water.bumpTexture = waterBumpTexture;
-    }, 3500);
-
-    waterMesh.material = water;
-
-    // Ambient Splashes (Particle System) - reduced for performance
-    const splashParticles = new ParticleSystem('splashes', 300, scene);
-
-    // Create simple color texture instead of loading from CDN
-    const particleTexture = new DynamicTexture('particleTexture', 64, scene);
-    const pctx = particleTexture.getContext();
-    pctx.fillStyle = 'white';
-    pctx.beginPath();
-    pctx.arc(32, 32, 30, 0, Math.PI * 2);
-    pctx.fill();
-    particleTexture.update();
-    splashParticles.particleTexture = particleTexture;
-
-    // Emit from the entire surface of the pool
-    splashParticles.createBoxEmitter(
-      new Vector3(0, 0.5, 0), // direction1
-      new Vector3(0, 0.8, 0), // direction2
-      new Vector3(-poolWidth / 2 + 0.5, -0.2, -poolLength / 2 + 0.5), // minEmitBox
-      new Vector3(poolWidth / 2 - 0.5, -0.2, poolLength / 2 - 0.5) // maxEmitBox
-    );
-
-    splashParticles.color1 = new Color4(0.8, 0.9, 1.0, 0.6);
-    splashParticles.color2 = new Color4(0.9, 1.0, 1.0, 0.3);
-    splashParticles.colorDead = new Color4(1, 1, 1, 0.0);
-
-    splashParticles.minSize = 0.02;
-    splashParticles.maxSize = 0.08;
-    splashParticles.minLifeTime = 0.2;
-    splashParticles.maxLifeTime = 0.6;
-    splashParticles.emitRate = 75; // Reduced from 200
-
-    splashParticles.blendMode = ParticleSystem.BLENDMODE_STANDARD;
-    splashParticles.gravity = new Vector3(0, -9.81, 0);
-    splashParticles.minEmitPower = 0.5;
-    splashParticles.maxEmitPower = 1.5;
-    splashParticles.updateSpeed = 0.01;
-
-    splashParticles.start();
-
-    // Interactive Splashes & Ripples
-    const createInteractiveSplash = (position: Vector3) => {
-      const splash = new ParticleSystem('interactiveSplash', 50, scene);
-      splash.particleTexture = particleTexture; // Reuse existing texture
-      splash.emitter = position;
-      splash.minEmitBox = new Vector3(-0.5, 0, -0.5);
-      splash.maxEmitBox = new Vector3(0.5, 0, 0.5);
-      splash.color1 = new Color4(0.8, 0.9, 1.0, 0.8);
-      splash.color2 = new Color4(0.9, 1.0, 1.0, 0.5);
-      splash.colorDead = new Color4(1, 1, 1, 0.0);
-      splash.minSize = 0.05;
-      splash.maxSize = 0.15;
-      splash.minLifeTime = 0.2;
-      splash.maxLifeTime = 0.6;
-      splash.emitRate = 300; // Reduced from 1000
-      splash.blendMode = ParticleSystem.BLENDMODE_STANDARD;
-      splash.gravity = new Vector3(0, -9.81, 0);
-      splash.direction1 = new Vector3(-1.5, 3, -1.5);
-      splash.direction2 = new Vector3(1.5, 5, 1.5);
-      splash.minEmitPower = 1;
-      splash.maxEmitPower = 2.5;
-      splash.updateSpeed = 0.02;
-      splash.targetStopDuration = 0.15; // Stop emitting quickly
-      splash.disposeOnStop = true;
-      splash.start();
-    };
-
-    const createRipple = (position: Vector3) => {
-      const ripple = MeshBuilder.CreateTorus('ripple', { diameter: 0.5, thickness: 0.03, tessellation: 32 }, scene);
-      ripple.position = position.clone();
-      ripple.position.y = -0.19; // Just above water surface
-      ripple.scaling = new Vector3(1, 0.05, 1);
-      
-      const rippleMat = new StandardMaterial('rippleMat', scene);
-      rippleMat.diffuseColor = new Color3(0.8, 0.9, 1.0);
-      rippleMat.alpha = 0.7;
-      rippleMat.disableLighting = true;
-      ripple.material = rippleMat;
-
-      // Expand ripple and dispose mesh + material when done
-      Animation.CreateAndStartAnimation('rippleScale', ripple, 'scaling', 60, 60, new Vector3(1, 0.05, 1), new Vector3(6, 0.05, 6), 0, undefined, () => {
-         rippleMat.dispose();
-         ripple.dispose();
-      });
-      // Fade out ripple
-      Animation.CreateAndStartAnimation('rippleAlpha', rippleMat, 'alpha', 60, 60, 0.7, 0, 0);
-    };
-
-    // Click interaction
-    scene.onPointerDown = (evt, pickResult) => {
-      if (pickResult.hit && pickResult.pickedMesh === waterMesh) {
-        createInteractiveSplash(pickResult.pickedPoint!);
-        createRipple(pickResult.pickedPoint!);
-      }
-    };
-
-    // Initialize EnhancedSwimmerManager with personality system
-    enhancedSwimmerManagerRef.current = new EnhancedSwimmerManager(scene, poolWidth, 8);
-    try {
-      await enhancedSwimmerManagerRef.current.initialize();
-      console.log('EnhancedSwimmerManager initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize EnhancedSwimmerManager:', error);
-      throw error;
-    }
-
-    // Get base swimmer manager for compatibility
-    const swimmerManager = enhancedSwimmerManagerRef.current.getBaseSwimmerManager();
-
-    // Swimmers Data - indexed by lane index (0-7)
-    const swimmersData = [
-      { name: "GUY", lane: 1, speed: 2.30, color: new Color3(0.5, 0.5, 0.5) },
-      { name: "CHALMERS", lane: 2, speed: 2.35, color: new Color3(1, 0.8, 0) },
-      { name: "MILAK", lane: 3, speed: 2.38, color: new Color3(0.2, 0.8, 0.2) },
-      { name: "PHELPS", lane: 4, speed: 2.45, color: new Color3(1, 0.4, 0) },
-      { name: "DRESSEL", lane: 5, speed: 2.42, color: new Color3(0, 0.5, 1) },
-      { name: "POPOVICI", lane: 6, speed: 2.40, color: new Color3(0.8, 0.2, 0.8) },
-      { name: "LE CLOS", lane: 7, speed: 2.32, color: new Color3(0.1, 0.1, 0.1) },
-      { name: "PROUD", lane: 8, speed: 2.48, color: new Color3(1, 1, 1) },
-    ];
-
-    const swimmers: any[] = [];
-    swimmersData.forEach((data, laneIndex) => {
-      const swimmerInstance = swimmerManager.getSwimmer(laneIndex);
-      if (!swimmerInstance || !swimmerInstance.mesh) {
-        console.error(`Failed to get swimmer at lane ${laneIndex}`);
-        return;
-      }
-
-      const swimmer = swimmerInstance.mesh;
-
-      // Validate mesh has position and rotation
-      if (!swimmer.position || !swimmer.rotation) {
-        console.error(`Swimmer mesh invalid at lane ${laneIndex}`);
-        return;
-      }
-
-      // Calculate lane X position based on lane index (0-7)
-      const laneX = -poolWidth / 2 + (laneIndex * poolWidth) / (8 - 1);
-
-      // Initial position on starting block
-      swimmer.position.x = laneX;
-      swimmer.position.y = 1.2; // Standing on block
-      swimmer.position.z = -poolLength / 2 - 1.2;
-      swimmer.rotation.x = Math.PI / 8; // Leaning forward slightly
-
-      // Update swimmer colors
-      swimmerManager.setSwimmerSuitColor(laneIndex, data.color);
-
-      // Add all swimmer body meshes to water render list
-      const bodyMeshes = swimmerManager.getSwimmerBodyMeshes(laneIndex);
-      if (bodyMeshes && bodyMeshes.length > 0) {
-        bodyMeshes.forEach((mesh) => {
-          if (mesh) {
-            water.addToRenderList(mesh);
-          }
-        });
-      }
-
-      swimmers.push({
-        mesh: swimmer,
-        data: data,
-        z: -poolLength / 2 - 1.2,
-        y: 1.2,
-        dir: 1,
-        time: 0,
-        finished: false,
-        rank: 0,
-        speed: data.speed + (Math.random() * 0.1 - 0.05), // Slight random variation
-        state: 'waiting', // waiting, diving, swimming
-        diveTime: 0
-      });
-    });
-
-    // Verify we have 8 swimmers
-    if (swimmers.length !== 8) {
-      console.warn(`Expected 8 swimmers but got ${swimmers.length}`);
-    }
-    swimmersRef.current = swimmers;
-
-    let raceTime = 0;
-    let raceActive = false;
-    let lastRippleTime = 0;
-    
-    // Use the component state for countdown and raceStatus
-    // But we need to update them from the loop.
-    // This is tricky because we are inside a useEffect.
-    // Let's use refs for the loop and update the state.
-
-    // Update Scoreboard Function
-    const updateScoreboard = () => {
-      sbTex.drawText(v.scoreboardTitle, null, 60, "bold 45px Arial", v.scoreboardText, v.scoreboardBg, true, true);
-      
-      // Sort swimmers by progress/time for ranking
-      const sorted = [...swimmers].sort((a, b) => {
-        if (a.finished && b.finished) return a.time - b.time;
-        if (a.finished) return -1;
-        if (b.finished) return 1;
-        return b.z - a.z; // Further along is "better"
-      });
-
-      sorted.forEach((s, i) => {
-        const yPos = 130 + i * 45;
-        const rank = s.finished ? s.rank : i + 1;
-        const timeStr = s.finished ? s.time.toFixed(2) : raceTime.toFixed(2);
-        
-        // High-contrast colors for rankings
-        const color = i === 0 ? "#FFD700" : i === 1 ? "#E0E0E0" : i === 2 ? "#CD7F32" : v.scoreboardText;
-        
-        sbTex.drawText(`${rank}. L${s.data.lane}  ${s.data.name.padEnd(12)} ${timeStr}`, 50, yPos, "bold 32px monospace", color, null, true, false);
-      });
-
-      let statusText = "";
-      if (!raceActiveRef.current && countdownRef.current > 0) {
-        statusText = `STARTING IN: ${Math.ceil(countdownRef.current)}`;
-        // Animate lights: 3=Red, 2=Yellow, 1=Green
-        const step = Math.ceil(countdownRef.current); // 3, 2, 1
-        startLightMatsRef.current.forEach((mat, index) => {
-            const lightIndex = index % 3; // 0 (top), 1 (middle), 2 (bottom)
-            if (3 - step >= lightIndex) {
-                mat.emissiveColor = new Color3(1, 0, 0); // Red
-            } else {
-                mat.emissiveColor = new Color3(0, 0, 0); // Off
-            }
-        });
-      } else if (raceActiveRef.current) {
-        statusText = `RACE TIME: ${raceTime.toFixed(2)}`;
-        startLightMatsRef.current.forEach(mat => mat.emissiveColor = new Color3(0, 1, 0)); // Green
-      } else {
-        statusText = "RACE FINISHED";
-        startLightMatsRef.current.forEach(mat => mat.emissiveColor = new Color3(0, 0, 0)); // Off
-      }
-      sbTex.drawText(statusText, null, 490, "bold 40px Arial", "#00FF00", null, true, true);
-    };
-
-    // Lane Ropes
-    const createLaneRope = (x: number) => {
-      const ropeGroup = new Mesh(`rope_${x}`, scene);
-      const buoyCount = 100;
-      const buoySpacing = poolLength / buoyCount;
-      
-      for (let i = 0; i < buoyCount; i++) {
-        const buoy = MeshBuilder.CreateSphere(`buoy_${x}_${i}`, { diameter: 0.2 }, scene);
-        buoy.position.x = x;
-        buoy.position.z = -poolLength / 2 + i * buoySpacing;
-        buoy.position.y = -0.15;
-        
-        const buoyMat = new StandardMaterial(`buoyMat_${x}_${i}`, scene);
-        if (i % 4 < 2) {
-          buoyMat.diffuseColor = v.ropeColors[0];
-        } else {
-          buoyMat.diffuseColor = v.ropeColors[1];
-        }
-        buoy.material = buoyMat;
-        buoy.parent = ropeGroup;
-      }
-      water.addToRenderList(ropeGroup);
-    };
-
-    for (let i = 1; i < laneCount; i++) {
-      createLaneRope(-poolWidth / 2 + i * laneWidth);
-    }
-
-    // Starting Blocks
-    const athletes = ["Phelps", "Ledecky", "Dressel", "Sjöström", "Peaty", "McKeon", "Milak", "Titmus"];
-    
-    const createStartingBlock = (x: number, laneIndex: number) => {
-      const blockBase = MeshBuilder.CreateBox(`blockBase_${laneIndex}`, { width: 0.8, height: 0.6, depth: 0.8 }, scene);
-      blockBase.position.x = x;
-      blockBase.position.z = -poolLength / 2 - 1.2;
-      blockBase.position.y = 0.3;
-      
-      const blockTop = MeshBuilder.CreateBox(`blockTop_${laneIndex}`, { width: 0.9, height: 0.1, depth: 0.9 }, scene);
-      blockTop.position.x = x;
-      blockTop.position.z = -poolLength / 2 - 1.2;
-      blockTop.position.y = 0.65;
-      blockTop.rotation.x = Math.PI / 12;
-
-      const blockMat = new StandardMaterial(`blockMat_${laneIndex}`, scene);
-      blockMat.diffuseColor = v.blockColor;
-      blockBase.material = blockMat;
-
-      // Dynamic Texture for Lane Number on the front of the base
-      const frontTex = new DynamicTexture(`frontTex_${laneIndex}`, { width: 256, height: 128 }, scene);
-      const frontMat = new StandardMaterial(`frontMat_${laneIndex}`, scene);
-      frontMat.diffuseTexture = frontTex;
-      frontTex.hasAlpha = true;
-      
-      const laneNumPlane = MeshBuilder.CreatePlane(`laneNumPlane_${laneIndex}`, { width: 0.6, height: 0.4 }, scene);
-      laneNumPlane.position = new Vector3(x, 0.3, -poolLength / 2 - 1.2 + 0.41); // Slightly in front of the base
-      laneNumPlane.material = frontMat;
-      water.addToRenderList(laneNumPlane);
-      
-      frontTex.drawText(
-        `${laneIndex + 1}`,
-        null,
-        null,
-        "bold 80px Arial",
-        "white",
-        "transparent",
-        true,
-        true
-      );
-
-      // Dynamic Texture for Lane Number and Athlete Name on top
-      const dynamicTexture = new DynamicTexture(`dynamicTex_${laneIndex}`, { width: 512, height: 512 }, scene);
-      const topMat = new StandardMaterial(`topMat_${laneIndex}`, scene);
-      topMat.diffuseTexture = dynamicTexture;
-      blockTop.material = topMat;
-
-      const font = "bold 80px Arial";
-      dynamicTexture.drawText(
-        `LANE ${laneIndex + 1}`,
-        null,
-        150,
-        font,
-        "white",
-        "#1a1a4a",
-        true,
-        true
-      );
-      dynamicTexture.drawText(
-        athletes[laneIndex],
-        null,
-        350,
-        "60px Arial",
-        "#00ffcc",
-        null,
-        true,
-        true
-      );
-
-      water.addToRenderList(blockBase);
-      water.addToRenderList(blockTop);
-    };
-
-    for (let i = 0; i < laneCount; i++) {
-      createStartingBlock(-poolWidth / 2 + (i + 0.5) * laneWidth, i);
-    }
-
-    // Signage / Flags
-    const createFlagPost = (x: number, z: number) => {
-      const post = MeshBuilder.CreateCylinder(`post_${x}_${z}`, { diameter: 0.1, height: 4 }, scene);
-      post.position = new Vector3(x, 2, z);
-      const postMat = new StandardMaterial(`postMat_${x}_${z}`, scene);
-      postMat.diffuseColor = new Color3(0.5, 0.5, 0.5);
-      post.material = postMat;
-
-      const sign = MeshBuilder.CreatePlane(`sign_${x}_${z}`, { size: 1.5 }, scene);
-      sign.position = new Vector3(x, 3.5, z);
-      sign.rotation.y = Math.PI / 2;
-      const signMat = new StandardMaterial(`signMat_${x}_${z}`, scene);
-      signMat.diffuseColor = v.signColor;
-      sign.material = signMat;
-      
-      const signTex = new DynamicTexture(`signTex_${x}_${z}`, { width: 256, height: 256 }, scene);
-      signTex.drawText("FINISH", null, 140, "bold 40px Arial", v.signTextColor, v.signColor.toHexString(), true, true);
-      signMat.diffuseTexture = signTex;
-      
-      water.addToRenderList(post);
-      water.addToRenderList(sign);
-    };
-
-    createFlagPost(-poolWidth / 2 - 2, poolLength / 2 + 2);
-    createFlagPost(poolWidth / 2 + 2, poolLength / 2 + 2);
-
-    // Starting Light System
-    startLightMatsRef.current = [];
-    const createStartLightSystem = (xPos: number, facingRight: boolean) => {
-      const pole = MeshBuilder.CreateCylinder(`lightPole_${xPos}`, { diameter: 0.2, height: 4 }, scene);
-      pole.position = new Vector3(xPos, 2, -poolLength / 2 - 1.2);
-      const poleMat = new StandardMaterial(`lightPoleMat_${xPos}`, scene);
-      poleMat.diffuseColor = new Color3(0.2, 0.2, 0.2);
-      pole.material = poleMat;
-
-      const box = MeshBuilder.CreateBox(`lightBox_${xPos}`, { width: 0.4, height: 1.8, depth: 0.6 }, scene);
-      box.position = new Vector3(xPos, 3, -poolLength / 2 - 1.2);
-      const boxMat = new StandardMaterial(`lightBoxMat_${xPos}`, scene);
-      boxMat.diffuseColor = new Color3(0.1, 0.1, 0.1);
-      box.material = boxMat;
-
-      for (let i = 0; i < 3; i++) {
-        const light = MeshBuilder.CreateSphere(`startLight_${xPos}_${i}`, { diameter: 0.4 }, scene);
-        // Position slightly forward (towards the pool)
-        light.position = new Vector3(xPos + (facingRight ? 0.2 : -0.2), 3.6 - i * 0.6, -poolLength / 2 - 1.2);
-        const lightMat = new StandardMaterial(`startLightMat_${xPos}_${i}`, scene);
-        lightMat.diffuseColor = new Color3(0.1, 0.1, 0.1);
-        lightMat.emissiveColor = new Color3(0, 0, 0); // Off initially
-        light.material = lightMat;
-        startLightMatsRef.current.push(lightMat);
-      }
-    };
-    
-    // Create lights on both sides of the starting blocks
-    createStartLightSystem(-poolWidth / 2 - 2, true);
-    createStartLightSystem(poolWidth / 2 + 2, false);
-
-    // Register pool arena with EnvironmentManager for proper scene management
-    if (environmentManagerRef.current) {
-      environmentManagerRef.current.registerPoolArena(poolArenaNode);
-      // Switch to the selected environment if it's not the default pool
-      if (currentEnvironment !== 'pool') {
-        environmentManagerRef.current.switchToEnvironment(currentEnvironment);
-      }
-    }
-
-    let time = 0;
-    engine.runRenderLoop(() => {
-      const dt = engine.getDeltaTime() * 0.001;
-      time += dt;
-      
-      // Dynamic currents: slowly shift wind direction and modulate wave height
-      if (water) {
-        water.windDirection = new Vector2(Math.cos(time * 0.2), Math.sin(time * 0.2));
-        water.waveHeight = 0.12 + Math.sin(time * 0.5) * 0.04;
-      }
-
-      // Animate caustics
-      if (causticsTexture) {
-        causticsTexture.uOffset = time * 0.02;
-        causticsTexture.vOffset = time * 0.03;
-      }
-
-      // Update enhanced systems
-      if (enhancedSwimmerManagerRef.current) {
-        enhancedSwimmerManagerRef.current.update();
-      }
-
-      // Update warm-up if active
-      if (warmupActive && enhancedSwimmerManagerRef.current) {
-        const { allComplete, avgProgress } = enhancedSwimmerManagerRef.current.updateWarmup();
-        setWarmupProgress(Math.round(avgProgress));
-        if (allComplete) {
-          setWarmupActive(false);
-          raceActiveRef.current = true;
-          setRaceStatus('racing');
-          swimmersRef.current.forEach(s => {
-            s.state = 'diving';
-            s.diveTime = 0;
-          });
-        }
-      }
-
-      if (isReplayingRef.current) {
-        if (replayFrameRef.current < recordedDataRef.current.length) {
-            const frame = recordedDataRef.current[replayFrameRef.current];
-            swimmers.forEach((s, i) => {
-                if (frame && frame[i] && s && s.mesh) {
-                    s.mesh.position.x = frame[i].x;
-                    s.mesh.position.y = frame[i].y;
-                    s.mesh.position.z = frame[i].z;
-                    s.mesh.rotation.x = frame[i].rotationX;
-                }
-            });
-            replayFrameRef.current++;
-        } else {
-            isReplayingRef.current = false;
-        }
-      } else {
-        // Update Swimmers & Race
-
-        if (raceActiveRef.current) {
-            raceTime += dt;
-            let allFinished = true;
-            
-            // Start Lights Green for 2 seconds
-            if (raceTime < 2) {
-            startLightMatsRef.current.forEach(mat => mat.emissiveColor = new Color3(0, 1, 0)); // Green
-            } else {
-            startLightMatsRef.current.forEach(mat => mat.emissiveColor = new Color3(0, 0, 0)); // Off
-            }
-
-            swimmers.forEach(s => {
-              if (!s || !s.mesh || !s.mesh.position || !s.mesh.rotation) return;
-
-              if (!s.finished) {
-                  allFinished = false;
-
-                  if (s.state === 'diving') {
-                    s.diveTime += dt;
-                    const diveDuration = 0.6; // 0.6 seconds dive
-
-                    if (s.diveTime < diveDuration) {
-                        const t = s.diveTime / diveDuration;
-
-                        // Start: z = -poolLength/2 - 1.2, y = 1.2
-                        // End: z = -poolLength/2 + 1.0, y = -0.2
-                        const startZ = -poolLength / 2 - 1.2;
-                        const endZ = -poolLength / 2 + 1.0;
-                        const startY = 1.2;
-                        const endY = -0.2;
-
-                        s.z = startZ + (endZ - startZ) * t;
-                        // Parabola for Y: goes up slightly then down
-                        const height = 0.8;
-                        s.y = startY + (endY - startY) * t + Math.sin(t * Math.PI) * height;
-
-                        // Rotation: lean forward to flat
-                        s.mesh.rotation.x = Math.PI / 8 + (Math.PI / 2 - Math.PI / 8) * t;
-
-                        s.mesh.position.z = s.z;
-                        s.mesh.position.y = s.y;
-                    } else {
-                        // Dive finished, enter water
-                        s.state = 'swimming';
-                        s.y = -0.2;
-                        s.mesh.position.y = s.y;
-                        s.mesh.rotation.x = Math.PI / 2;
-                        // Update to swimming pose
-                        swimmerManager.updateSwimmerAnimation(swimmers.indexOf(s), 'freestyle');
-                        createInteractiveSplash(s.mesh.position); // Big splash on entry
-                    }
-                  } else if (s.state === 'swimming') {
-                    s.z += s.dir * s.speed * dt;
-
-                    // Oscillate swimming pose for animation effect
-                    const swimPulse = Math.sin(raceTime * 4) * 0.15;
-                    s.mesh.rotation.x = -Math.PI / 6 + swimPulse;
-
-                    // Finish line check (one lap race for simplicity)
-                    if (s.z >= poolLength / 2 - 2) {
-                        s.z = poolLength / 2 - 2;
-                        s.finished = true;
-                        s.time = raceTime;
-                        s.rank = swimmers.filter(sw => sw.finished).length;
-                    }
-                    s.mesh.position.z = s.z;
-
-                    // Generate swimmer ripples and splashes periodically
-                    if (time - lastRippleTime > 0.4) {
-                        createRipple(s.mesh.position);
-                        const splashPos = new Vector3(s.mesh.position.x, s.mesh.position.y, s.mesh.position.z - s.dir * 0.6);
-                        createInteractiveSplash(splashPos);
-                    }
-                  }
+  };
+
+  const screenContent = useMemo(() => {
+    switch (currentScreen) {
+      case 'PLAY':
+        return <PlayScreen onModeSelect={handleModeSelect} />;
+      case 'CAREER':
+        return <CareerScreen onEventSelect={() => setCurrentScreen('PRE_RACE')} />;
+      case 'SWIMMER':
+        return <SwimmerScreen />;
+      case 'CLUB':
+        return (
+          <ClubScreen
+            onLaunchArenaRace={() => {
+              if (!backendCapabilities.raceLaunchBridge) {
+                pushNotice('Race Launch Bridge Missing', '3D arena race launch is not connected yet. Wire menu-to-arena bridge.');
+                return;
               }
-            });
+              pushNotice('Launching Arena', 'Opening 3D swimming arena...');
+            }}
+          />
+        );
+      case 'LIVE_EVENTS':
+        return <LiveEventsScreen onEventSelect={() => setCurrentScreen('PRE_RACE')} />;
+      case 'SOCIAL':
+        return <SocialScreen />;
+      case 'STORE':
+        return <StoreScreen playerPremiumCurrency={580} playerCoins={124650} />;
+      case 'LOCKER_ROOM':
+        return <LockerRoomScreen />;
+      case 'REWARDS':
+        return <RewardsInboxScreen />;
+      case 'PRE_RACE':
+        return (
+          <PreRaceSetupScreen
+            mode="Quick Race"
+            onCancel={() => setCurrentScreen('PLAY')}
+            onConfirmRace={() => {
+              if (!backendCapabilities.raceLaunchBridge) {
+                pushNotice('Race Launch Bridge Missing', 'Menu-to-gameplay scene launch function is not connected yet.');
+              }
+              setCurrentScreen('POST_GAME');
+            }}
+          />
+        );
+      case 'SETTINGS':
+        return <SettingsScreen />;
+      case 'POST_GAME':
+        return (
+          <RaceResultScreen
+            onContinue={() => setCurrentScreen('CAREER')}
+            onRematch={() => setCurrentScreen('PRE_RACE')}
+            onReturnHome={() => setCurrentScreen('HOME')}
+            onWatchReplay={() => {
+              if (!backendCapabilities.replayService) {
+                pushNotice('Replay Service Missing', 'Replay backend/storage is not connected yet.');
+              }
+            }}
+          />
+        );
+      case 'HOME':
+      default:
+        return <HomeScreen onPlayClick={() => setCurrentScreen('PLAY')} onCareerClick={() => setCurrentScreen('CAREER')} />;
+    }
+  }, [currentScreen]);
 
-            if (time - lastRippleTime > 0.4) {
-                lastRippleTime = time;
-            }
 
-            if (allFinished && raceActiveRef.current) {
-            raceActiveRef.current = false;
-            countdownRef.current = 0;
-            setRaceStatus('finished');
-            }
-        }
-      }
-
-      // Recording
-      if (isRecordingRef.current) {
-        const frame = swimmers.map(s => ({
-            x: s.mesh.position.x,
-            y: s.mesh.position.y,
-            z: s.mesh.position.z,
-            rotationX: s.mesh.rotation.x
-        }));
-        recordedDataRef.current.push(frame);
-      }
-
-      // Update Scoreboard every few frames for performance
-      if (Math.floor(time * 10) % 2 === 0) {
-        updateScoreboard();
-      }
-
-      // ── CINEMATIC BROADCAST CAMERA ──────────────────────────────────────────
-      // Player's NPC: PHELPS, lane 4 (index 3) — center lane, iconic swimmer
-      if (cameraRef.current && swimmers.length > 0) {
-        const cam = cameraRef.current;
-        const PLAYER_IDX = 3;
-        const playerSwimmer = swimmers[PLAYER_IDX];
-        const playerMesh = playerSwimmer?.mesh;
-
-        // Player's X position in the lane (fixed), Z tracks as they swim
-        const playerLaneX = playerMesh ? playerMesh.position.x : 0;
-        const blockZ = -poolLength / 2 - 1.2; // starting block Z
-
-        // Smooth helper: exponential approach, clamped so dt spikes don't overshoot
-        const approach = (cur: number, tgt: number, speed: number) =>
-          cur + (tgt - cur) * Math.min(1, dt * speed);
-
-        if (!raceActiveRef.current) {
-          // ── PRE-RACE: 4-SHOT CINEMATIC INTRO ─────────────────────────────────
-          // Shot timing (seconds of elapsed scene time):
-          //  0.0 – 2.5 s  →  AERIAL ROTATION   (dramatic wide overview)
-          //  2.5 – 4.5 s  →  SIDE SWEEP BLOCKS (tension — all competitors)
-          //  4.5 – 6.0 s  →  PLAYER CLOSE-UP   (focus on the hero)
-          //  6.0 – 8.0 s  →  DRAMATIC LOW      (suspense before the gun)
-
-          if (time < 2.5) {
-            // ── SHOT 1: AERIAL ROTATION ──────────────────────────────────────
-            // Camera high above, slowly spinning — reveals the whole arena
-            cam.alpha += dt * 0.28;                          // slow clockwise spin
-            cam.beta    = approach(cam.beta,   0.22,  1.2);  // keep near top-down
-            cam.radius  = approach(cam.radius, 90,    1.0);
-            cam.target  = Vector3.Lerp(cam.target, new Vector3(0, 0, 0), Math.min(1, dt * 1.5));
-
-          } else if (time < 4.5) {
-            // ── SHOT 2: SIDE SWEEP OF STARTING BLOCKS ────────────────────────
-            // Camera swings to the side, wide view of all 8 athletes tensed on blocks
-            cam.alpha  = approach(cam.alpha,  0,            2.5); // move to +X side
-            cam.beta   = approach(cam.beta,   Math.PI / 3,  2.5); // 60° above horizontal
-            cam.radius = approach(cam.radius, 52,           2.0);
-            cam.target = Vector3.Lerp(
-              cam.target,
-              new Vector3(0, 2, blockZ + 4), // looking along the row of blocks
-              Math.min(1, dt * 2.5)
-            );
-
-          } else if (time < 6.0) {
-            // ── SHOT 3: PLAYER CLOSE-UP ──────────────────────────────────────
-            // Push in tight on the player's face / body on the block
-            cam.alpha  = approach(cam.alpha,  -Math.PI / 2, 3.0); // front-on
-            cam.beta   = approach(cam.beta,    Math.PI / 2.1, 3.0); // almost eye-level
-            cam.radius = approach(cam.radius,  6,            2.5);
-            cam.target = Vector3.Lerp(
-              cam.target,
-              new Vector3(playerLaneX, 1.3, blockZ),
-              Math.min(1, dt * 3.0)
-            );
-
-          } else {
-            // ── SHOT 4: DRAMATIC LOW ANGLE ────────────────────────────────────
-            // Camera is almost at water level, looking UP at the player — pure suspense
-            cam.alpha  = approach(cam.alpha,  Math.PI * 0.28, 1.8); // diagonal low
-            cam.beta   = approach(cam.beta,   Math.PI / 2 - 0.08, 1.8); // nearly horizontal
-            cam.radius = approach(cam.radius, 4.5,            1.5);
-            cam.target = Vector3.Lerp(
-              cam.target,
-              new Vector3(playerLaneX, 0.4, blockZ),
-              Math.min(1, dt * 2.0)
-            );
-          }
-
-        } else {
-          // ── RACE ACTIVE: TV BROADCAST SIDE-TRACKING SHOT ─────────────────────
-          // Classic swimming broadcast: camera locked to the side of the pool,
-          // slightly elevated, tracking the player's swimmer as they race.
-          // The camera leads slightly ahead for cinematic tension.
-
-          const playerZ     = playerSwimmer ? playerSwimmer.z : 0;
-          const isFinished  = playerSwimmer?.finished ?? false;
-
-          if (!isFinished) {
-            // Lead ahead of the swimmer by ~6m for dramatic anticipation
-            const leadZ = Math.min(poolLength / 2 - 1, playerZ + 6);
-
-            cam.alpha  = approach(cam.alpha,  0,            3.5); // snap to +X side
-            cam.beta   = approach(cam.beta,   Math.PI / 2.6, 2.5); // 35° above horizontal
-            cam.radius = approach(cam.radius, 28,           2.0);
-            cam.target = Vector3.Lerp(
-              cam.target,
-              new Vector3(0, 0, leadZ),
-              Math.min(1, dt * 5.0) // fast target tracking for responsive feel
-            );
-          } else {
-            // ── FINISH: pull back to a wide celebration shot ──────────────────
-            cam.alpha  = approach(cam.alpha,  -Math.PI / 4, 1.2); // diagonal angle
-            cam.beta   = approach(cam.beta,   Math.PI / 3.5, 1.2);
-            cam.radius = approach(cam.radius, 40,            1.0);
-            cam.target = Vector3.Lerp(
-              cam.target,
-              new Vector3(playerLaneX, 0, poolLength / 2 - 2), // at the finish wall
-              Math.min(1, dt * 2.0)
-            );
-          }
-        }
-      }
-      // ── END CINEMATIC CAMERA ─────────────────────────────────────────────────
-
-      scene.render();
-    });
-
-    const handleResize = () => {
-      if (engineRef.current) {
-        engineRef.current.resize();
-      }
-    };
-    handleResizeRef.current = handleResize;
-    window.addEventListener('resize', handleResize);
-    };
-
-    // Execute the async initialization
-    initializeGame().catch(err => {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error('Game initialization failed:', errorMessage);
-      console.error('Full error object:', err);
-    });
-
-    // Return cleanup function
-    return () => {
-      if (handleResizeRef.current) {
-        window.removeEventListener('resize', handleResizeRef.current);
-      }
-      // Cleanup enhanced systems
-      try {
-        if (enhancedSwimmerManagerRef.current) {
-          enhancedSwimmerManagerRef.current.dispose();
-        }
-      } catch (e) {
-        console.error('Error disposing enhanced swimmer manager:', e);
-      }
-      try {
-        if (environmentManagerRef.current) {
-          environmentManagerRef.current.dispose();
-        }
-      } catch (e) {
-        console.error('Error disposing environment manager:', e);
-      }
-      try {
-        if (renderingOptimizerRef.current) {
-          renderingOptimizerRef.current.dispose();
-        }
-      } catch (e) {
-        console.error('Error disposing rendering optimizer:', e);
-      }
-      // Cleanup scene and engine
-      if (engineRef.current) {
-        engineRef.current.dispose();
-      }
-    };
-  }, [currentVenue, customColors, gameStarted]);
+  if (isPortrait) {
+    return (
+      <div className="app-race-theme flex h-dvh w-screen items-center justify-center p-6 text-center">
+        <div className="glass-panel max-w-sm rounded-lg border border-white/20 p-6">
+          <div className="material-symbols-outlined mb-3 text-5xl text-primary-fixed">screen_rotation</div>
+          <h1 className="text-xl font-black uppercase tracking-wide text-primary-fixed">Landscape Required</h1>
+          <p className="mt-2 text-sm text-on-surface-variant">
+            SWIM26 is locked to landscape mode. Rotate your device to continue.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-screen bg-slate-900 flex flex-col overflow-hidden relative">
-      {/* Cinematic Opening */}
-      {showCinematic && (
-        <CinematicOpening
-          onComplete={() => {
-            setShowCinematic(false);
-            setLoadingProgress(0);
-            setShowLoading(true);
-            if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
-            loadingIntervalRef.current = setInterval(() => {
-              setLoadingProgress(prev => {
-                if (prev >= 100) {
-                  clearInterval(loadingIntervalRef.current!);
-                  loadingIntervalRef.current = null;
-                  setShowLoading(false);
-                  return 100;
-                }
-                return prev + Math.random() * 30;
-              });
-            }, 500);
-          }}
-        />
-      )}
-
-      {/* Loading Screen */}
-      {showLoading && (
-        <LoadingScreen
-          isLoading={true}
-          progress={loadingProgress}
-          onComplete={() => {
-            setShowLoading(false);
-            setShowMenu(true);
-          }}
-        />
-      )}
-
-      {/* Main Menu */}
-      {showMenu && !showSettings && !gameStarted && (
-        <MainMenu
-          onPlay={() => {
-            setShowMenu(false);
-            setGameStarted(true);
-            // Auto-start race countdown
-            countdownRef.current = 3.0;
-            setCountdown(3.0);
-            setRaceStatus('countdown');
-          }}
-          onSettings={() => {
-            setShowMenu(false);
-            setShowSettings(true);
-          }}
-        />
-      )}
-
-      {/* Settings Menu */}
-      {showSettings && (
-        <SettingsMenu
-          onBack={() => {
-            setShowSettings(false);
-            setShowMenu(true);
-          }}
-          onPlay={(mode, venue, environment, extras) => {
-            setGameMode(mode);
-            setCurrentVenue(venue as VenueTheme);
-            setCurrentEnvironment(environment as 'pool' | 'locker-room' | 'training' | 'school-gym');
-            if (extras?.cameraPerspective) {
-              setCameraPerspective(extras.cameraPerspective as 'default' | 'aerial' | 'startingBlock' | 'racing');
+    <GlobalMenuLayout
+      currentScreen={currentScreen}
+      onScreenChange={navigate}
+      playerLevel={27}
+      playerName="Lane Master"
+      softCurrency={124650}
+      premiumCurrency={580}
+      onProfileClick={() => setCurrentScreen('SWIMMER')}
+      onInboxClick={() => setCurrentScreen('SOCIAL')}
+      onNotificationsClick={() => setCurrentScreen('LIVE_EVENTS')}
+      onSettingsClick={() => setCurrentScreen('SETTINGS')}
+      onQuickRaceClick={() => setCurrentScreen('PLAY')}
+      onTrainingClick={() => {
+        if (!backendCapabilities.trainingService) {
+          pushNotice('Training Service Missing', 'Training mode API/service is not connected yet.');
+        }
+      }}
+      onRankedClick={() => {
+        if (!backendCapabilities.rankedMatchmaking) {
+          pushNotice('Ranked Matchmaking Missing', 'Ranked queue backend is not connected yet.');
+        }
+      }}
+      onLockerRoomClick={() => setCurrentScreen('LOCKER_ROOM')}
+      onReplaysClick={() => {
+        if (!backendCapabilities.replayService) {
+          pushNotice('Replay Service Missing', 'Replay backend/storage is not connected yet.');
+        }
+      }}
+      onRewardsClick={() => {
+        if (backendCapabilities.rewardsClaimService) {
+          setCurrentScreen('REWARDS');
+          return;
+        }
+        pushNotice('Rewards Claim Missing', 'Rewards claiming backend function is not connected yet.');
+        setCurrentScreen('REWARDS');
+      }}
+      rightPanel={
+        <HomeRightPanel
+          onOpenShop={() => setCurrentScreen('STORE')}
+          onOpenShopItem={() => {
+            setCurrentScreen('STORE');
+            if (!backendCapabilities.purchaseCheckout) {
+              pushNotice('Store Checkout Missing', 'Shop item purchase backend is not connected yet.');
             }
-            if (extras?.timeOfDay) {
-              setTimeOfDay(extras.timeOfDay as 'morning' | 'afternoon' | 'evening' | 'night');
-            }
-            if (extras?.enableRecording) {
-              isRecordingRef.current = true;
-              recordedDataRef.current = [];
-              setIsRecording(true);
-            }
-            // Hide settings first, then show menu, then start game
-            setShowSettings(false);
-            setShowMenu(false);
-            setGameStarted(true);
-            // Auto-start race countdown
-            countdownRef.current = 3.0;
-            setCountdown(3.0);
-            setRaceStatus('countdown');
           }}
         />
+      }
+    >
+      {screenContent}
+
+      {integrationNotices.length > 0 && (
+        <div className="fixed right-3 top-20 z-[80] w-80 max-w-[92vw] space-y-2">
+          {integrationNotices.map((notice) => (
+            <div key={notice.id} className="glass-panel border border-white/20 rounded-lg p-3">
+              <p className="text-xs font-black uppercase tracking-wide text-primary-fixed">{notice.title}</p>
+              <p className="mt-1 text-xs text-on-surface-variant">{notice.detail}</p>
+            </div>
+          ))}
+        </div>
       )}
-
-      {/* Game Content - Only show after menu starts game and not in settings */}
-      {gameStarted && !showSettings && !showMenu && (
-        <>
-          {/* Pause Menu */}
-          {showPauseMenu && (
-            <PauseMenu
-              onResume={() => setShowPauseMenu(false)}
-              onMainMenu={() => {
-                setGameStarted(false);
-                setShowPauseMenu(false);
-                setShowMenu(true);
-                setRaceStatus('idle');
-              }}
-            />
-          )}
-
-
-      <main className="flex-1 relative min-h-0">
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full block outline-none touch-none"
-          id="renderCanvas"
-        />
-
-      </main>
-
-        </>
-      )}
-    </div>
+    </GlobalMenuLayout>
   );
 }
