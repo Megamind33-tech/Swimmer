@@ -308,7 +308,7 @@ const TIME_OF_DAY_CONFIG = {
         s.state = 'diving';
         s.diveTime = 0;
       });
-    }, 1500);
+    }, 8000); // Extended for dramatic cinematic intro sequence
     return () => clearTimeout(timer);
   }, [gameStarted]);
 
@@ -352,24 +352,20 @@ const TIME_OF_DAY_CONFIG = {
     const clearColor = scene.clearColor as Color4;
     scene.fogColor = new Color3(clearColor.r, clearColor.g, clearColor.b);
 
-    // Camera
-    // Broadcast camera: fixed cinematic angle, no user input allowed
+    // Camera — broadcast only, no user control ever
+    // Start positioned high above for the aerial opening shot
     cameraRef.current = new ArcRotateCamera(
       'camera',
-      -Math.PI / 2,
-      Math.PI / 3.5,
-      45,
+      -Math.PI / 2, // facing down the pool
+      0.22,         // near top-down for aerial opening
+      90,           // wide radius
       new Vector3(0, 0, 0),
       scene
     );
-    // Disable ALL user camera interaction - broadcast mode only
+    // Strip ALL input handlers — players can never move this camera
     cameraRef.current.inputs.clear();
-    // Lock radius, angles, and panning so nothing can change them
-    cameraRef.current.lowerRadiusLimit = 45;
-    cameraRef.current.upperRadiusLimit = 45;
-    cameraRef.current.lowerBetaLimit = Math.PI / 3.5;
-    cameraRef.current.upperBetaLimit = Math.PI / 3.5;
     cameraRef.current.panningSensibility = 0;
+    // No fixed limits — cinematic system drives every parameter programmatically
 
     // Light
     lightRef.current = new HemisphericLight('light', new Vector3(0, 1, 0), sceneRef.current);
@@ -1352,28 +1348,110 @@ const TIME_OF_DAY_CONFIG = {
         updateScoreboard();
       }
 
-      // Broadcast camera: always follow the race leader smoothly
+      // ── CINEMATIC BROADCAST CAMERA ──────────────────────────────────────────
+      // Player's NPC: PHELPS, lane 4 (index 3) — center lane, iconic swimmer
       if (cameraRef.current && swimmers.length > 0) {
-          // Find the furthest swimmer still racing, or the last finisher
-          let leader = null;
-          let maxZ = -Infinity;
-          swimmers.forEach(s => {
-              if (!s.finished && s.z > maxZ) {
-                  maxZ = s.z;
-                  leader = s;
-              }
-          });
-          // If all finished, track the winner (rank 1)
-          if (!leader) {
-              leader = swimmers.find(s => s.rank === 1) || swimmers[0];
+        const cam = cameraRef.current;
+        const PLAYER_IDX = 3;
+        const playerSwimmer = swimmers[PLAYER_IDX];
+        const playerMesh = playerSwimmer?.mesh;
+
+        // Player's X position in the lane (fixed), Z tracks as they swim
+        const playerLaneX = playerMesh ? playerMesh.position.x : 0;
+        const blockZ = -poolLength / 2 - 1.2; // starting block Z
+
+        // Smooth helper: exponential approach, clamped so dt spikes don't overshoot
+        const approach = (cur: number, tgt: number, speed: number) =>
+          cur + (tgt - cur) * Math.min(1, dt * speed);
+
+        if (!raceActiveRef.current) {
+          // ── PRE-RACE: 4-SHOT CINEMATIC INTRO ─────────────────────────────────
+          // Shot timing (seconds of elapsed scene time):
+          //  0.0 – 2.5 s  →  AERIAL ROTATION   (dramatic wide overview)
+          //  2.5 – 4.5 s  →  SIDE SWEEP BLOCKS (tension — all competitors)
+          //  4.5 – 6.0 s  →  PLAYER CLOSE-UP   (focus on the hero)
+          //  6.0 – 8.0 s  →  DRAMATIC LOW      (suspense before the gun)
+
+          if (time < 2.5) {
+            // ── SHOT 1: AERIAL ROTATION ──────────────────────────────────────
+            // Camera high above, slowly spinning — reveals the whole arena
+            cam.alpha += dt * 0.28;                          // slow clockwise spin
+            cam.beta    = approach(cam.beta,   0.22,  1.2);  // keep near top-down
+            cam.radius  = approach(cam.radius, 90,    1.0);
+            cam.target  = Vector3.Lerp(cam.target, new Vector3(0, 0, 0), Math.min(1, dt * 1.5));
+
+          } else if (time < 4.5) {
+            // ── SHOT 2: SIDE SWEEP OF STARTING BLOCKS ────────────────────────
+            // Camera swings to the side, wide view of all 8 athletes tensed on blocks
+            cam.alpha  = approach(cam.alpha,  0,            2.5); // move to +X side
+            cam.beta   = approach(cam.beta,   Math.PI / 3,  2.5); // 60° above horizontal
+            cam.radius = approach(cam.radius, 52,           2.0);
+            cam.target = Vector3.Lerp(
+              cam.target,
+              new Vector3(0, 2, blockZ + 4), // looking along the row of blocks
+              Math.min(1, dt * 2.5)
+            );
+
+          } else if (time < 6.0) {
+            // ── SHOT 3: PLAYER CLOSE-UP ──────────────────────────────────────
+            // Push in tight on the player's face / body on the block
+            cam.alpha  = approach(cam.alpha,  -Math.PI / 2, 3.0); // front-on
+            cam.beta   = approach(cam.beta,    Math.PI / 2.1, 3.0); // almost eye-level
+            cam.radius = approach(cam.radius,  6,            2.5);
+            cam.target = Vector3.Lerp(
+              cam.target,
+              new Vector3(playerLaneX, 1.3, blockZ),
+              Math.min(1, dt * 3.0)
+            );
+
+          } else {
+            // ── SHOT 4: DRAMATIC LOW ANGLE ────────────────────────────────────
+            // Camera is almost at water level, looking UP at the player — pure suspense
+            cam.alpha  = approach(cam.alpha,  Math.PI * 0.28, 1.8); // diagonal low
+            cam.beta   = approach(cam.beta,   Math.PI / 2 - 0.08, 1.8); // nearly horizontal
+            cam.radius = approach(cam.radius, 4.5,            1.5);
+            cam.target = Vector3.Lerp(
+              cam.target,
+              new Vector3(playerLaneX, 0.4, blockZ),
+              Math.min(1, dt * 2.0)
+            );
           }
 
-          if (leader && leader.mesh) {
-              // Smoothly track the leader with broadcast-style camera
-              const target = leader.mesh.position;
-              cameraRef.current.target = Vector3.Lerp(cameraRef.current.target, target, 0.04);
+        } else {
+          // ── RACE ACTIVE: TV BROADCAST SIDE-TRACKING SHOT ─────────────────────
+          // Classic swimming broadcast: camera locked to the side of the pool,
+          // slightly elevated, tracking the player's swimmer as they race.
+          // The camera leads slightly ahead for cinematic tension.
+
+          const playerZ     = playerSwimmer ? playerSwimmer.z : 0;
+          const isFinished  = playerSwimmer?.finished ?? false;
+
+          if (!isFinished) {
+            // Lead ahead of the swimmer by ~6m for dramatic anticipation
+            const leadZ = Math.min(poolLength / 2 - 1, playerZ + 6);
+
+            cam.alpha  = approach(cam.alpha,  0,            3.5); // snap to +X side
+            cam.beta   = approach(cam.beta,   Math.PI / 2.6, 2.5); // 35° above horizontal
+            cam.radius = approach(cam.radius, 28,           2.0);
+            cam.target = Vector3.Lerp(
+              cam.target,
+              new Vector3(0, 0, leadZ),
+              Math.min(1, dt * 5.0) // fast target tracking for responsive feel
+            );
+          } else {
+            // ── FINISH: pull back to a wide celebration shot ──────────────────
+            cam.alpha  = approach(cam.alpha,  -Math.PI / 4, 1.2); // diagonal angle
+            cam.beta   = approach(cam.beta,   Math.PI / 3.5, 1.2);
+            cam.radius = approach(cam.radius, 40,            1.0);
+            cam.target = Vector3.Lerp(
+              cam.target,
+              new Vector3(playerLaneX, 0, poolLength / 2 - 2), // at the finish wall
+              Math.min(1, dt * 2.0)
+            );
           }
+        }
       }
+      // ── END CINEMATIC CAMERA ─────────────────────────────────────────────────
 
       scene.render();
     });
