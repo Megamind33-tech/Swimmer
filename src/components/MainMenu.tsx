@@ -9,6 +9,9 @@ import { HomeScreen, HomeRightPanel } from './menu/HomeScreen';
 import { PlayScreen } from './menu/PlayScreen';
 import { PreRaceSetupScreen } from './menu/PreRaceSetupScreen';
 import { RaceResultScreen } from './menu/RaceResultScreen';
+import { CareerScreen } from './menu/CareerScreen';
+import { SwimmerScreen } from './menu/SwimmerScreen';
+import { LockerRoomScreen } from './menu/LockerRoomScreen';
 
 interface MainMenuProps {
   onPlay: () => void;
@@ -42,12 +45,13 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       case 'PLAY':
         return <PlayScreen onModeSelect={(mode) => {
           console.log('Selected mode:', mode);
-          // In a real app, this would navigate to setup or directly start
         }} />;
       case 'CAREER':
-        return <div className="flex items-center justify-center h-full text-white text-2xl">Career Screen - Coming Soon</div>;
+        return <CareerScreen onEventSelect={(eventId) => {
+          console.log('Selected event:', eventId);
+        }} />;
       case 'SWIMMER':
-        return <div className="flex items-center justify-center h-full text-white text-2xl">Swimmer Screen - Coming Soon</div>;
+        return <SwimmerScreen swimmerName={playerName} swimmerLevel={playerLevel} />;
       case 'CLUB':
         return <div className="flex items-center justify-center h-full text-white text-2xl">Club Screen - Coming Soon</div>;
       case 'LIVE_EVENTS':
