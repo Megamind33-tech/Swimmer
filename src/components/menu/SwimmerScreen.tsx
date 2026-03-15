@@ -80,7 +80,7 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
       case 'ATTRIBUTES':
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-black text-white">Core Attributes</h3>
+            <h3 className="text-2xl font-black text-on-background text-glow">Core Attributes</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 { name: 'Start Reaction', value: 18, max: 20, icon: '⚡' },
@@ -90,17 +90,17 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
                 { name: 'Finish Burst', value: 18, max: 20, icon: '🚀' },
                 { name: 'Mental Composure', value: 16, max: 20, icon: '🧠' },
               ].map((attr, idx) => (
-                <div key={idx} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
+                <div key={idx} className="glass-panel rounded-lg p-4 border border-outline/30 kinetic-border">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{attr.icon}</span>
-                      <span className="font-bold text-white">{attr.name}</span>
+                      <span className="font-bold text-on-background">{attr.name}</span>
                     </div>
-                    <span className="text-sm font-bold text-cyan-400">{attr.value}/{attr.max}</span>
+                    <span className="text-sm font-bold text-primary">{attr.value}/{attr.max}</span>
                   </div>
-                  <div className="w-full bg-slate-600/50 rounded-full h-2">
+                  <div className="w-full bg-surface-container-high rounded-full h-2">
                     <div
-                      className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full"
+                      className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full"
                       style={{ width: `${(attr.value / attr.max) * 100}%` }}
                     ></div>
                   </div>
@@ -112,7 +112,7 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
       case 'SKILLS':
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-black text-white">Skill Specialties</h3>
+            <h3 className="text-2xl font-black text-on-background text-glow">Skill Specialties</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 { skill: 'Sprint Specialist', desc: '+10% speed in 50m/100m races', unlocked: true },
@@ -126,12 +126,12 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
                   key={idx}
                   className={`rounded-lg p-4 border ${
                     skill.unlocked
-                      ? 'bg-purple-500/20 border-purple-500/50'
-                      : 'bg-slate-600/20 border-slate-600/30 opacity-50'
+                      ? 'glass-panel border-secondary/50 kinetic-border'
+                      : 'glass-panel border-outline/30 opacity-50'
                   }`}
                 >
-                  <div className="font-bold text-white mb-1">{skill.skill}</div>
-                  <div className="text-sm text-slate-300">{skill.desc}</div>
+                  <div className="font-bold text-on-background mb-1">{skill.skill}</div>
+                  <div className="text-sm text-on-surface-variant">{skill.desc}</div>
                 </div>
               ))}
             </div>
@@ -140,7 +140,7 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
       case 'GEAR':
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-black text-white">Equipment</h3>
+            <h3 className="text-2xl font-black text-on-background text-glow">Equipment</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 { type: 'Suit', equipped: 'Pro Racing Suit', rarity: 'EPIC' },
@@ -148,14 +148,14 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
                 { type: 'Goggles', equipped: 'Vision Pro Goggles', rarity: 'EPIC' },
                 { type: 'Wedges', equipped: 'Racing Blocks', rarity: 'RARE' },
               ].map((gear, idx) => (
-                <div key={idx} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-                  <div className="text-sm text-slate-400 mb-1">{gear.type}</div>
-                  <div className="font-bold text-white mb-2">{gear.equipped}</div>
+                <div key={idx} className="glass-panel rounded-lg p-4 border border-outline/30 kinetic-border">
+                  <div className="text-sm text-on-surface-variant mb-1">{gear.type}</div>
+                  <div className="font-bold text-on-background mb-2">{gear.equipped}</div>
                   <span
                     className={`text-xs px-3 py-1 rounded-full font-bold ${
                       gear.rarity === 'EPIC'
-                        ? 'bg-purple-500/30 text-purple-300'
-                        : 'bg-blue-500/30 text-blue-300'
+                        ? 'bg-secondary/30 text-secondary'
+                        : 'bg-primary/30 text-primary'
                     }`}
                   >
                     {gear.rarity}
@@ -263,29 +263,29 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
+    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between animate-slide-in-down">
           <div>
-            <h1 className="text-4xl font-black text-white mb-1">{swimmerName}</h1>
-            <p className="text-slate-400">Level {swimmerLevel}</p>
+            <h1 className="text-4xl font-black text-on-background mb-1 text-glow">{swimmerName}</h1>
+            <p className="text-on-surface-variant">Level {swimmerLevel}</p>
           </div>
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-5xl font-black">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-on-primary text-5xl font-black kinetic-border border-2 border-primary/50">
             {swimmerName.charAt(0).toUpperCase()}
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap animate-slide-in-up">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-3 rounded-lg font-bold uppercase text-sm transition-all ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
+                  ? 'bg-gradient-to-r from-primary to-secondary text-on-primary shadow-lg shadow-primary/30'
+                  : 'glass-panel text-on-surface-variant hover:bg-surface-container/50'
               }`}
             >
               {tab.icon}
@@ -295,7 +295,7 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div className="bg-gradient-to-b from-slate-700/50 to-slate-800/50 rounded-lg p-8 border border-slate-600/30">
+        <div className="glass-panel rounded-lg p-8 border border-outline/30 kinetic-border animate-slide-in-left">
           {renderTab()}
         </div>
       </div>

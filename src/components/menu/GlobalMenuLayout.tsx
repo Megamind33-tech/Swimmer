@@ -1,6 +1,6 @@
 /**
- * SWIM 26 - Global Menu Layout
- * Professional AAA menu framework - landscape optimized with minimal chrome
+ * SWIM 26 - Global Menu Layout (New Design)
+ * Professional AAA menu framework with Material Design 3 dark theme
  */
 
 import React, { ReactNode } from 'react';
@@ -37,12 +37,12 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
   const showRightPanel = currentScreen === 'HOME' && rightPanel;
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-black overflow-hidden flex flex-col">
-      {/* Background Elements */}
+    <div className="w-screen h-screen bg-background text-on-surface overflow-hidden flex flex-col">
+      {/* Background Gradient Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-purple-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-secondary/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-tertiary/5 rounded-full blur-3xl"></div>
       </div>
 
       {/* Main Content Container */}
@@ -71,7 +71,7 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
 
           {/* Right Utility Panel - Only on HOME */}
           {showRightPanel && (
-            <div className="w-72 bg-gradient-to-b from-slate-800/30 to-slate-900/50 backdrop-blur-sm border-l border-slate-700/50 overflow-y-auto p-4 space-y-4 rounded-l-xl">
+            <div className="w-72 bg-surface-container/50 backdrop-blur-md border-l border-outline-variant/20 overflow-y-auto p-4 space-y-4">
               {rightPanel}
             </div>
           )}
@@ -80,18 +80,6 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
         {/* Bottom Quick Bar */}
         <BottomQuickBar onScreenChange={onScreenChange} />
       </div>
-
-      <style>{`
-        /* Responsive for different aspect ratios */
-        @media (max-aspect-ratio: 16/9) {
-          .w-72 { width: 16rem; }
-        }
-
-        /* Hide right panel on very narrow screens */
-        @media (max-width: 1400px) {
-          .w-72 { width: 14rem; }
-        }
-      `}</style>
     </div>
   );
 };
