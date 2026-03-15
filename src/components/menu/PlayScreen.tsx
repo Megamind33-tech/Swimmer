@@ -89,7 +89,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
         <p className="text-on-surface-variant text-sm">Select a game mode to start racing</p>
       </div>
 
-      {/* Game Modes Grid */}
+            {/* Game Modes Grid */}
       <div className="flex-1 p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max">
         {GameModes.map((mode) => (
           <button

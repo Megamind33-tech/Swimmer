@@ -38,7 +38,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   ];
 
   return (
-    <div className="w-full h-full p-8 space-y-8">
+    <div className="w-full h-full p-8 space-y-8 relative overflow-y-auto">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div>
