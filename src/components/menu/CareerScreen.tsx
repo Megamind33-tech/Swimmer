@@ -100,7 +100,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
 
   return (
     <div className="w-full h-full overflow-y-auto p-8 max-[1024px]:p-3 space-y-8 max-[1024px]:space-y-4 bg-surface relative">
-      <div className="max-w-5xl mx-auto space-y-8 max-[1024px]:space-y-4 max-[1024px]:max-w-[68vw] max-[1024px]:mx-auto">
+      <div className="max-w-5xl mx-auto space-y-8 max-[1024px]:space-y-4">
         {/* Header */}
         <div className="animate-slide-in-down">
           <h1 className="text-5xl max-[1024px]:text-3xl font-black text-primary mb-2 text-glow">Career Journey</h1>
@@ -241,7 +241,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
               {/* Tier Header */}
               <button
                 onClick={() => setExpandedTier(expandedTier === tier.tier ? -1 : tier.tier)}
-                className={`w-full px-6 max-[1024px]:px-2 py-4 flex items-center justify-between text-left transition-all gap-2 ${
+                className={`w-full px-6 max-[1024px]:px-3 py-4 flex items-center justify-between text-left transition-all gap-2 ${
                   expandedTier === tier.tier ? 'bg-primary/10' : 'hover:bg-primary/5'
                 }`}
               >
@@ -276,7 +276,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
                     <button
                       key={event.id}
                       onClick={() => onEventSelect?.(event.id)}
-                      className={`w-full px-4 max-[1024px]:px-2 py-4 rounded-lg text-left transition-all border backdrop-blur-sm ${
+                      className={`w-full px-4 max-[1024px]:px-3 py-4 rounded-lg text-left transition-all border backdrop-blur-sm ${
                         event.status === 'CURRENT'
                           ? 'bg-primary/20 border-primary/50 hover:bg-primary/30 hover:shadow-lg hover:shadow-primary/20 kinetic-border'
                           : event.status === 'COMPLETED'
