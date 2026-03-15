@@ -433,6 +433,13 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                     <button className="text-xs bg-amber-500/25 px-2 py-1 rounded font-black">Renew</button>
                     <button className="text-xs bg-red-500/30 px-2 py-1 rounded font-black">Transfer/Fire</button>
                   </div>
+                  <div className="text-[11px] text-white/90 font-bold mb-1">Targets</div>
+                  <ul className="space-y-1 mb-2 list-disc ml-4 text-[11px] text-white/75">
+                    {s.targets.map((target) => (
+                      <li key={target}>{target}</li>
+                    ))}
+                  </ul>
+                  <div className="text-[11px] p-2 rounded bg-slate-900/55 border border-white/10 text-white/80">Dynamic term: {s.dynamicTerms}</div>
                 </div>
               ))}
             </div>
@@ -647,46 +654,24 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                   <div className="font-black text-sm">{c.name}</div>
                   <div className="text-xs text-white/70">{c.role} • {c.level}</div>
                 </div>
+                <button className="mt-3 px-3 py-1 rounded bg-primary/35 text-xs font-black uppercase">Apply Branding Set</button>
               </div>
             ))}
           </div>
         );
       case 'BRANDING':
         return (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="glass-panel rounded-lg p-4 border border-white/15">
-              <h3 className="font-black mb-3">Club Identity Package</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {emblemOptions.map((e, idx) => (
-                  <button key={e} className="bg-slate-800/70 border border-white/15 rounded-lg p-3 text-left">
-                    <div className="w-10 h-10 mb-2 rounded-full bg-gradient-to-br from-primary/40 to-secondary/40 border border-white/20 flex items-center justify-center font-black text-sm">{idx + 1}</div>
-                    <div className="text-xs font-black">{e}</div>
-                  </button>
-                ))}
+              <h3 className="font-black mb-2">Club Emblem</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {emblemOptions.map((e) => <div key={e} className="bg-slate-800/60 rounded p-2 text-xs font-bold">{e}</div>)}
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="glass-panel rounded-lg p-4 border border-primary/25">
-                <h3 className="font-black mb-2">Sponsor Visual Assets</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {sponsorCards.map((s) => (
-                    <div key={s.logo} className="bg-slate-900/60 border border-white/10 rounded-lg p-2 text-center">
-                      <div className="w-11 h-11 mx-auto rounded bg-primary/25 flex items-center justify-center font-black">{s.logo}</div>
-                      <div className="text-[10px] mt-1 font-bold truncate">{s.name}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="glass-panel rounded-lg p-4 border border-secondary/25">
-                <h3 className="font-black mb-2">Kits & Arena Theme</h3>
-                <div className="space-y-2">
-                  {['Primary Kit: Midnight Blue + Ice White', 'Away Kit: Graphite + Cyan Trim', 'Cap + Emblem set synced for league nights'].map((item) => (
-                    <div key={item} className="bg-slate-900/60 border border-white/10 rounded p-2 text-xs text-white/80">{item}</div>
-                  ))}
-                </div>
-                <button className="mt-3 px-3 py-1 rounded bg-primary/35 text-xs font-black uppercase">Apply Branding Set</button>
+            <div className="glass-panel rounded-lg p-4 border border-white/15">
+              <h3 className="font-black mb-2">Sponsor Logos</h3>
+              <div className="flex gap-2">
+                {sponsorCards.map((s) => <div key={s.logo} className="w-10 h-10 rounded bg-primary/30 flex items-center justify-center font-black">{s.logo}</div>)}
               </div>
             </div>
           </div>
@@ -697,8 +682,8 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-4 max-[900px]:p-2 space-y-4">
-      <div className="max-w-5xl mx-auto space-y-4">
+    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
+      <div className="max-w-5xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl max-[900px]:text-xl font-black text-white mb-1">Club HQ</h1>
           <p className="text-slate-300 text-sm max-[900px]:text-xs">Manage your swimming club and dynasty</p>
@@ -712,7 +697,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                 setActiveTab(tab.id);
                 setActiveSubPage(null);
               }}
-              className={`flex items-center gap-1.5 px-3 py-2 max-[900px]:px-2 max-[900px]:py-1.5 rounded-lg font-bold uppercase text-xs transition-all ${
+              className={`flex items-center gap-2 px-4 py-3 rounded-lg font-bold uppercase text-sm transition-all ${
                 activeTab === tab.id
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
                   : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
