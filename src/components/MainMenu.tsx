@@ -15,6 +15,9 @@ import { LockerRoomScreen } from './menu/LockerRoomScreen';
 import { LiveEventsScreen } from './menu/LiveEventsScreen';
 import { SocialScreen } from './menu/SocialScreen';
 import { ClubScreen } from './menu/ClubScreen';
+import { StoreScreen } from './menu/StoreScreen';
+import { RewardsInboxScreen } from './menu/RewardsInboxScreen';
+import { SettingsScreen } from './menu/SettingsScreen';
 
 interface MainMenuProps {
   onPlay: () => void;
@@ -64,7 +67,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       case 'SOCIAL':
         return <SocialScreen playerName={playerName} />;
       case 'STORE':
-        return <div className="flex items-center justify-center h-full text-white text-2xl">Store Screen - Coming Soon</div>;
+        return <StoreScreen playerPremiumCurrency={premiumCurrency} playerCoins={softCurrency} />;
       default:
         return <HomeScreen onPlayClick={onPlay} onCareerClick={() => setCurrentScreen('CAREER')} />;
     }
