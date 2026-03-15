@@ -378,7 +378,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface">
+    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface relative">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header with Currency Display */}
         <div className="flex items-center justify-between animate-slide-in-down">
