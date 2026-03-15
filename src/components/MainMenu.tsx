@@ -82,7 +82,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       softCurrency={softCurrency}
       premiumCurrency={premiumCurrency}
       playerAvatarUrl={playerAvatarUrl}
-      rightPanel={currentScreen === 'HOME' ? <HomeRightPanel /> : null}
+      rightPanel={<HomeRightPanel />}
     >
       {renderScreen()}
     </GlobalMenuLayout>

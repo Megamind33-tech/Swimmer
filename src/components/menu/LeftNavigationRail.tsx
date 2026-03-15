@@ -107,32 +107,46 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
   onScreenChange,
 }) => {
   return (
-    <div className="w-24 bg-gradient-to-b from-slate-800/50 to-slate-900/50 border-r border-slate-700/50 flex flex-col items-center py-4 gap-2 overflow-y-auto">
+    <div className="w-24 bg-gradient-to-b from-slate-800/40 to-slate-900/60 backdrop-blur-sm border-r border-cyan-500/10 flex flex-col items-center py-4 gap-2 overflow-y-auto rounded-r-xl">
       {NavItems.map((item) => (
         <button
           key={item.id}
           onClick={() => onScreenChange(item.id)}
-          className={`relative w-16 h-16 rounded-lg flex flex-col items-center justify-center gap-1 transition-all duration-200 group ${
+          className={`relative w-16 h-16 rounded-lg flex flex-col items-center justify-center gap-1 transition-all duration-300 group border ${
             currentScreen === item.id
-              ? 'bg-gradient-to-br from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/50'
-              : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-          }`}
+              ? 'bg-gradient-to-br from-cyan-500/90 to-blue-500/80 text-white shadow-lg shadow-cyan-500/50 border-cyan-400/60 scale-105'
+              : 'text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 border-transparent hover:border-cyan-500/30'
+          } active:scale-95`}
           title={item.tooltip}
         >
-          {item.icon}
-          <span className="text-xs font-semibold text-center leading-tight">{item.label}</span>
+          <div className="transition-transform duration-300 group-hover:scale-110">{item.icon}</div>
+          <span className="text-xs font-bold text-center leading-tight tracking-wider">{item.label}</span>
 
           {/* Tooltip on hover */}
-          <div className="absolute left-full ml-2 bg-slate-950 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <div className="absolute left-full ml-3 bg-slate-950/95 backdrop-blur text-cyan-300 text-xs px-3 py-2 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none font-semibold border border-cyan-500/30 shadow-lg">
             {item.tooltip}
           </div>
 
-          {/* Active indicator */}
+          {/* Active indicator with glow */}
           {currentScreen === item.id && (
-            <div className="absolute inset-0 rounded-lg border-2 border-cyan-300"></div>
+            <>
+              <div className="absolute inset-0 rounded-lg border-2 border-cyan-300/60"></div>
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-cyan-400/20 to-blue-500/20"></div>
+            </>
           )}
         </button>
       ))}
+
+      <style>{`
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 10px rgba(34, 211, 238, 0.2); }
+          50% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.4); }
+        }
+
+        .bg-cyan-500\\/10:hover {
+          animation: pulse-glow 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };
