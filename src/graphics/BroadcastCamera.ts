@@ -21,7 +21,7 @@ import * as BABYLON from '@babylonjs/core';
 import { CameraView, ISwimmerRaceState, RaceState } from '../types';
 import { logger } from '../utils';
 
-export type ShotType = 'STARTING_BLOCK' | 'AERIAL_OVERVIEW' | 'PLAYER_FOLLOW' | 'WIDE_SHOT' | 'FINISH_CAM' | 'STARTING_BLOCK_CLOSE';
+export type ShotType = 'STARTING_BLOCK' | 'AERIAL_OVERVIEW' | 'PLAYER_FOLLOW' | 'WIDE_SHOT' | 'FINISH_CAM' | 'STARTING_BLOCK_CLOSE' | 'COMPETITORS_FOCUS' | 'UNDERWATER_PERSPECTIVE' | 'SIDE_FOLLOW' | 'FINISH_LINE_CAM';
 
 export interface ICameraShot {
   type: ShotType;
@@ -69,6 +69,12 @@ export class BroadcastCamera {
     enableSmoothing: true,
   };
 
+  // Dynamic camera rotation during racing
+  private dynamicShotRotation: ShotType[] = ['PLAYER_FOLLOW', 'WIDE_SHOT', 'COMPETITORS_FOCUS', 'SIDE_FOLLOW'];
+  private currentDynamicShotIndex: number = 0;
+  private shotRotationTimer: number = 0;
+  private shotRotationInterval: number = 5000; // Change shot every 5 seconds during racing
+
   // Pre-defined shots for different race phases
   private shots: Map<ShotType, ICameraShot> = new Map([
     ['STARTING_BLOCK', {
@@ -100,6 +106,30 @@ export class BroadcastCamera {
       position: new BABYLON.Vector3(0, 8, 35),
       target: new BABYLON.Vector3(0, 2, 0),
       duration: 800,
+    }],
+    ['FINISH_LINE_CAM', {
+      type: 'FINISH_LINE_CAM',
+      position: new BABYLON.Vector3(5, 4, 40),
+      target: new BABYLON.Vector3(0, 1.5, 20),
+      duration: 800,
+    }],
+    ['COMPETITORS_FOCUS', {
+      type: 'COMPETITORS_FOCUS',
+      position: new BABYLON.Vector3(15, 12, 0),
+      target: new BABYLON.Vector3(0, 2, 10),
+      duration: 1000,
+    }],
+    ['UNDERWATER_PERSPECTIVE', {
+      type: 'UNDERWATER_PERSPECTIVE',
+      position: new BABYLON.Vector3(0, -1, -25),
+      target: new BABYLON.Vector3(0, -0.5, 10),
+      duration: 800,
+    }],
+    ['SIDE_FOLLOW', {
+      type: 'SIDE_FOLLOW',
+      position: new BABYLON.Vector3(20, 6, 0),
+      target: new BABYLON.Vector3(-5, 2, 10),
+      duration: 1000,
     }],
   ]);
 
@@ -169,6 +199,11 @@ export class BroadcastCamera {
     // Handle player following during race
     if (this.currentShotType === 'PLAYER_FOLLOW' && this.playerSwimmer) {
       this.updatePlayerFollow(deltaTime);
+    }
+
+    // Handle dynamic shot rotation during racing
+    if (this.raceState === 'RACING') {
+      this.updateDynamicShotRotation(deltaTime);
     }
 
     // Handle shot sequence progress (for countdown sequence)
@@ -251,29 +286,34 @@ export class BroadcastCamera {
   }
 
   /**
-   * Update player following camera
+   * Update player following camera (now captures competitors too)
    */
   private updatePlayerFollow(deltaTime: number): void {
     if (!this.currentCamera || !this.playerSwimmer) return;
 
     // Calculate player position on the water surface
-    const playerZ = this.playerSwimmer.position - (this.config.followDistance);
+    const playerZ = this.playerSwimmer.position;
     const playerX = this.playerLaneX;
     const waterSurfaceY = 0.5;
 
-    // Camera position: behind player, elevated
+    // Dynamic camera positioning - slightly back and elevated
     const cameraZ = playerZ - this.config.followDistance;
     const cameraY = waterSurfaceY + this.config.followHeight;
 
-    const newCameraPos = new BABYLON.Vector3(playerX, cameraY, cameraZ);
+    // Vary horizontal position slightly to capture more of the pool
+    const cameraX = playerX + (Math.sin(Date.now() / 3000) * 5); // sway camera side to side
 
-    // Look ahead of player
-    const lookAheadZ = this.playerSwimmer.position + this.config.followLead;
-    const newTarget = new BABYLON.Vector3(playerX, waterSurfaceY + 2, lookAheadZ);
+    const newCameraPos = new BABYLON.Vector3(cameraX, cameraY, cameraZ);
+
+    // Look ahead of player to capture competitors
+    const lookAheadZ = playerZ + this.config.followLead;
+    const lookAtX = playerX + (Math.cos(Date.now() / 3000) * 3); // look at where competitors might be
+
+    const newTarget = new BABYLON.Vector3(lookAtX, waterSurfaceY + 2, lookAheadZ);
 
     // Smooth movement
     if (this.config.enableSmoothing) {
-      const smoothness = 0.1; // 0-1, higher = more responsive
+      const smoothness = 0.08; // 0-1, higher = more responsive
       this.currentCamera.position = BABYLON.Vector3.Lerp(
         this.currentCamera.position,
         newCameraPos,
@@ -287,6 +327,30 @@ export class BroadcastCamera {
     } else {
       this.currentCamera.position = newCameraPos;
       this.currentCamera.target = newTarget;
+    }
+  }
+
+  /**
+   * Rotate between different dynamic shots during racing for broadcast effect
+   */
+  private updateDynamicShotRotation(deltaTime: number): void {
+    this.shotRotationTimer += deltaTime;
+
+    if (this.shotRotationTimer >= this.shotRotationInterval) {
+      // Cycle to next shot
+      this.currentDynamicShotIndex = (this.currentDynamicShotIndex + 1) % this.dynamicShotRotation.length;
+      const nextShot = this.dynamicShotRotation[this.currentDynamicShotIndex];
+
+      // Switch to dynamic shot
+      if (nextShot === 'PLAYER_FOLLOW') {
+        this.currentShotType = 'PLAYER_FOLLOW';
+      } else {
+        // Use pre-defined shots for competitors and wide views
+        this.transitionToShot(nextShot as ShotType);
+      }
+
+      this.shotRotationTimer = 0;
+      logger.log(`Broadcasting dynamic shot: ${nextShot}`);
     }
   }
 
@@ -379,6 +443,61 @@ export class BroadcastCamera {
    */
   public setConfig(config: Partial<IBroadcastCameraConfig>): void {
     this.config = { ...this.config, ...config };
+  }
+
+  /**
+   * Enable dynamic shot rotation (for exciting broadcast during racing)
+   */
+  public enableDynamicShotRotation(interval: number = 5000): void {
+    this.shotRotationInterval = interval;
+    this.shotRotationTimer = 0;
+    logger.log(`Dynamic shot rotation enabled: ${interval}ms interval`);
+  }
+
+  /**
+   * Disable dynamic shot rotation (for replay focus)
+   */
+  public disableDynamicShotRotation(): void {
+    this.shotRotationTimer = 0;
+    logger.log('Dynamic shot rotation disabled');
+  }
+
+  /**
+   * Focus camera on specific underwater moment
+   */
+  public focusOnUnderwater(): void {
+    this.transitionToShot('UNDERWATER_PERSPECTIVE', 1000);
+    logger.log('Camera focused on underwater perspective');
+  }
+
+  /**
+   * Focus camera on finish line with dramatic angle
+   */
+  public focusOnFinishLine(duration: number = 2000): void {
+    this.transitionToShot('FINISH_LINE_CAM', duration);
+    logger.log('Camera focused on finish line');
+  }
+
+  /**
+   * Show wide replay angle capturing all swimmers
+   */
+  public showReplayWideAngle(): void {
+    this.transitionToShot('WIDE_SHOT', 1000);
+    logger.log('Camera showing replay wide angle');
+  }
+
+  /**
+   * Pan to specific swimmer for replay
+   */
+  public panToSwimmer(swimmerLaneX: number, duration: number = 1500): void {
+    const waterSurfaceY = 0.5;
+    this.targetPosition = new BABYLON.Vector3(swimmerLaneX, waterSurfaceY + 10, swimmerLaneX - 25);
+    this.targetTarget = new BABYLON.Vector3(swimmerLaneX, waterSurfaceY + 2, swimmerLaneX + 10);
+
+    this.isTransitioning = true;
+    this.transitionStartTime = performance.now();
+    this.transitionDuration = duration;
+    this.transitionProgress = 0;
   }
 
   /**
