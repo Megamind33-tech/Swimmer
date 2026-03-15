@@ -12,6 +12,9 @@ import { RaceResultScreen } from './menu/RaceResultScreen';
 import { CareerScreen } from './menu/CareerScreen';
 import { SwimmerScreen } from './menu/SwimmerScreen';
 import { LockerRoomScreen } from './menu/LockerRoomScreen';
+import { LiveEventsScreen } from './menu/LiveEventsScreen';
+import { SocialScreen } from './menu/SocialScreen';
+import { ClubScreen } from './menu/ClubScreen';
 
 interface MainMenuProps {
   onPlay: () => void;
@@ -53,11 +56,13 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       case 'SWIMMER':
         return <SwimmerScreen swimmerName={playerName} swimmerLevel={playerLevel} />;
       case 'CLUB':
-        return <div className="flex items-center justify-center h-full text-white text-2xl">Club Screen - Coming Soon</div>;
+        return <ClubScreen clubName="Aqua Dragons" />;
       case 'LIVE_EVENTS':
-        return <div className="flex items-center justify-center h-full text-white text-2xl">Live Events Screen - Coming Soon</div>;
+        return <LiveEventsScreen onEventSelect={(eventId) => {
+          console.log('Selected event:', eventId);
+        }} />;
       case 'SOCIAL':
-        return <div className="flex items-center justify-center h-full text-white text-2xl">Social Screen - Coming Soon</div>;
+        return <SocialScreen playerName={playerName} />;
       case 'STORE':
         return <div className="flex items-center justify-center h-full text-white text-2xl">Store Screen - Coming Soon</div>;
       default:
