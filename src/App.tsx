@@ -35,7 +35,6 @@ import SwimmerManager from './graphics/SwimmerManager';
 import EnhancedSwimmerManager from './graphics/EnhancedSwimmerManager';
 import EnvironmentManager from './graphics/EnvironmentManager';
 import RenderingOptimizer from './graphics/RenderingOptimizer';
-import OlympicUI from './components/OlympicUI';
 import CinematicOpening from './components/CinematicOpening';
 import LoadingScreen from './components/LoadingScreen';
 import MainMenu from './components/MainMenu';
