@@ -47,14 +47,20 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   const renderScreen = () => {
     switch (currentScreen) {
       case 'HOME':
-        return <HomeScreen onPlayClick={onPlay} onCareerClick={() => setCurrentScreen('CAREER')} />;
+        return <HomeScreen
+          onPlayClick={onPlay}
+          onCareerClick={() => setCurrentScreen('CAREER')}
+        />;
       case 'PLAY':
         return <PlayScreen onModeSelect={(mode) => {
-          console.log('Selected mode:', mode);
+          // Start race with selected mode
+          setCurrentScreen('HOME');
+          onPlay();
         }} />;
       case 'CAREER':
         return <CareerScreen onEventSelect={(eventId) => {
-          console.log('Selected event:', eventId);
+          // Start career race
+          onPlay();
         }} />;
       case 'SWIMMER':
         return <SwimmerScreen swimmerName={playerName} swimmerLevel={playerLevel} />;
