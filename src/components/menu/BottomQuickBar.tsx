@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import type { MenuScreen } from './GlobalMenuLayout';
 
 interface BottomQuickBarProps {
-  onScreenChange?: (screen: MenuScreen) => void;
+  onScreenChange?: (screen: string) => void;
   onQuickRaceClick?: () => void;
   onTrainingClick?: () => void;
   onRankedClick?: () => void;
@@ -24,7 +23,6 @@ interface QuickAction {
 }
 
 export const BottomQuickBar: React.FC<BottomQuickBarProps> = ({
-  onScreenChange,
   onQuickRaceClick,
   onTrainingClick,
   onRankedClick,
@@ -32,15 +30,6 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = ({
   onReplaysClick,
   onRewardsClick,
 }) => {
-  const defaultActionRoute: Record<string, MenuScreen> = {
-    'quick-race': 'PLAY',
-    training: 'CAREER',
-    ranked: 'PLAY',
-    'locker-room': 'LOCKER_ROOM',
-    replays: 'LIVE_EVENTS',
-    rewards: 'REWARDS',
-  };
-
   const quickActions: QuickAction[] = [
     { id: 'quick-race', label: 'Quick Race', icon: 'play_arrow', onClick: onQuickRaceClick },
     { id: 'training', label: 'Training', icon: 'fitness_center', onClick: onTrainingClick },

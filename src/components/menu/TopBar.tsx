@@ -29,6 +29,13 @@ export const TopBar: React.FC<TopBarProps> = ({
   onNotificationsClick,
 }) => {
   const [notificationCount] = useState(3);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  const notificationItems = [
+    'League finals registration closes in 2h',
+    'Your rival challenged you to a sprint rematch',
+    'Daily reward crate is ready to claim',
+  ];
 
   return (
     <header className="h-16 max-[1024px]:h-auto max-[1024px]:py-2 bg-black/65 backdrop-blur-md border-b border-white/10 px-6 max-[1024px]:px-2 flex max-[1024px]:flex-wrap items-center justify-between gap-2 z-50 sticky top-0">
@@ -45,7 +52,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Profile Button */}
         <button
           onClick={onProfileClick}
-          className="flex items-center gap-2 hover:bg-surface-container-high transition-colors px-1.5 py-1 rounded-full group"
+          className="flex items-center gap-3 hover:bg-white/10 transition-colors px-3 py-2 rounded-full group border border-transparent hover:border-white/15"
         >
           {playerAvatarUrl ? (
             <img
@@ -59,8 +66,8 @@ export const TopBar: React.FC<TopBarProps> = ({
             </div>
           )}
           <div className="text-left hidden sm:block">
-            <div className="text-xs font-bold text-on-surface">{playerName}</div>
-            <div className="text-[10px] text-primary uppercase font-bold">Lvl {playerLevel}</div>
+            <div className="text-xs font-bold text-white">{playerName}</div>
+            <div className="text-[10px] text-white uppercase font-bold">Lvl {playerLevel}</div>
           </div>
         </button>
       </div>
@@ -84,7 +91,10 @@ export const TopBar: React.FC<TopBarProps> = ({
       <div className="flex items-center gap-0.5 ml-auto">
         {/* Notifications Bell */}
         <button
-          onClick={onNotificationsClick}
+          onClick={() => {
+            setIsNotificationsOpen((prev) => !prev);
+            onNotificationsClick?.();
+          }}
           className="relative p-2 hover:bg-white/10 rounded-full transition-colors group"
         >
           <span className="material-symbols-outlined text-white group-hover:text-white transition-colors">
@@ -118,10 +128,31 @@ export const TopBar: React.FC<TopBarProps> = ({
         </button>
 
         {/* Connection Status */}
-        <div className="flex items-center gap-2 ml-2 pl-2 border-l border-white/10">
+        <div className="flex items-center gap-2 ml-2 pl-2 border-l border-white/20">
           <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
           <span className="text-[10px] text-on-surface-variant font-bold max-[1024px]:hidden">ONLINE</span>
         </div>
+
+        {isNotificationsOpen && (
+          <div className="absolute right-0 top-14 w-80 max-[900px]:w-64 rounded-lg border border-white/20 bg-[#081326]/95 backdrop-blur-md shadow-[0_15px_40px_rgba(0,0,0,0.45)] p-3 z-[60]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-black uppercase tracking-wide text-cyan-200">Notifications</span>
+              <button
+                onClick={() => setIsNotificationsOpen(false)}
+                className="text-[10px] px-2 py-1 rounded border border-white/25 text-white hover:bg-white/10"
+              >
+                Collapse
+              </button>
+            </div>
+            <div className="space-y-1.5">
+              {notificationItems.map((item) => (
+                <div key={item} className="text-[11px] text-white/90 bg-white/5 border border-white/10 rounded px-2 py-1.5">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

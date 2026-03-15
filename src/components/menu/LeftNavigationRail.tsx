@@ -40,8 +40,8 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
           onClick={() => onScreenChange(item.id)}
           className={`w-16 h-16 max-[1024px]:w-12 max-[1024px]:h-12 rounded-lg flex flex-col items-center justify-center gap-1 transition-all duration-300 group border ${
             currentScreen === item.id
-              ? 'bg-primary/25 text-primary-fixed border-primary/60 scale-100 shadow-[0_0_18px_rgba(15,98,254,0.35)]'
-              : 'text-white/70 hover:text-primary-fixed hover:bg-white/10 border-transparent'
+              ? 'bg-primary/30 text-white border-primary/70 scale-100 shadow-[0_0_14px_rgba(120,169,255,0.35)]'
+              : 'text-white hover:text-white hover:bg-white/10 border-transparent hover:border-white/15'
           } active:scale-95`}
           title={item.label}
         >
