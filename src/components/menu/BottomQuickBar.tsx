@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import type { MenuScreen } from './GlobalMenuLayout';
 
 interface BottomQuickBarProps {
-  onScreenChange?: (screen: MenuScreen) => void;
+  onScreenChange?: (screen: string) => void;
   onQuickRaceClick?: () => void;
   onTrainingClick?: () => void;
   onRankedClick?: () => void;
@@ -24,7 +23,6 @@ interface QuickAction {
 }
 
 export const BottomQuickBar: React.FC<BottomQuickBarProps> = ({
-  onScreenChange,
   onQuickRaceClick,
   onTrainingClick,
   onRankedClick,
@@ -32,15 +30,6 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = ({
   onReplaysClick,
   onRewardsClick,
 }) => {
-  const defaultActionRoute: Record<string, MenuScreen> = {
-    'quick-race': 'PLAY',
-    training: 'CAREER',
-    ranked: 'PLAY',
-    'locker-room': 'SWIMMER',
-    replays: 'LIVE_EVENTS',
-    rewards: 'STORE',
-  };
-
   const quickActions: QuickAction[] = [
     { id: 'quick-race', label: 'Quick Race', icon: 'play_arrow', onClick: onQuickRaceClick },
     { id: 'training', label: 'Training', icon: 'fitness_center', onClick: onTrainingClick },
@@ -51,7 +40,7 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = ({
   ];
 
   return (
-    <nav className="h-20 bg-gradient-to-t from-[#070f1f]/95 to-[#0a162b]/95 backdrop-blur-md border-t border-white/15 px-4 flex items-center justify-center gap-2 sticky bottom-0 z-50 shadow-[0_-8px_20px_rgba(0,0,0,0.35)]">
+    <nav className="h-20 max-[1024px]:h-16 bg-black/60 backdrop-blur-md border-t border-white/10 px-2 max-[1024px]:px-1 flex items-center justify-start max-[1024px]:overflow-x-auto max-[1024px]:[-ms-overflow-style:none] max-[1024px]:[scrollbar-width:none] max-[1024px]:[&::-webkit-scrollbar]:hidden gap-1 sticky bottom-0 z-50">
       {quickActions.map((action) => (
         <button
           key={action.id}
@@ -61,12 +50,12 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = ({
               onScreenChange(defaultActionRoute[action.id]);
             }
           }}
-          className="group flex flex-col items-center gap-1 px-4 py-2 hover:bg-white/10 transition-colors rounded-lg flex-1 border border-transparent hover:border-white/15"
+          className="group flex flex-col items-center justify-center gap-1 px-2 py-2 hover:bg-white/10 transition-colors rounded-lg flex-1 min-w-[88px] max-[1024px]:flex-none max-[1024px]:min-w-[92px] border border-transparent hover:border-white/10"
         >
-          <span className="material-symbols-outlined text-white group-hover:text-white transition-colors">
+          <span className="material-symbols-outlined text-white/70 group-hover:text-primary-fixed transition-colors max-[1024px]:text-base">
             {action.icon}
           </span>
-          <span className="text-[10px] font-bold text-white group-hover:text-white transition-colors uppercase tracking-tighter">
+          <span className="text-[10px] max-[1024px]:text-[9px] font-bold text-white/70 group-hover:text-primary-fixed transition-colors uppercase tracking-tighter">
             {action.label}
           </span>
         </button>

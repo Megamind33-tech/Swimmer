@@ -56,29 +56,36 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
           playerAvatarUrl={playerAvatarUrl}
         />
 
-        {/* Middle Section: Left Nav + Center Content + Right Panel (Landscape) */}
-        <div className="flex-1 flex overflow-hidden gap-3 px-2 py-2">
-          {/* Left Navigation Rail */}
-          <LeftNavigationRail
-            currentScreen={currentScreen}
-            onScreenChange={onScreenChange}
-          />
-
-          {/* Center Content Area - Full width or flex */}
-          <div className={`${showRightPanel ? 'flex-1' : 'flex-1'} overflow-y-auto rounded-xl border border-white/10 bg-gradient-to-b from-[#0c1830]/70 to-[#081326]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_30px_rgba(0,0,0,0.35)]`}>
-            {children}
+        <div className="flex-1 flex overflow-hidden gap-2 px-2 py-2 max-[1024px]:px-0 max-[1024px]:py-0">
+          <div>
+            <LeftNavigationRail currentScreen={currentScreen} onScreenChange={onScreenChange} />
           </div>
+
+          <div className="flex-1 overflow-y-auto max-[1024px]:px-2 max-[1024px]:pt-2">{children}</div>
 
           {/* Right Utility Panel - Only on HOME */}
           {showRightPanel && (
-            <div className="w-72 bg-[#0a1426]/75 backdrop-blur-md border-l border-white/10 overflow-y-auto p-4 space-y-4 shadow-[-10px_0_25px_rgba(0,0,0,0.3)]">
+            <div className="w-72 bg-black/45 backdrop-blur-md border-l border-white/10 overflow-y-auto p-3 space-y-3 max-[1024px]:hidden">
               {rightPanel}
             </div>
           )}
         </div>
 
-        {/* Bottom Quick Bar */}
-        <BottomQuickBar onScreenChange={onScreenChange} />
+        {showRightPanel && (
+          <div className="hidden max-[1024px]:block border-t border-white/10 bg-black/45 px-2 py-2 max-h-44 overflow-y-auto">
+            {rightPanel}
+          </div>
+        )}
+
+        <BottomQuickBar
+          onScreenChange={onScreenChange}
+          onQuickRaceClick={onQuickRaceClick}
+          onTrainingClick={onTrainingClick}
+          onRankedClick={onRankedClick}
+          onLockerRoomClick={onLockerRoomClick}
+          onReplaysClick={onReplaysClick}
+          onRewardsClick={onRewardsClick}
+        />
       </div>
     </div>
   );
