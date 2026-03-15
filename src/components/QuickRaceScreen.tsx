@@ -25,7 +25,7 @@ interface QuickRaceScreenProps {
   onBackToMenu?: () => void;
 }
 
-type QuickRacePhase = 'SETUP' | 'STARTING' | 'RACING' | 'RESULTS';
+type QuickRacePhase = 'SETUP' | 'INTRO' | 'WARMUP' | 'STANDING' | 'COLOR_COUNT' | 'RACING' | 'RESULTS';
 
 const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
   player,
@@ -69,7 +69,6 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
   // Setup race event listeners
   const setupRaceListeners = useCallback(() => {
     raceController.on('raceStart', () => {
-      setPhase('RACING');
       setIsCountingDown(true);
     });
 
@@ -79,6 +78,7 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
 
     raceController.on('raceBegin', () => {
       setIsCountingDown(false);
+      setPhase('RACING');
     });
 
     raceController.on('raceProgress', (data) => {
@@ -110,8 +110,8 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
   const handleStartRace = useCallback(() => {
     if (!player) return;
 
-    // Show arena with swimmers on starting blocks first, THEN start countdown
-    setPhase('STARTING');
+    // Begin race sequence: INTRO → WARMUP → STANDING → COLOR_COUNT → RACING
+    setPhase('INTRO');
 
     const raceSetup: IRaceSetup = {
       mode: 'QUICK_RACE',
@@ -126,13 +126,24 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
       })),
     };
 
-    // Wait for swimmers to be shown on starting blocks before countdown begins
+    // INTRO PHASE: 2 seconds (swimmers approaching)
     setTimeout(() => {
+      setPhase('WARMUP');
+    }, 2000);
+
+    // WARMUP PHASE: 2 seconds (warm-up animations)
+    setTimeout(() => {
+      setPhase('STANDING');
+    }, 4000);
+
+    // STANDING PHASE: 1.5 seconds (swimmers on starting blocks, ready position)
+    setTimeout(() => {
+      setPhase('COLOR_COUNT');
       setupRaceListeners();
       raceController.initializeRace(raceSetup);
       setRaceState(raceController.getRaceState());
 
-      // Start race loop
+      // Start race loop when in COLOR_COUNT (countdown will handle transition to RACING)
       let lastTime = performance.now();
       const raceLoop = () => {
         const now = performance.now();
@@ -148,7 +159,7 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
       };
 
       requestAnimationFrame(raceLoop);
-    }, 2500);
+    }, 5500);
   }, [player, selectedDistance, selectedStroke, selectedDifficulty, selectedOpponents, setupRaceListeners, raceController]);
 
   const handleReplay = useCallback(() => {
@@ -383,7 +394,149 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
     );
   }
 
-  if (phase === 'STARTING') {
+  // Helper function to render pool scene
+  const renderPoolScene = (label: string, subtitle?: string, showWarmupAnimation?: boolean) => (
+    <div style={{
+      width: '100%',
+      height: '100vh',
+      background: 'linear-gradient(180deg, #0a1628 0%, #0d2137 50%, #0a3d62 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <style>{`
+        @keyframes wave-motion {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-3px); }
+        }
+        @keyframes swim-prep {
+          0%, 100% { transform: scaleY(1); }
+          50% { transform: scaleY(1.1); }
+        }
+      `}</style>
+
+      {/* Pool lanes */}
+      <div style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '45%',
+        background: 'linear-gradient(180deg, #1565c0 0%, #0d47a1 100%)',
+        borderTop: '4px solid rgba(255,255,255,0.3)',
+      }}>
+        {/* Lane dividers */}
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: `${((i + 1) / 8) * 100}%`,
+            width: '2px',
+            background: 'rgba(255,255,255,0.25)',
+          }} />
+        ))}
+      </div>
+
+      {/* Starting blocks row with swimmers */}
+      <div style={{
+        position: 'absolute',
+        bottom: '43%',
+        left: 0,
+        right: 0,
+        display: 'flex',
+        justifyContent: 'space-around',
+        padding: '0 3%',
+      }}>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}>
+            {/* Swimmer on block with animations based on phase */}
+            <div style={{
+              fontSize: '28px',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+              animation: showWarmupAnimation ? 'swim-prep 0.8s ease-in-out infinite' : 'none',
+            }}>
+              🏊
+            </div>
+            {/* Starting block */}
+            <div style={{
+              width: '32px',
+              height: '12px',
+              background: 'linear-gradient(180deg, #f59e0b 0%, #d97706 100%)',
+              borderRadius: '3px 3px 0 0',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+            }} />
+          </div>
+        ))}
+      </div>
+
+      {/* Status label */}
+      <div style={{
+        position: 'absolute',
+        top: '30%',
+        textAlign: 'center',
+      }}>
+        <div style={{
+          fontSize: '22px',
+          fontWeight: 700,
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.9)',
+          textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+          marginBottom: '8px',
+        }}>
+          {label}
+        </div>
+        {subtitle && (
+          <div style={{
+            fontSize: '14px',
+            color: 'rgba(255,255,255,0.5)',
+            letterSpacing: '1px',
+          }}>
+            {subtitle}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  if (phase === 'INTRO') {
+    return renderPoolScene(
+      '🏊 Swimmers Approaching Blocks',
+      `${selectedDistance}m ${selectedStroke.charAt(0) + selectedStroke.slice(1).toLowerCase()}`
+    );
+  }
+
+  if (phase === 'WARMUP') {
+    return renderPoolScene(
+      '🔥 Warm-Up Routine',
+      'Preparing for race',
+      true
+    );
+  }
+
+  if (phase === 'STANDING') {
+    return renderPoolScene(
+      '⚡ Taking Position',
+      'Standing on Starting Blocks'
+    );
+  }
+
+  if (phase === 'COLOR_COUNT') {
+    const colors = ['#ff4444', '#ffbb33', '#00c853']; // Red, Yellow, Green
+    const displayValue = countdownValue > 0 ? Math.ceil(countdownValue) : 'GO!';
+    const colorIndex = Math.max(0, Math.ceil(countdownValue) - 1);
+    const bgColor = countdownValue <= 0 ? '#00c853' : colors[Math.min(colorIndex, colors.length - 1)];
+
     return (
       <div style={{
         width: '100%',
@@ -398,6 +551,14 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
         position: 'relative',
         overflow: 'hidden',
       }}>
+        <style>{`
+          @keyframes color-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+          }
+        `}</style>
+
         {/* Pool lanes */}
         <div style={{
           position: 'absolute',
@@ -437,15 +598,12 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
               flexDirection: 'column',
               alignItems: 'center',
             }}>
-              {/* Swimmer on block */}
               <div style={{
                 fontSize: '28px',
                 filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
-                animation: 'none',
               }}>
                 🏊
               </div>
-              {/* Starting block */}
               <div style={{
                 width: '32px',
                 height: '12px',
@@ -457,29 +615,42 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
           ))}
         </div>
 
-        {/* "Approaching starting blocks" label */}
+        {/* Countdown display with color indicator */}
         <div style={{
           position: 'absolute',
-          top: '30%',
-          textAlign: 'center',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '30px',
         }}>
           <div style={{
-            fontSize: '22px',
-            fontWeight: 700,
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.9)',
-            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
-            marginBottom: '8px',
+            width: '120px',
+            height: '120px',
+            borderRadius: '50%',
+            background: bgColor,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '48px',
+            fontWeight: 'bold',
+            boxShadow: `0 0 30px ${bgColor}99`,
+            animation: 'color-pulse 0.5s ease-in-out',
+            color: 'white',
+            textShadow: '0 2px 10px rgba(0,0,0,0.5)',
           }}>
-            Swimmers to Starting Blocks
+            {displayValue}
           </div>
           <div style={{
-            fontSize: '14px',
-            color: 'rgba(255,255,255,0.5)',
-            letterSpacing: '1px',
+            fontSize: '16px',
+            color: 'rgba(255,255,255,0.7)',
+            textTransform: 'uppercase',
+            letterSpacing: '2px',
+            fontWeight: 600,
           }}>
-            {selectedDistance}m {selectedStroke.charAt(0) + selectedStroke.slice(1).toLowerCase()}
+            Set...
           </div>
         </div>
       </div>
