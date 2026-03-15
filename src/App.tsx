@@ -277,34 +277,8 @@ const TIME_OF_DAY_CONFIG = {
     });
   }, [timeOfDay]);
 
-  useEffect(() => {
-    if (!cameraRef.current) return;
-    
-    switch(cameraPerspective) {
-      case 'aerial':
-        cameraRef.current.alpha = -Math.PI / 2;
-        cameraRef.current.beta = 0.1;
-        cameraRef.current.radius = 80;
-        cameraRef.current.target = new Vector3(0, 0, 0);
-        break;
-      case 'racing':
-        // Camera will be controlled by the render loop
-        break;
-      case 'startingBlock':
-        cameraRef.current.alpha = -Math.PI / 2;
-        cameraRef.current.beta = Math.PI / 2 - 0.5;
-        cameraRef.current.radius = 15;
-        cameraRef.current.target = new Vector3(0, 1, -20);
-        break;
-      case 'default':
-      default:
-        cameraRef.current.alpha = -Math.PI / 2;
-        cameraRef.current.beta = Math.PI / 3;
-        cameraRef.current.radius = 40;
-        cameraRef.current.target = new Vector3(0, 0, 0);
-        break;
-    }
-  }, [cameraPerspective]);
+  // Camera perspective switching is disabled — broadcast mode is always active.
+  // The camera automatically follows the race leader at a fixed cinematic angle.
 
   // Keyboard handler for pause
   useEffect(() => {
@@ -379,23 +353,22 @@ const TIME_OF_DAY_CONFIG = {
     scene.fogColor = new Color3(clearColor.r, clearColor.g, clearColor.b);
 
     // Camera
+    // Broadcast camera: fixed cinematic angle, no user input allowed
     cameraRef.current = new ArcRotateCamera(
       'camera',
       -Math.PI / 2,
-      Math.PI / 3,
-      40,
+      Math.PI / 3.5,
+      45,
       new Vector3(0, 0, 0),
       scene
     );
-    cameraRef.current.attachControl(canvasRef.current, true);
-    cameraRef.current.lowerRadiusLimit = 10;
-    cameraRef.current.upperRadiusLimit = 100; // Keep camera inside the hall
-    
-    // Restrict camera angles to prevent looking underneath the stadium
-    cameraRef.current.upperBetaLimit = Math.PI / 2 - 0.05; // Stop just above the floor
-    cameraRef.current.lowerBetaLimit = 0.1; // Prevent looking directly top-down
-    
-    // Disable panning so the stadium doesn't slide away
+    // Disable ALL user camera interaction - broadcast mode only
+    cameraRef.current.inputs.clear();
+    // Lock radius, angles, and panning so nothing can change them
+    cameraRef.current.lowerRadiusLimit = 45;
+    cameraRef.current.upperRadiusLimit = 45;
+    cameraRef.current.lowerBetaLimit = Math.PI / 3.5;
+    cameraRef.current.upperBetaLimit = Math.PI / 3.5;
     cameraRef.current.panningSensibility = 0;
 
     // Light
@@ -1379,8 +1352,9 @@ const TIME_OF_DAY_CONFIG = {
         updateScoreboard();
       }
 
-      // Update Camera to follow leader
-      if (raceActiveRef.current && cameraPerspectiveRef.current === 'racing') {
+      // Broadcast camera: always follow the race leader smoothly
+      if (cameraRef.current && swimmers.length > 0) {
+          // Find the furthest swimmer still racing, or the last finisher
           let leader = null;
           let maxZ = -Infinity;
           swimmers.forEach(s => {
@@ -1389,11 +1363,15 @@ const TIME_OF_DAY_CONFIG = {
                   leader = s;
               }
           });
+          // If all finished, track the winner (rank 1)
+          if (!leader) {
+              leader = swimmers.find(s => s.rank === 1) || swimmers[0];
+          }
 
-          if (leader) {
-              // Smoothly interpolate camera target
+          if (leader && leader.mesh) {
+              // Smoothly track the leader with broadcast-style camera
               const target = leader.mesh.position;
-              cameraRef.current.target = Vector3.Lerp(cameraRef.current.target, target, 0.05);
+              cameraRef.current.target = Vector3.Lerp(cameraRef.current.target, target, 0.04);
           }
       }
 
