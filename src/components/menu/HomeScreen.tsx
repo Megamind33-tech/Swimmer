@@ -1,9 +1,9 @@
 /**
- * Home Screen - Professional FC26-style main menu
- * Hero-focused design with athlete imagery, smooth animations, landscape-optimized
+ * Home Screen - FC26-inspired premium swimming menu
+ * Hero player showcase with Division Rivals styling, premium cards, cinematic atmosphere
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { IPlayerSwimmer } from '../../types';
 
 interface HomeScreenProps {
@@ -17,186 +17,168 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onPlayClick,
   onCareerClick,
 }) => {
-  const [selectedStroke, setSelectedStroke] = useState<string>('FREESTYLE');
-  const [isHovering, setIsHovering] = useState<string | null>(null);
-
-  // Animated background effect
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  const [isPlayHovering, setIsPlayHovering] = useState(false);
 
   return (
-    <div className="flex-1 flex items-center justify-center relative w-full h-full overflow-hidden">
-      {/* Dynamic Background with Animation */}
+    <div className="flex-1 relative w-full h-full overflow-hidden">
+      {/* Premium Cinematic Background */}
       <div className="absolute inset-0">
-        {/* Primary gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900"></div>
+        {/* Dynamic gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-blue-950 to-slate-950"></div>
 
-        {/* Animated light orbs */}
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" style={{ animation: 'float 8s ease-in-out infinite' }}></div>
-        <div className="absolute bottom-1/4 right-1/3 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl animate-pulse" style={{ animation: 'float 10s ease-in-out infinite reverse' }}></div>
-        <div className="absolute top-1/2 right-1/4 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl" style={{ animation: 'float 12s ease-in-out infinite' }}></div>
+        {/* Animated stadium lights */}
+        <div className="absolute top-0 left-1/3 w-96 h-96 bg-yellow-500/15 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" style={{ animation: 'float 8s ease-in-out infinite' }}></div>
+
+        {/* Stadium floor gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
       </div>
 
-      {/* Main Hero Section - Landscape Optimized */}
-      <div className="relative z-20 w-full h-full flex items-center justify-between px-12 py-8 max-w-7xl mx-auto">
+      {/* Main Content - Landscape Layout */}
+      <div className="relative z-20 h-full flex items-center px-8 py-6">
 
-        {/* Left Hero Section - Athlete Imagery Area */}
-        <div className="flex-1 h-full flex items-center justify-center relative group">
-          {/* Hero Image Container */}
-          <div className="relative w-full h-full max-w-md max-h-96 rounded-xl overflow-hidden shadow-2xl border border-cyan-500/30 bg-gradient-to-br from-blue-900/50 to-slate-900/50 backdrop-blur-sm transition-all duration-500 group-hover:border-cyan-400/60 group-hover:shadow-2xl group-hover:shadow-cyan-500/40">
-            {/* Gradient overlay for athlete image area */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+        {/* LEFT: Hero Player Showcase */}
+        <div className="flex-1 h-full flex flex-col items-center justify-center">
+          {/* Hero Card Container */}
+          <div className="relative w-full max-w-xs h-96 group">
+            {/* Premium Card Frame */}
+            <div className="absolute inset-0 bg-gradient-to-b from-yellow-600/30 via-slate-900/60 to-black rounded-2xl border-2 border-yellow-500/40 shadow-2xl shadow-yellow-500/30 overflow-hidden">
 
-            {/* Placeholder for athlete image - this would be replaced with actual image */}
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-600/20 to-blue-600/20">
-              <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center text-white text-5xl font-black shadow-2xl shadow-cyan-500/50">
-                  {player?.name.charAt(0).toUpperCase() || 'A'}
+              {/* Backdrop Image Area */}
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/20 to-blue-900/40 flex items-center justify-center">
+                {/* Player Placeholder - Use actual image here */}
+                <div className="text-center">
+                  <div className="w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-yellow-400 via-cyan-500 to-blue-600 flex items-center justify-center text-white text-7xl font-black shadow-2xl shadow-yellow-500/60 animate-pulse">
+                    {player?.name.charAt(0).toUpperCase() || 'S'}
+                  </div>
                 </div>
-                <p className="text-cyan-300 font-bold text-sm">Elite Athlete</p>
               </div>
-            </div>
 
-            {/* Glow effect on hover */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-cyan-500/0 group-hover:from-cyan-500/10 group-hover:via-cyan-500/5 group-hover:to-cyan-500/0 transition-all duration-500 z-5"></div>
+              {/* Gold Overlay Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+
+              {/* Hero Info Bottom */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3">
+                {/* Player Name */}
+                <div>
+                  <h2 className="text-2xl font-black text-yellow-300 tracking-wider">{player?.name || 'ELITE SWIMMER'}</h2>
+                  <p className="text-cyan-300 font-bold text-sm">LEVEL {player?.level || 1}</p>
+                </div>
+
+                {/* Division Badge */}
+                <div className="flex gap-2 items-center">
+                  <div className="px-3 py-1 bg-gradient-to-r from-yellow-500/80 to-yellow-600/60 rounded-lg border border-yellow-400/60">
+                    <p className="text-white font-black text-xs">ELITE DIVISION</p>
+                  </div>
+                  <div className="px-3 py-1 bg-gradient-to-r from-purple-600/60 to-pink-600/60 rounded-lg border border-purple-400/40">
+                    <p className="text-white font-bold text-xs">RANK #1,234</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Shine effect on hover */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-40 bg-gradient-to-r from-transparent via-white to-transparent group-hover:animate-pulse transition-opacity duration-300"></div>
+            </div>
           </div>
         </div>
 
-        {/* Right Content Section - Menu & Info */}
-        <div className="flex-1 h-full flex flex-col justify-between relative z-20 pl-12">
+        {/* RIGHT: Menu Content */}
+        <div className="flex-1 h-full flex flex-col justify-between pl-12">
 
-          {/* Top Section - Season & Stats */}
-          <div className="space-y-6">
-            {/* Main Heading */}
-            <div className="space-y-2 animate-fade-in">
-              <h1 className="text-5xl font-black text-white leading-tight">
-                CHAMPIONSHIP
-                <br />
-                <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                  SEASON 7
-                </span>
-              </h1>
-              <p className="text-blue-300/80 text-lg font-medium">National trials finals approaching</p>
+          {/* Top Section - Featured Season */}
+          <div className="space-y-8">
+            {/* Season Banner - Premium Card */}
+            <div className="relative overflow-hidden rounded-2xl border-2 border-yellow-500/50 bg-gradient-to-r from-yellow-600/30 to-purple-600/20 p-6 shadow-xl shadow-yellow-500/20 backdrop-blur-sm">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
+
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-black text-yellow-300 uppercase tracking-wider">Championship Season 7</h3>
+                  <div className="px-3 py-1 bg-red-600/50 rounded-lg border border-red-500/60">
+                    <p className="text-white text-xs font-black">LIVE</p>
+                  </div>
+                </div>
+                <p className="text-slate-200 text-sm font-medium">National Trials Finals - 2 races left before qualification</p>
+                <div className="mt-4 pt-4 border-t border-yellow-500/30 flex justify-between items-center">
+                  <span className="text-slate-300 text-xs font-bold">SEASON ENDS IN</span>
+                  <span className="text-yellow-300 font-black text-lg">12d 5h 22m</span>
+                </div>
+              </div>
             </div>
 
-            {/* Stroke Selection - Horizontal */}
-            <div className="flex gap-3 mt-6">
-              {['FREESTYLE', 'BUTTERFLY', 'BREASTSTROKE', 'BACKSTROKE'].map((stroke) => (
-                <button
-                  key={stroke}
-                  onClick={() => setSelectedStroke(stroke)}
-                  className={`px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-300 border ${
-                    selectedStroke === stroke
-                      ? 'bg-cyan-500 text-white border-cyan-400 shadow-lg shadow-cyan-500/50 scale-105'
-                      : 'bg-slate-800/40 text-slate-300 border-slate-700/50 hover:bg-slate-700/50 hover:border-slate-600'
-                  }`}
-                >
-                  {stroke.slice(0, 3)}
-                </button>
-              ))}
-            </div>
+            {/* Quick Stats Grid - Premium Cards */}
+            <div className="grid grid-cols-3 gap-3">
+              {/* Global Rank Card */}
+              <div className="bg-gradient-to-br from-cyan-600/30 to-cyan-900/20 rounded-xl p-4 border border-cyan-500/40 backdrop-blur-sm shadow-lg">
+                <p className="text-cyan-400 text-xs font-bold uppercase mb-2">Global Rank</p>
+                <p className="text-cyan-200 text-2xl font-black">#1,234</p>
+                <div className="mt-2 text-cyan-500/60 text-xs">↑ 45 positions</div>
+              </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4 mt-8">
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-lg p-4 border border-slate-700/50 hover:border-cyan-500/30 transition-all">
-                <p className="text-slate-400 text-xs uppercase font-bold mb-1">Global Rank</p>
-                <p className="text-cyan-400 text-2xl font-black">#1,234</p>
+              {/* Win Streak Card */}
+              <div className="bg-gradient-to-br from-purple-600/30 to-purple-900/20 rounded-xl p-4 border border-purple-500/40 backdrop-blur-sm shadow-lg">
+                <p className="text-purple-400 text-xs font-bold uppercase mb-2">Win Streak</p>
+                <p className="text-purple-200 text-2xl font-black">7x</p>
+                <div className="mt-2 text-purple-500/60 text-xs">🔥 ON FIRE!</div>
               </div>
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-lg p-4 border border-slate-700/50 hover:border-purple-500/30 transition-all">
-                <p className="text-slate-400 text-xs uppercase font-bold mb-1">Win Streak</p>
-                <p className="text-purple-400 text-2xl font-black">7x</p>
-              </div>
-              <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-lg p-4 border border-slate-700/50 hover:border-emerald-500/30 transition-all">
-                <p className="text-slate-400 text-xs uppercase font-bold mb-1">Personal Best</p>
-                <p className="text-emerald-400 text-2xl font-black">51.23s</p>
+
+              {/* Personal Best Card */}
+              <div className="bg-gradient-to-br from-emerald-600/30 to-emerald-900/20 rounded-xl p-4 border border-emerald-500/40 backdrop-blur-sm shadow-lg">
+                <p className="text-emerald-400 text-xs font-bold uppercase mb-2">Personal Best</p>
+                <p className="text-emerald-200 text-2xl font-black">51.23s</p>
+                <div className="mt-2 text-emerald-500/60 text-xs">FREESTYLE</div>
               </div>
             </div>
           </div>
 
-          {/* Bottom Section - CTAs */}
-          <div className="space-y-4 pb-4">
-            {/* Primary CTA - RACE NOW */}
+          {/* Bottom Section - Premium CTAs */}
+          <div className="space-y-3">
+            {/* PRIMARY: Race Now - Cinematic Button */}
             <button
               onClick={onPlayClick}
-              onMouseEnter={() => setIsHovering('play')}
-              onMouseLeave={() => setIsHovering(null)}
-              className="w-full group relative px-8 py-5 rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl"
+              onMouseEnter={() => setIsPlayHovering(true)}
+              onMouseLeave={() => setIsPlayHovering(false)}
+              className="w-full group relative px-6 py-5 rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl"
             >
-              {/* Animated gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 opacity-100 group-hover:opacity-110 transition-all duration-300"></div>
+              {/* Premium gradient - Gold to Cyan */}
+              <div className={`absolute inset-0 bg-gradient-to-r from-yellow-500 via-cyan-500 to-blue-600 transition-all duration-300 ${
+                isPlayHovering ? 'opacity-100 shadow-2xl shadow-yellow-500/60' : 'opacity-90'
+              }`}></div>
 
-              {/* Animated shine effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-gradient-to-r from-white to-transparent transition-all duration-500"></div>
+              {/* Shine animation */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-30 bg-gradient-to-r from-white via-transparent to-transparent animate-pulse"></div>
 
               {/* Content */}
               <div className="relative flex items-center justify-between">
                 <div className="text-left">
-                  <span className="block font-black text-2xl text-white uppercase tracking-wider">
-                    RACE NOW
-                  </span>
-                  <span className="block text-sm text-emerald-100 font-medium mt-1">2 races until qualification</span>
+                  <div className="font-black text-2xl text-white uppercase tracking-wider leading-tight">RACE NOW</div>
+                  <div className="text-sm text-yellow-100 font-bold mt-1">Enter Championship • Instant Matchmaking</div>
                 </div>
-                <div className="text-3xl group-hover:translate-x-2 transition-transform duration-300">→</div>
+                <div className={`text-4xl font-black text-white transition-transform duration-300 ${isPlayHovering ? 'translate-x-2' : ''}`}>▶</div>
               </div>
 
-              {/* Bottom glow */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-50 blur-sm transition-all duration-300"></div>
+              {/* Glow bottom */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-70 blur-sm transition-all"></div>
             </button>
 
-            {/* Secondary CTA - Career */}
+            {/* SECONDARY: Career Path */}
             <button
               onClick={onCareerClick}
-              onMouseEnter={() => setIsHovering('career')}
-              onMouseLeave={() => setIsHovering(null)}
-              className="w-full group relative px-8 py-4 rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-cyan-500/50 bg-gradient-to-r from-slate-800/40 to-slate-900/40 hover:from-cyan-500/20 hover:to-blue-500/20 backdrop-blur-sm"
+              className="w-full group relative px-6 py-4 rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-purple-500/60 bg-gradient-to-r from-purple-900/40 to-slate-900/40 hover:from-purple-600/30 hover:to-slate-800/30 backdrop-blur-sm shadow-lg"
             >
-              <span className="relative block font-bold text-lg text-white uppercase tracking-wider flex items-center justify-between">
+              <span className="relative flex items-center justify-between font-bold text-lg text-white uppercase tracking-wider">
                 <span>Continue Career</span>
-                <span className="group-hover:translate-x-2 transition-transform duration-300">↓</span>
+                <span className="group-hover:translate-y-1 transition-transform duration-300 text-2xl">↓</span>
               </span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Floating animation keyframes */}
       <style>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          25% { transform: translateY(-20px) translateX(10px); }
-          50% { transform: translateY(-40px) translateX(-10px); }
-          75% { transform: translateY(-20px) translateX(10px); }
-        }
-
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 1280px) {
-          .text-5xl { font-size: 3rem; }
-        }
-
-        @media (max-aspect-ratio: 16/9) {
-          .text-5xl { font-size: 2.5rem; }
-          .text-2xl { font-size: 1.5rem; }
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-30px); }
         }
       `}</style>
     </div>
