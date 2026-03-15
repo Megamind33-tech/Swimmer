@@ -514,6 +514,36 @@ export interface IDailyQuest {
 }
 
 // ============================================================================
+// CAMERA & BROADCAST TYPES
+// ============================================================================
+
+/**
+ * Camera package tier - MVP (7 cameras) or PREMIUM (20 cameras)
+ */
+export type CameraPackageTier = 'MVP' | 'PREMIUM';
+
+/**
+ * Race event type for camera shot planning
+ */
+export type RaceEventTypeEnum = '50M' | '100M' | '200M' | 'RELAY';
+
+/**
+ * Camera-specific input window types for readability protection
+ */
+export type CameraInputWindowType = 'DIVE' | 'TURN' | 'FINISH' | 'RELAY' | 'STROKE';
+
+/**
+ * Broadcast camera status
+ */
+export interface IBroadcastCameraStatus {
+  isActive: boolean;
+  currentCameraId: string | null;
+  raceEventType: RaceEventTypeEnum;
+  packageTier: CameraPackageTier;
+  isInInputWindow: boolean;
+}
+
+// ============================================================================
 // TYPE EXPORTS
 // ============================================================================
 // All types are exported individually above

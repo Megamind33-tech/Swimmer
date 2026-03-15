@@ -30,6 +30,11 @@ export interface RaceControllerEvents {
   raceResumed: number;
   replayRecorded: IRaceReplay;
   error: string;
+  // Camera-relevant events
+  cameraEventType: 'RACE_DISTANCE_50M' | 'RACE_DISTANCE_100M' | 'RACE_DISTANCE_200M' | 'RACE_DISTANCE_RELAY';
+  turnApproach: { swimmerId: string; distanceToWall: number; wallPosition: number };
+  turnContact: { swimmerId: string; position: number };
+  finishThreshold: { swimmerId: string; distanceToWall: number; wallPosition: number };
 }
 
 /**
@@ -108,6 +113,16 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
       this.isPaused = false;
 
       this.emit('raceStart', setup);
+
+      // Emit camera event type based on race distance (for camera shot planning)
+      const cameraEventType = (() => {
+        if (setup.distance === 50) return 'RACE_DISTANCE_50M';
+        if (setup.distance === 100) return 'RACE_DISTANCE_100M';
+        if (setup.distance === 200) return 'RACE_DISTANCE_200M';
+        if (setup.mode === 'RELAY') return 'RACE_DISTANCE_RELAY';
+        return 'RACE_DISTANCE_100M'; // default
+      })();
+      this.emit('cameraEventType', cameraEventType as any);
 
       return this.raceState;
     } catch (error) {
@@ -196,6 +211,40 @@ export class RaceController extends EventEmitter<RaceControllerEvents> {
           });
         }
       } else {
+        // Emit camera events for dramatic moments
+        const distanceToFinish = this.raceSetup!.distance - swimmer.position;
+
+        // Finish threshold: final 12m (for dramatic finish camera)
+        if (distanceToFinish > 0 && distanceToFinish <= 12 && distanceToFinish > 11.99) {
+          this.emit('finishThreshold', {
+            swimmerId: swimmer.id,
+            distanceToWall: distanceToFinish,
+            wallPosition: this.raceSetup!.distance,
+          });
+        }
+
+        // Turn approach: 6-8m before halfway point (for races 100m+)
+        if (this.raceSetup!.distance > 50) {
+          const halfway = this.raceSetup!.distance / 2;
+          const distanceToTurn = Math.abs(halfway - swimmer.position);
+
+          if (distanceToTurn > 6 && distanceToTurn <= 8 && swimmer.position < halfway) {
+            this.emit('turnApproach', {
+              swimmerId: swimmer.id,
+              distanceToWall: distanceToTurn,
+              wallPosition: halfway,
+            });
+          }
+
+          // Turn contact: near halfway point
+          if (distanceToTurn < 0.1 && swimmer.position >= (halfway - 0.1) && swimmer.position <= (halfway + 0.1)) {
+            this.emit('turnContact', {
+              swimmerId: swimmer.id,
+              position: swimmer.position,
+            });
+          }
+        }
+
         // Track leader
         if (swimmer.position > leaderPosition) {
           leaderPosition = swimmer.position;

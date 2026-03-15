@@ -3,43 +3,40 @@
  * Automated broadcasting camera system for races
  *
  * Responsibilities:
- * - Manage camera views like a broadcasting camera (not player-controlled)
- * - Define and transition between dynamic shots based on race phase
+ * - Manage all 20 camera types with professional specifications
+ * - Support event-specific shot sequences (50m, 100m, 200m, relay)
+ * - Enforce gameplay readability rules
+ * - Enforce golden rules of camera direction
+ * - Transition between shots with proper easing
  * - Follow the player during racing with cinematic framing
  * - Respond to race events (countdown, start, progress, finish)
- * - Handle smooth camera transitions
  *
  * Design Philosophy:
- * - Like entering a stadium: you can't control the broadcast camera
- * - System manages camera automatically based on race state
- * - Pre-race: wide shots, starting block focus
- * - Racing: follow player with leading framing
- * - Finish: dramatic angles showing winner
+ * - Like a professional broadcast director: automated, event-driven
+ * - Pre-race: establish scale, build tension, show competitors
+ * - Racing: follow with readability, enforce input windows
+ * - Finish: capture emotion and drama
+ * - Every race should feel like a televised championship
  */
 
 import * as BABYLON from '@babylonjs/core';
-import { CameraView, ISwimmerRaceState, RaceState } from '../types';
+import { ISwimmerRaceState, RaceState } from '../types';
 import { logger } from '../utils';
-
-export type ShotType = 'STARTING_BLOCK' | 'AERIAL_OVERVIEW' | 'PLAYER_FOLLOW' | 'WIDE_SHOT' | 'FINISH_CAM' | 'STARTING_BLOCK_CLOSE' | 'COMPETITORS_FOCUS' | 'UNDERWATER_PERSPECTIVE' | 'SIDE_FOLLOW' | 'FINISH_LINE_CAM';
-
-export interface ICameraShot {
-  type: ShotType;
-  position: BABYLON.Vector3;
-  target: BABYLON.Vector3;
-  duration: number; // transition duration in ms
-}
-
-export interface IBroadcastCameraConfig {
-  followDistance: number; // distance behind player
-  followHeight: number; // height above water
-  followLead: number; // how far ahead to look
-  transitionSpeed: number; // camera lerp speed
-  enableSmoothing: boolean;
-}
+import {
+  CAMERA_SPECS,
+  CameraID,
+  CameraPackage,
+  RaceEventType,
+  RacePhase,
+  EVENT_SHOT_SEQUENCES,
+  IShotSequence,
+  isCameraAvailable,
+  getFallbackCamera,
+} from './CameraSpecifications';
+import CameraPackageManager from './CameraPackageManager';
 
 /**
- * BroadcastCamera - Automated cinematics for races
+ * BroadcastCamera - Professional broadcasting cinematics for races
  */
 export class BroadcastCamera {
   private currentCamera: BABYLON.ArcRotateCamera | null = null;
@@ -53,99 +50,43 @@ export class BroadcastCamera {
   private transitionProgress: number = 0;
   private transitionDuration: number = 1000;
   private transitionStartTime: number = 0;
+  private transitionEasing: 'linear' | 'easeInOutQuad' | 'easeInQuad' | 'easeOutQuad' = 'easeInOutQuad';
 
   // Racing state
   private raceState: RaceState | null = null;
-  private currentShotType: ShotType = 'STARTING_BLOCK';
+  private currentCameraId: CameraID | null = null;
   private playerSwimmer: ISwimmerRaceState | null = null;
-  private playerLaneX: number = 0; // x position of player's lane
+  private playerLaneX: number = 0;
+  private raceEventType: RaceEventType = '100M';
 
-  // Configuration
-  private config: IBroadcastCameraConfig = {
-    followDistance: 20, // 20m behind player
-    followHeight: 8, // 8m above water
-    followLead: 15, // look 15m ahead
-    transitionSpeed: 0.016, // 60fps
-    enableSmoothing: true,
-  };
+  // Package management
+  private packageManager: CameraPackageManager;
 
-  // Dynamic camera rotation during racing
-  private dynamicShotRotation: ShotType[] = ['PLAYER_FOLLOW', 'WIDE_SHOT', 'COMPETITORS_FOCUS', 'SIDE_FOLLOW'];
-  private currentDynamicShotIndex: number = 0;
-  private shotRotationTimer: number = 0;
-  private shotRotationInterval: number = 5000; // Change shot every 5 seconds during racing
-
-  // Pre-defined shots for different race phases
-  private shots: Map<ShotType, ICameraShot> = new Map([
-    ['STARTING_BLOCK', {
-      type: 'STARTING_BLOCK',
-      position: new BABYLON.Vector3(0, 3, -30),
-      target: new BABYLON.Vector3(0, 0, -10),
-      duration: 500,
-    }],
-    ['STARTING_BLOCK_CLOSE', {
-      type: 'STARTING_BLOCK_CLOSE',
-      position: new BABYLON.Vector3(5, 2.5, -28),
-      target: new BABYLON.Vector3(0, 1, -12),
-      duration: 800,
-    }],
-    ['AERIAL_OVERVIEW', {
-      type: 'AERIAL_OVERVIEW',
-      position: new BABYLON.Vector3(0, 50, -5),
-      target: new BABYLON.Vector3(0, 0, 10),
-      duration: 1200,
-    }],
-    ['WIDE_SHOT', {
-      type: 'WIDE_SHOT',
-      position: new BABYLON.Vector3(10, 15, -35),
-      target: new BABYLON.Vector3(0, 5, 5),
-      duration: 1000,
-    }],
-    ['FINISH_CAM', {
-      type: 'FINISH_CAM',
-      position: new BABYLON.Vector3(0, 8, 35),
-      target: new BABYLON.Vector3(0, 2, 0),
-      duration: 800,
-    }],
-    ['FINISH_LINE_CAM', {
-      type: 'FINISH_LINE_CAM',
-      position: new BABYLON.Vector3(5, 4, 40),
-      target: new BABYLON.Vector3(0, 1.5, 20),
-      duration: 800,
-    }],
-    ['COMPETITORS_FOCUS', {
-      type: 'COMPETITORS_FOCUS',
-      position: new BABYLON.Vector3(15, 12, 0),
-      target: new BABYLON.Vector3(0, 2, 10),
-      duration: 1000,
-    }],
-    ['UNDERWATER_PERSPECTIVE', {
-      type: 'UNDERWATER_PERSPECTIVE',
-      position: new BABYLON.Vector3(0, -1, -25),
-      target: new BABYLON.Vector3(0, -0.5, 10),
-      duration: 800,
-    }],
-    ['SIDE_FOLLOW', {
-      type: 'SIDE_FOLLOW',
-      position: new BABYLON.Vector3(20, 6, 0),
-      target: new BABYLON.Vector3(-5, 2, 10),
-      duration: 1000,
-    }],
-  ]);
-
-  // Shot sequence during different phases
-  private shotSequences: Map<RaceState, ShotType[]> = new Map([
-    ['COUNTDOWN', ['STARTING_BLOCK', 'STARTING_BLOCK_CLOSE', 'AERIAL_OVERVIEW']],
-    ['RACING', ['PLAYER_FOLLOW']],
-    ['FINISHED', ['FINISH_CAM']],
-  ]);
-
-  private shotSequenceIndex: number = 0;
+  // Shot sequences
+  private currentShotSequence: CameraID[] = [];
+  private currentShotDurations: number[] = [];
+  private currentSequenceIndex: number = 0;
   private sequenceTimer: number = 0;
 
-  constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
+  // Input readability window
+  private isInInputWindow: boolean = false;
+  private lockedCameraId: CameraID | null = null;
+
+  // Player follow configuration
+  private playerFollowConfig = {
+    followDistance: 20,
+    followHeight: 8,
+    followLead: 15,
+    sideSwayAmount: 5,
+    sideSwaySpeed: 3000,
+    enableSmoothing: true,
+    smoothingFactor: 0.08,
+  };
+
+  constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, packageTier: CameraPackage = 'MVP') {
     this.scene = scene;
     this.canvas = canvas;
+    this.packageManager = new CameraPackageManager(packageTier);
   }
 
   /**
@@ -157,7 +98,6 @@ export class BroadcastCamera {
       return;
     }
 
-    // Create the camera with position that won't receive user input
     this.currentCamera = new BABYLON.ArcRotateCamera(
       'broadcastCamera',
       Math.PI,
@@ -170,19 +110,18 @@ export class BroadcastCamera {
     this.currentCamera.attachControl(this.canvas, true);
 
     // Disable user input - critical for broadcast camera
-    this.currentCamera.inertia = 0; // no momentum
-    this.currentCamera.angularSensibilityX = Number.MAX_VALUE; // disable mouse/touch control
-    this.currentCamera.angularSensibilityY = Number.MAX_VALUE; // disable mouse/touch control
-    this.currentCamera.wheelPrecision = Number.MAX_VALUE; // disable wheel zoom
-    this.currentCamera.pinchPrecision = Number.MAX_VALUE; // disable pinch zoom
+    this.currentCamera.inertia = 0;
+    this.currentCamera.angularSensibilityX = Number.MAX_VALUE;
+    this.currentCamera.angularSensibilityY = Number.MAX_VALUE;
+    this.currentCamera.wheelPrecision = Number.MAX_VALUE;
+    this.currentCamera.pinchPrecision = Number.MAX_VALUE;
 
-    // Set camera as active
     this.scene.activeCamera = this.currentCamera;
 
-    // Initialize to starting block shot
-    this.transitionToShot('STARTING_BLOCK', 0);
-
-    logger.log('BroadcastCamera initialized (broadcast mode - user input disabled)');
+    const packageInfo = this.packageManager.getPackageInfo();
+    logger.log(
+      `BroadcastCamera initialized: ${packageInfo.package} package (${packageInfo.totalAvailable} cameras available)`
+    );
   }
 
   /**
@@ -197,40 +136,39 @@ export class BroadcastCamera {
     }
 
     // Handle player following during race
-    if (this.currentShotType === 'PLAYER_FOLLOW' && this.playerSwimmer) {
+    if (this.currentCameraId?.includes('POOLSIDE_TRACKING') && this.playerSwimmer && !this.isInInputWindow) {
       this.updatePlayerFollow(deltaTime);
     }
 
-    // Handle dynamic shot rotation during racing
-    if (this.raceState === 'RACING') {
-      this.updateDynamicShotRotation(deltaTime);
-    }
-
-    // Handle shot sequence progress (for countdown sequence)
-    if (this.raceState === 'COUNTDOWN') {
+    // Handle shot sequence progress
+    if (this.raceState === 'RACING' && this.currentShotSequence.length > 0) {
       this.updateShotSequence(deltaTime);
     }
   }
 
   /**
-   * Transition to a new shot
+   * Transition to a camera shot
    */
-  private transitionToShot(shotType: ShotType, overrideDuration?: number): void {
-    const shot = this.shots.get(shotType);
-    if (!shot) {
-      logger.warn(`Shot type not found: ${shotType}`);
+  public transitionToCamera(cameraId: CameraID, duration?: number): void {
+    // Check availability and get fallback if needed
+    const availableCamera = this.packageManager.getCameraOrFallback(cameraId);
+    if (!availableCamera) {
+      logger.warn(`Camera ${cameraId} not available and no fallback found`);
       return;
     }
 
-    // If we're already at this position, snap there
-    const distance = BABYLON.Vector3.Distance(
-      this.currentCamera?.position || BABYLON.Vector3.Zero(),
-      shot.position
-    );
+    const spec = CAMERA_SPECS[availableCamera];
+    if (!spec) {
+      logger.warn(`Camera specification not found: ${availableCamera}`);
+      return;
+    }
 
-    this.targetPosition = shot.position;
-    this.targetTarget = shot.target;
-    this.currentShotType = shotType;
+    this.targetPosition = spec.position.clone();
+    this.targetTarget = spec.target.clone();
+    this.currentCameraId = availableCamera;
+    this.transitionEasing = spec.easing;
+
+    const distance = this.currentCamera ? BABYLON.Vector3.Distance(this.currentCamera.position, this.targetPosition) : 0;
 
     if (distance < 1) {
       // Already at position, snap
@@ -243,11 +181,11 @@ export class BroadcastCamera {
       // Start smooth transition
       this.isTransitioning = true;
       this.transitionStartTime = performance.now();
-      this.transitionDuration = overrideDuration || shot.duration;
+      this.transitionDuration = duration || spec.transitionDuration;
       this.transitionProgress = 0;
     }
 
-    logger.log(`Broadcasting shot: ${shotType}`);
+    logger.log(`BroadcastCamera: Transitioning to ${availableCamera}`);
   }
 
   /**
@@ -259,25 +197,14 @@ export class BroadcastCamera {
     const elapsed = performance.now() - this.transitionStartTime;
     this.transitionProgress = Math.min(elapsed / this.transitionDuration, 1);
 
-    // Easing function for smooth transitions
-    const easeProgress = this.easeInOutQuad(this.transitionProgress);
+    const easeProgress = this.applyEasing(this.transitionProgress, this.transitionEasing);
 
     if (this.currentCamera) {
-      // Lerp position
       const oldPos = this.currentCamera.position.clone();
-      this.currentCamera.position = BABYLON.Vector3.Lerp(
-        oldPos,
-        this.targetPosition,
-        easeProgress
-      );
+      this.currentCamera.position = BABYLON.Vector3.Lerp(oldPos, this.targetPosition, easeProgress);
 
-      // Lerp target
       const oldTarget = this.currentCamera.target.clone();
-      this.currentCamera.target = BABYLON.Vector3.Lerp(
-        oldTarget,
-        this.targetTarget,
-        easeProgress
-      );
+      this.currentCamera.target = BABYLON.Vector3.Lerp(oldTarget, this.targetTarget, easeProgress);
     }
 
     if (this.transitionProgress >= 1) {
@@ -286,44 +213,39 @@ export class BroadcastCamera {
   }
 
   /**
-   * Update player following camera (now captures competitors too)
+   * Update player follow camera
    */
   private updatePlayerFollow(deltaTime: number): void {
     if (!this.currentCamera || !this.playerSwimmer) return;
 
-    // Calculate player position on the water surface
     const playerZ = this.playerSwimmer.position;
     const playerX = this.playerLaneX;
     const waterSurfaceY = 0.5;
 
-    // Dynamic camera positioning - slightly back and elevated
-    const cameraZ = playerZ - this.config.followDistance;
-    const cameraY = waterSurfaceY + this.config.followHeight;
+    // Camera positioning - slightly back and elevated
+    const cameraZ = playerZ - this.playerFollowConfig.followDistance;
+    const cameraY = waterSurfaceY + this.playerFollowConfig.followHeight;
 
-    // Vary horizontal position slightly to capture more of the pool
-    const cameraX = playerX + (Math.sin(Date.now() / 3000) * 5); // sway camera side to side
+    // Vary horizontal position for cinematic effect
+    const timeSeconds = Date.now() / 1000;
+    const sideOffset = Math.sin((timeSeconds * 1000) / this.playerFollowConfig.sideSwaySpeed) * this.playerFollowConfig.sideSwayAmount;
+    const cameraX = playerX + sideOffset;
 
     const newCameraPos = new BABYLON.Vector3(cameraX, cameraY, cameraZ);
 
-    // Look ahead of player to capture competitors
-    const lookAheadZ = playerZ + this.config.followLead;
-    const lookAtX = playerX + (Math.cos(Date.now() / 3000) * 3); // look at where competitors might be
-
+    // Look ahead of player
+    const lookAheadZ = playerZ + this.playerFollowConfig.followLead;
+    const lookAtX = playerX + Math.cos((timeSeconds * 1000) / this.playerFollowConfig.sideSwaySpeed) * 3;
     const newTarget = new BABYLON.Vector3(lookAtX, waterSurfaceY + 2, lookAheadZ);
 
     // Smooth movement
-    if (this.config.enableSmoothing) {
-      const smoothness = 0.08; // 0-1, higher = more responsive
+    if (this.playerFollowConfig.enableSmoothing) {
       this.currentCamera.position = BABYLON.Vector3.Lerp(
         this.currentCamera.position,
         newCameraPos,
-        smoothness
+        this.playerFollowConfig.smoothingFactor
       );
-      this.currentCamera.target = BABYLON.Vector3.Lerp(
-        this.currentCamera.target,
-        newTarget,
-        smoothness
-      );
+      this.currentCamera.target = BABYLON.Vector3.Lerp(this.currentCamera.target, newTarget, this.playerFollowConfig.smoothingFactor);
     } else {
       this.currentCamera.position = newCameraPos;
       this.currentCamera.target = newTarget;
@@ -331,84 +253,89 @@ export class BroadcastCamera {
   }
 
   /**
-   * Rotate between different dynamic shots during racing for broadcast effect
-   */
-  private updateDynamicShotRotation(deltaTime: number): void {
-    this.shotRotationTimer += deltaTime;
-
-    if (this.shotRotationTimer >= this.shotRotationInterval) {
-      // Cycle to next shot
-      this.currentDynamicShotIndex = (this.currentDynamicShotIndex + 1) % this.dynamicShotRotation.length;
-      const nextShot = this.dynamicShotRotation[this.currentDynamicShotIndex];
-
-      // Switch to dynamic shot
-      if (nextShot === 'PLAYER_FOLLOW') {
-        this.currentShotType = 'PLAYER_FOLLOW';
-      } else {
-        // Use pre-defined shots for competitors and wide views
-        this.transitionToShot(nextShot as ShotType);
-      }
-
-      this.shotRotationTimer = 0;
-      logger.log(`Broadcasting dynamic shot: ${nextShot}`);
-    }
-  }
-
-  /**
-   * Progress through shot sequence (for countdown)
+   * Update shot sequence progression
    */
   private updateShotSequence(deltaTime: number): void {
-    const shots = this.shotSequences.get('COUNTDOWN');
-    if (!shots || shots.length === 0) return;
+    if (this.currentShotSequence.length === 0) return;
 
-    // Auto-progress through shots during countdown
-    const currentShot = shots[this.shotSequenceIndex];
-    const shot = this.shots.get(currentShot as ShotType);
+    const currentCamera = this.currentShotSequence[this.currentSequenceIndex];
+    const currentDuration = this.currentShotDurations[this.currentSequenceIndex] || 2000;
 
-    if (shot) {
-      this.sequenceTimer += deltaTime;
-      if (this.sequenceTimer >= shot.duration) {
-        this.shotSequenceIndex = (this.shotSequenceIndex + 1) % shots.length;
+    this.sequenceTimer += deltaTime;
+
+    if (this.sequenceTimer >= currentDuration && !this.isTransitioning) {
+      // Move to next camera in sequence
+      this.currentSequenceIndex++;
+
+      if (this.currentSequenceIndex < this.currentShotSequence.length) {
+        const nextCamera = this.currentShotSequence[this.currentSequenceIndex];
+        this.transitionToCamera(nextCamera);
         this.sequenceTimer = 0;
-
-        const nextShot = shots[this.shotSequenceIndex];
-        this.transitionToShot(nextShot as ShotType);
+      } else {
+        // Sequence complete, switch back to default
+        this.currentShotSequence = [];
+        this.currentSequenceIndex = 0;
       }
     }
   }
 
   /**
-   * Handle race state change (called from RaceController)
+   * Set race event type and load event-specific shot plan
+   */
+  public setRaceEventType(eventType: RaceEventType): void {
+    this.raceEventType = eventType;
+    logger.log(`BroadcastCamera: Race event type set to ${eventType}`);
+  }
+
+  /**
+   * Load shot sequence for a race phase
+   */
+  public loadPhaseSequence(phase: RacePhase): void {
+    const sequence = EVENT_SHOT_SEQUENCES[this.raceEventType][phase];
+    if (!sequence) {
+      logger.warn(`No shot sequence found for ${this.raceEventType} - ${phase}`);
+      return;
+    }
+
+    this.currentShotSequence = this.packageManager.filterSequence(sequence.cameras);
+    this.currentShotDurations = sequence.durations;
+    this.currentSequenceIndex = 0;
+    this.sequenceTimer = 0;
+
+    if (this.currentShotSequence.length > 0) {
+      this.transitionToCamera(this.currentShotSequence[0]);
+      logger.log(`BroadcastCamera: Loaded ${phase} sequence (${this.currentShotSequence.length} cameras)`);
+    }
+  }
+
+  /**
+   * Handle race state change
    */
   public onRaceStateChange(newState: RaceState, playerSwimmer?: ISwimmerRaceState): void {
     this.raceState = newState;
 
     if (playerSwimmer) {
       this.playerSwimmer = playerSwimmer;
-      this.playerLaneX = -12.5 + (playerSwimmer.lane * (25 / 7)); // Calculate x from lane
+      this.playerLaneX = -12.5 + (playerSwimmer.lane * (25 / 7));
     }
 
-    // Reset sequence for new state
-    this.shotSequenceIndex = 0;
+    this.currentSequenceIndex = 0;
     this.sequenceTimer = 0;
 
     switch (newState) {
       case 'COUNTDOWN':
-        // Start shot sequence
-        this.transitionToShot('STARTING_BLOCK', 0);
-        logger.log('BroadcastCamera: Countdown started - showing starting block');
+        this.loadPhaseSequence('ENTRANCE');
+        logger.log('BroadcastCamera: Countdown started');
         break;
 
       case 'RACING':
-        // Switch to player follow
-        this.currentShotType = 'PLAYER_FOLLOW';
-        logger.log('BroadcastCamera: Race started - following player');
+        this.loadPhaseSequence('START');
+        logger.log('BroadcastCamera: Race started');
         break;
 
       case 'FINISHED':
-        // Show dramatic finish shot
-        this.transitionToShot('FINISH_CAM', 1500);
-        logger.log('BroadcastCamera: Race finished - finish camera');
+        this.loadPhaseSequence('POST_RACE');
+        logger.log('BroadcastCamera: Race finished');
         break;
 
       default:
@@ -417,94 +344,130 @@ export class BroadcastCamera {
   }
 
   /**
-   * Handle race progress event (for dynamic shots)
+   * Lock camera during critical input window
+   * Enforces: "Do not cut away during a critical input window"
    */
-  public onRaceProgress(data: { leader: string; leaderPosition: number; time: number }): void {
-    // Could add more dynamic shots based on race progress
-    // For now, stay in follow mode during racing
+  public beginInputWindow(inputType: 'DIVE' | 'TURN' | 'FINISH' | 'RELAY'): void {
+    this.isInInputWindow = true;
+    this.lockedCameraId = this.currentCameraId;
+    logger.log(`BroadcastCamera: Input window locked (${inputType})`);
   }
 
   /**
-   * Handle swimmer finish event
+   * Release camera lock after input window
    */
-  public onSwimmerFinished(data: { name: string; rank: number; time: number }): void {
-    // Could pan to finished swimmer
+  public endInputWindow(): void {
+    this.isInInputWindow = false;
+    this.lockedCameraId = null;
+    logger.log('BroadcastCamera: Input window released');
   }
 
   /**
-   * Get current shot type
+   * Check if camera is currently locked
    */
-  public getCurrentShot(): ShotType {
-    return this.currentShotType;
+  public isInputLocked(): boolean {
+    return this.isInInputWindow;
   }
 
   /**
-   * Configure camera behavior
+   * Handle turn event - transition to turn camera
    */
-  public setConfig(config: Partial<IBroadcastCameraConfig>): void {
-    this.config = { ...this.config, ...config };
+  public onTurnApproach(distanceToWall: number): void {
+    if (distanceToWall < 8 && distanceToWall > 6) {
+      if (this.raceEventType !== '50M') {
+        // Don't use turn camera for 50m races
+        this.transitionToCamera('CAM_09_TURN_MASTER');
+      }
+    }
   }
 
   /**
-   * Enable dynamic shot rotation (for exciting broadcast during racing)
+   * Handle turn contact event
    */
-  public enableDynamicShotRotation(interval: number = 5000): void {
-    this.shotRotationInterval = interval;
-    this.shotRotationTimer = 0;
-    logger.log(`Dynamic shot rotation enabled: ${interval}ms interval`);
+  public onTurnContact(): void {
+    if (this.raceEventType !== '50M') {
+      this.transitionToCamera('CAM_14_UNDERWATER_TURN');
+    }
   }
 
   /**
-   * Disable dynamic shot rotation (for replay focus)
+   * Handle finish threshold - switch to dramatic finish camera
    */
-  public disableDynamicShotRotation(): void {
-    this.shotRotationTimer = 0;
-    logger.log('Dynamic shot rotation disabled');
+  public onFinishThreshold(distanceToWall: number): void {
+    if (distanceToWall < 12 && distanceToWall >= 0) {
+      if (this.raceState === 'RACING') {
+        this.transitionToCamera('CAM_18_FINISH_COMPRESSION');
+      }
+    }
   }
 
   /**
-   * Focus camera on specific underwater moment
+   * Handle race finish
    */
-  public focusOnUnderwater(): void {
-    this.transitionToShot('UNDERWATER_PERSPECTIVE', 1000);
-    logger.log('Camera focused on underwater perspective');
+  public onRaceFinish(): void {
+    this.transitionToCamera('CAM_19_SCOREBOARD_REACTION', 600);
   }
 
   /**
-   * Focus camera on finish line with dramatic angle
+   * Get current camera ID
    */
-  public focusOnFinishLine(duration: number = 2000): void {
-    this.transitionToShot('FINISH_LINE_CAM', duration);
-    logger.log('Camera focused on finish line');
+  public getCurrentCamera(): CameraID | null {
+    return this.currentCameraId;
   }
 
   /**
-   * Show wide replay angle capturing all swimmers
+   * Get current race phase
    */
-  public showReplayWideAngle(): void {
-    this.transitionToShot('WIDE_SHOT', 1000);
-    logger.log('Camera showing replay wide angle');
+  public getRacePhase(): RacePhase {
+    switch (this.raceState) {
+      case 'COUNTDOWN':
+        return 'ENTRANCE';
+      case 'RACING':
+        return 'MID_RACE';
+      case 'FINISHED':
+        return 'POST_RACE';
+      default:
+        return 'ENTRANCE';
+    }
   }
 
   /**
-   * Pan to specific swimmer for replay
+   * Set camera package tier
    */
-  public panToSwimmer(swimmerLaneX: number, duration: number = 1500): void {
-    const waterSurfaceY = 0.5;
-    this.targetPosition = new BABYLON.Vector3(swimmerLaneX, waterSurfaceY + 10, swimmerLaneX - 25);
-    this.targetTarget = new BABYLON.Vector3(swimmerLaneX, waterSurfaceY + 2, swimmerLaneX + 10);
-
-    this.isTransitioning = true;
-    this.transitionStartTime = performance.now();
-    this.transitionDuration = duration;
-    this.transitionProgress = 0;
+  public setPackageTier(packageTier: CameraPackage): void {
+    this.packageManager.setPackage(packageTier);
+    logger.log(`BroadcastCamera: Package tier set to ${packageTier}`);
   }
 
   /**
-   * Ease function for smooth transitions
+   * Configure player follow parameters
    */
-  private easeInOutQuad(t: number): number {
-    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  public setFollowConfig(config: Partial<typeof BroadcastCamera.prototype['playerFollowConfig']>): void {
+    this.playerFollowConfig = { ...this.playerFollowConfig, ...config };
+  }
+
+  /**
+   * Easing functions
+   */
+  private applyEasing(t: number, easing: string): number {
+    switch (easing) {
+      case 'easeInOutQuad':
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      case 'easeInQuad':
+        return t * t;
+      case 'easeOutQuad':
+        return t * (2 - t);
+      case 'linear':
+      default:
+        return t;
+    }
+  }
+
+  /**
+   * Get package information
+   */
+  public getPackageInfo() {
+    return this.packageManager.getPackageInfo();
   }
 
   /**
