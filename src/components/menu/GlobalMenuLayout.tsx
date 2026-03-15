@@ -8,20 +8,7 @@ import { TopBar } from './TopBar';
 import { LeftNavigationRail } from './LeftNavigationRail';
 import { BottomQuickBar } from './BottomQuickBar';
 
-export type MenuScreen =
-  | 'HOME'
-  | 'PLAY'
-  | 'CAREER'
-  | 'SWIMMER'
-  | 'CLUB'
-  | 'LIVE_EVENTS'
-  | 'SOCIAL'
-  | 'STORE'
-  | 'LOCKER_ROOM'
-  | 'REWARDS'
-  | 'PRE_RACE'
-  | 'SETTINGS'
-  | 'POST_GAME';
+export type MenuScreen = 'HOME' | 'PLAY' | 'CAREER' | 'SWIMMER' | 'CLUB' | 'LIVE_EVENTS' | 'SOCIAL' | 'STORE';
 
 interface GlobalMenuLayoutProps {
   currentScreen: MenuScreen;
@@ -33,16 +20,6 @@ interface GlobalMenuLayoutProps {
   softCurrency?: number;
   premiumCurrency?: number;
   playerAvatarUrl?: string;
-  onProfileClick?: () => void;
-  onInboxClick?: () => void;
-  onSettingsClick?: () => void;
-  onNotificationsClick?: () => void;
-  onQuickRaceClick?: () => void;
-  onTrainingClick?: () => void;
-  onRankedClick?: () => void;
-  onLockerRoomClick?: () => void;
-  onReplaysClick?: () => void;
-  onRewardsClick?: () => void;
 }
 
 export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
@@ -55,69 +32,53 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
   softCurrency = 0,
   premiumCurrency = 0,
   playerAvatarUrl,
-  onProfileClick,
-  onInboxClick,
-  onSettingsClick,
-  onNotificationsClick,
-  onQuickRaceClick,
-  onTrainingClick,
-  onRankedClick,
-  onLockerRoomClick,
-  onReplaysClick,
-  onRewardsClick,
 }) => {
+  // Show right panel only on HOME screen to maximize hero area
   const showRightPanel = currentScreen === 'HOME' && rightPanel;
 
   return (
-    <div className="app-race-theme w-screen h-dvh bg-background text-on-surface overflow-hidden flex flex-col">
+    <div className="w-screen h-screen bg-[#060b14] text-white overflow-hidden flex flex-col">
+      {/* Background Gradient Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-blue-900/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-slate-900/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
       </div>
 
+      {/* Main Content Container */}
       <div className="relative z-10 flex flex-col h-full">
+        {/* Top Bar */}
         <TopBar
           playerLevel={playerLevel}
           playerName={playerName}
           softCurrency={softCurrency}
           premiumCurrency={premiumCurrency}
           playerAvatarUrl={playerAvatarUrl}
-          onProfileClick={onProfileClick}
-          onInboxClick={onInboxClick}
-          onSettingsClick={onSettingsClick}
-          onNotificationsClick={onNotificationsClick}
         />
 
-        <div className="flex-1 flex overflow-hidden gap-2 px-2 py-2 max-[900px]:px-0 max-[900px]:py-0">
-          <div className="max-[900px]:hidden">
-            <LeftNavigationRail currentScreen={currentScreen} onScreenChange={onScreenChange} />
+        {/* Middle Section: Left Nav + Center Content + Right Panel (Landscape) */}
+        <div className="flex-1 flex overflow-hidden gap-3 px-2 py-2">
+          {/* Left Navigation Rail */}
+          <LeftNavigationRail
+            currentScreen={currentScreen}
+            onScreenChange={onScreenChange}
+          />
+
+          {/* Center Content Area - Full width or flex */}
+          <div className={`${showRightPanel ? 'flex-1' : 'flex-1'} overflow-y-auto rounded-xl border border-white/10 bg-gradient-to-b from-[#0c1830]/70 to-[#081326]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_30px_rgba(0,0,0,0.35)]`}>
+            {children}
           </div>
 
-          <div className="flex-1 overflow-y-auto max-[900px]:px-2 max-[900px]:pt-2">{children}</div>
-
+          {/* Right Utility Panel - Only on HOME */}
           {showRightPanel && (
-            <div className="w-72 bg-black/45 backdrop-blur-md border-l border-white/10 overflow-y-auto p-3 space-y-3 max-[900px]:hidden">
+            <div className="w-72 bg-[#0a1426]/75 backdrop-blur-md border-l border-white/10 overflow-y-auto p-4 space-y-4 shadow-[-10px_0_25px_rgba(0,0,0,0.3)]">
               {rightPanel}
             </div>
           )}
         </div>
 
-        {showRightPanel && (
-          <div className="hidden max-[900px]:block border-t border-white/10 bg-black/45 px-2 py-2 max-h-44 overflow-y-auto">
-            {rightPanel}
-          </div>
-        )}
-
-        <BottomQuickBar
-          onScreenChange={onScreenChange}
-          onQuickRaceClick={onQuickRaceClick}
-          onTrainingClick={onTrainingClick}
-          onRankedClick={onRankedClick}
-          onLockerRoomClick={onLockerRoomClick}
-          onReplaysClick={onReplaysClick}
-          onRewardsClick={onRewardsClick}
-        />
+        {/* Bottom Quick Bar */}
+        <BottomQuickBar onScreenChange={onScreenChange} />
       </div>
     </div>
   );
