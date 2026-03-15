@@ -25,7 +25,7 @@ interface QuickRaceScreenProps {
   onBackToMenu?: () => void;
 }
 
-type QuickRacePhase = 'SETUP' | 'INTRO' | 'WARMUP' | 'STANDING' | 'COLOR_COUNT' | 'RACING' | 'RESULTS';
+type QuickRacePhase = 'SETUP' | 'STADIUM_VIEW' | 'INTRO' | 'WARMUP' | 'STANDING' | 'COLOR_COUNT' | 'RACING' | 'RESULTS';
 
 const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
   player,
@@ -110,8 +110,8 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
   const handleStartRace = useCallback(() => {
     if (!player) return;
 
-    // Begin race sequence: INTRO → WARMUP → STANDING → COLOR_COUNT → RACING
-    setPhase('INTRO');
+    // Begin race sequence: STADIUM_VIEW (30s) → INTRO → WARMUP → STANDING → COLOR_COUNT → RACING
+    setPhase('STADIUM_VIEW');
 
     const raceSetup: IRaceSetup = {
       mode: 'QUICK_RACE',
@@ -126,15 +126,20 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
       })),
     };
 
+    // STADIUM_VIEW PHASE: 30 seconds (spectators see the arena and swimmers)
+    setTimeout(() => {
+      setPhase('INTRO');
+    }, 30000);
+
     // INTRO PHASE: 2 seconds (swimmers approaching)
     setTimeout(() => {
       setPhase('WARMUP');
-    }, 2000);
+    }, 32000);
 
     // WARMUP PHASE: 2 seconds (warm-up animations)
     setTimeout(() => {
       setPhase('STANDING');
-    }, 4000);
+    }, 34000);
 
     // STANDING PHASE: 1.5 seconds (swimmers on starting blocks, ready position)
     setTimeout(() => {
@@ -159,7 +164,7 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
       };
 
       requestAnimationFrame(raceLoop);
-    }, 5500);
+    }, 35500);
   }, [player, selectedDistance, selectedStroke, selectedDifficulty, selectedOpponents, setupRaceListeners, raceController]);
 
   const handleReplay = useCallback(() => {
@@ -508,6 +513,208 @@ const QuickRaceScreen: React.FC<QuickRaceScreenProps> = ({
       </div>
     </div>
   );
+
+  if (phase === 'STADIUM_VIEW') {
+    return (
+      <div style={{
+        width: '100%',
+        height: '100vh',
+        background: 'linear-gradient(180deg, #0a1628 0%, #0d2137 50%, #0a3d62 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <style>{`
+          @keyframes stadium-glow {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+          }
+          @keyframes water-shimmer {
+            0%, 100% { transform: translateY(0px); }
+            25% { transform: translateY(-2px); }
+            50% { transform: translateY(0px); }
+            75% { transform: translateY(2px); }
+            100% { transform: translateY(0px); }
+          }
+        `}</style>
+
+        {/* Stands with spectators */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '35%',
+          background: 'linear-gradient(180deg, #1a3a52 0%, #0f2337 100%)',
+          borderBottom: '2px solid rgba(255,255,255,0.2)',
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-around',
+          paddingBottom: '15px',
+          overflow: 'hidden',
+        }}>
+          {/* Spectator groups */}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '2px',
+            }}>
+              {Array.from({ length: 3 + Math.floor(Math.random() * 2) }).map((_, j) => (
+                <div
+                  key={j}
+                  style={{
+                    fontSize: '16px',
+                    opacity: 0.6 + Math.random() * 0.4,
+                    animation: 'stadium-glow 3s ease-in-out infinite',
+                    animationDelay: `${i * 0.2 + j * 0.3}s`,
+                  }}
+                >
+                  👥
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Pool lanes */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '50%',
+          background: 'linear-gradient(180deg, #1565c0 0%, #0d47a1 100%)',
+          borderTop: '4px solid rgba(255,255,255,0.3)',
+          animation: 'water-shimmer 4s ease-in-out infinite',
+        }}>
+          {/* Lane dividers */}
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div key={i} style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: `${((i + 1) / 8) * 100}%`,
+              width: '2px',
+              background: 'rgba(255,255,255,0.25)',
+            }} />
+          ))}
+
+          {/* Lane numbers */}
+          <div style={{
+            position: 'absolute',
+            bottom: '5%',
+            left: 0,
+            right: 0,
+            display: 'flex',
+            justifyContent: 'space-around',
+            padding: '0 3%',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'rgba(255,255,255,0.5)',
+          }}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i}>Lane {i + 1}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Starting blocks row with swimmers */}
+        <div style={{
+          position: 'absolute',
+          bottom: '48%',
+          left: 0,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'space-around',
+          padding: '0 3%',
+          zIndex: 10,
+        }}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+            }}>
+              <div style={{
+                fontSize: '32px',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
+              }}>
+                🏊
+              </div>
+              <div style={{
+                width: '36px',
+                height: '14px',
+                background: 'linear-gradient(180deg, #f59e0b 0%, #d97706 100%)',
+                borderRadius: '3px 3px 0 0',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+              }} />
+            </div>
+          ))}
+        </div>
+
+        {/* Center information display */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+          zIndex: 20,
+        }}>
+          <div style={{
+            fontSize: '28px',
+            fontWeight: 700,
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.9)',
+            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+            marginBottom: '16px',
+          }}>
+            🏛️ Olympic Stadium
+          </div>
+          <div style={{
+            fontSize: '16px',
+            color: 'rgba(255,255,255,0.7)',
+            letterSpacing: '1px',
+            marginBottom: '8px',
+          }}>
+            {selectedDistance}m {selectedStroke.charAt(0) + selectedStroke.slice(1).toLowerCase()}
+          </div>
+          <div style={{
+            fontSize: '12px',
+            color: 'rgba(255,255,255,0.5)',
+            letterSpacing: '0.5px',
+          }}>
+            {selectedDifficulty === 'EASY' ? '1 opponent' : selectedDifficulty === 'NORMAL' ? '3 opponents' : '5 opponents'}
+          </div>
+        </div>
+
+        {/* Countdown timer for stadium view */}
+        <div style={{
+          position: 'absolute',
+          bottom: '15%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontSize: '18px',
+          color: 'rgba(255,255,255,0.6)',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
+          fontWeight: 600,
+          zIndex: 20,
+        }}>
+          Race starting soon...
+        </div>
+      </div>
+    );
+  }
 
   if (phase === 'INTRO') {
     return renderPoolScene(
