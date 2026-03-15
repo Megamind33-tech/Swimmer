@@ -1,6 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 
 @import "tailwindcss";
+
+:root {
+  --app-height: 100dvh;
+}
 
 /* Material Design Icons */
 .material-symbols-outlined {
@@ -9,7 +13,8 @@
 
 /* Design Utilities */
 .glass-panel {
-  background: rgba(28, 38, 57, 0.6);
+  background: rgba(15, 28, 50, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
 }
 
@@ -18,7 +23,7 @@
 }
 
 .text-glow {
-  text-shadow: 0 0 10px rgba(129, 236, 255, 0.5);
+  text-shadow: 0 0 14px rgba(15, 98, 254, 0.6);
 }
 
 .skew-12 {
@@ -180,8 +185,32 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  position: fixed;
   width: 100%;
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  min-height: 100vh;
+  font-family: "IBM Plex Sans", sans-serif;
+  background: #070d18;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  height: var(--app-height);
+  min-height: var(--app-height);
+}
+
+@supports (height: 100svh) {
+  #root {
+    min-height: 100svh;
+  }
+}
+
+.app-race-theme {
+  background-image: linear-gradient(rgba(7, 13, 24, 0.88), rgba(8, 16, 30, 0.96)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuDOvEV97kNUGMhZqKyFNQwpdO4VNRG4Z2sKdTVjLT8wEOtJlsm2ZzLT4YMWSfz2sLuCPfCLfDm7XDnVtqbQA4Fb2NOrpP0pufFvV-kmjDact6l3VlDcaIoFLH2rD4DohD7LQL_w-W3kCcbJZlvdp34971jn2oUjFTH6Ek9x6hnl1sQ_M-P7H5PjGphbqXhysqhZBoQx0TCrJI-OgxcolCj2L7e0InZjeVWOacIl0-b6dpEv0PvKvFrRmxEmM8g0jfVdCiZMIP1RNjZQ");
+  background-size: cover;
+  background-position: center;
+}
+
+.app-race-theme,
+.app-race-theme * {
+  color: #ffffff !important;
 }

@@ -1,20 +1,26 @@
 /**
  * Club Screen - Dynasty builder
- * Club overview, facilities, roster, relay, staff, branding, treasury
+ * Club overview + management sub-pages accessed only within club section
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 
-type ClubTab = 'OVERVIEW' | 'FACILITIES' | 'ROSTER' | 'RELAY' | 'STAFF' | 'BRANDING' | 'TREASURY';
+type ClubTab = 'OVERVIEW' | 'FACILITIES' | 'ROSTER' | 'RELAY' | 'STAFF' | 'BRANDING';
+type ClubSubPage =
+  | 'START_PATH'
+  | 'CLUB_SETUP'
+  | 'TEAM_OPERATIONS'
+  | 'CLUB_COMPETITIONS'
+  | 'STAFF_MANAGEMENT'
+  | 'PLAYER_MANAGEMENT'
+  | 'SPONSORS'
+  | 'UPCOMING_EVENTS'
+  | 'LEAGUES_TOURNAMENTS'
+  | 'SCOUTING'
+  | 'FUNDING';
 
-interface Facility {
-  id: string;
-  name: string;
-  level: number;
-  maxLevel: number;
-  benefit: string;
-  nextUpgradeCost: number;
-}
+type ManagerMode = 'OWNER' | 'HIRED';
 
 interface ClubMember {
   id: string;
@@ -22,270 +28,599 @@ interface ClubMember {
   level: number;
   specialty: string;
   joinDate: string;
+  nationality: string;
+  wage: string;
   relayPosition?: number;
 }
 
 interface ClubScreenProps {
   clubName?: string;
+  onLaunchArenaRace?: () => void;
 }
 
-const Facilities: Facility[] = [
-  {
-    id: 'pool',
-    name: 'Olympic Pool',
-    level: 3,
-    maxLevel: 5,
-    benefit: '+15% training efficiency',
-    nextUpgradeCost: 5000,
-  },
-  {
-    id: 'gym',
-    name: 'Training Gym',
-    level: 2,
-    maxLevel: 5,
-    benefit: '+10% strength gains',
-    nextUpgradeCost: 3000,
-  },
-  {
-    id: 'recovery',
-    name: 'Recovery Lab',
-    level: 1,
-    maxLevel: 5,
-    benefit: '+20% recovery speed',
-    nextUpgradeCost: 4000,
-  },
-  {
-    id: 'analytics',
-    name: 'Analytics Center',
-    level: 2,
-    maxLevel: 5,
-    benefit: '+15% race insights',
-    nextUpgradeCost: 3500,
-  },
-  {
-    id: 'nutrition',
-    name: 'Nutrition Center',
-    level: 1,
-    maxLevel: 4,
-    benefit: '+12% stamina',
-    nextUpgradeCost: 3000,
-  },
-  {
-    id: 'media',
-    name: 'Media Room',
-    level: 2,
-    maxLevel: 4,
-    benefit: '+10% fame gain',
-    nextUpgradeCost: 2500,
-  },
-];
-
 const ClubMembers: ClubMember[] = [
+  { id: '1', name: 'Lane Master', level: 45, specialty: 'Freestyle', joinDate: 'Mar 1, 2025', nationality: 'Zambia', wage: '14,000', relayPosition: 1 },
+  { id: '2', name: 'James Chen', level: 42, specialty: 'Butterfly', joinDate: 'Jan 15, 2025', nationality: 'China', wage: '11,200', relayPosition: 2 },
+  { id: '3', name: 'Maya Patel', level: 39, specialty: 'Breaststroke', joinDate: 'Feb 20, 2025', nationality: 'India', wage: '9,500', relayPosition: 3 },
+  { id: '4', name: 'Alex Wilson', level: 41, specialty: 'Backstroke', joinDate: 'Dec 10, 2024', nationality: 'USA', wage: '10,800', relayPosition: 4 },
+];
+
+const sponsorCards = [
+  { logo: 'AP', name: 'AquaPulse', deal: '50,000 / season', status: 'Active' },
+  { logo: 'BC', name: 'BlueCurrent', deal: '75,000 + gear', status: 'Incoming' },
+  { logo: 'WL', name: 'WaveLens', deal: 'Media rights bonus', status: 'Negotiation' },
+];
+
+const detailedSponsorOffers = [
   {
-    id: '1',
-    name: 'You',
-    level: 45,
-    specialty: 'Freestyle',
-    joinDate: 'Mar 1, 2025',
-    relayPosition: 1,
+    logo: 'AP',
+    name: 'AquaPulse Energy',
+    years: 3,
+    value: '240,000',
+    targets: ['Reach Top 8 in National League', 'Win 1 Regional Cup race', 'Post 2 branded social clips/month'],
+    dynamicTerms: 'Bonus +20,000 if your relay reaches podium in 2 consecutive rounds.',
+    status: 'Active',
   },
   {
-    id: '2',
-    name: 'James Chen',
-    level: 42,
-    specialty: 'Butterfly',
-    joinDate: 'Jan 15, 2025',
-    relayPosition: 2,
+    logo: 'BC',
+    name: 'BlueCurrent Tech',
+    years: 2,
+    value: '180,000 + gear kit',
+    targets: ['Develop two U19 talents to rating 80+', 'Appear in 1 partner showcase event', 'Finish season with positive team morale'],
+    dynamicTerms: 'Contract extends +1 year automatically if all performance targets are completed.',
+    status: 'Offer',
   },
   {
-    id: '3',
-    name: 'Maya Patel',
-    level: 39,
-    specialty: 'Breaststroke',
-    joinDate: 'Feb 20, 2025',
-    relayPosition: 3,
-  },
-  {
-    id: '4',
-    name: 'Alex Wilson',
-    level: 41,
-    specialty: 'Backstroke',
-    joinDate: 'Dec 10, 2024',
-    relayPosition: 4,
-  },
-  {
-    id: '5',
-    name: 'Sofia Rossi',
-    level: 38,
-    specialty: 'IM',
-    joinDate: 'Feb 1, 2025',
-  },
-  {
-    id: '6',
-    name: 'Marcus Johnson',
-    level: 36,
-    specialty: 'Freestyle',
-    joinDate: 'Mar 5, 2026',
+    logo: 'WL',
+    name: 'WaveLens Media',
+    years: 4,
+    value: '320,000 + media rights',
+    targets: ['Qualify for World Tour finals', 'Minimum 70% win rate in home events', 'Publish 4 coach insight interviews'],
+    dynamicTerms: 'Payout drops by 15% for every missed quarter target, but rebounds with win streaks.',
+    status: 'Negotiation',
   },
 ];
 
-export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons' }) => {
-  const [activeTab, setActiveTab] = useState<ClubTab>('OVERVIEW');
-  const [relayOrder, setRelayOrder] = useState<string[]>(['1', '2', '3', '4']);
+const longTermStaff = [
+  {
+    name: 'David Marsh',
+    role: 'Head Coach',
+    age: 49,
+    experience: '17 seasons',
+    contract: '2 years 8 months',
+    advantage: '+8% sprint block efficiency',
+  },
+  {
+    name: 'Teri McKeever',
+    role: 'Technical Director',
+    age: 45,
+    experience: '14 seasons',
+    contract: '1 year 4 months',
+    advantage: '+6% stroke consistency for U21',
+  },
+  {
+    name: 'Bob Bowman',
+    role: 'Performance Lead',
+    age: 52,
+    experience: '21 seasons',
+    contract: '3 years 2 months',
+    advantage: '+5% race-day stamina retention',
+  },
+];
 
-  const tabs: { id: ClubTab; label: string; icon: React.ReactNode }[] = [
-    {
-      id: 'OVERVIEW',
-      label: 'Overview',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9M9 21h6a2 2 0 002-2V9l-7-4-7 4v10a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'FACILITIES',
-      label: 'Facilities',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'ROSTER',
-      label: 'Roster',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zM5 20a3 3 0 015.856-1.487M5 10a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'RELAY',
-      label: 'Relay',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'STAFF',
-      label: 'Staff',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-        </svg>
-      ),
-    },
-    {
-      id: 'BRANDING',
-      label: 'Branding',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a6 6 0 016 6v10a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a6 6 0 00-6-6H7a2 2 0 00-2 2v4a6 6 0 006 6z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'TREASURY',
-      label: 'Treasury',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
+const competitionCards = [
+  {
+    title: 'P2P League Round 6',
+    mode: 'P2P League',
+    entry: '120 points',
+    reward: '12,000 + sponsor bonus',
+    schedule: 'Tonight • 19:30',
+    pool: 'National Aquatic Arena',
+  },
+  {
+    title: 'Continental Knockout',
+    mode: 'P2P Tournament',
+    entry: '80 points',
+    reward: '8,500 + contract boost',
+    schedule: 'Tomorrow • 21:00',
+    pool: 'Blue Wave Stadium',
+  },
+  {
+    title: 'Coach Challenge Tour',
+    mode: 'AI Tour',
+    entry: '35 points',
+    reward: '2,700 + youth XP',
+    schedule: 'Open this week',
+    pool: 'Riverfront Complex',
+  },
+];
+
+const coachCards = [
+  { name: 'David Marsh', role: 'Head Coach', level: 'Elite' },
+  { name: 'Bob Bowman', role: 'Strength Coach', level: 'Senior' },
+  { name: 'Teri McKeever', role: 'Assistant Coach', level: 'Senior' },
+];
+
+const emblemOptions = ['Wave Crest', 'Aqua Eagle', 'Blue Shark', 'Hydra Spear'];
+
+const baseRoutes: { key: ClubSubPage; title: string; description: string; icon: string }[] = [
+  { key: 'TEAM_OPERATIONS', title: 'Team Operations', description: 'Invest in facilities, players, gear, training, and scouting.', icon: 'monitoring' },
+  { key: 'STAFF_MANAGEMENT', title: 'Staff Management', description: 'Hire/fire coaches and mentors for your club system.', icon: 'badge' },
+  { key: 'PLAYER_MANAGEMENT', title: 'Player Management', description: 'Manage contracts, earnings, and squad plans.', icon: 'groups' },
+  { key: 'SPONSORS', title: 'Sponsors & Partners', description: 'Sign and manage sponsor/partner deals.', icon: 'handshake' },
+  { key: 'UPCOMING_EVENTS', title: 'Upcoming Events', description: 'See events and register entries in advance.', icon: 'event' },
+  { key: 'LEAGUES_TOURNAMENTS', title: 'Leagues & Tournaments', description: 'Join P2P/PvE tournaments, leagues, and tours.', icon: 'emoji_events' },
+  { key: 'SCOUTING', title: 'Scouting Market', description: 'Scout and recruit talent worldwide.', icon: 'travel_explore' },
+  { key: 'FUNDING', title: 'Funding & Finance', description: 'Track team/player earnings and source funding.', icon: 'payments' },
+  { key: 'CLUB_COMPETITIONS', title: 'Club Competitions', description: 'Launch arena races for tournaments/leagues.', icon: 'sports_score' },
+];
+
+export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons', onLaunchArenaRace }) => {
+  const [activeTab, setActiveTab] = useState<ClubTab>('OVERVIEW');
+  const [activeSubPage, setActiveSubPage] = useState<ClubSubPage | null>(null);
+  const [managerMode, setManagerMode] = useState<ManagerMode | null>(null);
+  const [relayOrder] = useState<string[]>(['1', '2', '3', '4']);
+  const [clubSetup, setClubSetup] = useState({ name: 'Aqua Dragons', city: 'Lusaka', nation: 'Zambia', emblem: 'Wave Crest' });
+
+  const tabs: { id: ClubTab; label: string; icon: string }[] = [
+    { id: 'OVERVIEW', label: 'Overview', icon: 'home' },
+    { id: 'FACILITIES', label: 'Facilities', icon: 'apartment' },
+    { id: 'ROSTER', label: 'Roster', icon: 'groups' },
+    { id: 'RELAY', label: 'Relay', icon: 'bolt' },
+    { id: 'STAFF', label: 'Staff', icon: 'badge' },
+    { id: 'BRANDING', label: 'Branding', icon: 'palette' },
   ];
+
+  const managementRoutes = useMemo(() => {
+    if (!managerMode) {
+      return [
+        {
+          key: 'START_PATH' as ClubSubPage,
+          title: 'Create Club / Get Hired',
+          description: 'Choose your journey: own a club or start as hired amateur manager.',
+          icon: 'account_tree',
+        },
+      ];
+    }
+    return baseRoutes;
+  }, [managerMode]);
+
+  const commonSubHeader = (title: string) => (
+    <div className="flex items-center justify-between gap-3 mb-4">
+      <h2 className="text-2xl font-black text-primary">{title}</h2>
+      <button onClick={() => setActiveSubPage(null)} className="px-4 py-2 rounded-lg border border-white/20 bg-slate-800/60 font-bold uppercase text-xs">
+        Back to Club Hub
+      </button>
+    </div>
+  );
+
+  const renderSubPage = () => {
+    if (!activeSubPage) return null;
+
+    switch (activeSubPage) {
+      case 'START_PATH':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Choose Club Career Path')}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="glass-panel rounded-lg p-5 border border-primary/35 space-y-3">
+                <h3 className="text-xl font-black text-white">Create Your Club</h3>
+                <p className="text-sm text-white/75">Start from scratch, build identity, sign prospects, and grow ranks.</p>
+                <ul className="text-xs text-white/80 space-y-1 list-disc ml-4">
+                  <li>Customize club profile and emblem</li>
+                  <li>Receive starter sponsorship offers</li>
+                  <li>Sign 2 free teen prospects</li>
+                </ul>
+                <div className="flex items-center gap-2 pt-1">
+                  <button onClick={() => setActiveSubPage('CLUB_SETUP')} className="px-4 py-2 rounded-lg bg-primary/35 font-bold">
+                    Create Club
+                  </button>
+                  <span className="text-[11px] text-white/65">Build from zero with sponsor + academy starter pack.</span>
+                </div>
+              </div>
+              <div className="glass-panel rounded-lg p-5 border border-secondary/35 space-y-3">
+                <h3 className="text-xl font-black text-white">Find a Club to Manage</h3>
+                <p className="text-sm text-white/75">Join as amateur manager and climb to elite clubs.</p>
+                <ul className="text-xs text-white/80 space-y-1 list-disc ml-4">
+                  <li>Start with lower-table clubs</li>
+                  <li>Meet board objectives</li>
+                  <li>Earn promotion offers</li>
+                </ul>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => {
+                      setManagerMode('HIRED');
+                      setActiveSubPage(null);
+                    }}
+                    className="px-4 py-2 rounded-lg bg-secondary/35 font-bold"
+                  >
+                    Find Club
+                  </button>
+                  <span className="text-[11px] text-white/65">Browse vacancies, negotiate contract, and start with existing roster.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'CLUB_SETUP':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Create Club Setup')}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="glass-panel rounded-lg p-4 border border-primary/30 space-y-3">
+                {(['name', 'city', 'nation'] as const).map((field) => (
+                  <label key={field} className="block text-sm">
+                    <div className="font-bold uppercase text-xs mb-1">{field}</div>
+                    <input
+                      value={clubSetup[field]}
+                      onChange={(e) => setClubSetup((prev) => ({ ...prev, [field]: e.target.value }))}
+                      className="w-full bg-slate-900/50 border border-white/20 rounded-lg px-3 py-2 text-white"
+                    />
+                  </label>
+                ))}
+                <div>
+                  <div className="font-bold uppercase text-xs mb-1">Emblem</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {emblemOptions.map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => setClubSetup((prev) => ({ ...prev, emblem: option }))}
+                        className={`px-3 py-2 rounded-lg border text-xs font-bold ${clubSetup.emblem === option ? 'border-primary bg-primary/20' : 'border-white/20 bg-slate-900/40'}`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="glass-panel rounded-lg p-4 border border-secondary/30">
+                  <h3 className="font-black mb-2">Starter Sponsorship Offers</h3>
+                  {sponsorCards.slice(0, 2).map((s) => (
+                    <div key={s.name} className="bg-slate-800/60 border border-white/10 rounded-lg p-2 mb-2 flex items-center gap-2">
+                      <div className="w-8 h-8 rounded bg-primary/30 flex items-center justify-center font-black text-xs">{s.logo}</div>
+                      <div className="text-xs"><div className="font-bold">{s.name}</div><div className="text-white/70">{s.deal}</div></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="glass-panel rounded-lg p-4 border border-primary/30">
+                  <h3 className="font-black mb-2">Sign 2 Free Teen Prospects</h3>
+                  {[1, 2].map((idx) => (
+                    <div key={idx} className="bg-slate-800/60 border border-white/10 rounded-lg p-2 mb-2 flex items-center gap-2">
+                      <img src={miaPhiriAthleteImage} alt="Teen prospect" className="w-9 h-9 rounded object-cover" />
+                      <div className="text-xs"><div className="font-bold">Teen Prospect #{idx}</div><div className="text-white/70">Potential 82-90</div></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setManagerMode('OWNER');
+                setActiveSubPage(null);
+              }}
+              className="px-4 py-2 rounded-lg bg-primary/35 font-bold"
+            >
+              Confirm Club Creation
+            </button>
+          </div>
+        );
+      case 'TEAM_OPERATIONS':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Team Operations')}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {[
+                ['Invest Facilities', 'Upgrade pool, gym, recovery labs'],
+                ['Invest Players', 'Contracts, wage adjustments, renewals'],
+                ['Gear Program', 'Suit tech and equipment quality'],
+                ['Train Players', 'Specialized weekly training blocks'],
+                ['Scout Talent', 'Global scouting assignments'],
+                ['Earnings Control', 'Team and player earning distribution'],
+              ].map(([title, text]) => (
+                <div key={title} className="glass-panel rounded-lg p-4 border border-white/15">
+                  <div className="font-black text-white">{title}</div>
+                  <div className="text-xs text-white/70 mt-1">{text}</div>
+                </div>
+              ))}
+            </div>
+            {managerMode === 'OWNER' && (
+              <button
+                onClick={() => {
+                  setManagerMode('HIRED');
+                  setActiveSubPage('START_PATH');
+                }}
+                className="px-4 py-2 rounded-lg bg-red-500/30 font-bold"
+              >
+                Sell Team & Get Hired
+              </button>
+            )}
+          </div>
+        );
+      case 'CLUB_COMPETITIONS':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Club Competitions')}
+            <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {competitionCards.map((item) => (
+                  <div key={item.title} className="glass-panel rounded-lg p-4 border border-white/15">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="text-sm font-black text-white">{item.title}</div>
+                      <span className="text-[10px] px-2 py-1 rounded bg-primary/25 border border-primary/40 uppercase font-black">{item.mode}</span>
+                    </div>
+                    <div className="space-y-1 text-xs text-white/75 mb-3">
+                      <div className="flex justify-between"><span>Entry</span><span>{item.entry}</span></div>
+                      <div className="flex justify-between"><span>Reward</span><span>{item.reward}</span></div>
+                      <div className="flex justify-between"><span>Schedule</span><span>{item.schedule}</span></div>
+                      <div className="flex justify-between"><span>Pool</span><span>{item.pool}</span></div>
+                    </div>
+                    <button onClick={onLaunchArenaRace} className="px-3 py-1 rounded bg-primary/35 text-xs font-black uppercase">
+                      Enter Race
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="glass-panel rounded-lg p-4 border border-secondary/30">
+                <h3 className="font-black mb-2 text-white">Competition Rotation</h3>
+                <div className="space-y-2 text-xs text-white/80">
+                  <div className="bg-slate-800/60 border border-white/10 rounded p-2">Daily: 2 P2P races + 1 AI tour available</div>
+                  <div className="bg-slate-800/60 border border-white/10 rounded p-2">Weekly objective: earn 220 points to unlock elite tier</div>
+                  <div className="bg-slate-800/60 border border-white/10 rounded p-2">Season reward booster active for National League matches</div>
+                </div>
+                <button onClick={onLaunchArenaRace} className="mt-3 w-full px-3 py-2 rounded bg-secondary/35 text-xs font-black uppercase">Enter Featured Race</button>
+              </div>
+            </div>
+          </div>
+        );
+      case 'STAFF_MANAGEMENT':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Staff Management')}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <div className="glass-panel rounded-lg p-4 border border-primary/20">
+                <h3 className="font-black mb-2">Available Mentors</h3>
+                {['Sprint Mentor • 120,000', 'Technique Mentor • 95,000', 'Endurance Mentor • 110,000'].map((s) => (
+                  <div key={s} className="bg-slate-800/60 border border-white/10 rounded-lg p-2 mb-2 flex items-center gap-2 justify-between">
+                    <div className="flex items-center gap-2"><img src={miaPhiriAthleteImage} className="w-9 h-9 rounded object-cover" /><span className="text-xs font-bold">{s}</span></div>
+                    <button className="text-xs bg-primary/30 px-2 py-1 rounded font-black">Hire</button>
+                  </div>
+                ))}
+              </div>
+              <div className="glass-panel rounded-lg p-4 border border-secondary/20">
+                <h3 className="font-black mb-2">Current Staff</h3>
+                {longTermStaff.map((c) => (
+                  <div key={c.name} className="bg-slate-800/60 border border-white/10 rounded-lg p-3 mb-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <img src={miaPhiriAthleteImage} className="w-10 h-10 rounded object-cover" />
+                        <div className="text-xs">
+                          <div className="font-bold">{c.name}</div>
+                          <div className="text-white/70">{c.role}</div>
+                        </div>
+                      </div>
+                      <button className="text-xs bg-red-500/30 px-2 py-1 rounded font-black">Release</button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[11px] text-white/75">
+                      <div>Age: <span className="font-bold text-white">{c.age}</span></div>
+                      <div>Experience: <span className="font-bold text-white">{c.experience}</span></div>
+                      <div>Contract Left: <span className="font-bold text-white">{c.contract}</span></div>
+                      <div className="col-span-2">Advantage: <span className="font-bold text-secondary-fixed">{c.advantage}</span></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'PLAYER_MANAGEMENT':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Player Management')}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {ClubMembers.map((player) => (
+                <div key={player.id} className="glass-panel rounded-lg p-3 border border-white/15">
+                  <div className="flex items-center gap-3">
+                    <img src={miaPhiriAthleteImage} alt={player.name} className="w-14 h-14 rounded object-cover" />
+                    <div className="min-w-0">
+                      <div className="font-black text-white truncate">{player.name}</div>
+                      <div className="text-xs text-white/70">{player.nationality} • {player.specialty}</div>
+                      <div className="text-xs text-white/70">Wage: {player.wage}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button className="text-xs bg-amber-500/25 px-2 py-1 rounded font-black">Renew</button>
+                    <button className="text-xs bg-red-500/30 px-2 py-1 rounded font-black">Transfer/Fire</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'SPONSORS':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Sponsors & Partners')}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {detailedSponsorOffers.map((s) => (
+                <div key={s.name} className="glass-panel rounded-lg p-4 border border-white/15">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 rounded bg-primary/30 flex items-center justify-center font-black">{s.logo}</div>
+                    <div className="font-bold">{s.name}</div>
+                    </div>
+                    <div className="text-[10px] px-2 py-1 rounded bg-secondary/20 border border-secondary/40 font-black uppercase">{s.status}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-white/75 mb-2">
+                    <div>Years: <span className="text-white font-bold">{s.years}</span></div>
+                    <div>Value: <span className="text-white font-bold">{s.value}</span></div>
+                  </div>
+                  <div className="text-[11px] text-white/90 font-bold mb-1">Targets</div>
+                  <ul className="space-y-1 mb-2 list-disc ml-4 text-[11px] text-white/75">
+                    {s.targets.map((target) => (
+                      <li key={target}>{target}</li>
+                    ))}
+                  </ul>
+                  <div className="text-[11px] p-2 rounded bg-slate-900/55 border border-white/10 text-white/80">Dynamic term: {s.dynamicTerms}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'UPCOMING_EVENTS':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Upcoming Events')}
+            <div className="glass-panel rounded-lg p-4 border border-white/15 space-y-2">
+              {['Regional Meet - Week 2', 'National Championship - Week 4', 'World Qualifier - Week 8'].map((event) => (
+                <div key={event} className="bg-slate-800/60 border border-white/10 rounded-lg p-3 flex justify-between items-center">
+                  <div className="font-bold text-sm">{event}</div>
+                  <button className="text-xs bg-primary/30 px-3 py-1 rounded font-black">Enter</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'LEAGUES_TOURNAMENTS':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Leagues & Tournaments')}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {['National League • Rank 6', 'Regional Cup • Semifinal', 'Elite Invitational • Qualifier'].map((league) => (
+                <div key={league} className="glass-panel rounded-lg p-4 border border-white/15">
+                  <div className="font-bold text-sm">{league}</div>
+                  <div className="text-xs text-white/70 mt-1">Entry points and rewards tracked</div>
+                  <button className="text-xs bg-primary/30 px-3 py-1 rounded font-black mt-3">Compete</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'SCOUTING':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Scouting Market')}
+            <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-3">
+              <div className="glass-panel rounded-lg p-4 border border-white/15">
+                <div className="font-black mb-2">Filters</div>
+                <div className="space-y-2 text-xs">
+                  <div className="bg-slate-800/60 rounded p-2">Age: U18-U21</div>
+                  <div className="bg-slate-800/60 rounded p-2">Region: Africa/Europe</div>
+                  <div className="bg-slate-800/60 rounded p-2">Stroke: Freestyle</div>
+                </div>
+                <button className="mt-3 w-full bg-primary/35 rounded-lg py-2 font-black text-xs">Hire Scout</button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {['Sophia Chen 91', 'Marta Nkomo 89', 'Irene Kole 88', 'Aya Khan 90', 'Saran Bhean 91', 'Prilia Karei 92'].map((p) => (
+                  <div key={p} className="glass-panel rounded-lg p-3 border border-primary/20">
+                    <img src={miaPhiriAthleteImage} className="w-full h-16 rounded object-cover mb-2" />
+                    <div className="text-xs font-black">{p}</div>
+                    <button className="mt-2 text-xs bg-secondary/30 px-2 py-1 rounded font-black">Shortlist</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'FUNDING':
+        return (
+          <div className="space-y-4">
+            {commonSubHeader('Funding & Finance')}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="glass-panel rounded-lg p-4 border border-yellow-500/30">
+                <h3 className="font-black mb-2">Club Earnings</h3>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between"><span>Sponsorship</span><span className="font-black text-emerald-300">+85,000</span></div>
+                  <div className="flex justify-between"><span>Prize Winnings</span><span className="font-black text-emerald-300">+42,000</span></div>
+                  <div className="flex justify-between"><span>Ticket/Media</span><span className="font-black text-emerald-300">+18,000</span></div>
+                </div>
+              </div>
+              <div className="glass-panel rounded-lg p-4 border border-red-500/30">
+                <h3 className="font-black mb-2">Team & Player Outgoings</h3>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between"><span>Player Wages</span><span className="font-black text-red-300">-39,000</span></div>
+                  <div className="flex justify-between"><span>Staff Wages</span><span className="font-black text-red-300">-14,000</span></div>
+                  <div className="flex justify-between"><span>Facilities</span><span className="font-black text-red-300">-8,000</span></div>
+                </div>
+                <button className="mt-3 px-3 py-1 bg-primary/30 rounded text-xs font-black">Source New Funding</button>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   const renderTab = () => {
     switch (activeTab) {
       case 'OVERVIEW':
         return (
-          <div className="space-y-6">
-            {/* Club Info */}
-            <div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-lg p-6 border border-cyan-500/30">
-              <div className="flex items-center justify-between">
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-lg p-5 border border-cyan-500/30">
+              <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-4 items-center">
                 <div>
                   <h2 className="text-3xl font-black text-white mb-2">{clubName}</h2>
-                  <div className="space-y-1 text-sm text-slate-300">
-                    <div>Founded: January 15, 2024</div>
-                    <div>Members: {ClubMembers.length}</div>
-                    <div>Global Rank: #156</div>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-slate-300">
+                    <div>Founded: Jan 15, 2024</div>
+                    <div>National Rank: #14</div>
+                    <div>Team Budget: 450,000 Coins</div>
+                    <div>Manager Mode: {managerMode ?? 'NEW / RESET'}</div>
                   </div>
                 </div>
-                <div className="text-6xl">🏊</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {sponsorCards.map((s) => (
+                    <div key={s.name} className="bg-slate-900/50 rounded-lg p-2 text-center border border-white/10">
+                      <div className="w-8 h-8 mx-auto rounded bg-primary/30 flex items-center justify-center font-black text-xs">{s.logo}</div>
+                      <div className="text-[10px] mt-1 font-bold truncate">{s.name}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: 'Total Wins', value: '1,247', color: 'from-emerald-500 to-teal-500' },
-                { label: 'Member Level', value: '42 avg', color: 'from-blue-500 to-cyan-500' },
-                { label: 'Treasury', value: '45,000', color: 'from-yellow-500 to-amber-500' },
-                { label: 'Fame', value: '8,500', color: 'from-purple-500 to-pink-500' },
-              ].map((stat, idx) => (
-                <div
-                  key={idx}
-                  className={`bg-gradient-to-br ${stat.color} opacity-20 rounded-lg p-4 border border-gray-600/30`}
-                >
-                  <div className="text-xs text-slate-400 mb-1">{stat.label}</div>
-                  <div className="text-2xl font-black text-white">{stat.value}</div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {managementRoutes.map((route) => (
+                <button key={route.key} onClick={() => setActiveSubPage(route.key)} className="text-left glass-panel rounded-lg p-4 border border-white/15 hover:border-primary/45 transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="material-symbols-outlined text-primary-fixed">{route.icon}</span>
+                    <div className="font-black text-white text-base">{route.title}</div>
+                  </div>
+                  <div className="text-xs text-white/70">{route.description}</div>
+                </button>
               ))}
             </div>
           </div>
         );
       case 'FACILITIES':
         return (
-          <div className="space-y-4">
-            {Facilities.map((facility) => (
-              <div key={facility.id} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="font-bold text-white">{facility.name}</h3>
-                    <p className="text-sm text-slate-400">Level {facility.level}/{facility.maxLevel}</p>
-                  </div>
-                  <div className="text-sm text-cyan-400 font-bold">{facility.benefit}</div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-slate-600/50 rounded-full h-2">
-                    <div
-                      className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full"
-                      style={{ width: `${(facility.level / facility.maxLevel) * 100}%` }}
-                    ></div>
-                  </div>
-                  <button className="px-4 py-2 bg-cyan-500/30 hover:bg-cyan-500/50 rounded text-sm font-bold text-cyan-300 transition-colors">
-                    Upgrade ({facility.nextUpgradeCost})
-                  </button>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {['Olympic Pool Lv3', 'Training Gym Lv2', 'Recovery Lab Lv1', 'Nutrition Center Lv2'].map((f) => (
+              <div key={f} className="glass-panel rounded-lg p-4 border border-white/15">
+                <div className="font-black">{f}</div>
+                <div className="text-xs text-white/70 mt-1">Investment needed for next upgrade</div>
+                <button className="text-xs bg-primary/30 px-3 py-1 rounded font-black mt-2">Invest</button>
               </div>
             ))}
           </div>
         );
       case 'ROSTER':
         return (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {ClubMembers.map((member) => (
-              <div
-                key={member.id}
-                className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30 hover:bg-slate-600/50 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-white">{member.name}</div>
-                    <div className="text-sm text-slate-400">
-                      {member.specialty} • Joined {member.joinDate}
-                    </div>
+              <div key={member.id} className="glass-panel rounded-lg p-3 border border-white/15">
+                <div className="flex items-center gap-3">
+                  <img src={miaPhiriAthleteImage} alt={member.name} className="w-14 h-14 rounded object-cover" />
+                  <div className="min-w-0">
+                    <div className="font-black truncate">{member.name}</div>
+                    <div className="text-xs text-white/70">{member.nationality} • {member.specialty}</div>
+                    <div className="text-xs text-white/70">Contract wage: {member.wage}</div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-white">Level {member.level}</div>
-                    {member.relayPosition && (
-                      <div className="text-xs text-cyan-400">Relay #{member.relayPosition}</div>
-                    )}
-                  </div>
+                </div>
+                <div className="flex justify-between mt-2 text-xs">
+                  <span>Level {member.level}</span>
+                  <span>Relay #{member.relayPosition ?? '-'}</span>
                 </div>
               </div>
             ))}
@@ -293,53 +628,24 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
         );
       case 'RELAY':
         return (
-          <div className="space-y-4">
-            <div className="bg-cyan-500/20 rounded-lg p-4 border border-cyan-500/30">
-              <h3 className="font-bold text-white mb-3">Relay Order (4x100M Medley)</h3>
-              <div className="space-y-2">
-                {relayOrder.map((memberId, idx) => {
-                  const member = ClubMembers.find((m) => m.id === memberId);
-                  return (
-                    <div
-                      key={idx}
-                      className="bg-slate-600/50 rounded-lg p-3 flex items-center justify-between"
-                    >
-                      <div>
-                        <div className="font-bold text-white">Leg {idx + 1}</div>
-                        <div className="text-sm text-slate-400">{member?.name || 'Not Selected'}</div>
-                      </div>
-                      <div className="text-sm text-cyan-400 font-bold">{member?.specialty || '-'}</div>
-                    </div>
-                  );
-                })}
+          <div className="glass-panel rounded-lg p-4 border border-white/15 space-y-2">
+            {relayOrder.map((id, idx) => (
+              <div key={id} className="bg-slate-700/50 rounded p-2 flex items-center gap-2">
+                <img src={miaPhiriAthleteImage} className="w-8 h-8 rounded object-cover" />
+                <div className="text-sm">Leg {idx + 1}: {ClubMembers.find((m) => m.id === id)?.name}</div>
               </div>
-            </div>
+            ))}
           </div>
         );
       case 'STAFF':
         return (
-          <div className="space-y-3">
-            {[
-              { role: 'Head Coach', name: 'Robert Smith', specialty: 'Distance Expert', salary: 2000 },
-              {
-                role: 'Assistant Coach',
-                name: 'Lisa Chen',
-                specialty: 'Stroke Specialist',
-                salary: 1500,
-              },
-              { role: 'Physiotherapist', name: 'Marcus Brown', specialty: 'Recovery', salary: 1200 },
-              { role: 'Scout', name: 'Emma Wilson', specialty: 'Talent Finder', salary: 800 },
-            ].map((staff, idx) => (
-              <div key={idx} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-white">{staff.role}</div>
-                    <div className="text-sm text-slate-400">{staff.name}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-yellow-400 font-bold">{staff.salary}/month</div>
-                    <div className="text-xs text-slate-400">{staff.specialty}</div>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {coachCards.map((c) => (
+              <div key={c.name} className="glass-panel rounded-lg p-3 border border-white/15 flex items-center gap-3">
+                <img src={miaPhiriAthleteImage} className="w-12 h-12 rounded object-cover" />
+                <div>
+                  <div className="font-black text-sm">{c.name}</div>
+                  <div className="text-xs text-white/70">{c.role} • {c.level}</div>
                 </div>
               </div>
             ))}
@@ -347,52 +653,40 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
         );
       case 'BRANDING':
         return (
-          <div className="space-y-6">
-            {/* Club Logo */}
-            <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600/30">
-              <h3 className="font-bold text-white mb-4">Club Logo</h3>
-              <div className="w-32 h-32 rounded-lg bg-slate-600 flex items-center justify-center text-5xl mb-4">
-                🏊
-              </div>
-              <button className="px-4 py-2 bg-cyan-500/30 hover:bg-cyan-500/50 rounded text-sm font-bold text-cyan-300 transition-colors">
-                Change Logo
-              </button>
-            </div>
-
-            {/* Colors */}
-            <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600/30">
-              <h3 className="font-bold text-white mb-4">Club Colors</h3>
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                {['Primary: Cyan', 'Secondary: Blue', 'Accent: White'].map((color) => (
-                  <div key={color} className="bg-slate-600/50 rounded-lg p-4 text-center">
-                    <div className="text-sm font-bold text-white">{color}</div>
-                  </div>
+          <div className="space-y-3">
+            <div className="glass-panel rounded-lg p-4 border border-white/15">
+              <h3 className="font-black mb-3">Club Identity Package</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {emblemOptions.map((e, idx) => (
+                  <button key={e} className="bg-slate-800/70 border border-white/15 rounded-lg p-3 text-left">
+                    <div className="w-10 h-10 mb-2 rounded-full bg-gradient-to-br from-primary/40 to-secondary/40 border border-white/20 flex items-center justify-center font-black text-sm">{idx + 1}</div>
+                    <div className="text-xs font-black">{e}</div>
+                  </button>
                 ))}
               </div>
-              <button className="px-4 py-2 bg-cyan-500/30 hover:bg-cyan-500/50 rounded text-sm font-bold text-cyan-300 transition-colors">
-                Customize Colors
-              </button>
             </div>
-          </div>
-        );
-      case 'TREASURY':
-        return (
-          <div className="space-y-4">
-            <div className="bg-gradient-to-r from-yellow-600/20 to-amber-600/20 rounded-lg p-6 border border-yellow-500/30">
-              <h3 className="text-xl font-black text-white mb-3">Club Treasury</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-300">Available Balance:</span>
-                  <span className="font-bold text-yellow-300">45,000 Coins</span>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="glass-panel rounded-lg p-4 border border-primary/25">
+                <h3 className="font-black mb-2">Sponsor Visual Assets</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {sponsorCards.map((s) => (
+                    <div key={s.logo} className="bg-slate-900/60 border border-white/10 rounded-lg p-2 text-center">
+                      <div className="w-11 h-11 mx-auto rounded bg-primary/25 flex items-center justify-center font-black">{s.logo}</div>
+                      <div className="text-[10px] mt-1 font-bold truncate">{s.name}</div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-300">Monthly Income:</span>
-                  <span className="font-bold text-emerald-300">+8,500 Coins</span>
+              </div>
+
+              <div className="glass-panel rounded-lg p-4 border border-secondary/25">
+                <h3 className="font-black mb-2">Kits & Arena Theme</h3>
+                <div className="space-y-2">
+                  {['Primary Kit: Midnight Blue + Ice White', 'Away Kit: Graphite + Cyan Trim', 'Cap + Emblem set synced for league nights'].map((item) => (
+                    <div key={item} className="bg-slate-900/60 border border-white/10 rounded p-2 text-xs text-white/80">{item}</div>
+                  ))}
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-300">Monthly Expenses:</span>
-                  <span className="font-bold text-red-300">-6,200 Coins</span>
-                </div>
+                <button className="mt-3 px-3 py-1 rounded bg-primary/35 text-xs font-black uppercase">Apply Branding Set</button>
               </div>
             </div>
           </div>
@@ -403,34 +697,34 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        {/* Header */}
+    <div className="w-full h-full overflow-y-auto p-4 max-[900px]:p-2 space-y-4">
+      <div className="max-w-5xl mx-auto space-y-4">
         <div>
-          <h1 className="text-4xl font-black text-white mb-2">Club HQ</h1>
-          <p className="text-slate-400">Manage your swimming club and dynasty</p>
+          <h1 className="text-3xl max-[900px]:text-xl font-black text-white mb-1">Club HQ</h1>
+          <p className="text-slate-300 text-sm max-[900px]:text-xs">Manage your swimming club and dynasty</p>
         </div>
 
-        {/* Tab Navigation */}
         <div className="flex gap-2 flex-wrap">
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-lg font-bold uppercase text-sm transition-all ${
+              onClick={() => {
+                setActiveTab(tab.id);
+                setActiveSubPage(null);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-2 max-[900px]:px-2 max-[900px]:py-1.5 rounded-lg font-bold uppercase text-xs transition-all ${
                 activeTab === tab.id
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
                   : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
               }`}
             >
-              {tab.icon}
+              <span className="material-symbols-outlined">{tab.icon}</span>
               <span className="hidden md:inline">{tab.label}</span>
             </button>
           ))}
         </div>
 
-        {/* Tab Content */}
-        <div>{renderTab()}</div>
+        <div>{activeSubPage ? renderSubPage() : renderTab()}</div>
       </div>
     </div>
   );

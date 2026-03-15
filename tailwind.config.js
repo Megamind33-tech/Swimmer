@@ -9,17 +9,17 @@ export default {
     extend: {
       colors: {
         // SWIM26 Material Design 3 Colors (Dark Theme)
-        "primary": "#81ecff",
-        "primary-dim": "#00d4ec",
-        "primary-fixed": "#00e3fd",
-        "primary-fixed-dim": "#00d4ec",
-        "primary-container": "#00e3fd",
+        "primary": "#0f62fe",
+        "primary-dim": "#4589ff",
+        "primary-fixed": "#78a9ff",
+        "primary-fixed-dim": "#4589ff",
+        "primary-container": "#d0e2ff",
 
-        "secondary": "#bfcafd",
-        "secondary-dim": "#b2bcee",
-        "secondary-fixed": "#c6cfff",
-        "secondary-fixed-dim": "#b7c1f4",
-        "secondary-container": "#3a446f",
+        "secondary": "#6f6f6f",
+        "secondary-dim": "#525252",
+        "secondary-fixed": "#e0e0e0",
+        "secondary-fixed-dim": "#c6c6c6",
+        "secondary-container": "#393939",
 
         "tertiary": "#f9f9f9",
         "tertiary-dim": "#ebebeb",
@@ -31,52 +31,52 @@ export default {
         "error-dim": "#d7383b",
         "error-container": "#9f0519",
 
-        "surface": "#070e1b",
-        "surface-dim": "#070e1b",
-        "surface-bright": "#222c41",
+        "surface": "#0b1220",
+        "surface-dim": "#0b1220",
+        "surface-bright": "#1a2538",
         "surface-container-lowest": "#000000",
-        "surface-container-low": "#0c1322",
-        "surface-container": "#11192a",
-        "surface-container-high": "#172031",
-        "surface-container-highest": "#1c2639",
+        "surface-container-low": "#101b2d",
+        "surface-container": "#142238",
+        "surface-container-high": "#1a2a42",
+        "surface-container-highest": "#223552",
 
-        "background": "#070e1b",
-        "on-background": "#e2e8fb",
+        "background": "#070d18",
+        "on-background": "#f4f4f4",
 
-        "on-surface": "#e2e8fb",
-        "on-surface-variant": "#a5abbd",
+        "on-surface": "#f4f4f4",
+        "on-surface-variant": "#ffffff",
 
-        "on-primary": "#005762",
-        "on-primary-fixed": "#003840",
-        "on-primary-fixed-variant": "#005762",
-        "on-primary-container": "#004d57",
+        "on-primary": "#ffffff",
+        "on-primary-fixed": "#ffffff",
+        "on-primary-fixed-variant": "#ffffff",
+        "on-primary-container": "#ffffff",
 
-        "on-secondary": "#37416c",
-        "on-secondary-fixed": "#27325b",
-        "on-secondary-fixed-variant": "#444e7a",
-        "on-secondary-container": "#c4ceff",
+        "on-secondary": "#ffffff",
+        "on-secondary-fixed": "#ffffff",
+        "on-secondary-fixed-variant": "#ffffff",
+        "on-secondary-container": "#ffffff",
 
-        "on-tertiary": "#5e5f60",
-        "on-tertiary-fixed": "#4f5051",
-        "on-tertiary-fixed-variant": "#6c6d6e",
-        "on-tertiary-container": "#555757",
+        "on-tertiary": "#ffffff",
+        "on-tertiary-fixed": "#ffffff",
+        "on-tertiary-fixed-variant": "#ffffff",
+        "on-tertiary-container": "#ffffff",
 
-        "on-error": "#490006",
-        "on-error-container": "#ffa8a3",
+        "on-error": "#ffffff",
+        "on-error-container": "#ffffff",
 
-        "outline": "#6f7586",
-        "outline-variant": "#414857",
+        "outline": "#8d8d8d",
+        "outline-variant": "#34445f",
 
         "inverse-surface": "#f9f9ff",
         "inverse-on-surface": "#4e5565",
-        "inverse-primary": "#006976",
+        "inverse-primary": "#78a9ff",
 
-        "surface-tint": "#81ecff",
+        "surface-tint": "#0f62fe",
       },
       fontFamily: {
-        "headline": ["Space Grotesk", "sans-serif"],
-        "body": ["Manrope", "sans-serif"],
-        "label": ["Space Grotesk", "sans-serif"],
+        "headline": ["IBM Plex Sans", "sans-serif"],
+        "body": ["IBM Plex Sans", "sans-serif"],
+        "label": ["IBM Plex Sans", "sans-serif"],
       },
       borderRadius: {
         "DEFAULT": "0px",
@@ -138,10 +138,10 @@ export default {
         },
         glow: {
           "0%, 100%": {
-            textShadow: "0 0 5px rgba(129, 236, 255, 0.2)",
+            textShadow: "0 0 5px rgba(15, 98, 254, 0.2)",
           },
           "50%": {
-            textShadow: "0 0 20px rgba(129, 236, 255, 0.6)",
+            textShadow: "0 0 20px rgba(15, 98, 254, 0.6)",
           },
         },
         float: {
@@ -162,10 +162,10 @@ export default {
         },
         "button-glow": {
           "0%, 100%": {
-            boxShadow: "0 0 10px rgba(129, 236, 255, 0.3)",
+            boxShadow: "0 0 10px rgba(15, 98, 254, 0.3)",
           },
           "50%": {
-            boxShadow: "0 0 20px rgba(129, 236, 255, 0.6)",
+            boxShadow: "0 0 20px rgba(15, 98, 254, 0.6)",
           },
         },
       },
