@@ -43,7 +43,7 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
   ];
 
   return (
-    <nav className="h-20 bg-gradient-to-t from-[#070f1f]/95 to-[#0a162b]/95 backdrop-blur-md border-t border-white/15 px-4 flex items-center justify-center gap-2 sticky bottom-0 z-50 shadow-[0_-8px_20px_rgba(0,0,0,0.35)]">
+    <nav className="h-20 min-h-20 shrink-0 bg-gradient-to-t from-[#070f1f]/98 to-[#0a162b]/98 backdrop-blur-md border-t-2 border-white/20 px-4 flex items-center justify-center gap-2 sticky bottom-0 z-[70] shadow-[0_-10px_24px_rgba(0,0,0,0.45)]">
       {quickActions.map((action) => (
         <button
           key={action.id}

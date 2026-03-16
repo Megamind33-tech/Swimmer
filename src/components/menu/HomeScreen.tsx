@@ -21,8 +21,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onCareerClick,
 }) => {
   return (
-    <div className="flex-1 relative w-full h-full overflow-hidden flex flex-col">
-      <div className="relative z-10 flex-1 flex flex-col p-4 max-[900px]:p-2.5 gap-2 max-[900px]:gap-2 min-h-0">
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col">
+      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-4 max-[900px]:p-2.5 gap-2 max-[900px]:gap-2 min-h-0 pb-3">
         {/* Championship Hero Strip */}
         <div className="glass-panel border border-primary/30 rounded-lg overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px]">
           <div className="px-4 max-[900px]:px-3 py-3 max-[900px]:py-2 bg-gradient-to-r from-black/65 via-primary/30 to-black/55 border-b border-white/15">
