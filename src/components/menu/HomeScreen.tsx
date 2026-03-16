@@ -23,7 +23,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col safe-zone-x">
       <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-4 max-[900px]:p-2.5 gap-3 max-[900px]:gap-2 min-h-0 pb-3">
         {/* Championship Hero Strip - Enhanced Glassmorphic with Water Theme */}
-        <div className="glass-card overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px] group hover:border-neon-cyan/40 transition-all duration-300 skew-container border border-neon-cyan/25 shadow-lg shadow-neon-cyan/10 rounded-2xl">
+        <div className="glass-card overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px] group hover:border-neon-cyan/40 transition-all duration-300 skew-container border border-neon-cyan/25 shadow-lg shadow-neon-cyan/10 rounded-2xl wave-container">
+          {/* Wave effect on hover */}
+          <div className="wave-element"></div>
+
           {/* Header with Live Badge */}
           <div className="px-6 max-[900px]:px-4 py-4 max-[900px]:py-3 bg-gradient-to-r from-broadcast-overlay/60 via-neon-cyan/8 to-broadcast-overlay/60 border-b border-neon-cyan/15 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
@@ -71,8 +74,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
+        {/* Wave divider */}
+        <div className="wave-divider"></div>
+
         {/* Live Race Wire - Broadcast Ticker Style */}
-        <div className="glass-card-elevated border-2 border-neon-cyan/40 rounded-xl px-6 max-[900px]:px-4 py-3 max-[900px]:py-2.5 bg-gradient-to-r from-neon-cyan/10 via-neon-cyan/5 to-transparent group hover:border-neon-cyan/70 hover:shadow-[0_0_30px_rgba(0,255,255,0.2)] transition-all duration-300">
+        <div className="glass-card-elevated border-2 border-neon-cyan/40 rounded-xl px-6 max-[900px]:px-4 py-3 max-[900px]:py-2.5 bg-gradient-to-r from-neon-cyan/10 via-neon-cyan/5 to-transparent group hover:border-neon-cyan/70 hover:shadow-[0_0_30px_rgba(0,255,255,0.2)] transition-all duration-300 wave-hover">
           <div className="flex items-center justify-between gap-3 max-[900px]:gap-2">
             <div className="flex-1">
               <p className="text-[11px] max-[900px]:text-[9px] font-barlow font-black uppercase tracking-wider text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.5)]">
@@ -95,8 +101,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className="relative z-20 flex-1 flex">
           <button
             onClick={onPlayClick}
-            className="w-full h-full group relative px-8 max-[900px]:px-5 py-6 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 border border-neon-cyan/25 glass-card skew-container-reverse active:animate-squash-stretch shadow-lg shadow-neon-cyan/5 hover:shadow-lg hover:shadow-neon-cyan/15"
+            className="w-full h-full group relative px-8 max-[900px]:px-5 py-6 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 border border-neon-cyan/25 glass-card skew-container-reverse active:animate-squash-stretch shadow-lg shadow-neon-cyan/5 hover:shadow-lg hover:shadow-neon-cyan/15 wave-container"
           >
+            {/* Wave effect on hover */}
+            <div className="wave-element"></div>
             {/* Background Image */}
             <img
               src={p2pQuickMatchImage}
@@ -152,7 +160,7 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
   return (
     <div className="space-y-4 safe-zone">
       {/* Daily Objectives */}
-      <div className="glass-card p-5 border border-neon-cyan/25 rounded-2xl group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5">
+      <div className="glass-card p-5 border border-neon-cyan/25 rounded-2xl group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5 wave-hover">
         <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
           Daily Objectives
         </h3>
@@ -176,7 +184,7 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
       </div>
 
       {/* Active Events */}
-      <div className="glass-card p-5 border border-neon-cyan/25 rounded-2xl group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5">
+      <div className="glass-card p-5 border border-neon-cyan/25 rounded-2xl group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5 wave-hover">
         <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
           Active Events
         </h3>
