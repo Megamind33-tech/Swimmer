@@ -3,7 +3,7 @@
  * Championship display with glassmorphic cards and neon accents
  */
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { IPlayerSwimmer } from '../../types';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 import p2pQuickMatchImage from '../../designs/doh9161_copy.width_800.jpg/screen.png';
@@ -20,33 +20,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onCareerClick,
 }) => {
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col">
-      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-4 max-[900px]:p-2.5 gap-2 max-[900px]:gap-2 min-h-0 pb-3">
-        {/* Championship Hero Strip */}
-        <div className="glass-panel border border-primary/30 rounded-lg overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px]">
-          <div className="px-4 max-[900px]:px-3 py-3 max-[900px]:py-2 bg-gradient-to-r from-black/65 via-primary/30 to-black/55 border-b border-white/15">
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col safe-zone-x">
+      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-4 max-[900px]:p-2.5 gap-3 max-[900px]:gap-2 min-h-0 pb-3">
+        {/* Championship Hero Strip - Enhanced Glassmorphic with Water Theme */}
+        <div className="glass-card overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px] group hover:border-neon-cyan/40 transition-all duration-300 skew-container border border-neon-cyan/25 shadow-lg shadow-neon-cyan/10 rounded-2xl wave-container">
+          {/* Wave effect on hover */}
+          <div className="wave-element"></div>
+
+          {/* Header with Live Badge */}
+          <div className="px-6 max-[900px]:px-4 py-4 max-[900px]:py-3 bg-gradient-to-r from-broadcast-overlay/60 via-neon-cyan/8 to-broadcast-overlay/60 border-b border-neon-cyan/15 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-din text-[25px] max-[1100px]:text-2xl max-[900px]:text-sm font-black italic uppercase text-white tracking-wider leading-tight drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">
+              <h2 className="font-din text-[25px] max-[1100px]:text-2xl max-[900px]:text-sm font-black italic-header uppercase text-white tracking-wider leading-tight drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
                 CHAMPIONSHIP SEASON 7
               </h2>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full border-2 border-neon-cyan bg-neon-cyan/10 animate-live-pulse">
-                <span className="w-2 h-2 rounded-full bg-neon-cyan"></span>
-                <span className="text-xs text-neon-cyan font-bold uppercase tracking-wider">LIVE</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-cyan/40 bg-neon-cyan/8 animate-live-pulse backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan"></span>
+                <span className="text-xs text-neon-cyan font-bold font-mono uppercase tracking-wider">LIVE</span>
               </div>
             </div>
           </div>
 
           {/* Hero Content Grid */}
           <div className="grid grid-cols-[1fr_220px] max-[900px]:grid-cols-[1fr_120px] items-stretch min-h-[152px] max-[900px]:min-h-[112px]">
-            <div className="p-4 max-[900px]:p-3 bg-gradient-to-r from-black/55 via-black/35 to-transparent flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <p className="text-3xl max-[900px]:text-lg font-black uppercase leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">START RACE</p>
+            <div className="p-6 max-[900px]:p-4 bg-gradient-to-r from-broadcast-overlay/50 via-neon-cyan/3 to-transparent flex flex-col justify-center backdrop-blur-sm">
+              <div className="flex items-center justify-between gap-4 mb-3">
+                <p className="text-3xl max-[900px]:text-lg font-din font-black italic-header uppercase leading-tight text-white drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
+                  START RACE
+                </p>
                 <button
                   onClick={onPlayClick}
-                  className="h-11 w-11 max-[900px]:h-11 max-[900px]:w-11 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 flex items-center justify-center transition-colors"
+                  className="h-12 w-12 max-[900px]:h-10 max-[900px]:w-10 rounded-xl border border-neon-cyan/40 bg-neon-cyan/10 hover:bg-neon-cyan/20 hover:border-neon-cyan/60 flex items-center justify-center transition-all duration-300 active:animate-squash-stretch group/btn backdrop-blur-sm shadow-lg shadow-neon-cyan/5"
                   aria-label="Play start race"
                 >
-                  <span className="material-symbols-outlined text-white">play_arrow</span>
+                  <span className="material-symbols-outlined text-neon-cyan text-2xl drop-shadow-[0_0_8px_rgba(0,255,255,0.4)] group-hover/btn:scale-110 transition-transform">
+                    play_arrow
+                  </span>
                 </button>
               </div>
               <p className="text-sm max-[900px]:text-[11px] font-barlow font-bold text-white/90">
@@ -66,9 +74,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
+        {/* Wave divider */}
+        <div className="wave-divider"></div>
 
-        {/* Live Race Wire */}
-        <div className="glass-panel border border-cyan-300/25 rounded-lg px-4 max-[900px]:px-3 py-3 max-[900px]:py-2 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-transparent">
+        {/* Live Race Wire - Broadcast Ticker Style */}
+        <div className="glass-card-elevated border-2 border-neon-cyan/40 rounded-xl px-6 max-[900px]:px-4 py-3 max-[900px]:py-2.5 bg-gradient-to-r from-neon-cyan/10 via-neon-cyan/5 to-transparent group hover:border-neon-cyan/70 hover:shadow-[0_0_30px_rgba(0,255,255,0.2)] transition-all duration-300 wave-hover">
           <div className="flex items-center justify-between gap-3 max-[900px]:gap-2">
             <div>
               <p className="text-[11px] max-[900px]:text-[9px] font-black uppercase tracking-wider text-cyan-200">Live Race Wire</p>
@@ -83,23 +93,37 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Action Buttons */}
         <div className="relative z-20 flex-1 flex">
-        <button
-          onClick={onPlayClick}
-          className="w-full h-full group relative px-6 max-[900px]:px-3 py-5 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-lg overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95 border border-white/20"
-        >
-          <img
-            src={p2pQuickMatchImage}
-            alt="P2P Quick matches"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/65 group-hover:from-black/70 group-hover:via-black/35 group-hover:to-black/60 transition-colors" />
+          <button
+            onClick={onPlayClick}
+            className="w-full h-full group relative px-8 max-[900px]:px-5 py-6 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 border border-neon-cyan/25 glass-card skew-container-reverse active:animate-squash-stretch shadow-lg shadow-neon-cyan/5 hover:shadow-lg hover:shadow-neon-cyan/15 wave-container"
+          >
+            {/* Wave effect on hover */}
+            <div className="wave-element"></div>
+            {/* Background Image */}
+            <img
+              src={p2pQuickMatchImage}
+              alt="P2P Quick matches"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
 
-          <span className="relative flex items-center justify-between font-headline text-2xl max-[900px]:text-base text-white uppercase tracking-wider font-bold">
-            <span>P2P Quick matches</span>
-            <span className="flex items-center gap-2">
-              <span className="material-symbols-outlined">groups</span>
-              <span className="h-11 w-11 max-[900px]:h-11 max-[900px]:w-11 rounded-full bg-white/15 border border-white/35 flex items-center justify-center">
-                <span className="material-symbols-outlined text-white text-xl max-[900px]:text-lg">play_arrow</span>
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-broadcast-overlay/85 via-broadcast-overlay/60 to-broadcast-overlay/75 group-hover:from-broadcast-overlay/80 group-hover:via-broadcast-overlay/50 group-hover:to-broadcast-overlay/70 transition-colors" />
+
+            {/* Speed line texture */}
+            <div className="absolute inset-0 speed-lines opacity-30 group-hover:opacity-50 transition-opacity"></div>
+
+            {/* Content */}
+            <span className="relative flex items-center justify-between font-din text-2xl max-[900px]:text-base text-white uppercase tracking-wider font-black">
+              <span className="drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">P2P Quick Matches</span>
+              <span className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">
+                  groups
+                </span>
+                <span className="h-10 w-10 max-[900px]:h-9 max-[900px]:w-9 rounded-xl neon-stroke flex items-center justify-center group-hover:neon-stroke-active transition-all duration-300">
+                  <span className="material-symbols-outlined text-neon-cyan text-xl max-[900px]:text-lg drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]">
+                    play_arrow
+                  </span>
+                </span>
               </span>
             </span>
           </span>
@@ -138,59 +162,167 @@ interface HomeRightPanelProps {
 }
 
 export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
+  const [completedObjectives, setCompletedObjectives] = useState<Set<number>>(new Set([2]));
+  const [splashingObjective, setSplashingObjective] = useState<number | null>(null);
+  const splashRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
   const dailyObjectives = [
     { id: 1, name: 'Complete 2 sprint races', progress: 1, total: 2, icon: 'play_arrow' },
-    { id: 2, name: 'Perform 3 perfect turns', progress: 2, total: 3, icon: 'edit' },
+    { id: 2, name: 'Perform 3 perfect turns', progress: 3, total: 3, icon: 'edit' },
     { id: 3, name: 'Train endurance once', progress: 0, total: 1, icon: 'fitness_center' },
     { id: 4, name: 'Beat one rival ghost', progress: 0, total: 1, icon: 'emoji_events' },
   ];
 
   const activeEvents = [
-    { name: 'World Sprint Cup', time: '05:14:22' },
-    { name: 'Butterfly Challenge', time: '2d 14h' },
+    { name: 'World Sprint Cup', time: '05:14:22', timeMs: 514220, urgency: 'normal' as const },
+    { name: 'Butterfly Challenge', time: '2d 14h', timeMs: null, urgency: 'normal' as const },
   ];
+
+  const isComplete = (obj: typeof dailyObjectives[0]) => obj.progress >= obj.total;
+  const progressPercent = (progress: number, total: number) => Math.min((progress / total) * 100, 100);
+
+  const getIconColorClass = (obj: typeof dailyObjectives[0]) => {
+    if (completedObjectives.has(obj.id)) {
+      return 'icon-progress-complete';
+    } else if (obj.progress > 0) {
+      return 'icon-progress-active';
+    }
+    return 'icon-progress-grey';
+  };
+
+  const handleObjectiveClick = (obj: typeof dailyObjectives[0]) => {
+    if (isComplete(obj) && !completedObjectives.has(obj.id)) {
+      setSplashingObjective(obj.id);
+      setCompletedObjectives((prev) => new Set([...prev, obj.id]));
+      setTimeout(() => setSplashingObjective(null), 600);
+    }
+  };
 
   return (
     <div className="space-y-4 safe-zone">
-      {/* Daily Objectives */}
-      <div className="glass-card-elevated p-5 border border-neon-cyan/30 rounded-xl group hover:border-neon-cyan/60 transition-all duration-300">
-        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">
+      {/* Daily Objectives - Frosted Water Pane */}
+      <div className="frosted-water-pane p-5 rounded-2xl group hover:border-neon-cyan/60 transition-all duration-300 wave-hover">
+        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
           Daily Objectives
         </h3>
         <div className="space-y-3">
-          {dailyObjectives.map((obj) => (
-            <div key={obj.id} className="flex items-center justify-between p-2 rounded-lg bg-neon-cyan/5 border border-neon-cyan/20 hover:border-neon-cyan/50 transition-all duration-300">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <span className="material-symbols-outlined text-neon-cyan text-lg shrink-0">
-                  {obj.icon}
-                </span>
-                <span className="text-sm font-barlow font-bold text-white/90 truncate">
-                  {obj.name}
-                </span>
+          {dailyObjectives.map((obj) => {
+            const isCompleted = completedObjectives.has(obj.id);
+            const fillPercent = progressPercent(obj.progress, obj.total);
+
+            return (
+              <div
+                key={obj.id}
+                ref={(el) => {
+                  if (el) splashRefs.current[obj.id] = el;
+                }}
+                onClick={() => handleObjectiveClick(obj)}
+                className={`relative flex items-center justify-between p-3 rounded-lg border transition-all duration-300 cursor-pointer ${
+                  isCompleted
+                    ? 'bg-yellow-400/10 border-yellow-400/30 hover:border-yellow-400/50'
+                    : 'bg-neon-cyan/6 border-neon-cyan/15 hover:border-neon-cyan/35 hover:bg-neon-cyan/10'
+                } ${splashingObjective === obj.id ? 'splash-complete' : ''}`}
+              >
+                {/* Icon with Liquid Fill */}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="relative">
+                    <span
+                      className={`material-symbols-outlined text-2xl shrink-0 icon-liquid-fill icon-3d ${getIconColorClass(obj)} ${
+                        obj.progress > 0 && !isCompleted ? 'icon-progress-active-pulse' : ''
+                      } transition-all duration-300 ${
+                        obj.icon === 'emoji_events' ? 'icon-trophy-3d' : ''
+                      } ${obj.icon === 'fitness_center' ? 'icon-dumbbell-wave' : ''}`}
+                      style={{
+                        '--fill-progress': `${fillPercent}%`,
+                      } as React.CSSProperties}
+                    >
+                      {obj.icon}
+                    </span>
+
+                    {/* Completion Watermark */}
+                    {isCompleted && (
+                      <div className="completion-watermark" style={{ animationDelay: '0.2s' }}>
+                        COMPLETE
+                      </div>
+                    )}
+                  </div>
+
+                  <span
+                    className={`text-sm font-barlow font-bold truncate transition-colors duration-300 ${
+                      isCompleted ? 'text-yellow-200' : 'text-white/85'
+                    }`}
+                  >
+                    {obj.name}
+                  </span>
+                </div>
+
+                {/* Liquid Fill Progress Display */}
+                <div className="flex items-center gap-2 ml-2 shrink-0">
+                  <div
+                    className={`progress-badge ${isCompleted ? 'progress-badge--complete' : ''}`}
+                    style={{
+                      color: isCompleted ? '#ffd700' : 'currentColor',
+                    }}
+                  >
+                    <span className="font-mono-data">{obj.progress}/{obj.total}</span>
+                  </div>
+                  <div className={`liquid-progress-bar ${
+                    fillPercent === 0
+                      ? 'liquid-progress-bar--empty'
+                      : fillPercent === 100
+                      ? 'liquid-progress-bar--full'
+                      : 'liquid-progress-bar--partial'
+                  }`}
+                    style={{
+                      '--progress-width': `${fillPercent}%`,
+                    } as React.CSSProperties}
+                  />
+                </div>
               </div>
-              <span className="text-xs font-din font-bold text-neon-cyan ml-2 shrink-0 drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">
-                {obj.progress}/{obj.total}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Active Events */}
-      <div className="glass-card-elevated p-5 border border-neon-cyan/30 rounded-xl group hover:border-neon-cyan/60 transition-all duration-300">
-        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">
+      {/* Active Events - Floating Cards with Caustics */}
+      <div className="frosted-water-pane p-5 rounded-2xl group hover:border-neon-cyan/60 transition-all duration-300 wave-hover">
+        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
           Active Events
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {activeEvents.map((event, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between p-2 rounded-lg bg-neon-cyan/5 border border-neon-cyan/20 hover:border-neon-cyan/50 transition-all duration-300"
+              className="floating-card relative p-3 rounded-lg bg-gradient-to-br from-neon-cyan/12 to-neon-cyan/6 border border-neon-cyan/25 hover:border-neon-cyan/50 transition-all duration-300"
             >
-              <span className="text-sm font-barlow font-bold text-white/90">{event.name}</span>
-              <span className="text-xs font-mono font-bold text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">
-                {event.time}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-barlow font-bold text-white/85">{event.name}</span>
+                <div className="flex flex-col items-end gap-1">
+                  {event.timeMs ? (
+                    <div className={`countdown-timer countdown-timer--${event.urgency} countdown-ticker`}>
+                      <div className="digital-timer-bar mb-1"></div>
+                      <span className="segmented-time text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.5)] block text-xs">
+                        <span className="segmented-time-digit">0</span>
+                        <span className="segmented-time-digit">5</span>
+                        <span className="timer-separator">:</span>
+                        <span className="segmented-time-digit">1</span>
+                        <span className="segmented-time-digit">4</span>
+                        <span className="timer-separator">:</span>
+                        <span className="segmented-time-digit">2</span>
+                        <span className="segmented-time-digit">2</span>
+                        <span className="timer-milliseconds">ms</span>
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="segmented-time text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.4)] text-xs">
+                      {event.time}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Caustic Undershadow */}
+              <div className="caustic-undershadow"></div>
             </div>
           ))}
         </div>

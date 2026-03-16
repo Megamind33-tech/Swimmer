@@ -88,6 +88,7 @@ export default {
         "din": ["'Din Condensed'", "'Din Next Condensed'", "sans-serif"],
         "barlow": ["'Barlow Condensed'", "sans-serif"],
         "chakra": ["'Chakra Petch'", "sans-serif"],
+        "mono": ["'JetBrains Mono'", "'Roboto Mono'", "monospace"],
       },
       borderRadius: {
         "DEFAULT": "0px",
@@ -112,6 +113,9 @@ export default {
         "parallax-float": "parallaxFloat 8s ease-in-out infinite",
         "ticker-scroll": "tickerScroll 40s linear infinite",
         "live-pulse": "livePulse 1.2s ease-in-out infinite",
+        "caustics": "caustics 8s ease-in-out infinite",
+        "water-fill": "waterFill 0.6s ease-out forwards",
+        "shimmer": "shimmer 3s ease-in-out infinite",
       },
       keyframes: {
         slideInUp: {
@@ -256,6 +260,32 @@ export default {
           "50%": {
             opacity: "0.7",
             transform: "scale(1.05)",
+          },
+        },
+        caustics: {
+          "0%, 100%": {
+            backgroundPosition: "0% 0%",
+            opacity: "0.15",
+          },
+          "50%": {
+            backgroundPosition: "100% 100%",
+            opacity: "0.25",
+          },
+        },
+        waterFill: {
+          "from": {
+            clipPath: "inset(100% 0 0 0)",
+          },
+          "to": {
+            clipPath: "inset(0 0 0 0)",
+          },
+        },
+        shimmer: {
+          "0%, 100%": {
+            backgroundPosition: "-1000px 0",
+          },
+          "50%": {
+            backgroundPosition: "1000px 0",
           },
         },
       },

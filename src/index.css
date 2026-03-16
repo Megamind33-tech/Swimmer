@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,700;1,700&family=IBM+Plex+Sans:wght@300;400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=Barlow+Condensed:wght@300;400;600;700&family=Chakra+Petch:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 
 @import "tailwindcss";
 
@@ -80,20 +80,38 @@
   z-index: 40;
 }
 
-/* Glassmorphic Card Styling */
+/* Enhanced Glassmorphic Card Styling */
 .glass-card {
-  background: rgba(15, 28, 50, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: rgba(15, 28, 50, 0.35);
+  border: 1px solid rgba(0, 255, 255, 0.15);
+  backdrop-filter: blur(20px) brightness(1.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+              inset 0 1px 2px rgba(255, 255, 255, 0.08);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(0, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              inset 0 1px 2px rgba(0, 255, 255, 0.1);
 }
 
 .glass-card-elevated {
-  background: rgba(15, 28, 50, 0.6);
+  background: rgba(15, 28, 50, 0.4);
+  border: 1.5px solid rgba(0, 255, 255, 0.25);
+  backdrop-filter: blur(24px) brightness(1.08);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25),
+              inset 0 1px 2px rgba(0, 255, 255, 0.12),
+              inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Frosted glass wet look effect */
+.glass-wet {
+  background: rgba(10, 15, 30, 0.3);
   border: 1px solid rgba(0, 255, 255, 0.2);
-  backdrop-filter: blur(24px);
-  box-shadow: 0 12px 48px rgba(0, 255, 255, 0.15),
-              inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: 0 4px 16px rgba(0, 255, 255, 0.08),
+              inset 0 1px 1px rgba(255, 255, 255, 0.06);
 }
 
 /* Neon Cyan Glow */
@@ -185,6 +203,32 @@
   background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
   border-radius: 50%;
   animation: parallaxFloat 15s ease-in-out infinite;
+}
+
+/* Monospaced Typography Utilities */
+.font-mono-data {
+  font-family: "JetBrains Mono", "Roboto Mono", monospace;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.font-mono-timer {
+  font-family: "JetBrains Mono", "Roboto Mono", monospace;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+}
+
+/* Italic Headers for Speed Momentum */
+.italic-header {
+  font-style: italic;
+  letter-spacing: -1px;
+}
+
+/* Caustics Background Pattern */
+.caustics-bg {
+  background: radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.08) 0%, transparent 50%);
+  animation: caustics 8s ease-in-out infinite;
 }
 
 /* Premium Menu Animations */
@@ -354,6 +398,38 @@
   }
 }
 
+/* Caustics Water Effect */
+@keyframes caustics {
+  0%, 100% {
+    background-position: 0% 0%;
+    opacity: 0.15;
+  }
+  50% {
+    background-position: 100% 100%;
+    opacity: 0.25;
+  }
+}
+
+/* Water Fill Animation */
+@keyframes waterFill {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0%, 100% {
+    background-position: -1000px 0;
+  }
+  50% {
+    background-position: 1000px 0;
+  }
+}
+
 /* Apply animations to specific classes */
 .animate-slide-in-up {
   animation: slideInUp 0.6s ease-out;
@@ -409,6 +485,875 @@
 
 .animate-live-pulse {
   animation: live-pulse 1.2s ease-in-out infinite;
+}
+
+.animate-caustics {
+  animation: caustics 8s ease-in-out infinite;
+}
+
+.animate-water-fill {
+  animation: waterFill 0.6s ease-out forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Biome Textures for Game Modes */
+
+/* Quick Race - Ripple Pool Pattern */
+.biome-quick-race {
+  background:
+    repeating-radial-gradient(
+      circle at 20% 40%,
+      rgba(0, 255, 255, 0.08) 0px,
+      rgba(0, 255, 255, 0.04) 2px,
+      transparent 4px,
+      transparent 6px
+    ),
+    repeating-radial-gradient(
+      circle at 80% 60%,
+      rgba(0, 255, 255, 0.06) 0px,
+      rgba(0, 255, 255, 0.03) 2px,
+      transparent 4px,
+      transparent 6px
+    ),
+    linear-gradient(45deg, rgba(0, 255, 255, 0.02) 0%, transparent 100%);
+  animation: biome-ripple 8s ease-in-out infinite;
+}
+
+/* Career Race - Vintage Ceramic Tile Pattern */
+.biome-career-race {
+  background:
+    linear-gradient(90deg, transparent 24%, rgba(255, 200, 100, 0.08) 25%, rgba(255, 200, 100, 0.08) 26%, transparent 27%, transparent 74%, rgba(255, 200, 100, 0.08) 75%, rgba(255, 200, 100, 0.08) 76%, transparent 77%, transparent 100%),
+    linear-gradient(0deg, transparent 24%, rgba(255, 200, 100, 0.08) 25%, rgba(255, 200, 100, 0.08) 26%, transparent 27%, transparent 74%, rgba(255, 200, 100, 0.08) 75%, rgba(255, 200, 100, 0.08) 76%, transparent 77%, transparent 100%),
+    repeating-linear-gradient(45deg, rgba(139, 90, 50, 0.04) 0px, rgba(139, 90, 50, 0.04) 10px, transparent 10px, transparent 20px),
+    linear-gradient(135deg, rgba(200, 120, 40, 0.03) 0%, transparent 100%);
+  background-size: 50px 50px, 50px 50px, 20px 20px, 100% 100%;
+  filter: sepia(0.15);
+}
+
+/* Ranked Match - Deep Water Texture */
+.biome-ranked-match {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.08) 0px,
+      rgba(0, 0, 0, 0.04) 1px,
+      transparent 2px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 100, 150, 0.05) 0px,
+      transparent 3px,
+      transparent 8px
+    ),
+    radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.06) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(0, 26, 51, 0.2) 0%, transparent 100%);
+  animation: biome-depth-pulse 6s ease-in-out infinite;
+}
+
+/* Time Trial - Clear Shallow Water Pattern */
+.biome-time-trial {
+  background:
+    repeating-linear-gradient(
+      60deg,
+      transparent 0px,
+      transparent 4px,
+      rgba(0, 255, 255, 0.06) 4px,
+      rgba(0, 255, 255, 0.06) 8px
+    ),
+    repeating-linear-gradient(
+      120deg,
+      transparent 0px,
+      transparent 4px,
+      rgba(0, 255, 255, 0.04) 4px,
+      rgba(0, 255, 255, 0.04) 8px
+    ),
+    linear-gradient(135deg, rgba(0, 255, 255, 0.03) 0%, rgba(100, 200, 255, 0.02) 100%);
+  opacity: 0.95;
+}
+
+/* Relay Mode - Converging Currents Pattern */
+.biome-relay-mode {
+  background:
+    conic-gradient(from 45deg at 30% 40%, rgba(0, 255, 255, 0.08) 0deg, rgba(0, 180, 255, 0.04) 90deg, rgba(0, 255, 255, 0.08) 180deg, rgba(0, 180, 255, 0.04) 270deg, rgba(0, 255, 255, 0.08) 360deg),
+    conic-gradient(from 225deg at 70% 60%, rgba(0, 255, 255, 0.06) 0deg, rgba(0, 150, 200, 0.03) 90deg, rgba(0, 255, 255, 0.06) 180deg, rgba(0, 150, 200, 0.03) 270deg, rgba(0, 255, 255, 0.06) 360deg),
+    linear-gradient(45deg, transparent 0%, rgba(0, 255, 255, 0.02) 100%);
+  background-size: 200px 200px, 300px 300px, 100% 100%;
+  animation: biome-current-flow 10s linear infinite;
+}
+
+/* Ghost Race - Fractured Ice/Reflection Pattern */
+.biome-ghost-race {
+  background:
+    repeating-linear-gradient(
+      30deg,
+      transparent 0px,
+      transparent 10px,
+      rgba(255, 255, 255, 0.04) 10px,
+      rgba(255, 255, 255, 0.04) 20px
+    ),
+    repeating-linear-gradient(
+      60deg,
+      transparent 0px,
+      transparent 15px,
+      rgba(0, 255, 255, 0.03) 15px,
+      rgba(0, 255, 255, 0.03) 30px
+    ),
+    radial-gradient(ellipse at 40% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
+    linear-gradient(180deg, rgba(100, 180, 255, 0.03) 0%, rgba(0, 255, 255, 0.02) 100%);
+  animation: biome-reflection-shift 7s ease-in-out infinite;
+}
+
+/* Biome Animation Keyframes */
+@keyframes biome-ripple {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes biome-depth-pulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(0.95);
+  }
+}
+
+@keyframes biome-current-flow {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 200px 200px, -300px -300px;
+  }
+}
+
+@keyframes biome-reflection-shift {
+  0%, 100% {
+    filter: brightness(1) hue-rotate(0deg);
+  }
+  50% {
+    filter: brightness(1.05) hue-rotate(5deg);
+  }
+}
+
+/* Interactive Ripple Wave Effect */
+@keyframes ripple-wave {
+  0% {
+    width: 20px;
+    height: 20px;
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+    box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
+  }
+}
+
+/* Ignition Color-Shift Effect */
+@keyframes ignition-burst {
+  0% {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.1);
+    filter: brightness(1) hue-rotate(0deg);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(0, 255, 255, 0.8), inset 0 0 30px rgba(0, 255, 255, 0.3);
+    filter: brightness(1.2) hue-rotate(10deg);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(0, 200, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.15);
+    filter: brightness(1.05) hue-rotate(0deg);
+  }
+}
+
+.ignite {
+  animation: ignition-burst 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Wave Divider Effect */
+.wave-divider {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.3) 50%, transparent 100%);
+  overflow: hidden;
+}
+
+.wave-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 10px,
+    rgba(0, 255, 255, 0.5) 10px,
+    rgba(0, 255, 255, 0.5) 20px
+  );
+  animation: wave-slide 2s linear infinite;
+}
+
+@keyframes wave-slide {
+  0% {
+    transform: translateX(-20px);
+  }
+  100% {
+    transform: translateX(20px);
+  }
+}
+
+/* Enhanced Wave-Form Hover State */
+.wave-hover {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.wave-hover::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.6) 50%, transparent 100%);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.wave-hover:hover::after {
+  transform: scaleX(1);
+}
+
+/* Flowing Wave Animation */
+@keyframes flowing-wave {
+  0%, 100% {
+    clip-path: polygon(0% 45%, 16% 44%, 33% 50%, 54% 60%, 70% 61%, 84% 52%, 100% 45%, 100% 55%, 84% 62%, 70% 71%, 54% 70%, 33% 60%, 16% 54%, 0% 55%);
+  }
+  50% {
+    clip-path: polygon(0% 60%, 16% 65%, 33% 59%, 54% 45%, 70% 46%, 84% 59%, 100% 60%, 100% 70%, 84% 69%, 70% 56%, 54% 55%, 33% 69%, 16% 75%, 0% 70%);
+  }
+}
+
+.wave-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-element {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, rgba(0, 255, 255, 0) 0%, rgba(0, 255, 255, 0.15) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: flowing-wave 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.wave-container:hover .wave-element {
+  opacity: 1;
+}
+
+/* Liquid Fill Effect for Progress Icons */
+.icon-liquid-fill {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.icon-liquid-fill::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.6) 100%);
+  box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.5), 0 0 15px rgba(0, 255, 255, 0.4);
+  border-radius: 50%;
+  opacity: 0;
+  animation: liquid-fill-wave 0.8s ease-out forwards;
+  z-index: 0;
+}
+
+.icon-liquid-fill .material-symbols-outlined {
+  position: relative;
+  z-index: 1;
+}
+
+/* Liquid fill animation - customizable height via --fill-progress */
+@keyframes liquid-fill-wave {
+  0% {
+    height: 0%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    height: var(--fill-progress, 0%);
+    opacity: 1;
+  }
+}
+
+/* Progress-based Icon Hues */
+.icon-progress-grey {
+  color: rgba(255, 255, 255, 0.4);
+  filter: grayscale(100%) brightness(0.6);
+}
+
+.icon-progress-active {
+  color: #00ffff;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+  animation: icon-pulse-glow 2s ease-in-out infinite;
+}
+
+.icon-progress-complete {
+  color: #ffd700;
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) brightness(1.2);
+}
+
+@keyframes icon-pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(0, 255, 255, 1));
+  }
+}
+
+/* Impact Splash Animation for Completion */
+@keyframes completion-splash {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(0, 255, 255, 0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+    box-shadow: 0 0 40px 20px rgba(0, 255, 255, 0);
+  }
+}
+
+.splash-complete {
+  animation: completion-splash 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Completion Watermark */
+.completion-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  opacity: 0;
+  animation: watermark-fade-in 0.6s ease-out 0.3s forwards;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes watermark-fade-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Floating Card Effect */
+.floating-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.floating-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 100%, rgba(0, 150, 200, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.floating-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 255, 255, 0.2), 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.floating-card:hover::before {
+  opacity: 1;
+}
+
+/* Caustic Light Pattern for Floating Cards */
+.caustic-undershadow {
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background:
+    radial-gradient(ellipse 400px 8px at 20% 0%, rgba(0, 255, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(ellipse 400px 8px at 80% 0%, rgba(0, 200, 255, 0.1) 0%, transparent 50%);
+  filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.floating-card:hover .caustic-undershadow {
+  opacity: 1;
+}
+
+/* Frosted Water Layer Effect */
+.frosted-water-pane {
+  background: linear-gradient(135deg, rgba(10, 100, 150, 0.1) 0%, rgba(30, 120, 180, 0.08) 100%);
+  backdrop-filter: blur(24px) brightness(1.1) saturate(1.2);
+  border: 1px solid rgba(0, 255, 255, 0.15);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 2px rgba(0, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Digital Timer Bar */
+.digital-timer-bar {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.4) 50%, transparent 100%);
+  overflow: hidden;
+}
+
+.digital-timer-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.8) 50%, transparent 100%);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    filter: blur(0px);
+  }
+  50% {
+    opacity: 1;
+    filter: blur(1px);
+  }
+}
+
+/* Segmented Display for Time */
+.segmented-time {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeSpeed;
+}
+
+.segmented-time-digit {
+  display: inline-block;
+  min-width: 1.2em;
+  text-align: center;
+}
+
+/* Millisecond precision styling */
+.milliseconds {
+  font-size: 0.75em;
+  opacity: 0.85;
+  letter-spacing: 0.5px;
+}
+
+/* Liquid Progress Bar */
+.liquid-progress-bar {
+  position: relative;
+  height: 6px;
+  width: 24px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.1) 50%, transparent 100%);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.liquid-progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 255, 255, 0.6) 0%, rgba(0, 200, 255, 0.4) 100%);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 0 8px rgba(0, 255, 255, 0.5);
+  border-radius: 2px;
+  animation: liquid-flow 3s ease-in-out infinite;
+  width: var(--progress-width, 0%);
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes liquid-flow {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Liquid progress bar full state */
+.liquid-progress-bar--full::before {
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.8) 0%, rgba(255, 200, 0, 0.6) 100%);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 215, 0, 0.8);
+}
+
+/* Micro-interactions for progress tracking */
+.progress-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  background: rgba(0, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.progress-badge:hover {
+  border-color: rgba(0, 255, 255, 0.6);
+  background: rgba(0, 255, 255, 0.15);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.progress-badge--complete {
+  border-color: rgba(255, 215, 0, 0.6);
+  background: rgba(255, 215, 0, 0.12);
+  color: #ffd700;
+}
+
+.progress-badge--complete:hover {
+  border-color: rgba(255, 215, 0, 0.8);
+  background: rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+}
+
+/* Dimensional Icon Effects */
+.icon-3d {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Icon reflective surface overlay */
+.icon-3d::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 30% 30%,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.icon-3d:hover::after {
+  opacity: 1;
+}
+
+/* Icon subtle tilt effect on interaction */
+.icon-3d:hover {
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+  transform: perspective(1000px) rotateY(5deg) rotateX(-5deg);
+}
+
+/* Wave pattern for specific icons */
+.icon-wave-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 255, 255, 0.15) 2px,
+    rgba(0, 255, 255, 0.15) 4px
+  );
+  opacity: 0;
+  animation: wave-pattern-emerge 0.6s ease-out forwards;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes wave-pattern-emerge {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Icon trophy variant - 3D reflective appearance */
+.icon-trophy-3d {
+  position: relative;
+}
+
+.icon-trophy-3d::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: radial-gradient(
+    ellipse at 40% 20%,
+    rgba(255, 215, 0, 0.3) 0%,
+    rgba(255, 200, 0, 0.1) 40%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.icon-trophy-3d:hover::before {
+  opacity: 1;
+}
+
+/* Icon dumbbell variant - wave pattern integration */
+.icon-dumbbell-wave {
+  position: relative;
+}
+
+.icon-dumbbell-wave::after {
+  content: '';
+  position: absolute;
+  inset: 25%;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 50%;
+  opacity: 0;
+  animation: dumbbell-wave-ripple 0.8s ease-out forwards;
+}
+
+.icon-dumbbell-wave:hover::after {
+  animation: dumbbell-wave-ripple 0.8s ease-out infinite;
+}
+
+@keyframes dumbbell-wave-ripple {
+  0% {
+    inset: 25%;
+    opacity: 1;
+  }
+  100% {
+    inset: -25%;
+    opacity: 0;
+  }
+}
+
+/* Icon pulse animation for active state */
+@keyframes icon-active-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.icon-progress-active-pulse {
+  animation: icon-active-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Dimensional icon shadow base */
+.icon-shadow-base {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(0, 0, 0, 0.2) 0%, transparent 60%);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translateZ(-10px) scaleY(0.5);
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.icon-3d:hover .icon-shadow-base {
+  opacity: 1;
+}
+
+/* Countdown Timer Pulse Effects */
+.countdown-timer {
+  position: relative;
+  display: inline-block;
+}
+
+/* Urgency indicator based on time remaining */
+.countdown-timer--critical::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid rgba(255, 50, 50, 0.6);
+  border-radius: 4px;
+  animation: critical-pulse 0.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+}
+
+.countdown-timer--warning::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 4px;
+  animation: warning-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+}
+
+.countdown-timer--normal::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid rgba(0, 255, 255, 0.2);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+@keyframes critical-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 50, 50, 0.4), inset 0 0 4px rgba(255, 50, 50, 0.2);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 50, 50, 0.8), inset 0 0 8px rgba(255, 50, 50, 0.4);
+    opacity: 0.8;
+  }
+}
+
+@keyframes warning-pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(255, 215, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+  }
+}
+
+/* Millisecond display with precision focus */
+.timer-milliseconds {
+  font-size: 0.65em;
+  opacity: 0.8;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: inherit;
+}
+
+/* Digital display separator */
+.timer-separator {
+  margin: 0 2px;
+  opacity: 0.7;
+  animation: separator-blink 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes separator-blink {
+  0%, 49%, 100% {
+    opacity: 0.7;
+  }
+  50%, 99% {
+    opacity: 0.3;
+  }
+}
+
+/* Floating score badge for countdown */
+.countdown-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 700;
+  color: rgba(0, 255, 255, 0.9);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.countdown-badge:hover {
+  background: rgba(0, 255, 255, 0.2);
+  border-color: rgba(0, 255, 255, 0.6);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+}
+
+/* Ticker-style countdown effect */
+.countdown-ticker {
+  position: relative;
+  overflow: hidden;
+}
+
+.countdown-ticker::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.2) 50%, transparent 100%);
+  animation: ticker-shimmer 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ticker-shimmer {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* High Contrast State Utilities */

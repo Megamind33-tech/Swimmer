@@ -87,28 +87,44 @@ export const TopBar: React.FC<TopBarProps> = ({
         </button>
       </div>
 
-      {/* Center Section: Currencies */}
-      <div className="flex items-center gap-3">
-        {/* Gold Currency */}
-        <div className="relative overflow-hidden px-4 py-2 rounded-xl border border-amber-300/35 bg-gradient-to-br from-[#2b2414]/85 via-[#1b1a17]/88 to-[#1a1410]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_8px_16px_rgba(0,0,0,0.35)]">
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.06)_0_2px,transparent_2px_8px)] opacity-25" />
-          <div className="relative flex items-center gap-2">
-            <span className="material-symbols-outlined text-amber-300 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
-            <div className="leading-tight">
-              <div className="text-[10px] font-bold text-amber-200 uppercase">Gold</div>
-              <div className="font-black italic text-2xl tracking-tight text-white">{softCurrency.toLocaleString()}</div>
+      {/* Center Section: Level & Currencies HUD */}
+      <div className="flex items-center gap-4">
+        {/* Level Display - Centered */}
+        <div className="relative px-6 py-2 glass-card rounded-xl border border-neon-cyan/25 group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5">
+          <div className="text-center">
+            <div className="text-[10px] font-barlow font-bold text-white uppercase tracking-wider">Rank</div>
+            <div className="text-lg font-mono-timer text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">
+              #{((playerLevel * 42) % 1000).toString().padStart(3, '0')}
             </div>
           </div>
         </div>
 
-        {/* Premium Currency (SP) */}
-        <div className="relative overflow-hidden px-4 py-2 rounded-xl border border-cyan-300/35 bg-gradient-to-br from-[#122634]/88 via-[#0f1a27]/88 to-[#101927]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_8px_16px_rgba(0,0,0,0.35)]">
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0_2px,transparent_2px_9px)] opacity-25" />
-          <div className="relative flex items-center gap-2">
-            <span className="material-symbols-outlined text-cyan-200 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>diamond</span>
-            <div className="leading-tight">
-              <div className="text-[10px] font-bold text-cyan-100 uppercase">SP</div>
-              <div className="font-black italic text-2xl tracking-tight text-white">{premiumCurrency}</div>
+        {/* Gold Currency - High Contrast */}
+        <div className="relative px-5 py-2 rounded-xl border border-yellow-500/40 bg-yellow-500/8 group hover:border-yellow-400/60 hover:bg-yellow-500/15 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-yellow-500/5">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-yellow-400 text-lg drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]">
+              coin
+            </span>
+            <div>
+              <div className="text-[8px] font-barlow font-bold text-yellow-300 uppercase tracking-wider">Gold</div>
+              <div className="text-sm font-mono-timer text-yellow-200 drop-shadow-[0_0_6px_rgba(250,204,21,0.4)]">
+                {softCurrency.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Premium Currency - Neon Cyan */}
+        <div className="relative px-5 py-2 rounded-xl border border-neon-cyan/40 bg-neon-cyan/8 group hover:border-neon-cyan/60 hover:bg-neon-cyan/15 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/10 hover:shadow-lg hover:shadow-neon-cyan/20">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-neon-cyan text-lg drop-shadow-[0_0_10px_rgba(0,255,255,0.6)]">
+              star
+            </span>
+            <div>
+              <div className="text-[8px] font-barlow font-bold text-neon-cyan uppercase tracking-wider">SP</div>
+              <div className="text-sm font-mono-timer text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">
+                {premiumCurrency}
+              </div>
             </div>
           </div>
         </div>
@@ -161,19 +177,24 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
 
         {isNotificationsOpen && (
-          <div className="absolute right-0 top-14 w-80 max-[900px]:w-64 rounded-lg border border-white/20 bg-[#081326]/95 backdrop-blur-md shadow-[0_15px_40px_rgba(0,0,0,0.45)] p-3 z-[60]">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black uppercase tracking-wide text-cyan-200">Notifications</span>
+          <div className="absolute right-0 top-14 w-96 max-[900px]:w-72 rounded-2xl glass-card border border-neon-cyan/25 shadow-[0_20px_60px_rgba(0,255,255,0.15)] p-4 z-[60] backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-black font-din italic-header uppercase tracking-wider text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">
+                Notifications
+              </span>
               <button
                 onClick={() => setIsNotificationsOpen(false)}
-                className="text-[10px] px-2 py-1 rounded border border-white/25 text-white hover:bg-white/10"
+                className="text-[10px] px-3 py-1 rounded-lg border border-neon-cyan/25 text-neon-cyan hover:border-neon-cyan/50 hover:bg-neon-cyan/10 transition-all duration-300 backdrop-blur-sm"
               >
                 Collapse
               </button>
             </div>
             <div className="space-y-1.5">
               {notificationItems.map((item) => (
-                <div key={item} className="text-[11px] text-white/90 bg-white/5 border border-white/10 rounded px-2 py-1.5">
+                <div
+                  key={item}
+                  className="text-[11px] text-white/85 bg-neon-cyan/8 border border-neon-cyan/15 rounded-lg px-3 py-2 hover:border-neon-cyan/35 transition-all duration-300 backdrop-blur-sm"
+                >
                   {item}
                 </div>
               ))}
