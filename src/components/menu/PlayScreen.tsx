@@ -1,9 +1,9 @@
 /**
  * Play Screen - Game Mode Selection with Broadcast Aesthetic
- * Glassmorphic cards with neon accents and high-contrast difficulty indicators
+ * Glassmorphic cards with neon accents, biome textures, and ripple effects
  */
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
 interface GameModeCard {
   id: string;
@@ -14,6 +14,7 @@ interface GameModeCard {
   rewards: string;
   playerCount?: string;
   accentColor: string; // Neon accent color class
+  biomeClass: string; // Biome texture class
 }
 
 interface PlayScreenProps {
@@ -30,6 +31,7 @@ const GameModes: GameModeCard[] = [
     rewards: '100 XP, 500 Coins',
     playerCount: '4.2K playing',
     accentColor: 'border-blue-400/60',
+    biomeClass: 'biome-quick-race',
   },
   {
     id: 'career-race',
@@ -39,6 +41,7 @@ const GameModes: GameModeCard[] = [
     difficulty: 'HARD',
     rewards: '250 XP, 2000 Coins',
     accentColor: 'border-purple-400/60',
+    biomeClass: 'biome-career-race',
   },
   {
     id: 'ranked-match',
@@ -49,6 +52,7 @@ const GameModes: GameModeCard[] = [
     rewards: '300 XP, 3000 Coins',
     playerCount: '12.5K playing',
     accentColor: 'border-red-400/60',
+    biomeClass: 'biome-ranked-match',
   },
   {
     id: 'time-trial',
@@ -58,6 +62,7 @@ const GameModes: GameModeCard[] = [
     difficulty: 'NORMAL',
     rewards: '150 XP, 1000 Coins',
     accentColor: 'border-green-400/60',
+    biomeClass: 'biome-time-trial',
   },
   {
     id: 'relay-mode',
@@ -68,6 +73,7 @@ const GameModes: GameModeCard[] = [
     rewards: '400 XP, 4000 Coins',
     playerCount: '8.3K playing',
     accentColor: 'border-cyan-400/60',
+    biomeClass: 'biome-relay-mode',
   },
   {
     id: 'ghost-race',
@@ -77,23 +83,42 @@ const GameModes: GameModeCard[] = [
     difficulty: 'EASY',
     rewards: '50 XP, 250 Coins',
     accentColor: 'border-yellow-400/60',
+    biomeClass: 'biome-ghost-race',
   },
 ];
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
     case 'EASY':
-      return 'text-green-400 border-green-400/40 bg-green-400/10';
+      return 'text-green-300 border-green-400/70 bg-green-400/15 shadow-[0_0_8px_rgba(74,222,128,0.4)] font-mono-data tracking-widest';
     case 'NORMAL':
-      return 'text-blue-400 border-blue-400/40 bg-blue-400/10';
+      return 'text-blue-300 border-blue-400/70 bg-blue-400/15 shadow-[0_0_8px_rgba(96,165,250,0.4)] font-mono-data tracking-widest';
     case 'HARD':
-      return 'text-red-400 border-red-400/40 bg-red-400/10';
+      return 'text-red-300 border-red-400/70 bg-red-400/15 shadow-[0_0_8px_rgba(248,113,113,0.4)] font-mono-data tracking-widest';
     default:
-      return 'text-white/60 border-white/20 bg-white/5';
+      return 'text-white/60 border-white/20 bg-white/5 font-mono-data tracking-widest';
   }
 };
 
 export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
+  const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number; cardId: string }>>([]);
+  const rippleIdRef = useRef(0);
+
+  const handleRipple = (e: React.MouseEvent<HTMLButtonElement>, cardId: string) => {
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const rippleId = rippleIdRef.current++;
+    setRipples((prev) => [...prev, { id: rippleId, x, y, cardId }]);
+
+    // Remove ripple after animation completes
+    setTimeout(() => {
+      setRipples((prev) => prev.filter((r) => r.id !== rippleId));
+    }, 600);
+  };
+
   return (
     <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col safe-zone-x">
       {/* Header */}
@@ -112,9 +137,15 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
           return (
             <button
               key={mode.id}
-              onClick={() => onModeSelect?.(mode.id)}
-              className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 active:animate-squash-stretch h-56 glass-card-elevated border-2 ${mode.accentColor} hover:border-neon-cyan/80 skew-container`}
+              onClick={(e) => {
+                handleRipple(e, mode.id);
+                onModeSelect?.(mode.id);
+              }}
+              className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 active:animate-squash-stretch h-56 glass-card-elevated border-2 ${mode.accentColor} hover:border-neon-cyan/80 skew-container ${mode.biomeClass}`}
             >
+              {/* Biome texture background - layered beneath overlays */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
               {/* Background gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/20 to-broadcast-overlay/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -164,6 +195,25 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                   )}
                 </div>
               </div>
+
+              {/* Ripple Effects */}
+              {ripples.map((ripple) => (
+                ripple.cardId === mode.id && (
+                  <div
+                    key={ripple.id}
+                    className="absolute rounded-full bg-neon-cyan/40 pointer-events-none"
+                    style={{
+                      left: ripple.x,
+                      top: ripple.y,
+                      width: '20px',
+                      height: '20px',
+                      transform: 'translate(-50%, -50%)',
+                      animation: 'ripple-wave 0.6s cubic-bezier(0.4, 0, 0.6, 1) forwards',
+                      boxShadow: '0 0 20px rgba(0, 255, 255, 0.6)',
+                    }}
+                  />
+                )
+              ))}
 
               {/* Hover glow effect */}
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-neon-cyan/0 via-neon-cyan/20 to-neon-cyan/0 opacity-0 group-hover:opacity-50 blur-xl -z-10 transition-opacity duration-300" />
