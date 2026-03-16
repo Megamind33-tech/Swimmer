@@ -40,7 +40,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <p className="text-3xl max-[900px]:text-lg font-black uppercase leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">START RACE</p>
                 <button
                   onClick={onPlayClick}
-                  className="h-10 w-10 max-[900px]:h-8 max-[900px]:w-8 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 flex items-center justify-center transition-colors"
+                  className="h-11 w-11 max-[900px]:h-11 max-[900px]:w-11 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 flex items-center justify-center transition-colors"
                   aria-label="Play start race"
                 >
                   <span className="material-symbols-outlined text-white">play_arrow</span>
@@ -87,12 +87,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <span>P2P Quick matches</span>
             <span className="flex items-center gap-2">
               <span className="material-symbols-outlined">groups</span>
-              <span className="h-9 w-9 max-[900px]:h-8 max-[900px]:w-8 rounded-full bg-white/15 border border-white/35 flex items-center justify-center">
+              <span className="h-11 w-11 max-[900px]:h-11 max-[900px]:w-11 rounded-full bg-white/15 border border-white/35 flex items-center justify-center">
                 <span className="material-symbols-outlined text-white text-xl max-[900px]:text-lg">play_arrow</span>
               </span>
             </span>
           </span>
         </button>
+        </div>
+
+        {/* Mobile 19.5:9 Action Hub */}
+        <div className="action-hub-shell hidden max-[900px]:flex">
+          <div className="action-hub-arc">
+            <button
+              onClick={onPlayClick}
+              className="action-hub-button action-hub-primary"
+              aria-label="Start quick race"
+            >
+              <span className="material-symbols-outlined text-[22px]">play_arrow</span>
+              <span className="text-[10px] font-black uppercase tracking-wide">Quick Race</span>
+            </button>
+            <button
+              onClick={onCareerClick}
+              className="action-hub-button action-hub-secondary"
+              aria-label="Open training"
+            >
+              <span className="material-symbols-outlined text-[22px]">fitness_center</span>
+              <span className="text-[10px] font-black uppercase tracking-wide">Training</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -138,6 +160,7 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
             <span className="text-primary font-mono text-xs font-bold">2d 14h</span>
           </div>
         </div>
+
       </div>
     </div>
   );

@@ -38,7 +38,7 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
   const showRightPanel = currentScreen === 'HOME' && rightPanel;
 
   return (
-    <div className="w-screen h-dvh bg-[#060b14] text-white overflow-hidden flex flex-col">
+    <div className="menu-safe-zone w-screen h-dvh bg-[#060b14] text-white overflow-hidden flex flex-col">
       {/* Cinematic Pool Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <img
@@ -59,7 +59,7 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
       </div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 flex flex-col h-full">
+      <div className="relative z-10 flex flex-col h-full min-h-0">
         {/* Top Bar */}
         <TopBar
           playerLevel={playerLevel}
@@ -70,7 +70,7 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
         />
 
         {/* Middle Section: Left Nav + Center Content + Right Panel (Landscape) */}
-        <div className="flex-1 flex overflow-hidden gap-3 px-2 py-2">
+        <div className="flex-1 flex min-h-0 overflow-hidden gap-3 px-2 py-2 max-[900px]:px-1.5 max-[900px]:pb-1">
           {/* Left Navigation Rail */}
           <LeftNavigationRail
             currentScreen={currentScreen}
@@ -78,7 +78,7 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
           />
 
           {/* Center Content Area - Full width or flex */}
-          <div className={`${showRightPanel ? 'flex-1' : 'flex-1'} overflow-y-auto rounded-xl border border-white/10 bg-gradient-to-b from-[#0c1830]/70 to-[#081326]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_30px_rgba(0,0,0,0.35)]`}>
+          <div className={`${showRightPanel ? 'flex-1' : 'flex-1'} min-h-0 overflow-y-auto rounded-xl border border-white/10 bg-gradient-to-b from-[#0c1830]/70 to-[#081326]/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_30px_rgba(0,0,0,0.35)]`}>
             {children}
           </div>
 
