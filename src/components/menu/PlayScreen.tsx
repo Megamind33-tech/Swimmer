@@ -102,6 +102,7 @@ const getDifficultyColor = (difficulty: string) => {
 
 export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
   const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number; cardId: string }>>([]);
+  const [ignitedCard, setIgnitedCard] = useState<string | null>(null);
   const rippleIdRef = useRef(0);
 
   const handleRipple = (e: React.MouseEvent<HTMLButtonElement>, cardId: string) => {
@@ -109,6 +110,10 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
     const rect = button.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    // Trigger ignition effect
+    setIgnitedCard(cardId);
+    setTimeout(() => setIgnitedCard(null), 600);
 
     const rippleId = rippleIdRef.current++;
     setRipples((prev) => [...prev, { id: rippleId, x, y, cardId }]);
@@ -141,7 +146,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                 handleRipple(e, mode.id);
                 onModeSelect?.(mode.id);
               }}
-              className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 active:animate-squash-stretch h-56 glass-card-elevated border-2 ${mode.accentColor} hover:border-neon-cyan/80 skew-container ${mode.biomeClass}`}
+              className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 active:animate-squash-stretch h-56 glass-card-elevated border-2 ${mode.accentColor} hover:border-neon-cyan/80 skew-container ${mode.biomeClass} ${ignitedCard === mode.id ? 'ignite' : ''}`}
             >
               {/* Biome texture background - layered beneath overlays */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
