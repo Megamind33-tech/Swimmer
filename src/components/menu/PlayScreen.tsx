@@ -4,6 +4,7 @@
  */
 
 import React, { useRef, useState } from 'react';
+import { getDifficultyColor, getDifficultyBadgeIcon } from '../../utils/difficultyUtils';
 
 interface GameModeCard {
   id: string;
@@ -87,31 +88,6 @@ const GameModes: GameModeCard[] = [
   },
 ];
 
-const getDifficultyColor = (difficulty: string) => {
-  switch (difficulty) {
-    case 'EASY':
-      return 'text-green-200 border-green-400/80 bg-gradient-to-br from-green-400/25 to-green-400/10 shadow-[0_0_12px_rgba(74,222,128,0.6),inset_0_0_8px_rgba(74,222,128,0.2)] font-mono-data tracking-widest font-bold';
-    case 'NORMAL':
-      return 'text-blue-200 border-blue-400/80 bg-gradient-to-br from-blue-400/25 to-blue-400/10 shadow-[0_0_12px_rgba(96,165,250,0.6),inset_0_0_8px_rgba(96,165,250,0.2)] font-mono-data tracking-widest font-bold';
-    case 'HARD':
-      return 'text-red-200 border-red-400/80 bg-gradient-to-br from-red-400/25 to-red-400/10 shadow-[0_0_12px_rgba(248,113,113,0.6),inset_0_0_8px_rgba(248,113,113,0.2)] font-mono-data tracking-widest font-bold';
-    default:
-      return 'text-white/70 border-white/30 bg-white/8 font-mono-data tracking-widest font-bold';
-  }
-};
-
-const getDifficultyBadgeIcon = (difficulty: string) => {
-  switch (difficulty) {
-    case 'EASY':
-      return '◆';
-    case 'NORMAL':
-      return '◆◆';
-    case 'HARD':
-      return '◆◆◆';
-    default:
-      return '◆';
-  }
-};
 
 const getIllustrationPattern = (modeId: string) => {
   // Return SVG pattern data for each game mode
@@ -217,7 +193,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                       <h3 className="font-din text-xl max-[900px]:text-lg font-black text-white uppercase tracking-wider leading-tight drop-shadow-[0_0_8px_rgba(0,255,255,0.2)]">
                         {mode.name}
                       </h3>
-                      <div className={`text-[9px] font-barlow font-bold uppercase tracking-widest mt-1 px-3 py-1.5 rounded-lg border-2 w-fit ${diffColor}`}>
+                      <div className={`text-[9px] font-barlow font-bold uppercase tracking-widest mt-1 px-3 py-1.5 rounded-lg border-2 w-fit font-mono-data ${diffColor}`}>
                         <span className="mr-1">{getDifficultyBadgeIcon(mode.difficulty)}</span>
                         {mode.difficulty}
                       </div>
