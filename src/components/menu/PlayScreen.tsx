@@ -90,13 +90,52 @@ const GameModes: GameModeCard[] = [
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
     case 'EASY':
-      return 'text-green-300 border-green-400/70 bg-green-400/15 shadow-[0_0_8px_rgba(74,222,128,0.4)] font-mono-data tracking-widest';
+      return 'text-green-200 border-green-400/80 bg-gradient-to-br from-green-400/25 to-green-400/10 shadow-[0_0_12px_rgba(74,222,128,0.6),inset_0_0_8px_rgba(74,222,128,0.2)] font-mono-data tracking-widest font-bold';
     case 'NORMAL':
-      return 'text-blue-300 border-blue-400/70 bg-blue-400/15 shadow-[0_0_8px_rgba(96,165,250,0.4)] font-mono-data tracking-widest';
+      return 'text-blue-200 border-blue-400/80 bg-gradient-to-br from-blue-400/25 to-blue-400/10 shadow-[0_0_12px_rgba(96,165,250,0.6),inset_0_0_8px_rgba(96,165,250,0.2)] font-mono-data tracking-widest font-bold';
     case 'HARD':
-      return 'text-red-300 border-red-400/70 bg-red-400/15 shadow-[0_0_8px_rgba(248,113,113,0.4)] font-mono-data tracking-widest';
+      return 'text-red-200 border-red-400/80 bg-gradient-to-br from-red-400/25 to-red-400/10 shadow-[0_0_12px_rgba(248,113,113,0.6),inset_0_0_8px_rgba(248,113,113,0.2)] font-mono-data tracking-widest font-bold';
     default:
-      return 'text-white/60 border-white/20 bg-white/5 font-mono-data tracking-widest';
+      return 'text-white/70 border-white/30 bg-white/8 font-mono-data tracking-widest font-bold';
+  }
+};
+
+const getDifficultyBadgeIcon = (difficulty: string) => {
+  switch (difficulty) {
+    case 'EASY':
+      return '◆';
+    case 'NORMAL':
+      return '◆◆';
+    case 'HARD':
+      return '◆◆◆';
+    default:
+      return '◆';
+  }
+};
+
+const getIllustrationPattern = (modeId: string) => {
+  // Return SVG pattern data for each game mode
+  switch (modeId) {
+    case 'quick-race':
+      // Ripple circles pattern
+      return 'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.08) 0%, rgba(0,255,255,0.04) 15%, transparent 30%), radial-gradient(circle at 70% 30%, rgba(0,255,255,0.06) 0%, transparent 25%)';
+    case 'career-race':
+      // Ascending ladder pattern
+      return 'repeating-linear-gradient(0deg, rgba(255,200,100,0.06) 0px, rgba(255,200,100,0.06) 20px, transparent 20px, transparent 40px), repeating-linear-gradient(90deg, rgba(255,200,100,0.04) 0px, rgba(255,200,100,0.04) 1px, transparent 1px, transparent 20px)';
+    case 'ranked-match':
+      // Crown/trophy pattern
+      return 'conic-gradient(from 0deg at 50% 50%, rgba(255,215,0,0.08) 0deg, rgba(255,215,0,0.04) 180deg, rgba(255,215,0,0.08) 360deg)';
+    case 'time-trial':
+      // Stopwatch pattern
+      return 'radial-gradient(circle at 50% 40%, rgba(0,255,255,0.08) 0%, rgba(0,255,255,0.02) 50%), radial-gradient(circle at 50% 60%, rgba(0,255,255,0.06) 0%, transparent 40%)';
+    case 'relay-mode':
+      // Converging arrows pattern
+      return 'linear-gradient(45deg, rgba(0,255,255,0.06) 0%, transparent 50%), linear-gradient(-45deg, rgba(0,255,255,0.06) 0%, transparent 50%)';
+    case 'ghost-race':
+      // Reflection/mirror pattern
+      return 'linear-gradient(0deg, transparent 40%, rgba(0,255,255,0.08) 45%, rgba(0,255,255,0.08) 55%, transparent 60%)';
+    default:
+      return 'rgba(0,255,255,0.05)';
   }
 };
 
@@ -157,6 +196,15 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
               {/* Speed line texture */}
               <div className="absolute inset-0 speed-lines opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none"></div>
 
+              {/* Illustration Background */}
+              <div
+                className="absolute top-0 left-0 right-0 h-24 opacity-50 group-hover:opacity-70 transition-opacity duration-300"
+                style={{
+                  background: getIllustrationPattern(mode.id),
+                  pointerEvents: 'none',
+                }}
+              />
+
               {/* Content */}
               <div className="relative h-full flex flex-col p-6 max-[900px]:p-5 justify-between z-10">
                 {/* Icon & Title Section */}
@@ -169,7 +217,8 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                       <h3 className="font-din text-xl max-[900px]:text-lg font-black text-white uppercase tracking-wider leading-tight drop-shadow-[0_0_8px_rgba(0,255,255,0.2)]">
                         {mode.name}
                       </h3>
-                      <div className={`text-[10px] font-barlow font-bold uppercase tracking-widest mt-1 px-2 py-1 rounded border w-fit ${diffColor}`}>
+                      <div className={`text-[9px] font-barlow font-bold uppercase tracking-widest mt-1 px-3 py-1.5 rounded-lg border-2 w-fit ${diffColor}`}>
+                        <span className="mr-1">{getDifficultyBadgeIcon(mode.difficulty)}</span>
                         {mode.difficulty}
                       </div>
                     </div>
