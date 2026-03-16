@@ -3,7 +3,7 @@
  * Championship display with glassmorphic cards and neon accents
  */
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { IPlayerSwimmer } from '../../types';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 import p2pQuickMatchImage from '../../designs/doh9161_copy.width_800.jpg/screen.png';
@@ -145,59 +145,155 @@ interface HomeRightPanelProps {
 }
 
 export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
+  const [completedObjectives, setCompletedObjectives] = useState<Set<number>>(new Set([2]));
+  const [splashingObjective, setSplashingObjective] = useState<number | null>(null);
+  const splashRefs = useRef<Record<number, HTMLDivElement | null>>({});
+
   const dailyObjectives = [
     { id: 1, name: 'Complete 2 sprint races', progress: 1, total: 2, icon: 'play_arrow' },
-    { id: 2, name: 'Perform 3 perfect turns', progress: 2, total: 3, icon: 'edit' },
+    { id: 2, name: 'Perform 3 perfect turns', progress: 3, total: 3, icon: 'edit' },
     { id: 3, name: 'Train endurance once', progress: 0, total: 1, icon: 'fitness_center' },
     { id: 4, name: 'Beat one rival ghost', progress: 0, total: 1, icon: 'emoji_events' },
   ];
 
   const activeEvents = [
-    { name: 'World Sprint Cup', time: '05:14:22' },
-    { name: 'Butterfly Challenge', time: '2d 14h' },
+    { name: 'World Sprint Cup', time: '05:14:22', timeMs: 514220 },
+    { name: 'Butterfly Challenge', time: '2d 14h', timeMs: null },
   ];
+
+  const isComplete = (obj: typeof dailyObjectives[0]) => obj.progress >= obj.total;
+  const progressPercent = (progress: number, total: number) => Math.min((progress / total) * 100, 100);
+
+  const getIconColorClass = (obj: typeof dailyObjectives[0]) => {
+    if (completedObjectives.has(obj.id)) {
+      return 'icon-progress-complete';
+    } else if (obj.progress > 0) {
+      return 'icon-progress-active';
+    }
+    return 'icon-progress-grey';
+  };
+
+  const handleObjectiveClick = (obj: typeof dailyObjectives[0]) => {
+    if (isComplete(obj) && !completedObjectives.has(obj.id)) {
+      setSplashingObjective(obj.id);
+      setCompletedObjectives((prev) => new Set([...prev, obj.id]));
+      setTimeout(() => setSplashingObjective(null), 600);
+    }
+  };
 
   return (
     <div className="space-y-4 safe-zone">
-      {/* Daily Objectives */}
-      <div className="glass-card p-5 border border-neon-cyan/25 rounded-2xl group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5 wave-hover">
+      {/* Daily Objectives - Frosted Water Pane */}
+      <div className="frosted-water-pane p-5 rounded-2xl group hover:border-neon-cyan/60 transition-all duration-300 wave-hover">
         <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
           Daily Objectives
         </h3>
         <div className="space-y-3">
-          {dailyObjectives.map((obj) => (
-            <div key={obj.id} className="flex items-center justify-between p-2 rounded-lg bg-neon-cyan/8 border border-neon-cyan/15 hover:border-neon-cyan/35 transition-all duration-300 backdrop-blur-sm">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <span className="material-symbols-outlined text-neon-cyan text-lg shrink-0">
-                  {obj.icon}
-                </span>
-                <span className="text-sm font-barlow font-bold text-white/85 truncate">
-                  {obj.name}
-                </span>
+          {dailyObjectives.map((obj) => {
+            const isCompleted = completedObjectives.has(obj.id);
+            const fillPercent = progressPercent(obj.progress, obj.total);
+
+            return (
+              <div
+                key={obj.id}
+                ref={(el) => {
+                  if (el) splashRefs.current[obj.id] = el;
+                }}
+                onClick={() => handleObjectiveClick(obj)}
+                className={`relative flex items-center justify-between p-3 rounded-lg border transition-all duration-300 cursor-pointer ${
+                  isCompleted
+                    ? 'bg-yellow-400/10 border-yellow-400/30 hover:border-yellow-400/50'
+                    : 'bg-neon-cyan/6 border-neon-cyan/15 hover:border-neon-cyan/35 hover:bg-neon-cyan/10'
+                } ${splashingObjective === obj.id ? 'splash-complete' : ''}`}
+              >
+                {/* Icon with Liquid Fill */}
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="relative">
+                    <span
+                      className={`material-symbols-outlined text-2xl shrink-0 icon-liquid-fill ${getIconColorClass(obj)} transition-all duration-300`}
+                      style={{
+                        '--fill-progress': `${fillPercent}%`,
+                      } as React.CSSProperties}
+                    >
+                      {obj.icon}
+                    </span>
+
+                    {/* Completion Watermark */}
+                    {isCompleted && (
+                      <div className="completion-watermark" style={{ animationDelay: '0.2s' }}>
+                        COMPLETE
+                      </div>
+                    )}
+                  </div>
+
+                  <span
+                    className={`text-sm font-barlow font-bold truncate transition-colors duration-300 ${
+                      isCompleted ? 'text-yellow-200' : 'text-white/85'
+                    }`}
+                  >
+                    {obj.name}
+                  </span>
+                </div>
+
+                {/* Liquid Fill Progress Display */}
+                <div className="flex items-center gap-2 ml-2 shrink-0">
+                  <div className="text-xs font-mono-data text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">
+                    <span className={isCompleted ? 'text-yellow-300' : 'text-neon-cyan'}>
+                      {obj.progress}/{obj.total}
+                    </span>
+                  </div>
+                  <div className="w-6 h-6 rounded-sm border border-neon-cyan/30 bg-neon-cyan/5 flex items-center justify-center overflow-hidden">
+                    <div
+                      className="w-full bg-gradient-to-t from-neon-cyan/60 to-neon-cyan/40 rounded-sm"
+                      style={{ height: `${fillPercent}%` }}
+                    />
+                  </div>
+                </div>
               </div>
-              <span className="text-xs font-mono-data text-neon-cyan ml-2 shrink-0 drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">
-                {obj.progress}/{obj.total}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Active Events */}
-      <div className="glass-card p-5 border border-neon-cyan/25 rounded-2xl group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5 wave-hover">
+      {/* Active Events - Floating Cards with Caustics */}
+      <div className="frosted-water-pane p-5 rounded-2xl group hover:border-neon-cyan/60 transition-all duration-300 wave-hover">
         <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
           Active Events
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {activeEvents.map((event, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between p-2 rounded-lg bg-neon-cyan/8 border border-neon-cyan/15 hover:border-neon-cyan/35 transition-all duration-300 backdrop-blur-sm"
+              className="floating-card relative p-3 rounded-lg bg-gradient-to-br from-neon-cyan/12 to-neon-cyan/6 border border-neon-cyan/25 hover:border-neon-cyan/50 transition-all duration-300"
             >
-              <span className="text-sm font-barlow font-bold text-white/85">{event.name}</span>
-              <span className="text-xs font-mono-timer text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">
-                {event.time}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-barlow font-bold text-white/85">{event.name}</span>
+                <div className="flex flex-col items-end gap-1">
+                  {event.timeMs ? (
+                    <div>
+                      <div className="digital-timer-bar mb-1"></div>
+                      <span className="segmented-time text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.5)] block text-xs">
+                        <span className="segmented-time-digit">0</span>
+                        <span className="segmented-time-digit">5</span>
+                        <span className="mx-0.5">:</span>
+                        <span className="segmented-time-digit">1</span>
+                        <span className="segmented-time-digit">4</span>
+                        <span className="mx-0.5">:</span>
+                        <span className="segmented-time-digit">2</span>
+                        <span className="segmented-time-digit">2</span>
+                        <span className="milliseconds">ms</span>
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="segmented-time text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.4)] text-xs">
+                      {event.time}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Caustic Undershadow */}
+              <div className="caustic-undershadow"></div>
             </div>
           ))}
         </div>

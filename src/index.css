@@ -769,6 +769,236 @@
   opacity: 1;
 }
 
+/* Liquid Fill Effect for Progress Icons */
+.icon-liquid-fill {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.icon-liquid-fill::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.6) 100%);
+  box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.5), 0 0 15px rgba(0, 255, 255, 0.4);
+  border-radius: 50%;
+  opacity: 0;
+  animation: liquid-fill-wave 0.8s ease-out forwards;
+  z-index: 0;
+}
+
+.icon-liquid-fill .material-symbols-outlined {
+  position: relative;
+  z-index: 1;
+}
+
+/* Liquid fill animation - customizable height via --fill-progress */
+@keyframes liquid-fill-wave {
+  0% {
+    height: 0%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    height: var(--fill-progress, 0%);
+    opacity: 1;
+  }
+}
+
+/* Progress-based Icon Hues */
+.icon-progress-grey {
+  color: rgba(255, 255, 255, 0.4);
+  filter: grayscale(100%) brightness(0.6);
+}
+
+.icon-progress-active {
+  color: #00ffff;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+  animation: icon-pulse-glow 2s ease-in-out infinite;
+}
+
+.icon-progress-complete {
+  color: #ffd700;
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) brightness(1.2);
+}
+
+@keyframes icon-pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(0, 255, 255, 1));
+  }
+}
+
+/* Impact Splash Animation for Completion */
+@keyframes completion-splash {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 20px 10px rgba(0, 255, 255, 0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+    box-shadow: 0 0 40px 20px rgba(0, 255, 255, 0);
+  }
+}
+
+.splash-complete {
+  animation: completion-splash 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Completion Watermark */
+.completion-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  opacity: 0;
+  animation: watermark-fade-in 0.6s ease-out 0.3s forwards;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes watermark-fade-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Floating Card Effect */
+.floating-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.floating-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 100%, rgba(0, 150, 200, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.floating-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 255, 255, 0.2), 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.floating-card:hover::before {
+  opacity: 1;
+}
+
+/* Caustic Light Pattern for Floating Cards */
+.caustic-undershadow {
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background:
+    radial-gradient(ellipse 400px 8px at 20% 0%, rgba(0, 255, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(ellipse 400px 8px at 80% 0%, rgba(0, 200, 255, 0.1) 0%, transparent 50%);
+  filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.floating-card:hover .caustic-undershadow {
+  opacity: 1;
+}
+
+/* Frosted Water Layer Effect */
+.frosted-water-pane {
+  background: linear-gradient(135deg, rgba(10, 100, 150, 0.1) 0%, rgba(30, 120, 180, 0.08) 100%);
+  backdrop-filter: blur(24px) brightness(1.1) saturate(1.2);
+  border: 1px solid rgba(0, 255, 255, 0.15);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 2px rgba(0, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Digital Timer Bar */
+.digital-timer-bar {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.4) 50%, transparent 100%);
+  overflow: hidden;
+}
+
+.digital-timer-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.8) 50%, transparent 100%);
+  animation: timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    filter: blur(0px);
+  }
+  50% {
+    opacity: 1;
+    filter: blur(1px);
+  }
+}
+
+/* Segmented Display for Time */
+.segmented-time {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeSpeed;
+}
+
+.segmented-time-digit {
+  display: inline-block;
+  min-width: 1.2em;
+  text-align: center;
+}
+
+/* Millisecond precision styling */
+.milliseconds {
+  font-size: 0.75em;
+  opacity: 0.85;
+  letter-spacing: 0.5px;
+}
+
 /* High Contrast State Utilities */
 .state-active {
   opacity: 1;
