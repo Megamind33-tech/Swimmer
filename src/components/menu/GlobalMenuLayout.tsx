@@ -7,6 +7,7 @@ import React, { ReactNode } from 'react';
 import { TopBar } from './TopBar';
 import { LeftNavigationRail } from './LeftNavigationRail';
 import { BottomQuickBar } from './BottomQuickBar';
+import championshipPoolBg from '../../designs/championship-pool-bg.jpg';
 
 export type MenuScreen = 'HOME' | 'PLAY' | 'CAREER' | 'SWIMMER' | 'CLUB' | 'LIVE_EVENTS' | 'SOCIAL' | 'STORE';
 
@@ -37,19 +38,33 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
   const showRightPanel = currentScreen === 'HOME' && rightPanel;
 
   return (
-    <div className="w-screen h-dvh bg-pool-navy text-white overflow-hidden flex flex-col vignette">
-      {/* Background Gradient Elements with Pool Theme */}
+    <div className="w-screen h-dvh text-white overflow-hidden flex flex-col vignette" style={{
+      backgroundImage: `url(${championshipPoolBg})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+    }}>
+      {/* Background Overlay Layers with Pool Theme */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        {/* Base gradient - deep navy pool */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pool-navy via-pool-dark to-pool-teal opacity-90"></div>
+        {/* Pool image base - already applied via inline styles above */}
 
-        {/* Bokeh particles */}
+        {/* Blurred overlay layer for depth - applied as blur filter to the entire bg */}
+        <div className="absolute inset-0 backdrop-blur-[40px]"></div>
+
+        {/* Teal color overlay - enhance night aesthetic */}
+        <div className="absolute inset-0 bg-gradient-to-br from-pool-teal/40 via-pool-dark/30 to-pool-navy/50"></div>
+
+        {/* Additional navy overlay for deeper night effect */}
+        <div className="absolute inset-0 bg-pool-navy/20"></div>
+
+        {/* Bokeh particles floating on top */}
         <div className="absolute top-1/4 right-1/5 w-96 h-96 bg-pool-teal/15 rounded-full blur-3xl animate-parallax-float"></div>
         <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-parallax-float" style={{animationDelay: '-4s'}}></div>
         <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-neon-cyan/5 rounded-full blur-3xl animate-parallax-float" style={{animationDelay: '-2s'}}></div>
 
-        {/* Lens flares */}
+        {/* Lens flares - neon cyan for dramatic effect */}
         <div className="absolute top-20 right-1/3 w-64 h-64 bg-gradient-to-br from-neon-cyan/20 to-transparent rounded-full blur-2xl animate-parallax-float"></div>
+        <div className="absolute bottom-1/3 left-1/6 w-80 h-80 bg-gradient-to-tr from-neon-cyan/10 to-transparent rounded-full blur-3xl animate-parallax-float" style={{animationDelay: '-6s'}}></div>
       </div>
 
       {/* Main Content Container */}
