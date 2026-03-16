@@ -3,7 +3,7 @@
  * Sleek translucent glass HUD with neon accents and high-contrast information
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 interface TopBarProps {
   playerLevel: number;
@@ -37,24 +37,27 @@ export const TopBar: React.FC<TopBarProps> = ({
     'Daily reward crate is ready to claim',
   ];
 
+  const levelProgress = useMemo(() => {
+    const remainder = playerLevel % 10;
+    return remainder === 0 ? 100 : remainder * 10;
+  }, [playerLevel]);
+
   return (
-    <header className="h-16 bg-broadcast-overlay/90 backdrop-blur-xl border-b border-neon-cyan/20 px-6 flex items-center justify-between z-50 sticky top-0 shadow-[0_8px_40px_rgba(0,255,255,0.15)] safe-zone-x">
-      {/* Left Section: Profile with Slanted Nameplate */}
-      <div className="flex items-center gap-4">
+    <header className="h-20 bg-gradient-to-b from-[#0f1d34]/95 to-[#091427]/95 backdrop-blur-md border-b border-white/15 px-6 flex items-center justify-between z-50 sticky top-0 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
+      {/* Left Section: Logo & Profile */}
+      <div className="flex items-center gap-6">
         {/* Game Logo */}
-        <div className="flex items-center gap-2 drop-shadow-[0_0_16px_rgba(0,255,255,0.3)]">
-          <span className="material-symbols-outlined text-neon-cyan text-3xl animate-live-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>
+        <div className="flex items-center gap-2 drop-shadow-[0_0_12px_rgba(120,169,255,0.2)]">
+          <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
             waves
           </span>
-          <h1 className="font-din font-bold text-2xl tracking-tighter uppercase italic text-neon-cyan drop-shadow-[0_0_12px_rgba(0,255,255,0.5)]">
-            SWIM26
-          </h1>
+          <h1 className="font-headline font-bold text-2xl tracking-tighter uppercase italic text-glow">SWIM26</h1>
         </div>
 
         {/* Profile Button - Slanted Nameplate */}
         <button
           onClick={onProfileClick}
-          className="relative group flex items-center gap-3 px-4 py-2 transition-all duration-300 skew-12-reverse"
+          className="flex items-center gap-3 hover:bg-white/10 transition-colors px-3 py-2 rounded-full group border border-transparent hover:border-white/15"
         >
           {/* Slanted glass background */}
           <div className="absolute inset-0 glass-card-elevated rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10"></div>
@@ -67,79 +70,59 @@ export const TopBar: React.FC<TopBarProps> = ({
               className="w-10 h-10 rounded-lg border-2 border-neon-cyan group-hover:border-neon-cyan group-hover:shadow-[0_0_12px_rgba(0,255,255,0.6)]"
             />
           ) : (
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-cyan/40 to-neon-cyan/20 flex items-center justify-center text-neon-cyan font-bold text-sm border border-neon-cyan/50">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
               {playerName.charAt(0).toUpperCase()}
             </div>
           )}
-
-          {/* Profile Info */}
-          <div className="text-left hidden sm:block relative z-10">
-            <div className="text-xs font-bold font-barlow text-white uppercase tracking-wider">{playerName}</div>
-            <div className="text-[9px] text-neon-cyan font-bold uppercase tracking-wider drop-shadow-[0_0_4px_rgba(0,255,255,0.5)]">
-              LVL {playerLevel}
+          <div className="text-left hidden sm:block min-w-[150px]">
+            <div className="text-base font-black italic text-white leading-tight">{playerName}</div>
+            <div className="text-[12px] text-cyan-200 uppercase font-black tracking-wide">Lvl {playerLevel}</div>
+            <div className="mt-1.5 h-1.5 rounded-full bg-white/15 border border-cyan-200/20 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-300 via-teal-300 to-cyan-200 shadow-[0_0_12px_rgba(45,212,191,0.85)] animate-pulse"
+                style={{ width: `${levelProgress}%` }}
+              />
             </div>
           </div>
         </button>
       </div>
 
-      {/* Center Section: Level & Currencies HUD */}
-      <div className="flex items-center gap-4">
-        {/* Level Display - Centered */}
-        <div className="relative px-6 py-2 glass-card-elevated rounded-xl border border-neon-cyan/30 group hover:border-neon-cyan transition-all duration-300">
-          <div className="text-center">
-            <div className="text-[10px] font-barlow font-bold text-white uppercase tracking-wider">Rank</div>
-            <div className="text-lg font-din font-bold text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]">
-              #{(playerLevel * 42) % 1000}
+      {/* Center Section: Currencies */}
+      <div className="flex items-center gap-3">
+        {/* Gold Currency */}
+        <div className="relative overflow-hidden px-4 py-2 rounded-xl border border-amber-300/35 bg-gradient-to-br from-[#2b2414]/85 via-[#1b1a17]/88 to-[#1a1410]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_8px_16px_rgba(0,0,0,0.35)]">
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.06)_0_2px,transparent_2px_8px)] opacity-25" />
+          <div className="relative flex items-center gap-2">
+            <span className="material-symbols-outlined text-amber-300 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+            <div className="leading-tight">
+              <div className="text-[10px] font-bold text-amber-200 uppercase">Gold</div>
+              <div className="font-black italic text-2xl tracking-tight text-white">{softCurrency.toLocaleString()}</div>
             </div>
           </div>
         </div>
 
-        {/* Gold Currency - High Contrast */}
-        <div className="relative px-5 py-2 rounded-lg border-2 border-yellow-500/60 bg-yellow-500/10 group hover:border-yellow-400 hover:bg-yellow-500/20 transition-all duration-300">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-yellow-400 text-lg drop-shadow-[0_0_8px_rgba(250,200,0,0.6)]">
-              coin
-            </span>
-            <div>
-              <div className="text-[8px] font-barlow font-bold text-yellow-300 uppercase tracking-wider">Gold</div>
-              <div className="text-sm font-din font-bold text-yellow-100">
-                {softCurrency.toLocaleString()}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Premium Currency - Neon Cyan */}
-        <div className="relative px-5 py-2 rounded-lg neon-stroke-active group hover:shadow-[0_0_30px_rgba(0,255,255,0.8)] transition-all duration-300">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-neon-cyan text-lg drop-shadow-[0_0_10px_rgba(0,255,255,0.8)]">
-              star
-            </span>
-            <div>
-              <div className="text-[8px] font-barlow font-bold text-neon-cyan uppercase tracking-wider">SP</div>
-              <div className="text-sm font-din font-bold text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]">
-                {premiumCurrency}
-              </div>
+        {/* Premium Currency (SP) */}
+        <div className="relative overflow-hidden px-4 py-2 rounded-xl border border-cyan-300/35 bg-gradient-to-br from-[#122634]/88 via-[#0f1a27]/88 to-[#101927]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_8px_16px_rgba(0,0,0,0.35)]">
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0_2px,transparent_2px_9px)] opacity-25" />
+          <div className="relative flex items-center gap-2">
+            <span className="material-symbols-outlined text-cyan-200 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>diamond</span>
+            <div className="leading-tight">
+              <div className="text-[10px] font-bold text-cyan-100 uppercase">SP</div>
+              <div className="font-black italic text-2xl tracking-tight text-white">{premiumCurrency}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right Section: Status & Actions */}
-      <div className="relative flex items-center gap-3">
-        {/* Live Status Indicator */}
-        <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-red-500/20 border border-red-500/40">
-          <div className="w-2 h-2 bg-red-500 rounded-full animate-live-pulse"></div>
-          <span className="text-[10px] font-bold font-barlow text-red-400 uppercase tracking-wider">LIVE</span>
-        </div>
-
-        {/* Notifications */}
+      {/* Right Section: Actions */}
+      <div className="relative flex items-center gap-2">
+        {/* Notifications Bell */}
         <button
           onClick={() => {
             setIsNotificationsOpen((prev) => !prev);
             onNotificationsClick?.();
           }}
-          className="relative p-2 hover:bg-neon-cyan/10 rounded-lg transition-all duration-300 group border border-transparent hover:border-neon-cyan/30"
+          className="relative p-2 hover:bg-white/10 rounded-full transition-colors group"
         >
           <span className="material-symbols-outlined text-white group-hover:text-neon-cyan transition-colors drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
             notifications
@@ -171,25 +154,26 @@ export const TopBar: React.FC<TopBarProps> = ({
           </span>
         </button>
 
+        {/* Connection Status */}
+        <div className="flex items-center gap-2 ml-2 pl-2 border-l border-white/20">
+          <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+          <span className="text-[10px] text-white font-bold">ONLINE</span>
+        </div>
+
         {isNotificationsOpen && (
-          <div className="absolute right-0 top-14 w-96 max-[900px]:w-72 rounded-xl glass-card-elevated border border-neon-cyan/20 shadow-[0_20px_60px_rgba(0,255,255,0.2)] p-4 z-[60]">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-black font-din uppercase tracking-wider text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">
-                Notifications
-              </span>
+          <div className="absolute right-0 top-14 w-80 max-[900px]:w-64 rounded-lg border border-white/20 bg-[#081326]/95 backdrop-blur-md shadow-[0_15px_40px_rgba(0,0,0,0.45)] p-3 z-[60]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-black uppercase tracking-wide text-cyan-200">Notifications</span>
               <button
                 onClick={() => setIsNotificationsOpen(false)}
-                className="text-[10px] px-3 py-1 rounded border border-neon-cyan/30 text-neon-cyan hover:border-neon-cyan hover:bg-neon-cyan/10 transition-all duration-300"
+                className="text-[10px] px-2 py-1 rounded border border-white/25 text-white hover:bg-white/10"
               >
                 Collapse
               </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {notificationItems.map((item) => (
-                <div
-                  key={item}
-                  className="text-[11px] text-white/90 bg-neon-cyan/10 border border-neon-cyan/20 rounded-lg px-3 py-2 hover:border-neon-cyan/50 transition-all duration-300"
-                >
+                <div key={item} className="text-[11px] text-white/90 bg-white/5 border border-white/10 rounded px-2 py-1.5">
                   {item}
                 </div>
               ))}

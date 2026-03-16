@@ -20,12 +20,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onCareerClick,
 }) => {
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col safe-zone-x">
-      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-4 max-[900px]:p-2.5 gap-3 max-[900px]:gap-2 min-h-0 pb-3">
-        {/* Championship Hero Strip - Glassmorphic with Neon */}
-        <div className="glass-card-elevated border border-neon-cyan/30 rounded-2xl overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px] group hover:border-neon-cyan/60 transition-all duration-300 skew-container">
-          {/* Header with Live Badge */}
-          <div className="px-6 max-[900px]:px-4 py-4 max-[900px]:py-3 bg-gradient-to-r from-broadcast-overlay via-neon-cyan/5 to-broadcast-overlay border-b border-neon-cyan/20">
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col">
+      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-4 max-[900px]:p-2.5 gap-2 max-[900px]:gap-2 min-h-0 pb-3">
+        {/* Championship Hero Strip */}
+        <div className="glass-panel border border-primary/30 rounded-lg overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px]">
+          <div className="px-4 max-[900px]:px-3 py-3 max-[900px]:py-2 bg-gradient-to-r from-black/65 via-primary/30 to-black/55 border-b border-white/15">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-din text-[25px] max-[1100px]:text-2xl max-[900px]:text-sm font-black italic uppercase text-white tracking-wider leading-tight drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">
                 CHAMPIONSHIP SEASON 7
@@ -39,19 +38,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* Hero Content Grid */}
           <div className="grid grid-cols-[1fr_220px] max-[900px]:grid-cols-[1fr_120px] items-stretch min-h-[152px] max-[900px]:min-h-[112px]">
-            <div className="p-6 max-[900px]:p-4 bg-gradient-to-r from-broadcast-overlay/80 via-neon-cyan/5 to-transparent flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-4 mb-3">
-                <p className="text-3xl max-[900px]:text-lg font-din font-black uppercase leading-tight text-white drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">
-                  START RACE
-                </p>
+            <div className="p-4 max-[900px]:p-3 bg-gradient-to-r from-black/55 via-black/35 to-transparent flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <p className="text-3xl max-[900px]:text-lg font-black uppercase leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">START RACE</p>
                 <button
                   onClick={onPlayClick}
-                  className="h-12 w-12 max-[900px]:h-10 max-[900px]:w-10 rounded-xl neon-stroke hover:neon-stroke-active flex items-center justify-center transition-all duration-300 active:animate-squash-stretch group/btn"
+                  className="h-11 w-11 max-[900px]:h-11 max-[900px]:w-11 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 flex items-center justify-center transition-colors"
                   aria-label="Play start race"
                 >
-                  <span className="material-symbols-outlined text-neon-cyan text-2xl drop-shadow-[0_0_8px_rgba(0,255,255,0.6)] group-hover/btn:scale-110 transition-transform">
-                    play_arrow
-                  </span>
+                  <span className="material-symbols-outlined text-white">play_arrow</span>
                 </button>
               </div>
               <p className="text-sm max-[900px]:text-[11px] font-barlow font-bold text-white/90">
@@ -71,60 +66,66 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        {/* Live Race Wire - Broadcast Ticker Style */}
-        <div className="glass-card-elevated border-2 border-neon-cyan/40 rounded-xl px-6 max-[900px]:px-4 py-3 max-[900px]:py-2.5 bg-gradient-to-r from-neon-cyan/10 via-neon-cyan/5 to-transparent group hover:border-neon-cyan/70 hover:shadow-[0_0_30px_rgba(0,255,255,0.2)] transition-all duration-300">
+
+        {/* Live Race Wire */}
+        <div className="glass-panel border border-cyan-300/25 rounded-lg px-4 max-[900px]:px-3 py-3 max-[900px]:py-2 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-transparent">
           <div className="flex items-center justify-between gap-3 max-[900px]:gap-2">
-            <div className="flex-1">
-              <p className="text-[11px] max-[900px]:text-[9px] font-barlow font-black uppercase tracking-wider text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.5)]">
-                Live Race Wire
-              </p>
-              <p className="text-sm max-[900px]:text-[10px] font-barlow font-bold text-white/90">
-                Rival Queue Active • 126 swimmers searching now
-              </p>
+            <div>
+              <p className="text-[11px] max-[900px]:text-[9px] font-black uppercase tracking-wider text-cyan-200">Live Race Wire</p>
+              <p className="text-sm max-[900px]:text-[10px] font-semibold text-white">Rival Queue Active • 126 swimmers searching now</p>
             </div>
-            <div className="flex items-center gap-2 shrink-0 px-3 py-1 rounded-lg bg-neon-cyan/20 border border-neon-cyan/30">
-              <span className="w-2 h-2 rounded-full bg-neon-cyan animate-live-pulse" />
-              <span className="text-[11px] max-[900px]:text-[9px] font-bold font-barlow uppercase text-neon-cyan tracking-wider">
-                Broadcast
-              </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="h-2.5 w-2.5 rounded-full bg-cyan-300 animate-pulse" />
+              <span className="text-[11px] max-[900px]:text-[9px] font-black uppercase text-cyan-100">Broadcast Live</span>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="relative z-20 flex-1 flex">
-          <button
-            onClick={onPlayClick}
-            className="w-full h-full group relative px-8 max-[900px]:px-5 py-6 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 border-2 border-neon-cyan/40 glass-card-elevated skew-container-reverse active:animate-squash-stretch"
-          >
-            {/* Background Image */}
-            <img
-              src={p2pQuickMatchImage}
-              alt="P2P Quick matches"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-            />
+        <button
+          onClick={onPlayClick}
+          className="w-full h-full group relative px-6 max-[900px]:px-3 py-5 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-lg overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95 border border-white/20"
+        >
+          <img
+            src={p2pQuickMatchImage}
+            alt="P2P Quick matches"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/65 group-hover:from-black/70 group-hover:via-black/35 group-hover:to-black/60 transition-colors" />
 
-            {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-broadcast-overlay/85 via-broadcast-overlay/60 to-broadcast-overlay/75 group-hover:from-broadcast-overlay/80 group-hover:via-broadcast-overlay/50 group-hover:to-broadcast-overlay/70 transition-colors" />
-
-            {/* Speed line texture */}
-            <div className="absolute inset-0 speed-lines opacity-30 group-hover:opacity-50 transition-opacity"></div>
-
-            {/* Content */}
-            <span className="relative flex items-center justify-between font-din text-2xl max-[900px]:text-base text-white uppercase tracking-wider font-black">
-              <span className="drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">P2P Quick Matches</span>
-              <span className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">
-                  groups
-                </span>
-                <span className="h-10 w-10 max-[900px]:h-9 max-[900px]:w-9 rounded-xl neon-stroke flex items-center justify-center group-hover:neon-stroke-active transition-all duration-300">
-                  <span className="material-symbols-outlined text-neon-cyan text-xl max-[900px]:text-lg drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]">
-                    play_arrow
-                  </span>
-                </span>
+          <span className="relative flex items-center justify-between font-headline text-2xl max-[900px]:text-base text-white uppercase tracking-wider font-bold">
+            <span>P2P Quick matches</span>
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined">groups</span>
+              <span className="h-11 w-11 max-[900px]:h-11 max-[900px]:w-11 rounded-full bg-white/15 border border-white/35 flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-xl max-[900px]:text-lg">play_arrow</span>
               </span>
             </span>
-          </button>
+          </span>
+        </button>
+        </div>
+
+        {/* Mobile 19.5:9 Action Hub */}
+        <div className="action-hub-shell hidden max-[900px]:flex">
+          <div className="action-hub-arc">
+            <button
+              onClick={onPlayClick}
+              className="action-hub-button action-hub-primary"
+              aria-label="Start quick race"
+            >
+              <span className="material-symbols-outlined text-[22px]">play_arrow</span>
+              <span className="text-[10px] font-black uppercase tracking-wide">Quick Race</span>
+            </button>
+            <button
+              onClick={onCareerClick}
+              className="action-hub-button action-hub-secondary"
+              aria-label="Open training"
+            >
+              <span className="material-symbols-outlined text-[22px]">fitness_center</span>
+              <span className="text-[10px] font-black uppercase tracking-wide">Training</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -193,6 +194,7 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );

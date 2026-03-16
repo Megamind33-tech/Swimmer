@@ -51,57 +51,29 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
   };
 
   return (
-    <nav className="relative w-28 bg-broadcast-overlay/80 backdrop-blur-xl border-r border-neon-cyan/20 flex flex-col items-center py-4 gap-3 overflow-y-auto overscroll-contain sticky left-0 top-16 self-start h-[calc(100dvh-9rem)] shadow-[8px_0_40px_rgba(0,255,255,0.15)] skew-container">
-      {NavItems.map((item) => {
-        const isActive = currentScreen === item.id;
-        const isHovered = hoveredItem === item.id;
+    <nav className="w-20 bg-gradient-to-b from-[#0b162b]/85 to-[#070f1f]/85 backdrop-blur-md border-r border-white/15 flex flex-col items-center py-4 gap-1 overflow-y-auto overscroll-contain sticky left-0 top-16 self-start h-[calc(100dvh-9rem)] shadow-[8px_0_20px_rgba(0,0,0,0.35)] skew-x-[-6deg]">
+      {NavItems.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => onScreenChange(item.id)}
+          className={`w-16 h-16 rounded-lg skew-x-[6deg] flex flex-col items-center justify-center gap-1 transition-all duration-300 group border ${
+            currentScreen === item.id
+              ? 'bg-primary/30 text-white border-primary/70 scale-100 shadow-[0_0_14px_rgba(120,169,255,0.35)]'
+              : 'text-white hover:text-white hover:bg-white/10 border-transparent hover:border-white/15'
+          } active:scale-95`}
+          title={item.label}
+        >
+          <span className="material-symbols-outlined text-2xl transition-transform duration-300 group-hover:scale-110">
+            {item.icon}
+          </span>
+          <span className="text-[10px] font-bold text-white text-center leading-tight">{item.label}</span>
 
-        return (
-          <button
-            key={item.id}
-            onClick={() => onScreenChange(item.id)}
-            onMouseEnter={() => setHoveredItem(item.id)}
-            onMouseLeave={handleMouseLeave}
-            onMouseMove={(e) => handleMouseMove(e, item.id)}
-            className={`relative w-20 h-20 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 group border-2 overflow-hidden ${
-              isActive
-                ? 'neon-stroke-active state-active bg-neon-cyan/10 animate-neon-glow'
-                : 'border-white/20 state-inactive hover:border-neon-cyan/50 hover:bg-neon-cyan/5'
-            } active:animate-squash-stretch`}
-            title={item.label}
-            style={{
-              '--tilt-x': `${tiltX}deg`,
-              '--tilt-y': `${tiltY}deg`,
-            } as React.CSSProperties}
-          >
-            {/* Background glow on hover */}
-            {isHovered && (
-              <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/20 to-transparent rounded-xl"></div>
-            )}
-
-            {/* Icon */}
-            <span className={`material-symbols-outlined text-5xl transition-all duration-300 relative z-10 ${
-              isActive
-                ? 'text-neon-cyan drop-shadow-[0_0_12px_rgba(0,255,255,0.6)]'
-                : 'text-white group-hover:text-neon-cyan group-hover:drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]'
-            }`}>
-              {item.icon}
-            </span>
-
-            {/* Label */}
-            <span className={`text-[8px] font-bold font-barlow text-center leading-tight transition-all duration-300 relative z-10 ${
-              isActive ? 'text-neon-cyan' : 'text-white'
-            }`}>
-              {item.label}
-            </span>
-
-            {/* Active indicator glow */}
-            {isActive && (
-              <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-12 bg-gradient-to-b from-neon-cyan to-neon-cyan/30 rounded-r-full shadow-[0_0_10px_rgba(0,255,255,0.6)]"></div>
-            )}
-          </button>
-        );
-      })}
+          {/* Active indicator bar */}
+          {currentScreen === item.id && (
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary-fixed rounded-r-full"></div>
+          )}
+        </button>
+      ))}
     </nav>
   );
 };
