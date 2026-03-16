@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { getDifficultyColor, getDifficultyBadgeIcon } from '../../utils/difficultyUtils';
 
 type SocialTab = 'FRIENDS' | 'RIVALS' | 'LEADERBOARDS' | 'CHAT' | 'GHOSTS';
 
@@ -195,14 +196,9 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                   <div className="text-right">
                     <div className="font-bold text-white">Level {rival.level}</div>
                     <div
-                      className={`text-xs font-bold ${
-                        rival.difficulty === 'HARD'
-                          ? 'text-red-400'
-                          : rival.difficulty === 'NORMAL'
-                          ? 'text-yellow-400'
-                          : 'text-emerald-400'
-                      }`}
+                      className={`text-xs font-bold font-mono-data tracking-wider ${getDifficultyColor(rival.difficulty)} px-2 py-1 rounded border-2 mt-1`}
                     >
+                      <span className="mr-1">{getDifficultyBadgeIcon(rival.difficulty)}</span>
                       {rival.difficulty}
                     </div>
                   </div>
