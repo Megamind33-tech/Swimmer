@@ -157,8 +157,8 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
   ];
 
   const activeEvents = [
-    { name: 'World Sprint Cup', time: '05:14:22', timeMs: 514220 },
-    { name: 'Butterfly Challenge', time: '2d 14h', timeMs: null },
+    { name: 'World Sprint Cup', time: '05:14:22', timeMs: 514220, urgency: 'normal' as const },
+    { name: 'Butterfly Challenge', time: '2d 14h', timeMs: null, urgency: 'normal' as const },
   ];
 
   const isComplete = (obj: typeof dailyObjectives[0]) => obj.progress >= obj.total;
@@ -282,18 +282,18 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
                 <span className="text-sm font-barlow font-bold text-white/85">{event.name}</span>
                 <div className="flex flex-col items-end gap-1">
                   {event.timeMs ? (
-                    <div>
+                    <div className={`countdown-timer countdown-timer--${event.urgency} countdown-ticker`}>
                       <div className="digital-timer-bar mb-1"></div>
                       <span className="segmented-time text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.5)] block text-xs">
                         <span className="segmented-time-digit">0</span>
                         <span className="segmented-time-digit">5</span>
-                        <span className="mx-0.5">:</span>
+                        <span className="timer-separator">:</span>
                         <span className="segmented-time-digit">1</span>
                         <span className="segmented-time-digit">4</span>
-                        <span className="mx-0.5">:</span>
+                        <span className="timer-separator">:</span>
                         <span className="segmented-time-digit">2</span>
                         <span className="segmented-time-digit">2</span>
-                        <span className="milliseconds">ms</span>
+                        <span className="timer-milliseconds">ms</span>
                       </span>
                     </div>
                   ) : (
