@@ -3,9 +3,10 @@
  * Main hub with featured season, stats, and quick actions
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { IPlayerSwimmer } from '../../types';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
+import p2pQuickMatchImage from '../../designs/doh9161_copy.width_800.jpg/screen.png';
 
 interface HomeScreenProps {
   player?: IPlayerSwimmer;
@@ -19,13 +20,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onPlayClick,
   onCareerClick,
 }) => {
-  const [isPlayHovering, setIsPlayHovering] = useState(false);
-
   return (
     <div className="flex-1 relative w-full h-full overflow-hidden flex flex-col">
-      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-6 max-[900px]:p-3 gap-4 max-[900px]:gap-2">
+      <div className="relative z-10 flex-1 flex flex-col p-4 max-[900px]:p-2.5 gap-2 max-[900px]:gap-2 min-h-0">
         {/* Championship Hero Strip */}
-        <div className="glass-panel border border-primary/30 rounded-lg overflow-hidden w-full">
+        <div className="glass-panel border border-primary/30 rounded-lg overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px]">
           <div className="px-4 max-[900px]:px-3 py-3 max-[900px]:py-2 bg-gradient-to-r from-black/65 via-primary/30 to-black/55 border-b border-white/15">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-headline text-[25px] max-[1100px]:text-2xl max-[900px]:text-sm font-black italic uppercase text-white tracking-wide leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)]">
@@ -39,6 +38,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <div className="p-4 max-[900px]:p-3 bg-gradient-to-r from-black/55 via-black/35 to-transparent flex flex-col justify-center">
               <div className="flex items-center justify-between gap-3 mb-2">
                 <p className="text-3xl max-[900px]:text-lg font-black uppercase leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]">START RACE</p>
+                <button
+                  onClick={onPlayClick}
+                  className="h-10 w-10 max-[900px]:h-8 max-[900px]:w-8 rounded-full bg-white/15 hover:bg-white/25 border border-white/30 flex items-center justify-center transition-colors"
+                  aria-label="Play start race"
+                >
+                  <span className="material-symbols-outlined text-white">play_arrow</span>
+                </button>
               </div>
               <p className="text-sm max-[900px]:text-[11px] font-semibold text-white/95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">Enter Championship • Instant Matchmaking</p>
             </div>
@@ -48,40 +54,46 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="relative z-20 px-6 max-[900px]:px-3 pb-6 max-[900px]:pb-2 space-y-2">
+
+        {/* Live Race Wire */}
+        <div className="glass-panel border border-cyan-300/25 rounded-lg px-4 max-[900px]:px-3 py-3 max-[900px]:py-2 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-transparent">
+          <div className="flex items-center justify-between gap-3 max-[900px]:gap-2">
+            <div>
+              <p className="text-[11px] max-[900px]:text-[9px] font-black uppercase tracking-wider text-cyan-200">Live Race Wire</p>
+              <p className="text-sm max-[900px]:text-[10px] font-semibold text-white">Rival Queue Active • 126 swimmers searching now</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="h-2.5 w-2.5 rounded-full bg-cyan-300 animate-pulse" />
+              <span className="text-[11px] max-[900px]:text-[9px] font-black uppercase text-cyan-100">Broadcast Live</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="relative z-20 flex-1 flex">
         <button
           onClick={onPlayClick}
-          onMouseEnter={() => setIsPlayHovering(true)}
-          onMouseLeave={() => setIsPlayHovering(false)}
-          className="w-full group relative px-6 max-[900px]:px-3 py-4 max-[900px]:py-2.5 rounded-lg overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95"
+          className="w-full h-full group relative px-6 max-[900px]:px-3 py-5 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-lg overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95 border border-white/20"
         >
-          <div className={`absolute inset-0 bg-gradient-to-r from-primary via-primary-dim to-primary-fixed transition-all duration-300 ${
-            isPlayHovering ? 'opacity-100 shadow-2xl shadow-primary/60' : 'opacity-90'
-          }`} />
+          <img
+            src={p2pQuickMatchImage}
+            alt="P2P Quick matches"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/65 group-hover:from-black/70 group-hover:via-black/35 group-hover:to-black/60 transition-colors" />
 
-          <div className="relative flex items-center justify-between">
-            <div className="text-left">
-              <div className="font-headline text-xl max-[900px]:text-sm font-black text-white uppercase tracking-wider">Start Race</div>
-              <div className="text-sm max-[900px]:text-[10px] text-white/90 font-bold mt-1">Enter Championship • Instant Matchmaking</div>
-            </div>
-            <span className="material-symbols-outlined text-white text-3xl max-[900px]:text-xl" style={{fontVariationSettings: "'FILL' 1"}}>
-              play_arrow
+          <span className="relative flex items-center justify-between font-headline text-2xl max-[900px]:text-base text-white uppercase tracking-wider font-bold">
+            <span>P2P Quick matches</span>
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined">groups</span>
+              <span className="h-9 w-9 max-[900px]:h-8 max-[900px]:w-8 rounded-full bg-white/15 border border-white/35 flex items-center justify-center">
+                <span className="material-symbols-outlined text-white text-xl max-[900px]:text-lg">play_arrow</span>
+              </span>
             </span>
-          </div>
-        </button>
-
-        <button
-          onClick={onCareerClick}
-          className="w-full group relative px-6 max-[900px]:px-3 py-3 max-[900px]:py-2.5 rounded-lg overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95 border-2 border-primary/40 glass-panel"
-        >
-          <span className="relative flex items-center justify-between font-headline text-lg max-[900px]:text-sm text-white uppercase tracking-wider font-bold">
-            <span>Continue Career</span>
-            <span className="material-symbols-outlined">expand_more</span>
           </span>
         </button>
+        </div>
       </div>
     </div>
   );
