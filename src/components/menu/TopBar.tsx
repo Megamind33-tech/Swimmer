@@ -3,7 +3,7 @@
  * Shows player profile, currencies with new dark theme design
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 interface TopBarProps {
   playerLevel: number;
@@ -37,8 +37,13 @@ export const TopBar: React.FC<TopBarProps> = ({
     'Daily reward crate is ready to claim',
   ];
 
+  const levelProgress = useMemo(() => {
+    const remainder = playerLevel % 10;
+    return remainder === 0 ? 100 : remainder * 10;
+  }, [playerLevel]);
+
   return (
-    <header className="h-16 bg-gradient-to-b from-[#0f1d34]/95 to-[#091427]/95 backdrop-blur-md border-b border-white/15 px-6 flex items-center justify-between z-50 sticky top-0 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
+    <header className="h-20 bg-gradient-to-b from-[#0f1d34]/95 to-[#091427]/95 backdrop-blur-md border-b border-white/15 px-6 flex items-center justify-between z-50 sticky top-0 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
       {/* Left Section: Logo & Profile */}
       <div className="flex items-center gap-6">
         {/* Game Logo */}
@@ -65,9 +70,15 @@ export const TopBar: React.FC<TopBarProps> = ({
               {playerName.charAt(0).toUpperCase()}
             </div>
           )}
-          <div className="text-left hidden sm:block">
-            <div className="text-xs font-bold text-white">{playerName}</div>
-            <div className="text-[10px] text-white uppercase font-bold">Lvl {playerLevel}</div>
+          <div className="text-left hidden sm:block min-w-[150px]">
+            <div className="text-base font-black italic text-white leading-tight">{playerName}</div>
+            <div className="text-[12px] text-cyan-200 uppercase font-black tracking-wide">Lvl {playerLevel}</div>
+            <div className="mt-1.5 h-1.5 rounded-full bg-white/15 border border-cyan-200/20 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-300 via-teal-300 to-cyan-200 shadow-[0_0_12px_rgba(45,212,191,0.85)] animate-pulse"
+                style={{ width: `${levelProgress}%` }}
+              />
+            </div>
           </div>
         </button>
       </div>
@@ -75,15 +86,27 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Center Section: Currencies */}
       <div className="flex items-center gap-3">
         {/* Gold Currency */}
-        <div className="bg-[#050b17]/80 px-4 py-1 rounded-full flex items-center gap-2 border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-          <span className="text-xs font-bold text-white">Gold</span>
-          <span className="font-headline font-bold text-white">{softCurrency.toLocaleString()}</span>
+        <div className="relative overflow-hidden px-4 py-2 rounded-xl border border-amber-300/35 bg-gradient-to-br from-[#2b2414]/85 via-[#1b1a17]/88 to-[#1a1410]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_8px_16px_rgba(0,0,0,0.35)]">
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.06)_0_2px,transparent_2px_8px)] opacity-25" />
+          <div className="relative flex items-center gap-2">
+            <span className="material-symbols-outlined text-amber-300 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+            <div className="leading-tight">
+              <div className="text-[10px] font-bold text-amber-200 uppercase">Gold</div>
+              <div className="font-black italic text-2xl tracking-tight text-white">{softCurrency.toLocaleString()}</div>
+            </div>
+          </div>
         </div>
 
         {/* Premium Currency (SP) */}
-        <div className="bg-[#050b17]/80 px-4 py-1 rounded-full flex items-center gap-2 border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-          <span className="text-xs font-bold text-white">SP</span>
-          <span className="font-headline font-bold text-white">{premiumCurrency}</span>
+        <div className="relative overflow-hidden px-4 py-2 rounded-xl border border-cyan-300/35 bg-gradient-to-br from-[#122634]/88 via-[#0f1a27]/88 to-[#101927]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_8px_16px_rgba(0,0,0,0.35)]">
+          <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.05)_0_2px,transparent_2px_9px)] opacity-25" />
+          <div className="relative flex items-center gap-2">
+            <span className="material-symbols-outlined text-cyan-200 text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>diamond</span>
+            <div className="leading-tight">
+              <div className="text-[10px] font-bold text-cyan-100 uppercase">SP</div>
+              <div className="font-black italic text-2xl tracking-tight text-white">{premiumCurrency}</div>
+            </div>
+          </div>
         </div>
       </div>
 
