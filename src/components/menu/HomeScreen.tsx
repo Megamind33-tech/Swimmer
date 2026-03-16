@@ -210,7 +210,11 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="relative">
                     <span
-                      className={`material-symbols-outlined text-2xl shrink-0 icon-liquid-fill ${getIconColorClass(obj)} transition-all duration-300`}
+                      className={`material-symbols-outlined text-2xl shrink-0 icon-liquid-fill icon-3d ${getIconColorClass(obj)} ${
+                        obj.progress > 0 && !isCompleted ? 'icon-progress-active-pulse' : ''
+                      } transition-all duration-300 ${
+                        obj.icon === 'emoji_events' ? 'icon-trophy-3d' : ''
+                      } ${obj.icon === 'fitness_center' ? 'icon-dumbbell-wave' : ''}`}
                       style={{
                         '--fill-progress': `${fillPercent}%`,
                       } as React.CSSProperties}

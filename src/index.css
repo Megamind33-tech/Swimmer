@@ -1073,6 +1073,160 @@
   box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
 }
 
+/* Dimensional Icon Effects */
+.icon-3d {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Icon reflective surface overlay */
+.icon-3d::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 30% 30%,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.icon-3d:hover::after {
+  opacity: 1;
+}
+
+/* Icon subtle tilt effect on interaction */
+.icon-3d:hover {
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+  transform: perspective(1000px) rotateY(5deg) rotateX(-5deg);
+}
+
+/* Wave pattern for specific icons */
+.icon-wave-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 255, 255, 0.15) 2px,
+    rgba(0, 255, 255, 0.15) 4px
+  );
+  opacity: 0;
+  animation: wave-pattern-emerge 0.6s ease-out forwards;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes wave-pattern-emerge {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Icon trophy variant - 3D reflective appearance */
+.icon-trophy-3d {
+  position: relative;
+}
+
+.icon-trophy-3d::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: radial-gradient(
+    ellipse at 40% 20%,
+    rgba(255, 215, 0, 0.3) 0%,
+    rgba(255, 200, 0, 0.1) 40%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.icon-trophy-3d:hover::before {
+  opacity: 1;
+}
+
+/* Icon dumbbell variant - wave pattern integration */
+.icon-dumbbell-wave {
+  position: relative;
+}
+
+.icon-dumbbell-wave::after {
+  content: '';
+  position: absolute;
+  inset: 25%;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 50%;
+  opacity: 0;
+  animation: dumbbell-wave-ripple 0.8s ease-out forwards;
+}
+
+.icon-dumbbell-wave:hover::after {
+  animation: dumbbell-wave-ripple 0.8s ease-out infinite;
+}
+
+@keyframes dumbbell-wave-ripple {
+  0% {
+    inset: 25%;
+    opacity: 1;
+  }
+  100% {
+    inset: -25%;
+    opacity: 0;
+  }
+}
+
+/* Icon pulse animation for active state */
+@keyframes icon-active-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.icon-progress-active-pulse {
+  animation: icon-active-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Dimensional icon shadow base */
+.icon-shadow-base {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(0, 0, 0, 0.2) 0%, transparent 60%);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translateZ(-10px) scaleY(0.5);
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.icon-3d:hover .icon-shadow-base {
+  opacity: 1;
+}
+
 /* High Contrast State Utilities */
 .state-active {
   opacity: 1;
