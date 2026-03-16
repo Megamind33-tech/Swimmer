@@ -116,137 +116,112 @@ const getIllustrationPattern = (modeId: string) => {
 };
 
 export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
-  const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number; cardId: string }>>([]);
   const [ignitedCard, setIgnitedCard] = useState<string | null>(null);
-  const rippleIdRef = useRef(0);
 
-  const handleRipple = (e: React.MouseEvent<HTMLButtonElement>, cardId: string) => {
-    const button = e.currentTarget;
-    const rect = button.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Trigger ignition effect
-    setIgnitedCard(cardId);
-    setTimeout(() => setIgnitedCard(null), 600);
-
-    const rippleId = rippleIdRef.current++;
-    setRipples((prev) => [...prev, { id: rippleId, x, y, cardId }]);
-
-    // Remove ripple after animation completes
+  const handleModeClick = (modeId: string) => {
+    setIgnitedCard(modeId);
     setTimeout(() => {
-      setRipples((prev) => prev.filter((r) => r.id !== rippleId));
-    }, 600);
+      setIgnitedCard(null);
+      onModeSelect?.(modeId);
+    }, 400);
   };
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col safe-zone-x">
-      {/* Header */}
-      <div className="p-8 max-[900px]:p-5 border-b border-neon-cyan/20 bg-gradient-to-r from-broadcast-overlay via-neon-cyan/5 to-broadcast-overlay">
-        <h1 className="font-din text-5xl max-[900px]:text-3xl font-black italic uppercase text-white mb-2 drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">
-          Game Modes
-        </h1>
-        <p className="text-on-surface-variant text-base font-barlow font-bold">Select a game mode to start racing</p>
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      {/* Cinematic Header */}
+      <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="h-[1px] w-12 bg-primary/40" />
+            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">Arena Selection</span>
+            <span className="h-[1px] w-12 bg-primary/40" />
+          </div>
+          
+          <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
+            Game Modes
+          </h1>
+          <p className="text-on-surface-variant text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary text-base">explore</span>
+            Select your discipline to begin the circuit
+          </p>
+        </div>
       </div>
 
       {/* Game Modes Grid */}
-      <div className="flex-1 p-6 max-[900px]:p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-max overflow-y-auto">
+      <div className="flex-1 p-6 max-[900px]:p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max overflow-y-auto pb-12">
         {GameModes.map((mode) => {
           const diffColor = getDifficultyColor(mode.difficulty);
 
           return (
             <button
               key={mode.id}
-              onClick={(e) => {
-                handleRipple(e, mode.id);
-                onModeSelect?.(mode.id);
-              }}
-              className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 active:animate-squash-stretch h-56 glass-card-elevated border-2 ${mode.accentColor} hover:border-neon-cyan/80 skew-container ${mode.biomeClass} ${ignitedCard === mode.id ? 'ignite' : ''}`}
+              onClick={() => handleModeClick(mode.id)}
+              className={`group relative h-64 rounded-2xl overflow-hidden transition-all duration-500 hover:scale-[1.02] active:scale-95 glass-card border-white/5 hover:border-primary/40 ${ignitedCard === mode.id ? 'animate-pulse ring-4 ring-primary/40' : ''}`}
             >
-              {/* Biome texture background - layered beneath overlays */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              {/* Card Background Layer */}
+              <div className={`absolute inset-0 bg-surface-high/40 group-hover:bg-primary/5 transition-colors duration-500`} />
+              
+              {/* Biome Texture Logic replacement with stylized gradients */}
+              <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+                <div 
+                  className="w-full h-full"
+                  style={{
+                    background: getIllustrationPattern(mode.id),
+                    backgroundSize: '40px 40px',
+                  }}
+                />
+              </div>
 
-              {/* Background gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/20 to-broadcast-overlay/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              {/* Speed lines */}
+              <div className="absolute inset-0 speed-lines opacity-10 group-hover:opacity-30 pointer-events-none" />
 
-              {/* Speed line texture */}
-              <div className="absolute inset-0 speed-lines opacity-20 group-hover:opacity-40 transition-opacity pointer-events-none"></div>
-
-              {/* Illustration Background */}
-              <div
-                className="absolute top-0 left-0 right-0 h-24 opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-                style={{
-                  background: getIllustrationPattern(mode.id),
-                  pointerEvents: 'none',
-                }}
-              />
-
-              {/* Content */}
-              <div className="relative h-full flex flex-col p-6 max-[900px]:p-5 justify-between z-10">
-                {/* Icon & Title Section */}
-                <div>
-                  <div className="flex items-center gap-4 mb-4">
-                    <span className={`material-symbols-outlined text-4xl text-neon-cyan drop-shadow-[0_0_12px_rgba(0,255,255,0.5)] group-hover:scale-110 transition-transform`}>
+              {/* Content Box */}
+              <div className="relative h-full flex flex-col p-6 z-10">
+                {/* Header Section */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="h-14 w-14 rounded-xl bg-surface-highest/60 border border-white/5 group-hover:border-primary/30 flex items-center justify-center transition-all duration-500 shadow-lg shadow-black/20">
+                    <span className="material-symbols-outlined text-3xl text-primary/80 group-hover:text-primary transition-colors text-glow">
                       {mode.icon}
                     </span>
-                    <div className="text-left flex-1 min-w-0">
-                      <h3 className="font-din text-xl max-[900px]:text-lg font-black text-white uppercase tracking-wider leading-tight drop-shadow-[0_0_8px_rgba(0,255,255,0.2)]">
-                        {mode.name}
-                      </h3>
-                      <div className={`text-[9px] font-barlow font-bold uppercase tracking-widest mt-1 px-3 py-1.5 rounded-lg border-2 w-fit font-mono-data ${diffColor}`}>
-                        <span className="mr-1">{getDifficultyBadgeIcon(mode.difficulty)}</span>
-                        {mode.difficulty}
-                      </div>
-                    </div>
                   </div>
-                  <p className="text-xs max-[900px]:text-[11px] font-barlow font-bold text-white/85 leading-relaxed">
+                  
+                  <div className={`px-2 py-1 rounded border ${diffColor} bg-black/20 backdrop-blur-sm`}>
+                    <span className="text-[9px] font-black uppercase tracking-widest">{mode.difficulty}</span>
+                  </div>
+                </div>
+
+                <div className="flex-1 text-left">
+                  <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface mb-1 group-hover:text-glow transition-all">
+                    {mode.name}
+                  </h3>
+                  <p className="text-xs font-bold text-on-surface-variant leading-relaxed max-w-[90%]">
                     {mode.description}
                   </p>
                 </div>
 
-                {/* Stats Footer */}
-                <div className="space-y-2 border-t border-neon-cyan/20 pt-3 mt-3">
-                  {/* Rewards */}
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-white/70 font-barlow font-bold uppercase tracking-wider">Rewards</span>
-                    <span className="text-neon-cyan font-din font-bold drop-shadow-[0_0_6px_rgba(0,255,255,0.4)]">
-                      {mode.rewards}
-                    </span>
+                {/* Footer Stats - Broadcast Style */}
+                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[8px] uppercase tracking-widest text-on-surface-variant font-bold mb-0.5">Potential Rewards</span>
+                    <span className="text-[10px] font-black italic slanted text-primary text-glow uppercase">{mode.rewards}</span>
                   </div>
-
-                  {/* Player Count */}
+                  
                   {mode.playerCount && (
-                    <div className="flex items-center gap-2 text-[10px] text-white/70 font-barlow font-bold">
-                      <span className="material-symbols-outlined text-sm text-neon-cyan/60">
-                        person
-                      </span>
-                      <span className="text-neon-cyan/80">{mode.playerCount}</span>
+                    <div className="text-right">
+                      <span className="text-[8px] uppercase tracking-widest text-on-surface-variant font-bold block mb-0.5">Active Swimmers</span>
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="w-1 h-1 rounded-full bg-primary animate-pulse shadow-[0_0_4px_rgba(129,236,255,1)]" />
+                        <span className="text-[10px] font-bold text-on-surface font-mono-data">{mode.playerCount.split(' ')[0]}</span>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Ripple Effects */}
-              {ripples.map((ripple) => (
-                ripple.cardId === mode.id && (
-                  <div
-                    key={ripple.id}
-                    className="absolute rounded-full bg-neon-cyan/40 pointer-events-none"
-                    style={{
-                      left: ripple.x,
-                      top: ripple.y,
-                      width: '20px',
-                      height: '20px',
-                      transform: 'translate(-50%, -50%)',
-                      animation: 'ripple-wave 0.6s cubic-bezier(0.4, 0, 0.6, 1) forwards',
-                      boxShadow: '0 0 20px rgba(0, 255, 255, 0.6)',
-                    }}
-                  />
-                )
-              ))}
-
-              {/* Hover glow effect */}
-              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-neon-cyan/0 via-neon-cyan/20 to-neon-cyan/0 opacity-0 group-hover:opacity-50 blur-xl -z-10 transition-opacity duration-300" />
+              {/* Hover Glow Ripple */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-1000 -z-10" />
             </button>
           );
         })}

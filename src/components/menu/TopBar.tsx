@@ -43,159 +43,131 @@ export const TopBar: React.FC<TopBarProps> = ({
   }, [playerLevel]);
 
   return (
-    <header className="h-20 bg-gradient-to-b from-[#0f1d34]/95 to-[#091427]/95 backdrop-blur-md border-b border-white/15 px-6 flex items-center justify-between z-50 sticky top-0 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
-      {/* Left Section: Logo & Profile */}
-      <div className="flex items-center gap-6">
-        {/* Game Logo */}
-        <div className="flex items-center gap-2 drop-shadow-[0_0_12px_rgba(120,169,255,0.2)]">
-          <span className="material-symbols-outlined text-white text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-            waves
-          </span>
-          <h1 className="font-headline font-bold text-2xl tracking-tighter uppercase italic text-glow">SWIM26</h1>
+    <header className="h-24 bg-surface/80 backdrop-blur-3xl border-b border-white/5 px-10 flex items-center justify-between z-50 sticky top-0 font-body">
+      {/* Left Section: Command Logo & Operator Profile */}
+      <div className="flex items-center gap-10">
+        {/* Luminous Game Logo */}
+        <div className="flex items-center gap-3 group cursor-pointer transition-all duration-500 hover:scale-105 active:scale-95">
+          <div className="relative">
+             <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse" />
+             <span className="material-symbols-outlined text-primary text-4xl text-glow relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>
+               waves
+             </span>
+          </div>
+          <h1 className="font-headline font-black text-4xl tracking-tighter uppercase italic slanted text-glow text-on-surface">
+             SWIM<span className="text-primary italic">26</span>
+          </h1>
         </div>
 
-        {/* Profile Button - Slanted Nameplate */}
+        {/* Operator Profile - Command HUD Style */}
         <button
           onClick={onProfileClick}
-          className="flex items-center gap-3 hover:bg-white/10 transition-colors px-3 py-2 rounded-full group border border-transparent hover:border-white/15"
+          className="flex items-center gap-5 p-2 pr-6 rounded-[32px] bg-white/[0.03] border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 group relative overflow-hidden"
         >
-          {/* Slanted glass background */}
-          <div className="absolute inset-0 glass-card-elevated rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10"></div>
+          <div className="absolute inset-0 bg-primary/5 -translate-x-full group-hover:translate-x-0 transition-transform duration-700" />
+          
+          {/* Avatar Ring */}
+          <div className="relative z-10">
+             <div className={`absolute -inset-1 rounded-2xl border-2 border-primary/40 group-hover:border-primary opacity-0 group-hover:opacity-100 transition-all duration-500 rotate-45 group-hover:rotate-0`} />
+             {playerAvatarUrl ? (
+               <img
+                 src={playerAvatarUrl}
+                 alt={playerName}
+                 className="w-12 h-12 rounded-[20px] object-cover relative z-10 border border-white/10"
+               />
+             ) : (
+               <div className="w-12 h-12 rounded-[20px] bg-surface border border-white/10 flex items-center justify-center text-primary font-headline text-xl font-black italic slanted relative z-10">
+                 {playerName.charAt(0).toUpperCase()}
+               </div>
+             )}
+          </div>
 
-          {/* Avatar */}
-          {playerAvatarUrl ? (
-            <img
-              src={playerAvatarUrl}
-              alt={playerName}
-              className="w-10 h-10 rounded-lg border-2 border-neon-cyan group-hover:border-neon-cyan group-hover:shadow-[0_0_12px_rgba(0,255,255,0.6)]"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
-              {playerName.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div className="text-left hidden sm:block min-w-[150px]">
-            <div className="text-base font-black italic text-white leading-tight">{playerName}</div>
-            <div className="text-[12px] text-cyan-200 uppercase font-black tracking-wide">Lvl {playerLevel}</div>
-            <div className="mt-1.5 h-1.5 rounded-full bg-white/15 border border-cyan-200/20 overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-cyan-300 via-teal-300 to-cyan-200 shadow-[0_0_12px_rgba(45,212,191,0.85)] animate-pulse"
-                style={{ width: `${levelProgress}%` }}
-              />
-            </div>
+          <div className="text-left hidden lg:block relative z-10 transition-transform duration-500 group-hover:translate-x-1">
+            <div className="text-[9px] font-black text-primary uppercase tracking-[0.4em] mb-1">Combat Operator</div>
+            <div className="font-headline text-2xl font-black italic slanted text-on-surface leading-none group-hover:text-glow transition-all">{playerName}</div>
           </div>
         </button>
       </div>
 
-      {/* Center Section: Level & Currencies HUD */}
+      {/* Center Section: Global Telemetry HUD */}
+      <div className="flex items-center gap-6">
+        {/* Tier / Rank Display */}
+        <div className="px-8 py-3 rounded-[28px] bg-white/[0.03] border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+           <div className="text-center relative z-10">
+              <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-[0.3em] mb-1 block">Global Vector</span>
+              <span className="font-headline text-2xl font-black italic slanted text-primary text-glow">RANK #{((playerLevel * 42) % 1000).toString().padStart(3, '0')}</span>
+           </div>
+        </div>
+
+        {/* Currency Array */}
+        <div className="flex items-center gap-3">
+           {/* Electric Gold Pod */}
+           <div className="px-6 py-3 rounded-[28px] bg-secondary/5 border border-secondary/20 flex items-center gap-4 hover:border-secondary/50 hover:bg-secondary/10 transition-all duration-500 cursor-pointer shadow-[0_0_20px_rgba(255,215,9,0.05)]">
+              <span className="material-symbols-outlined text-secondary text-2xl gold-glow" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+              <div>
+                 <div className="text-[8px] font-black text-secondary/60 uppercase tracking-widest leading-none mb-1">Credits</div>
+                 <div className="font-headline text-xl font-black italic slanted text-secondary gold-glow">{softCurrency.toLocaleString()}</div>
+              </div>
+           </div>
+
+           {/* Pulse SP Pod */}
+           <div className="px-6 py-3 rounded-[28px] bg-primary/5 border border-primary/20 flex items-center gap-4 hover:border-primary/50 hover:bg-primary/10 transition-all duration-500 cursor-pointer shadow-[0_0_20px_rgba(129,236,255,0.05)]">
+              <span className="material-symbols-outlined text-primary text-2xl text-glow" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+              <div>
+                 <div className="text-[8px] font-black text-primary/60 uppercase tracking-widest leading-none mb-1">Pulse SP</div>
+                 <div className="font-headline text-xl font-black italic slanted text-primary text-glow">{premiumCurrency}</div>
+              </div>
+           </div>
+        </div>
+      </div>
+
+      {/* Right Section: Access Terminals */}
       <div className="flex items-center gap-4">
-        {/* Level Display - Centered */}
-        <div className="relative px-6 py-2 glass-card rounded-xl border border-neon-cyan/25 group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5">
-          <div className="text-center">
-            <div className="text-[10px] font-barlow font-bold text-white uppercase tracking-wider">Rank</div>
-            <div className="text-lg font-mono-timer text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">
-              #{((playerLevel * 42) % 1000).toString().padStart(3, '0')}
-            </div>
-          </div>
+        {/* Utility Buttons */}
+        <div className="flex items-center gap-2 p-1 rounded-full bg-white/[0.03] border border-white/5">
+           {[
+             { icon: 'notifications', count: notificationCount, onClick: () => { setIsNotificationsOpen(!isNotificationsOpen); onNotificationsClick?.(); }, color: 'text-error' },
+             { icon: 'mail', onClick: onInboxClick },
+             { icon: 'settings', onClick: onSettingsClick }
+           ].map((btn, i) => (
+             <button
+               key={i}
+               onClick={btn.onClick}
+               className="h-12 w-12 rounded-full hover:bg-white/5 transition-all duration-300 relative group"
+             >
+                <span className={`material-symbols-outlined text-2xl text-on-surface-variant group-hover:text-primary transition-all ${btn.icon === 'settings' ? 'group-hover:rotate-90' : ''}`}>
+                  {btn.icon}
+                </span>
+                {btn.count ? (
+                  <span className="absolute top-2 right-2 h-4 w-4 rounded-full bg-error border-2 border-surface text-[8px] font-black text-white flex items-center justify-center animate-bounce">
+                    {btn.count}
+                  </span>
+                ) : null}
+             </button>
+           ))}
         </div>
 
-        {/* Gold Currency - High Contrast */}
-        <div className="relative px-5 py-2 rounded-xl border border-yellow-500/40 bg-yellow-500/8 group hover:border-yellow-400/60 hover:bg-yellow-500/15 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-yellow-500/5">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-yellow-400 text-lg drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]">
-              coin
-            </span>
-            <div>
-              <div className="text-[8px] font-barlow font-bold text-yellow-300 uppercase tracking-wider">Gold</div>
-              <div className="text-sm font-mono-timer text-yellow-200 drop-shadow-[0_0_6px_rgba(250,204,21,0.4)]">
-                {softCurrency.toLocaleString()}
-              </div>
-            </div>
-          </div>
+        {/* Terminal Connection Status */}
+        <div className="pl-6 border-l border-white/10 flex flex-col items-end">
+           <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(129,236,255,1)] animate-pulse" />
+              <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] italic">Encrypted</span>
+           </div>
+           <span className="text-[8px] font-black text-on-surface-variant uppercase tracking-widest opacity-40 mt-1">Uplink: Nominal</span>
         </div>
 
-        {/* Premium Currency - Neon Cyan */}
-        <div className="relative px-5 py-2 rounded-xl border border-neon-cyan/40 bg-neon-cyan/8 group hover:border-neon-cyan/60 hover:bg-neon-cyan/15 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/10 hover:shadow-lg hover:shadow-neon-cyan/20">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-neon-cyan text-lg drop-shadow-[0_0_10px_rgba(0,255,255,0.6)]">
-              star
-            </span>
-            <div>
-              <div className="text-[8px] font-barlow font-bold text-neon-cyan uppercase tracking-wider">SP</div>
-              <div className="text-sm font-mono-timer text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">
-                {premiumCurrency}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Section: Actions */}
-      <div className="relative flex items-center gap-2">
-        {/* Notifications Bell */}
-        <button
-          onClick={() => {
-            setIsNotificationsOpen((prev) => !prev);
-            onNotificationsClick?.();
-          }}
-          className="relative p-2 hover:bg-white/10 rounded-full transition-colors group"
-        >
-          <span className="material-symbols-outlined text-white group-hover:text-neon-cyan transition-colors drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
-            notifications
-          </span>
-          {notificationCount > 0 && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-[0_0_8px_rgba(255,0,0,0.6)]">
-              {notificationCount}
-            </div>
-          )}
-        </button>
-
-        {/* Inbox */}
-        <button
-          onClick={onInboxClick}
-          className="p-2 hover:bg-neon-cyan/10 rounded-lg transition-all duration-300 group border border-transparent hover:border-neon-cyan/30"
-        >
-          <span className="material-symbols-outlined text-white group-hover:text-neon-cyan transition-colors drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
-            mail
-          </span>
-        </button>
-
-        {/* Settings */}
-        <button
-          onClick={onSettingsClick}
-          className="p-2 hover:bg-neon-cyan/10 rounded-lg transition-all duration-300 group border border-transparent hover:border-neon-cyan/30"
-        >
-          <span className="material-symbols-outlined text-white group-hover:text-neon-cyan transition-colors group-hover:rotate-90 duration-300 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
-            settings
-          </span>
-        </button>
-
-        {/* Connection Status */}
-        <div className="flex items-center gap-2 ml-2 pl-2 border-l border-white/20">
-          <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-          <span className="text-[10px] text-white font-bold">ONLINE</span>
-        </div>
-
+        {/* Notifications Dropdown */}
         {isNotificationsOpen && (
-          <div className="absolute right-0 top-14 w-96 max-[900px]:w-72 rounded-2xl glass-card border border-neon-cyan/25 shadow-[0_20px_60px_rgba(0,255,255,0.15)] p-4 z-[60] backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-black font-din italic-header uppercase tracking-wider text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">
-                Notifications
-              </span>
-              <button
-                onClick={() => setIsNotificationsOpen(false)}
-                className="text-[10px] px-3 py-1 rounded-lg border border-neon-cyan/25 text-neon-cyan hover:border-neon-cyan/50 hover:bg-neon-cyan/10 transition-all duration-300 backdrop-blur-sm"
-              >
-                Collapse
-              </button>
+          <div className="absolute right-10 top-28 w-96 rounded-[40px] bg-surface/95 backdrop-blur-3xl border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.6)] p-8 z-[60] animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center justify-between mb-8">
+               <h4 className="font-headline text-xl font-black italic slanted uppercase text-primary text-glow">Uplink Data</h4>
+               <button onClick={() => setIsNotificationsOpen(false)} className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest hover:text-on-surface transition-colors">Clear Stream</button>
             </div>
-            <div className="space-y-1.5">
-              {notificationItems.map((item) => (
-                <div
-                  key={item}
-                  className="text-[11px] text-white/85 bg-neon-cyan/8 border border-neon-cyan/15 rounded-lg px-3 py-2 hover:border-neon-cyan/35 transition-all duration-300 backdrop-blur-sm"
-                >
-                  {item}
+            <div className="space-y-3">
+              {notificationItems.map((item, i) => (
+                <div key={i} className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer group">
+                   <div className="text-[11px] text-on-surface opacity-80 group-hover:opacity-100 transition-opacity">{item}</div>
                 </div>
               ))}
             </div>

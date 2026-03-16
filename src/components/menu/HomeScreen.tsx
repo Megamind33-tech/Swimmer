@@ -20,47 +20,46 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onCareerClick,
 }) => {
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col safe-zone-x">
-      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-4 max-[900px]:p-2.5 gap-3 max-[900px]:gap-2 min-h-0 pb-3">
-        {/* Championship Hero Strip - Enhanced Glassmorphic with Water Theme */}
-        <div className="glass-card overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px] group hover:border-neon-cyan/40 transition-all duration-300 skew-container border border-neon-cyan/25 shadow-lg shadow-neon-cyan/10 rounded-2xl wave-container">
-          {/* Wave effect on hover */}
-          <div className="wave-element"></div>
-
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-5 gap-4 min-h-0 pb-5">
+        {/* Championship Hero Strip - Enhanced Glassmorphic */}
+        <div className="glass-card overflow-hidden w-full flex-[1.25] min-h-[230px] group transition-all duration-300 rounded-2xl relative">
           {/* Header with Live Badge */}
-          <div className="px-6 max-[900px]:px-4 py-4 max-[900px]:py-3 bg-gradient-to-r from-broadcast-overlay/60 via-neon-cyan/8 to-broadcast-overlay/60 border-b border-neon-cyan/15 backdrop-blur-sm">
+          <div className="px-6 py-4 bg-gradient-to-r from-surface-high/60 via-primary/5 to-transparent border-b border-white/5 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-din text-[25px] max-[1100px]:text-2xl max-[900px]:text-sm font-black italic-header uppercase text-white tracking-wider leading-tight drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
-                CHAMPIONSHIP SEASON 7
+              <h2 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface tracking-widest text-glow">
+                Championship Season 7
               </h2>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-cyan/40 bg-neon-cyan/8 animate-live-pulse backdrop-blur-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan"></span>
-                <span className="text-xs text-neon-cyan font-bold font-mono uppercase tracking-wider">LIVE</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(129,236,255,1)]"></span>
+                <span className="text-[10px] text-primary font-black uppercase tracking-widest">Live Event</span>
               </div>
             </div>
           </div>
 
           {/* Hero Content Grid */}
-          <div className="grid grid-cols-[1fr_220px] max-[900px]:grid-cols-[1fr_120px] items-stretch min-h-[152px] max-[900px]:min-h-[112px]">
-            <div className="p-6 max-[900px]:p-4 bg-gradient-to-r from-broadcast-overlay/50 via-neon-cyan/3 to-transparent flex flex-col justify-center backdrop-blur-sm">
-              <div className="flex items-center justify-between gap-4 mb-3">
-                <p className="text-3xl max-[900px]:text-lg font-din font-black italic-header uppercase leading-tight text-white drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
-                  START RACE
+          <div className="grid grid-cols-[1fr_240px] items-stretch min-h-[160px]">
+            <div className="p-8 bg-gradient-to-r from-surface-high/40 to-transparent flex flex-col justify-center">
+              <div className="flex items-center justify-between gap-4 mb-2">
+                <p className="text-4xl font-headline font-black italic slanted uppercase leading-tight text-on-surface text-glow">
+                  Start Race
                 </p>
                 <button
                   onClick={onPlayClick}
-                  className="h-12 w-12 max-[900px]:h-10 max-[900px]:w-10 rounded-xl border border-neon-cyan/40 bg-neon-cyan/10 hover:bg-neon-cyan/20 hover:border-neon-cyan/60 flex items-center justify-center transition-all duration-300 active:animate-squash-stretch group/btn backdrop-blur-sm shadow-lg shadow-neon-cyan/5"
+                  className="h-14 w-14 rounded-2xl border border-primary/40 bg-primary/10 hover:bg-primary/20 hover:border-primary/60 flex items-center justify-center transition-all duration-300 active:scale-90 group/btn shadow-xl shadow-primary/5"
                   aria-label="Play start race"
                 >
-                  <span className="material-symbols-outlined text-neon-cyan text-2xl drop-shadow-[0_0_8px_rgba(0,255,255,0.4)] group-hover/btn:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-primary text-3xl text-glow group-hover/btn:scale-110 transition-transform">
                     play_arrow
                   </span>
                 </button>
               </div>
-              <p className="text-sm max-[900px]:text-[11px] font-barlow font-bold text-white/90">
+              <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+                <span className="w-4 h-[1px] bg-primary/40"></span>
                 Enter Championship • Instant Matchmaking
               </p>
             </div>
+
 
             {/* Hero Image */}
             <div className="relative bg-gradient-to-l from-neon-cyan/20 via-neon-cyan/10 to-transparent overflow-hidden">
@@ -78,78 +77,83 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className="wave-divider"></div>
 
         {/* Live Race Wire - Broadcast Ticker Style */}
-        <div className="glass-card-elevated border-2 border-neon-cyan/40 rounded-xl px-6 max-[900px]:px-4 py-3 max-[900px]:py-2.5 bg-gradient-to-r from-neon-cyan/10 via-neon-cyan/5 to-transparent group hover:border-neon-cyan/70 hover:shadow-[0_0_30px_rgba(0,255,255,0.2)] transition-all duration-300 wave-hover">
-          <div className="flex items-center justify-between gap-3 max-[900px]:gap-2">
+        <div className="glass-card border-none rounded-xl px-6 py-3 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent group hover:bg-primary/15 transition-all duration-300 overflow-hidden relative">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(129,236,255,1)]" />
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] max-[900px]:text-[9px] font-black uppercase tracking-wider text-cyan-200">Live Race Wire</p>
-              <p className="text-sm max-[900px]:text-[10px] font-semibold text-white">Rival Queue Active • 126 swimmers searching now</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary text-glow">Live Race Wire</p>
+              <p className="text-sm font-semibold text-on-surface">Rival Queue Active • 126 swimmers searching now</p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="h-2.5 w-2.5 rounded-full bg-cyan-300 animate-pulse" />
-              <span className="text-[11px] max-[900px]:text-[9px] font-black uppercase text-cyan-100">Broadcast Live</span>
+            <div className="flex items-center gap-3 shrink-0">
+              <span className="flex items-center gap-1.5 px-2 py-1 rounded border border-primary/20 bg-primary/5">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-primary">Broadcast</span>
+              </span>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="relative z-20 flex-1 flex">
+        <div className="relative z-20 flex-1 flex gap-4 min-h-[190px]">
           <button
             onClick={onPlayClick}
-            className="w-full h-full group relative px-8 max-[900px]:px-5 py-6 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 border border-neon-cyan/25 glass-card skew-container-reverse active:animate-squash-stretch shadow-lg shadow-neon-cyan/5 hover:shadow-lg hover:shadow-neon-cyan/15 wave-container"
+            className="flex-1 group relative px-8 py-6 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95 glass-card border-white/5 hover:border-primary/40 shadow-xl"
           >
-            {/* Wave effect on hover */}
-            <div className="wave-element"></div>
             {/* Background Image */}
             <img
               src={p2pQuickMatchImage}
               alt="P2P Quick matches"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-40 group-hover:scale-110 transition-all duration-700 brightness-50"
             />
 
-            {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-broadcast-overlay/85 via-broadcast-overlay/60 to-broadcast-overlay/75 group-hover:from-broadcast-overlay/80 group-hover:via-broadcast-overlay/50 group-hover:to-broadcast-overlay/70 transition-colors" />
-
-            {/* Speed line texture */}
-            <div className="absolute inset-0 speed-lines opacity-30 group-hover:opacity-50 transition-opacity"></div>
-
             {/* Content */}
-            <span className="relative flex items-center justify-between font-din text-2xl max-[900px]:text-base text-white uppercase tracking-wider font-black">
-              <span className="drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">P2P Quick Matches</span>
-              <span className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-neon-cyan drop-shadow-[0_0_8px_rgba(0,255,255,0.5)]">
-                  groups
-                </span>
-                <span className="h-10 w-10 max-[900px]:h-9 max-[900px]:w-9 rounded-xl neon-stroke flex items-center justify-center group-hover:neon-stroke-active transition-all duration-300">
-                  <span className="material-symbols-outlined text-neon-cyan text-xl max-[900px]:text-lg drop-shadow-[0_0_8px_rgba(0,255,255,0.6)]">
-                    play_arrow
+            <div className="relative h-full flex flex-col justify-end">
+              <div className="flex items-center justify-between">
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-1">PVP Arena</p>
+                  <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow leading-none">
+                    Multiplayer
+                  </h3>
+                </div>
+                <div className="h-12 w-12 rounded-xl border border-primary/40 bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all">
+                  <span className="material-symbols-outlined text-primary text-2xl text-glow">
+                    groups
                   </span>
+                </div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={onCareerClick}
+            className="w-48 group relative px-6 py-6 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95 glass-card border-white/5 hover:border-secondary/40 shadow-xl"
+          >
+            <div className="relative h-full flex flex-col items-center justify-center text-center gap-3">
+              <div className="h-16 w-16 rounded-full border border-secondary/40 bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-all shadow-lg shadow-secondary/5">
+                <span className="material-symbols-outlined text-secondary text-3xl gold-glow" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  emoji_events
                 </span>
-              </span>
-            </span>
-          </span>
-        </button>
+              </div>
+              <div>
+                <p className="text-[9px] font-bold text-secondary uppercase tracking-[0.2em] mb-0.5">Progress</p>
+                <h3 className="font-headline text-lg font-black italic slanted uppercase text-on-surface leading-none">
+                  Career
+                </h3>
+              </div>
+            </div>
+          </button>
         </div>
 
-        {/* Mobile 19.5:9 Action Hub */}
-        <div className="action-hub-shell hidden max-[900px]:flex">
-          <div className="action-hub-arc">
-            <button
-              onClick={onPlayClick}
-              className="action-hub-button action-hub-primary"
-              aria-label="Start quick race"
-            >
-              <span className="material-symbols-outlined text-[22px]">play_arrow</span>
-              <span className="text-[10px] font-black uppercase tracking-wide">Quick Race</span>
-            </button>
-            <button
-              onClick={onCareerClick}
-              className="action-hub-button action-hub-secondary"
-              aria-label="Open training"
-            >
-              <span className="material-symbols-outlined text-[22px]">fitness_center</span>
-              <span className="text-[10px] font-black uppercase tracking-wide">Training</span>
-            </button>
-          </div>
+        {/* Mobile Action Hub - Hydro Kinetic Refinement */}
+        <div className="hidden max-[900px]:flex h-16 glass-panel rounded-2xl items-center justify-around px-4 border border-white/10">
+          <button onClick={onPlayClick} className="flex flex-col items-center gap-1 group">
+            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">play_arrow</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-primary/80">Race</span>
+          </button>
+          <button onClick={onCareerClick} className="flex flex-col items-center gap-1 group">
+            <span className="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform">fitness_center</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-secondary/80">Train</span>
+          </button>
         </div>
       </div>
     </div>
@@ -200,9 +204,9 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
 
   return (
     <div className="space-y-4 safe-zone">
-      {/* Daily Objectives - Frosted Water Pane */}
-      <div className="frosted-water-pane p-5 rounded-2xl group hover:border-neon-cyan/60 transition-all duration-300 wave-hover">
-        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
+      {/* Daily Objectives - Hydro Pane */}
+      <div className="glass-panel p-6 rounded-2xl group hover:border-primary/40 transition-all duration-300">
+        <h3 className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-5 text-glow">
           Daily Objectives
         </h3>
         <div className="space-y-3">
@@ -217,65 +221,46 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
                   if (el) splashRefs.current[obj.id] = el;
                 }}
                 onClick={() => handleObjectiveClick(obj)}
-                className={`relative flex items-center justify-between p-3 rounded-lg border transition-all duration-300 cursor-pointer ${
+                className={`relative flex items-center justify-between p-3.5 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${
                   isCompleted
-                    ? 'bg-yellow-400/10 border-yellow-400/30 hover:border-yellow-400/50'
-                    : 'bg-neon-cyan/6 border-neon-cyan/15 hover:border-neon-cyan/35 hover:bg-neon-cyan/10'
-                } ${splashingObjective === obj.id ? 'splash-complete' : ''}`}
+                    ? 'bg-secondary/10 border-secondary/30 hover:border-secondary/50'
+                    : 'bg-white/5 border-white/5 hover:border-primary/30 hover:bg-white/10'
+                }`}
               >
-                {/* Icon with Liquid Fill */}
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="relative">
+                {/* Icon with Glass Look */}
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="relative h-10 w-10 rounded-lg bg-surface-highest/50 flex items-center justify-center border border-white/5 group-hover:border-primary/20 transition-all">
                     <span
-                      className={`material-symbols-outlined text-2xl shrink-0 icon-liquid-fill icon-3d ${getIconColorClass(obj)} ${
-                        obj.progress > 0 && !isCompleted ? 'icon-progress-active-pulse' : ''
-                      } transition-all duration-300 ${
-                        obj.icon === 'emoji_events' ? 'icon-trophy-3d' : ''
-                      } ${obj.icon === 'fitness_center' ? 'icon-dumbbell-wave' : ''}`}
-                      style={{
-                        '--fill-progress': `${fillPercent}%`,
-                      } as React.CSSProperties}
+                      className={`material-symbols-outlined text-2xl shrink-0 transition-all duration-300 ${
+                        isCompleted ? 'text-secondary gold-glow' : 'text-primary/70 group-hover:text-primary'
+                      }`}
+                      style={{ fontVariationSettings: isCompleted ? "'FILL' 1" : "'FILL' 0" }}
                     >
                       {obj.icon}
                     </span>
-
-                    {/* Completion Watermark */}
-                    {isCompleted && (
-                      <div className="completion-watermark" style={{ animationDelay: '0.2s' }}>
-                        COMPLETE
-                      </div>
-                    )}
                   </div>
 
-                  <span
-                    className={`text-sm font-barlow font-bold truncate transition-colors duration-300 ${
-                      isCompleted ? 'text-yellow-200' : 'text-white/85'
-                    }`}
-                  >
-                    {obj.name}
-                  </span>
+                  <div className="flex flex-col">
+                    <span
+                      className={`text-sm font-bold truncate transition-colors duration-300 ${
+                        isCompleted ? 'text-secondary/90' : 'text-on-surface'
+                      }`}
+                    >
+                      {obj.name}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
+                      {isCompleted ? 'Objective Complete' : `${obj.progress} / ${obj.total} Progress`}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Liquid Fill Progress Display */}
-                <div className="flex items-center gap-2 ml-2 shrink-0">
+                {/* Progress Indicator */}
+                <div className="relative h-1.5 w-16 rounded-full bg-white/5 border border-white/5 overflow-hidden">
                   <div
-                    className={`progress-badge ${isCompleted ? 'progress-badge--complete' : ''}`}
-                    style={{
-                      color: isCompleted ? '#ffd700' : 'currentColor',
-                    }}
-                  >
-                    <span className="font-mono-data">{obj.progress}/{obj.total}</span>
-                  </div>
-                  <div className={`liquid-progress-bar ${
-                    fillPercent === 0
-                      ? 'liquid-progress-bar--empty'
-                      : fillPercent === 100
-                      ? 'liquid-progress-bar--full'
-                      : 'liquid-progress-bar--partial'
-                  }`}
-                    style={{
-                      '--progress-width': `${fillPercent}%`,
-                    } as React.CSSProperties}
+                    className={`h-full transition-all duration-700 ${
+                      isCompleted ? 'bg-secondary shadow-[0_0_10px_rgba(255,215,9,0.5)]' : 'bg-primary shadow-[0_0_10px_rgba(129,236,255,0.5)]'
+                    }`}
+                    style={{ width: `${fillPercent}%` }}
                   />
                 </div>
               </div>
@@ -284,52 +269,44 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
         </div>
       </div>
 
-      {/* Active Events - Floating Cards with Caustics */}
-      <div className="frosted-water-pane p-5 rounded-2xl group hover:border-neon-cyan/60 transition-all duration-300 wave-hover">
-        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
+      {/* Active Events - Floating Cards */}
+      <div className="glass-panel p-6 rounded-2xl group hover:border-primary/40 transition-all duration-300 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full translate-x-16 -translate-y-16" />
+        
+        <h3 className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-5 text-glow">
           Active Events
         </h3>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {activeEvents.map((event, idx) => (
             <div
               key={idx}
-              className="floating-card relative p-3 rounded-lg bg-gradient-to-br from-neon-cyan/12 to-neon-cyan/6 border border-neon-cyan/25 hover:border-neon-cyan/50 transition-all duration-300"
+              className="relative p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all duration-300 group/card overflow-hidden"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-barlow font-bold text-white/85">{event.name}</span>
-                <div className="flex flex-col items-end gap-1">
-                  {event.timeMs ? (
-                    <div className={`countdown-timer countdown-timer--${event.urgency} countdown-ticker`}>
-                      <div className="digital-timer-bar mb-1"></div>
-                      <span className="segmented-time text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.5)] block text-xs">
-                        <span className="segmented-time-digit">0</span>
-                        <span className="segmented-time-digit">5</span>
-                        <span className="timer-separator">:</span>
-                        <span className="segmented-time-digit">1</span>
-                        <span className="segmented-time-digit">4</span>
-                        <span className="timer-separator">:</span>
-                        <span className="segmented-time-digit">2</span>
-                        <span className="segmented-time-digit">2</span>
-                        <span className="timer-milliseconds">ms</span>
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="segmented-time text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.4)] text-xs">
-                      {event.time}
-                    </span>
-                  )}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-bold text-on-surface group-hover/card:text-primary transition-colors">{event.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="h-1 w-8 bg-primary/30 rounded-full" />
+                    <span className="text-[9px] uppercase tracking-widest text-on-surface-variant font-black">Season Series</span>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-end">
+                  <div className="text-primary font-headline font-bold italic slanted text-glow">
+                    {event.time}
+                  </div>
+                  <div className="text-[8px] uppercase tracking-tighter text-on-surface-variant font-bold">Ends In</div>
                 </div>
               </div>
 
-              {/* Caustic Undershadow */}
-              <div className="caustic-undershadow"></div>
+              {/* Hover Glow Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-transparent -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000" />
             </div>
           ))}
         </div>
-
       </div>
-    </div>
-  );
+      </div>
+    );
 };
 
 export default HomeScreen;

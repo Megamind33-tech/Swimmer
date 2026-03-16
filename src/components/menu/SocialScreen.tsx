@@ -145,36 +145,50 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
     switch (activeTab) {
       case 'FRIENDS':
         return (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {Friends.map((friend) => (
               <div
                 key={friend.id}
-                className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30 hover:bg-slate-600/50 transition-colors cursor-pointer"
+                className="group/friend relative p-1 rounded-[40px] bg-gradient-to-br from-white/10 to-transparent hover:from-primary/40 transition-all duration-500 cursor-pointer"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-4 h-4 rounded-full ${
-                        friend.online ? 'bg-emerald-500' : 'bg-slate-500'
-                      }`}
-                    ></div>
-                    <div>
-                      <div className="font-bold text-white">{friend.name}</div>
-                      <div className="text-xs text-slate-400">{friend.lastSeen}</div>
+                <div className="relative z-10 p-8 rounded-[36px] bg-surface overflow-hidden h-full flex flex-col justify-between">
+                  {/* Background Aura */}
+                  <div className={`absolute -right-20 -top-20 h-40 w-40 blur-3xl opacity-5 transition-colors ${
+                    friend.online ? 'bg-primary' : 'bg-white'
+                  }`} />
+                  
+                  <div className="flex items-center justify-between mb-8 relative z-10">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                         <div className={`absolute inset-0 blur-xl ${friend.online ? 'bg-primary animate-pulse' : 'bg-transparent'}`} />
+                         <div className={`h-12 w-12 rounded-2xl border flex items-center justify-center relative z-10 ${
+                           friend.online ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'
+                         }`}>
+                           <span className={`material-symbols-outlined ${friend.online ? 'text-primary' : 'text-on-surface-variant opacity-60'}`}>person</span>
+                         </div>
+                      </div>
+                      <div>
+                        <h4 className="font-headline text-xl font-black italic slanted uppercase text-on-surface group-hover/friend:text-glow transition-all">{friend.name}</h4>
+                        <div className="flex items-center gap-2">
+                           <span className={`h-1.5 w-1.5 rounded-full ${friend.online ? 'bg-primary shadow-[0_0_5px_rgba(129,236,255,1)]' : 'bg-white/20'}`} />
+                           <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant">{friend.lastSeen}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                       <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest block opacity-60">Global Pos</span>
+                       <span className="font-headline text-lg font-black italic slanted text-primary text-glow">{friend.rank}</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-white">Level {friend.level}</div>
-                    <div className="text-xs text-cyan-400">{friend.rank}</div>
+
+                  <div className="grid grid-cols-2 gap-3 relative z-10">
+                    <button className="h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-primary/20 hover:border-primary/40 transition-all duration-500 font-headline font-black italic slanted uppercase text-[10px] tracking-widest text-on-surface-variant hover:text-primary">
+                       Challenge
+                    </button>
+                    <button className="h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/40 transition-all duration-500 font-headline font-black italic slanted uppercase text-[10px] tracking-widest text-on-surface-variant hover:text-on-surface">
+                       Dossier
+                    </button>
                   </div>
-                </div>
-                <div className="flex gap-2 mt-3">
-                  <button className="flex-1 px-3 py-2 bg-cyan-500/30 hover:bg-cyan-500/50 rounded text-xs font-bold text-cyan-300 transition-colors">
-                    Challenge
-                  </button>
-                  <button className="flex-1 px-3 py-2 bg-slate-600/30 hover:bg-slate-600/50 rounded text-xs font-bold text-slate-300 transition-colors">
-                    Message
-                  </button>
                 </div>
               </div>
             ))}
@@ -182,112 +196,181 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
         );
       case 'RIVALS':
         return (
-          <div className="space-y-3">
+          <div className="space-y-6">
             {Rivals.map((rival) => (
               <div
                 key={rival.id}
-                className="bg-gradient-to-r from-rose-500/20 to-pink-500/20 rounded-lg p-4 border border-rose-500/30 hover:from-rose-500/30 hover:to-pink-500/30 transition-all cursor-pointer"
+                className="group/rival relative p-1 rounded-[48px] bg-gradient-to-br from-secondary/40 via-white/5 to-transparent hover:scale-[1.01] transition-all duration-700"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <div className="font-black text-white text-lg">{rival.name}</div>
-                    <div className="text-sm text-slate-400">{rival.specialty}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-white">Level {rival.level}</div>
-                    <div
-                      className={`text-xs font-bold font-mono-data tracking-wider ${getDifficultyColor(rival.difficulty)} px-2 py-1 rounded border-2 mt-1`}
-                    >
-                      <span className="mr-1">{getDifficultyBadgeIcon(rival.difficulty)}</span>
-                      {rival.difficulty}
-                    </div>
-                  </div>
+                <div className="relative z-10 p-10 rounded-[44px] bg-surface overflow-hidden flex flex-col md:flex-row items-center justify-between gap-12">
+                   {/* Rival Aura */}
+                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-secondary/10 via-transparent to-transparent opacity-40 pointer-events-none" />
+                   
+                   <div className="flex-1 space-y-6 relative z-10 w-full">
+                      <div className="flex items-center gap-4">
+                        <div className="h-16 w-16 rounded-[24px] bg-secondary/20 border border-secondary/40 flex items-center justify-center">
+                           <span className="material-symbols-outlined text-4xl text-secondary gold-glow">bolt</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                             <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] italic gold-glow">Priority Target</span>
+                             <span className="h-[1px] w-8 bg-secondary/40" />
+                          </div>
+                          <h3 className="font-headline text-4xl font-black italic slanted uppercase text-on-surface text-glow leading-none">{rival.name}</h3>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                         {[
+                           { label: 'Tactical Class', val: rival.specialty },
+                           { label: 'Biometric Level', val: `Lv. ${rival.level}` },
+                           { label: 'Battle History', val: `${rival.raceCount} Races` },
+                           { label: 'Win Percent', val: `${Math.round((rival.playerWins / rival.raceCount) * 100)}%` }
+                         ].map((s, i) => (
+                           <div key={i} className="space-y-1">
+                              <span className="text-[8px] font-black text-on-surface-variant uppercase tracking-widest block opacity-60">{s.label}</span>
+                              <span className="font-headline text-sm font-black italic slanted uppercase text-on-surface group-hover/rival:text-glow transition-all">{s.val}</span>
+                           </div>
+                         ))}
+                      </div>
+                   </div>
+
+                   <div className="w-full md:w-auto relative z-10">
+                      <button className="w-full md:w-64 h-20 rounded-[28px] bg-secondary border border-white/20 shadow-[0_0_40px_rgba(255,215,9,0.3)] hover:shadow-[0_0_60px_rgba(255,215,9,0.5)] active:scale-95 transition-all duration-500 font-headline text-2xl font-black italic slanted uppercase text-surface flex items-center justify-center gap-4 group/btn relative overflow-hidden">
+                         <div className="absolute inset-x-0 bottom-0 h-1 bg-white/40 shadow-[0_0_20px_rgba(255,255,255,1)]" />
+                         Engage Rival
+                         <span className="material-symbols-outlined text-3xl group-hover/btn:translate-x-2 transition-transform">swords</span>
+                      </button>
+                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 mb-3 text-xs">
-                  <div>
-                    <div className="text-slate-400">Races</div>
-                    <div className="font-bold text-white">{rival.raceCount}</div>
-                  </div>
-                  <div>
-                    <div className="text-slate-400">Wins</div>
-                    <div className="font-bold text-emerald-400">{rival.playerWins}</div>
-                  </div>
-                  <div>
-                    <div className="text-slate-400">Losses</div>
-                    <div className="font-bold text-red-400">{rival.raceCount - rival.playerWins}</div>
-                  </div>
-                </div>
-                <button className="w-full px-3 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:shadow-lg hover:shadow-rose-500/30 rounded text-sm font-bold text-white transition-all">
-                  Challenge Rival
-                </button>
               </div>
             ))}
           </div>
         );
       case 'LEADERBOARDS':
         return (
-          <div className="space-y-4">
-            {/* Global Leaderboard */}
-            <div className="bg-slate-700/50 rounded-lg overflow-hidden border border-slate-600/30">
-              <div className="px-6 py-4 bg-slate-800/50 border-b border-slate-600/30 font-bold text-white">
-                Global 100M Freestyle
+          <div className="p-1 rounded-[48px] bg-gradient-to-br from-primary/20 via-white/5 to-transparent border border-white/5 overflow-hidden">
+            <div className="rounded-[44px] bg-surface overflow-hidden">
+              <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between">
+                <div>
+                  <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow">Global Ranking Matrix</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-variant mt-2">100M Technical Freestyle Circuit</p>
+                </div>
+                <button className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/40 transition-all font-headline font-black italic slanted uppercase text-[10px] tracking-widest text-on-surface-variant hover:text-primary">
+                   Switch Circuit
+                </button>
               </div>
-              <div className="divide-y divide-slate-600/30">
+
+              <div className="p-4 space-y-2">
                 {GlobalLeaderboard.map((entry) => (
                   <div
                     key={entry.rank}
-                    className={`px-6 py-3 flex items-center justify-between hover:bg-slate-600/50 transition-colors ${
-                      entry.rank === 4 ? 'bg-cyan-500/10' : ''
+                    className={`group/row relative p-6 rounded-[28px] border transition-all duration-500 flex items-center justify-between gap-8 ${
+                      entry.rank === 4 
+                        ? 'bg-primary/20 border-primary/40 shadow-[0_0_30px_rgba(129,236,255,0.15)] overflow-hidden' 
+                        : 'bg-white/[0.02] border-white/5 hover:bg-white/5 hover:border-white/20'
                     }`}
                   >
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="font-black text-xl text-slate-400 w-8 text-center">{entry.rank}</div>
-                      <div>
-                        <div className="font-bold text-white">{entry.name}</div>
-                        <div className="text-xs text-slate-400">Level {entry.level}</div>
+                    {entry.rank === 4 && <div className="absolute inset-x-0 bottom-0 h-1 bg-primary/40 shadow-[0_0_10px_rgba(129,236,255,1)]" />}
+                    
+                    <div className="flex items-center gap-8 flex-1">
+                      <div className={`font-headline text-4xl font-black italic slanted w-12 text-center ${
+                         entry.rank === 1 ? 'text-secondary gold-glow' : entry.rank === 4 ? 'text-primary text-glow' : 'text-on-surface-variant opacity-40'
+                      }`}>
+                         {entry.rank.toString().padStart(2, '0')}
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                         <div className={`h-12 w-12 rounded-2xl border flex items-center justify-center ${
+                           entry.rank === 4 ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'
+                         }`}>
+                            <span className={`material-symbols-outlined ${entry.rank === 4 ? 'text-primary text-glow' : 'text-on-surface-variant opacity-40'}`}>
+                               {entry.rank === 1 ? 'workspace_premium' : 'person'}
+                            </span>
+                         </div>
+                         <div>
+                           <div className="font-headline text-xl font-black italic slanted uppercase text-on-surface group-hover/row:text-glow transition-all">
+                              {entry.name}
+                              {entry.rank === 4 && <span className="ml-3 text-[10px] font-black text-primary animate-pulse italic">(Current Athlete)</span>}
+                           </div>
+                           <div className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-60">Level {entry.level} Elite</div>
+                         </div>
                       </div>
                     </div>
+
                     <div className="text-right">
-                      <div className="text-cyan-400 font-mono font-bold">{entry.time}</div>
-                      <div className="text-xs text-slate-400">{entry.pb}</div>
+                       <div className="font-headline text-2xl font-black italic slanted text-primary text-glow leading-none mb-1">{entry.time}</div>
+                       <div className={`text-[10px] font-black uppercase tracking-widest italic ${entry.pb === 'World Record' ? 'text-secondary gold-glow' : 'text-on-surface-variant opacity-60'}`}>
+                          {entry.pb}
+                       </div>
                     </div>
                   </div>
                 ))}
+              </div>
+              
+              <div className="p-8 bg-white/[0.03] text-center">
+                 <button className="font-headline font-black italic slanted uppercase text-[11px] tracking-[0.4em] text-on-surface-variant hover:text-on-surface transition-colors">Scan Full Ranking Buffer</button>
               </div>
             </div>
           </div>
         );
       case 'CHAT':
         return (
-          <div className="h-96 flex flex-col bg-slate-700/50 rounded-lg border border-slate-600/30">
-            <div className="flex-1 p-4 overflow-y-auto space-y-3">
-              <div className="bg-slate-600/50 rounded p-3">
-                <div className="text-xs text-slate-400 mb-1">James Wilson</div>
-                <div className="text-white">Hey! Nice win yesterday!</div>
+          <div className="h-[600px] flex flex-col rounded-[40px] bg-surface border border-white/5 overflow-hidden">
+            <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between">
+               <div className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,1)]" />
+                  <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.4em]">Secure Channel: Global Matrix</span>
+               </div>
+               <span className="material-symbols-outlined text-on-surface-variant opacity-40">enhanced_encryption</span>
+            </div>
+
+            <div className="flex-1 p-8 overflow-y-auto space-y-6 scrollbar-hide">
+              <div className="flex flex-col items-start max-w-[80%]">
+                <span className="text-[9px] font-black text-primary uppercase tracking-widest mb-2 ml-4">James Wilson</span>
+                <div className="bg-white/5 border border-white/10 rounded-[24px] rounded-tl-none p-5 text-[13px] font-black uppercase text-on-surface-variant leading-relaxed">
+                  Terminal analysis confirms elite performance in high-pressure heats. Awaiting rival response.
+                </div>
               </div>
-              <div className="bg-cyan-500/20 rounded p-3 ml-12">
-                <div className="text-xs text-slate-400 mb-1">You</div>
-                <div className="text-white">Thanks! Your breaststroke is getting really fast</div>
+
+              <div className="flex flex-col items-end self-end max-w-[80%]">
+                <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-2 mr-4">System Identity: {playerName}</span>
+                <div className="bg-primary border border-white/20 rounded-[24px] rounded-tr-none p-5 text-[13px] font-black uppercase text-surface leading-relaxed shadow-[0_0_30px_rgba(129,236,255,0.2)]">
+                  Data stream synchronized. Biometric patterns aligned for World Series entry.
+                </div>
               </div>
             </div>
-            <div className="border-t border-slate-600/30 p-4">
+
+            <div className="p-8 border-t border-white/5 relative">
               <input
                 type="text"
-                placeholder="Type a message..."
-                className="w-full bg-slate-600/50 border border-slate-600/30 rounded px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500/50"
+                placeholder="INPUT DATA STREAM..."
+                className="w-full h-16 bg-white/[0.03] border border-white/10 rounded-2xl px-6 font-headline font-black italic slanted uppercase text-[14px] text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary/40 focus:bg-primary/5 transition-all text-glow"
               />
+              <button className="absolute right-12 top-11 text-primary hover:text-glow transition-all">
+                 <span className="material-symbols-outlined text-3xl">send</span>
+              </button>
             </div>
           </div>
         );
       case 'GHOSTS':
         return (
-          <div className="space-y-3">
-            <div className="bg-slate-700/50 rounded-lg p-4 border border-slate-600/30">
-              <div className="text-sm text-slate-400 mb-3">Download and race against ghost data</div>
-              <button className="w-full px-4 py-3 bg-cyan-500/30 hover:bg-cyan-500/50 rounded-lg text-cyan-300 font-bold transition-colors">
-                Browse Ghost Library
-              </button>
-            </div>
+          <div className="p-1 rounded-[48px] bg-gradient-to-br from-white/20 to-transparent border border-white/5 overflow-hidden">
+             <div className="p-20 rounded-[44px] bg-surface flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-40 pointer-events-none" />
+                
+                <div className="h-24 w-24 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center mb-8">
+                   <span className="material-symbols-outlined text-6xl text-on-surface-variant opacity-40 animate-pulse">ghost</span>
+                </div>
+                
+                <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">Simulated Entities</h3>
+                <p className="text-[11px] font-black uppercase tracking-[0.4em] text-on-surface-variant opacity-60 mb-12">Download and engage phantom biometric sequences</p>
+                
+                <button className="h-20 px-12 rounded-[28px] bg-primary border border-white/20 shadow-[0_0_40px_rgba(129,236,255,0.2)] hover:shadow-[0_0_60px_rgba(129,236,255,0.4)] transition-all duration-500 font-headline text-xl font-black italic slanted uppercase text-surface flex items-center justify-center gap-4 group/ghost">
+                   Browse Ghost Archives
+                   <span className="material-symbols-outlined text-3xl group-hover/ghost:translate-x-2 transition-transform">cloud_download</span>
+                </button>
+             </div>
           </div>
         );
       default:
@@ -296,39 +379,69 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-4xl font-black text-white mb-2">Social</h1>
-          <p className="text-slate-400">Connect, compete, and track progress</p>
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      {/* Cinematic Header */}
+      <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
+        
+        <div className="relative z-10 flex items-center justify-between gap-8 flex-wrap">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="h-[1px] w-12 bg-primary/40" />
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-sm animate-pulse">hub</span>
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Global Athlete Network Active</span>
+              </div>
+            </div>
+            
+            <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow">
+              Athlete Network
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-8 p-6 rounded-[32px] bg-white/5 border border-white/10 backdrop-blur-3xl">
+             <div className="text-center group cursor-pointer">
+               <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-1 block group-hover:text-primary transition-colors">Connections</span>
+               <span className="font-headline text-2xl font-black italic slanted text-primary text-glow">{Friends.length} Active</span>
+             </div>
+             <div className="h-10 w-[1px] bg-white/10" />
+             <div className="text-center group cursor-pointer">
+                <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-1 block group-hover:text-secondary transition-colors">Rivalries</span>
+                <span className="font-headline text-2xl font-black italic slanted text-secondary gold-glow">{Rivals.length} Tracked</span>
+             </div>
+          </div>
         </div>
+      </div>
 
+      <div className="p-8 max-w-7xl mx-auto w-full space-y-12 pb-24">
         {/* Tab Navigation */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-4 flex-wrap">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-lg font-bold uppercase text-sm transition-all ${
+              className={`relative px-10 py-5 rounded-[24px] font-headline font-black italic slanted uppercase text-[11px] tracking-widest transition-all duration-500 border overflow-hidden flex items-center gap-4 ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
+                  ? 'bg-primary/20 border-primary/40 text-primary text-glow'
+                  : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20 hover:text-on-surface'
               }`}
             >
-              {tab.icon}
-              <span className="hidden md:inline">{tab.label}</span>
+              <div className={`h-8 w-8 rounded-xl flex items-center justify-center border transition-all ${
+                activeTab === tab.id ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'
+              }`}>
+                 <span className="material-symbols-outlined text-xl italic">{tab.id === 'FRIENDS' ? 'people' : tab.id === 'RIVALS' ? 'bolt' : tab.id === 'LEADERBOARDS' ? 'leaderboard' : tab.id === 'CHAT' ? 'forum' : 'ghost'}</span>
+              </div>
+              {tab.label}
               {tab.count > 0 && (
-                <span className="ml-2 bg-red-500 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold text-white">
-                  {tab.count}
-                </span>
+                 <span className="ml-2 px-2 py-0.5 rounded-lg bg-primary text-surface text-[10px] font-black italic animate-pulse">{tab.count}</span>
               )}
+              <div className="absolute inset-x-0 bottom-0 h-[3px] bg-primary scale-x-0 transition-transform duration-500 origin-left activeTab === tab.id && 'scale-x-100'" />
             </button>
           ))}
         </div>
 
         {/* Tab Content */}
-        <div>{renderTab()}</div>
+        <div className="transition-all duration-500">{renderTab()}</div>
       </div>
     </div>
   );

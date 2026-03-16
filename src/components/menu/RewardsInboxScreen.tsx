@@ -133,66 +133,94 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
     switch (activeTab) {
       case 'CLAIMABLE':
         return (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {ClaimableRewards.filter((r) => !r.claimed && !claimedItems.has(r.id)).length === 0 ? (
-              <div className="rewards-glass-card rounded-lg p-8 text-center">
-                <div className="text-5xl mb-3">✓</div>
-                <div className="text-lg font-bold text-white mb-1">All Rewards Claimed!</div>
-                <p className="text-slate-400">Check back soon for more rewards</p>
+              <div className="relative group p-1 rounded-[48px] bg-gradient-to-br from-primary/20 to-transparent overflow-hidden">
+                <div className="p-16 rounded-[44px] bg-surface flex flex-col items-center justify-center text-center">
+                  <div className="h-24 w-24 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-8">
+                    <span className="material-symbols-outlined text-5xl text-primary animate-pulse">done_all</span>
+                  </div>
+                  <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">Terminal Clear</h3>
+                  <p className="text-[11px] font-black uppercase tracking-[0.4em] text-on-surface-variant opacity-60">All biometric rewards synchronized</p>
+                </div>
               </div>
             ) : (
               <>
                 {ClaimableRewards.filter((r) => !r.claimed && !claimedItems.has(r.id)).map((reward) => (
                   <div
                     key={reward.id}
-                    className={`rewards-glass-card rounded-lg p-6 border ${getTypeColor(reward.type)}`}
+                    className="group/reward relative p-1 rounded-[40px] bg-gradient-to-br from-white/10 to-transparent hover:from-primary/40 transition-all duration-500 overflow-hidden"
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <div className="text-xs font-bold uppercase opacity-75 mb-1">{reward.from}</div>
-                        <h3 className="sport-header text-lg font-black text-white">{reward.title}</h3>
-                      </div>
-                      <span className="text-xs font-bold opacity-50">{reward.date}</span>
-                    </div>
-                    <p className="text-sm text-gray-300 mb-4">{reward.description}</p>
+                     <div className="relative z-10 p-8 rounded-[36px] bg-surface overflow-hidden">
+                        {/* Status Background */}
+                        <div className={`absolute -right-20 -top-20 h-64 w-64 blur-3xl opacity-10 ${
+                          reward.type === 'SEASON' || reward.type === 'REWARD' ? 'bg-secondary' : 'bg-primary'
+                        }`} />
 
-                    {reward.rewards && (
-                      <div className="grid grid-cols-3 gap-2 mb-4 py-4 border-y border-current/20">
-                        {reward.rewards.xp && (
-                          <div className="text-center">
-                            <div className="text-2xl font-black">{reward.rewards.xp}</div>
-                            <div className="text-xs opacity-75">XP</div>
+                        <div className="flex items-start justify-between gap-8 mb-8 relative z-10">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className={`h-[2px] w-8 ${reward.type === 'SEASON' || reward.type === 'REWARD' ? 'bg-secondary' : 'bg-primary'}`} />
+                              <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-[0.4em]">{reward.from} / {reward.type} Dossier</span>
+                            </div>
+                            <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow">{reward.title}</h3>
                           </div>
-                        )}
-                        {reward.rewards.coins && (
-                          <div className="text-center">
-                            <div className="text-2xl font-black">{reward.rewards.coins}</div>
-                            <div className="text-xs opacity-75">Coins</div>
+                          <div className="text-right">
+                             <div className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-60">Timestamp</div>
+                             <div className="text-[13px] font-headline font-black italic slanted text-on-surface uppercase">{reward.date}</div>
                           </div>
-                        )}
-                        {reward.rewards.premium && (
-                          <div className="text-center">
-                            <div className="text-2xl font-black">◆ {reward.rewards.premium}</div>
-                            <div className="text-xs opacity-75">Premium</div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                        </div>
 
-                    <button
-                      onClick={() => handleClaim(reward.id)}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:shadow-lg hover:shadow-emerald-500/30 text-white font-black rounded-lg transition-all"
-                    >
-                      Claim Reward
-                    </button>
+                        <p className="text-[11px] font-black text-on-surface-variant uppercase tracking-tight leading-relaxed mb-10 max-w-2xl relative z-10">
+                          {reward.description}
+                        </p>
+
+                        {reward.rewards && (
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 relative z-10">
+                            {reward.rewards.xp && (
+                              <div className="p-6 rounded-[28px] bg-white/[0.03] border border-white/5 flex flex-col items-center justify-center group-hover/reward:bg-primary/5 transition-colors">
+                                <div className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-2">Efficiency Boost</div>
+                                <div className="font-headline text-3xl font-black italic slanted text-primary text-glow">{reward.rewards.xp} XP</div>
+                              </div>
+                            )}
+                            {reward.rewards.coins && (
+                              <div className="p-6 rounded-[28px] bg-white/[0.03] border border-white/5 flex flex-col items-center justify-center group-hover/reward:bg-secondary/5 transition-colors">
+                                <div className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-2">Operational Credits</div>
+                                <div className="font-headline text-3xl font-black italic slanted text-secondary gold-glow">{reward.rewards.coins} CR</div>
+                              </div>
+                            )}
+                            {reward.rewards.premium && (
+                              <div className="p-6 rounded-[28px] bg-white/[0.03] border border-white/5 flex flex-col items-center justify-center group-hover/reward:bg-secondary/5 transition-colors">
+                                <div className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-2">Elite Fragments</div>
+                                <div className="font-headline text-3xl font-black italic slanted text-secondary gold-glow">◆ {reward.rewards.premium}</div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <button
+                          onClick={() => handleClaim(reward.id)}
+                          className={`w-full h-20 rounded-[28px] transition-all duration-500 font-headline text-2xl font-black italic slanted uppercase flex items-center justify-center gap-4 relative overflow-hidden group/btn ${
+                            reward.type === 'SEASON' || reward.type === 'REWARD'
+                              ? 'bg-secondary text-surface shadow-[0_0_40px_rgba(255,215,9,0.2)] hover:shadow-[0_0_60px_rgba(255,215,9,0.4)]'
+                              : 'bg-primary text-surface shadow-[0_0_40px_rgba(129,236,255,0.2)] hover:shadow-[0_0_60px_rgba(129,236,255,0.4)]'
+                          }`}
+                        >
+                           <div className="absolute inset-x-0 bottom-0 h-1 bg-white/40 shadow-[0_0_20px_rgba(255,255,255,1)]" />
+                           Claim Dossier
+                           <span className="material-symbols-outlined text-3xl group-hover/btn:translate-x-2 transition-transform">download</span>
+                        </button>
+                     </div>
                   </div>
                 ))}
 
                 <button
                   onClick={onClaimAll}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:shadow-lg hover:shadow-cyan-500/50 text-white font-black rounded-lg transition-all text-lg"
+                  className="w-full h-24 rounded-[32px] bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 font-headline text-2xl font-black italic slanted uppercase text-on-surface-variant hover:text-primary flex items-center justify-center gap-6 group/all"
                 >
-                  Claim All Rewards
+                  <span className="material-symbols-outlined text-4xl group-hover/all:rotate-180 transition-transform duration-700">sync</span>
+                  Batch Claim Operations
+                  <span className="h-[2px] w-24 bg-white/10 group-hover:bg-primary/40 transition-colors" />
                 </button>
               </>
             )}
@@ -200,46 +228,61 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
         );
       case 'INBOX':
         return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {InboxMessages.map((message) => (
-              <div key={message.id} className={`rewards-glass-card rounded-lg p-4 border ${getTypeColor(message.type)}`}>
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <div className="text-xs font-bold uppercase opacity-75">{message.from}</div>
-                    <h3 className="font-bold text-white">{message.title}</h3>
+              <div 
+                key={message.id} 
+                className="group/msg relative p-6 rounded-[28px] bg-white/5 border border-white/5 hover:border-white/20 transition-all flex items-center justify-between gap-8"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-2">
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">{message.from}</span>
+                    <span className="h-1 w-1 rounded-full bg-white/20" />
+                    <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-60">{message.date}</span>
                   </div>
-                  <span className="text-xs opacity-50">{message.date}</span>
+                  <h3 className="font-headline text-xl font-black italic slanted uppercase text-on-surface group-hover/msg:text-glow transition-all mb-1">{message.title}</h3>
+                  <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-tight opacity-80">{message.description}</p>
                 </div>
-                <p className="text-sm opacity-90">{message.description}</p>
-                {message.rewards && (
-                  <div className="mt-3 flex gap-3 text-xs">
-                    {message.rewards.xp && <span>+{message.rewards.xp} XP</span>}
-                    {message.rewards.coins && <span>+{message.rewards.coins} Coins</span>}
-                  </div>
-                )}
+                <div className="h-12 w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover/msg:bg-primary/20 group-hover/msg:border-primary/40 transition-all">
+                  <span className="material-symbols-outlined text-on-surface-variant group-hover/msg:text-primary">arrow_forward</span>
+                </div>
               </div>
             ))}
           </div>
         );
       case 'HISTORY':
         return (
-          <div className="rewards-glass-card rounded-lg p-6">
-            <h3 className="sport-header text-lg font-black text-white mb-4">Claimed Rewards History</h3>
-            <div className="space-y-2">
-              {[
-                { date: 'Mar 14', item: 'Daily Login Bonus', reward: '✓ 300 XP' },
-                { date: 'Mar 13', item: 'Time Trial Victory', reward: '✓ 150 XP + 800 Coins' },
-                { date: 'Mar 12', item: 'Weekly Ranking Payout', reward: '✓ 2000 Coins' },
-                { date: 'Mar 11', item: 'Daily Login Bonus', reward: '✓ 300 XP' },
-              ].map((entry, idx) => (
-                <div key={idx} className="flex items-center justify-between text-sm py-2 border-b border-slate-600/30 last:border-0">
-                  <div>
-                    <div className="font-bold text-white">{entry.item}</div>
-                    <div className="text-xs text-slate-400">{entry.date}</div>
+          <div className="rounded-[40px] bg-surface border border-white/5 overflow-hidden">
+            <div className="p-10 border-b border-white/5">
+               <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Activity Logs</h3>
+               <p className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-variant mt-2">Historical synchronization records</p>
+            </div>
+            <div className="p-6">
+              <div className="space-y-2">
+                {[
+                  { date: 'Mar 14', item: 'Daily Login Bonus', reward: '+ 300 XP', active: true },
+                  { date: 'Mar 13', item: 'Time Trial Victory', reward: '+ 150 XP + 800 CR', active: false },
+                  { date: 'Mar 12', item: 'Weekly Ranking Payout', reward: '+ 2000 CR', active: false },
+                  { date: 'Mar 11', item: 'Daily Login Bonus', reward: '+ 300 XP', active: false },
+                ].map((entry, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-6 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/5 transition-all group/row">
+                    <div className="flex items-center gap-6">
+                      <div className="text-[11px] font-black text-on-surface-variant uppercase tracking-widest w-16">{entry.date}</div>
+                      <div>
+                        <div className="font-headline text-base font-black italic slanted uppercase text-on-surface group-hover/row:text-primary transition-colors">{entry.item}</div>
+                        <div className="text-[8px] font-black text-on-surface-variant uppercase tracking-widest mt-1">Status: Recorded</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                       <span className="font-headline text-lg font-black italic slanted text-primary text-glow">{entry.reward}</span>
+                       <span className="material-symbols-outlined text-emerald-400 text-sm ml-4 align-middle">verified</span>
+                    </div>
                   </div>
-                  <div className="text-emerald-400 font-bold">{entry.reward}</div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+            <div className="p-8 bg-white/[0.03] text-center">
+               <button className="text-[10px] font-black uppercase tracking-[0.4em] text-on-surface-variant hover:text-on-surface transition-colors">Load Full History Matrix</button>
             </div>
           </div>
         );
@@ -249,38 +292,68 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="sport-header text-4xl font-black text-white mb-2">Rewards & Inbox</h1>
-          <p className="text-slate-400">Claim your rewards and check messages</p>
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      {/* Cinematic Header */}
+      <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
+        
+        <div className="relative z-10 flex items-center justify-between gap-8 flex-wrap">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="h-[1px] w-12 bg-primary/40" />
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-sm animate-pulse">move_to_inbox</span>
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Terminal Recognition In-Progress</span>
+              </div>
+            </div>
+            
+            <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow">
+              Rewards Terminal
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-10 p-6 rounded-[32px] bg-white/5 border border-white/10 backdrop-blur-3xl">
+             <div className="text-center">
+               <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-1 block">Unclaimed</span>
+               <span className="font-headline text-2xl font-black italic slanted text-primary text-glow">
+                 {tabs[0].count}
+               </span>
+             </div>
+             <div className="h-12 w-[1px] bg-white/10" />
+             <div className="text-center">
+                <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-1 block">Total Value</span>
+                <span className="font-headline text-2xl font-black italic slanted text-secondary gold-glow">8.2k CR</span>
+             </div>
+          </div>
         </div>
+      </div>
 
+      <div className="p-8 max-w-5xl mx-auto w-full space-y-12 pb-24">
         {/* Tab Navigation */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-4 flex-wrap">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative px-4 py-3 rounded-lg font-bold uppercase text-sm transition-all ${
+              className={`relative px-10 py-5 rounded-[24px] font-headline font-black italic slanted uppercase text-[11px] tracking-widest transition-all duration-500 border overflow-hidden ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
+                  ? 'bg-primary/20 border-primary/40 text-primary text-glow'
+                  : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20 hover:text-on-surface'
               }`}
             >
               {tab.label}
               {tab.count > 0 && (
-                <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-black">
+                <span className="ml-4 px-2 py-0.5 rounded-lg bg-primary text-surface text-[10px] font-black animate-pulse">
                   {tab.count}
                 </span>
               )}
+              <div className="absolute inset-x-0 bottom-0 h-[3px] bg-primary scale-x-0 transition-transform duration-500 origin-left activeTab === tab.id && 'scale-x-100'" />
             </button>
           ))}
         </div>
 
         {/* Tab Content */}
-        <div>{renderTab()}</div>
+        <div className="transition-all duration-500">{renderTab()}</div>
       </div>
     </div>
   );

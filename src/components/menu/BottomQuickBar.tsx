@@ -41,11 +41,11 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
     rewards: 'STORE',
   };
 
-  const quickActions: QuickAction[] = [
+  const quickActions: PrimaryAction[] = [
     {
       id: 'quick-race',
       label: 'Quick Race',
-      icon: 'play_arrow',
+      icon: 'sports_score',
       image: raceActionImage,
       overlayClass: 'from-cyan-500/65 via-blue-600/40 to-slate-900/80',
       onClick: props.onQuickRaceClick,
@@ -92,18 +92,11 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
     },
   ];
 
-  const handleActionClick = (action: PrimaryAction) => {
-    setActiveButton(action.id);
-    setTimeout(() => setActiveButton(null), 150);
-
-    action.onClick?.();
-    if (!action.onClick && onScreenChange && action.route) {
-      onScreenChange(action.route);
-    }
-  };
-
   return (
-    <nav className="h-20 min-h-20 shrink-0 bg-gradient-to-t from-[#070f1f]/98 to-[#0a162b]/98 backdrop-blur-md border-t-2 border-white/20 px-3 max-[900px]:px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-2 flex items-center justify-center gap-2 sticky bottom-0 z-[70] shadow-[0_-10px_24px_rgba(0,0,0,0.45)] skew-x-[-6deg] max-[900px]:overflow-x-auto max-[900px]:justify-start">
+    <nav className="h-24 bg-surface/60 backdrop-blur-3xl border-t border-white/5 px-6 flex items-center justify-center gap-4 sticky bottom-0 z-40 font-headline overflow-hidden">
+      {/* Structural Accent Line */}
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      
       {quickActions.map((action) => (
         <button
           key={action.id}
@@ -113,18 +106,30 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
               onScreenChange(defaultActionRoute[action.id]);
             }
           }}
-          className="group relative overflow-hidden flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-lg h-14 min-h-[44px] min-w-[74px] skew-x-[6deg] flex-1 max-[900px]:flex-none max-[900px]:w-[92px] border border-white/20 transition-all duration-300 hover:scale-[1.05] hover:brightness-125"
+          className="group relative h-16 flex-1 min-w-[120px] max-w-[200px] overflow-hidden -skew-x-12 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:scale-105 active:scale-95 group"
         >
-          <img src={action.image} alt={`${action.label} action`} className="absolute inset-0 h-full w-full object-cover" />
-          <div className={`absolute inset-0 bg-gradient-to-br ${action.overlayClass}`} />
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(-20deg,rgba(255,255,255,0.12)_0_2px,transparent_2px_10px)] opacity-20 group-hover:opacity-30" />
+          {/* Action Image & Gradient HUD */}
+          <div className="absolute inset-0 skew-x-12 scale-125 group-hover:scale-110 transition-transform duration-700">
+             <img src={action.image} alt={action.label} className="w-full h-full object-cover opacity-40 group-hover:opacity-60 grayscale group-hover:grayscale-0 transition-all duration-500" />
+          </div>
+          <div className={`absolute inset-0 bg-gradient-to-br ${action.overlayClass} opacity-60 group-hover:opacity-40 transition-opacity`} />
+          
+          {/* Scanline Overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 bg-[length:100%_4px,3px_100%] pointer-events-none opacity-20" />
 
-          <span className="relative material-symbols-outlined text-white group-hover:text-white transition-colors drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
-            {action.icon}
-          </span>
-          <span className="relative text-[10px] font-bold text-white group-hover:text-white transition-colors uppercase tracking-tighter drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
-            {action.label}
-          </span>
+          {/* Label Content */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 skew-x-12 z-20">
+             <span className="material-symbols-outlined text-white text-2xl drop-shadow-[0_0_8px_rgba(0,0,0,0.8)] group-hover:text-glow transition-all">
+                {action.icon}
+             </span>
+             <span className="text-[10px] font-black italic slanted uppercase tracking-[0.2em] text-white drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
+                {action.label}
+             </span>
+          </div>
+
+          {/* Luminous Interaction State */}
+          <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity" />
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left shadow-[0_0_15px_rgba(129,236,255,1)]" />
         </button>
       ))}
     </nav>

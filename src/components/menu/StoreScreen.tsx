@@ -201,173 +201,282 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
     switch (activeTab) {
       case 'FEATURED':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {FeaturedItems.map((item) => (
-              <div
-                key={item.id}
-                className="glass-card-elevated rounded-2xl overflow-hidden border-2 border-neon-cyan/40 hover:border-neon-cyan/70 shadow-lg shadow-neon-cyan/20 hover:shadow-lg hover:shadow-neon-cyan/40 transition-all skew-container"
-              >
-                <div className="p-6 space-y-4 bg-gradient-to-br from-neon-cyan/10 to-broadcast-overlay/40">
-                  <div className="flex items-start justify-between">
-                    <div className="text-6xl">{item.icon}</div>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {FeaturedItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="group/featured relative h-[400px] rounded-[40px] overflow-hidden border border-white/10 hover:border-primary/40 transition-all duration-700 shadow-2xl"
+                >
+                  {/* Background Image/Gradients */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-surface/40 to-transparent z-0" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(129,236,255,0.15),transparent)] opacity-0 group-hover/featured:opacity-100 transition-opacity duration-700" />
+                  
+                  {/* Content Overlays */}
+                  <div className="absolute top-0 right-0 p-8 z-10">
                     {item.tag && (
-                      <span className="px-3 py-1 bg-yellow-400/30 text-yellow-300 text-xs font-black rounded-full border border-yellow-400/40">
-                        {item.tag}
+                      <span className="px-4 py-2 bg-secondary/20 text-secondary font-headline font-black italic slanted uppercase text-[10px] tracking-widest border border-secondary/40 gold-glow rounded-full">
+                        {item.tag} Offer
                       </span>
                     )}
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-din font-black text-white mb-1 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">{item.name}</h3>
-                    <p className="text-sm text-white/70 font-barlow">{item.description}</p>
-                  </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-neon-cyan/20">
-                    <span className={`text-xs px-3 py-1 rounded-full font-bold ${getRarityColor(item.rarity)}`}>
-                      {item.rarity}
-                    </span>
+
+                  <div className="absolute inset-0 flex flex-col justify-end p-10 z-20">
+                    <div className="flex items-center gap-4 mb-4">
+                      <span className={`text-[9px] font-black italic slanted uppercase tracking-[0.4em] px-3 py-1 rounded bg-white/5 border border-white/10 ${item.rarity === 'LEGENDARY' ? 'text-secondary border-secondary/30 gold-glow' : 'text-primary border-primary/30 text-glow'}`}>
+                        {item.rarity} Bundle
+                      </span>
+                    </div>
+                    
+                    <h3 className="font-headline text-4xl font-black italic slanted uppercase text-on-surface text-glow mb-2 group-hover/featured:scale-105 transition-transform duration-700 origin-left">
+                      {item.name}
+                    </h3>
+                    <p className="text-on-surface-variant text-sm mb-8 leading-relaxed max-w-sm">{item.description}</p>
+                    
                     <button
                       onClick={() => handlePurchase(item)}
-                      className="px-6 py-2 bg-neon-cyan/30 hover:bg-neon-cyan/40 hover:shadow-lg hover:shadow-neon-cyan/60 rounded-lg text-neon-cyan font-bold font-barlow transition-all flex items-center gap-2 border-2 border-neon-cyan/50 active:animate-squash-stretch drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]"
+                      className="w-full relative group/buy"
                     >
-                      <span>◆ {item.price}</span>
+                      <div className="absolute inset-0 bg-primary blur-xl opacity-20 group-hover/buy:opacity-40 transition-all duration-500" />
+                      <div className="relative h-14 bg-white/5 border border-white/10 group-hover/buy:border-primary group-hover/buy:bg-primary/20 rounded-2xl flex items-center justify-between px-8 transition-all duration-300">
+                        <span className="font-headline font-black italic slanted uppercase text-xs tracking-widest group-hover/buy:text-primary transition-colors">Acquire Assets</span>
+                        <span className="font-headline font-black italic slanted text-xl text-primary text-glow flex items-center gap-2 tracking-tighter">
+                          <span className="material-symbols-outlined text-[18px]">diamond</span>
+                          {item.price}
+                        </span>
+                      </div>
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         );
       case 'COSMETICS':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {CosmeticItems.map((item) => (
-              <div
-                key={item.id}
-                className="glass-card-elevated rounded-2xl overflow-hidden border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/10 hover:shadow-lg hover:shadow-neon-cyan/20 transition-all skew-container"
-              >
-                <div className="h-40 bg-gradient-to-br from-neon-cyan/15 to-neon-cyan/5 flex items-center justify-center">
-                  <div className="text-6xl">{item.icon}</div>
-                </div>
-                <div className="p-4 space-y-3">
-                  <div>
-                    <h3 className="font-bold font-din text-white text-sm drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">{item.name}</h3>
-                    <p className="text-xs text-white/70 mt-1 font-barlow">{item.description}</p>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
+              Visual Adjustments
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {CosmeticItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="group/cos rounded-3xl overflow-hidden border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/30 transition-all duration-300"
+                >
+                  <div className="h-44 relative overflow-hidden bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center p-8">
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/cos:opacity-100 transition-opacity duration-500" />
+                    <span className="text-6xl group-hover/cos:scale-110 transition-transform duration-500 drop-shadow-2xl">{item.icon}</span>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-neon-cyan/20">
-                    <span className={`text-xs px-2 py-1 rounded-lg font-bold ${getRarityColor(item.rarity)}`}>
-                      {item.rarity}
-                    </span>
+                  
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-[7px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
+                        item.rarity === 'LEGENDARY' ? 'bg-secondary/20 text-secondary border border-secondary/30' : 
+                        item.rarity === 'EPIC' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-white/10 text-on-surface-variant'
+                      }`}>
+                        {item.rarity}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-on-surface mb-4 truncate">{item.name}</h4>
+                    
                     <button
                       onClick={() => handlePurchase(item)}
-                      className="px-3 py-1 bg-neon-cyan/20 hover:bg-neon-cyan/40 rounded-lg text-xs font-bold text-neon-cyan font-barlow transition-colors border border-neon-cyan/30 active:animate-squash-stretch"
+                      className="w-full flex items-center justify-between group/buy-cos"
                     >
-                      ◆ {item.price}
+                      <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant group-hover/buy-cos:text-primary transition-colors">Purchase</span>
+                      <div className="flex items-center gap-1 text-primary font-headline font-black italic slanted text-sm">
+                        <span className="material-symbols-outlined text-xs">diamond</span>
+                        {item.price}
+                      </div>
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         );
       case 'SEASON_PASS':
         return (
-          <div className="space-y-6">
-            <div className="glass-card-elevated rounded-2xl p-8 border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/20 bg-gradient-to-br from-neon-cyan/10 to-broadcast-overlay/40 skew-container">
-              <h3 className="text-3xl font-din font-black text-neon-cyan mb-4 drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">Premium Season Pass</h3>
-              <p className="text-white/80 mb-6 text-lg font-barlow font-bold">Unlock 50 premium tiers with exclusive rewards</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {['Exclusive Cosmetics', '2x XP Boost', 'Premium Currency', 'Seasonal Weapon'].map((benefit) => (
-                  <div key={benefit} className="glass-card-elevated rounded-2xl p-4 text-center border border-neon-cyan/30 hover:border-neon-cyan/50">
-                    <div className="text-sm font-bold font-barlow text-white">{benefit}</div>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="group/pass relative overflow-hidden rounded-[40px] border border-white/10 bg-surface shadow-2xl">
+              {/* Season Banner */}
+              <div className="h-64 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-secondary/40 via-surface to-surface z-0" />
+                <div className="absolute inset-0 flex items-center px-12 z-10">
+                  <div>
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="h-8 w-1 bg-secondary shadow-[0_0_15px_rgba(255,215,9,0.5)]" />
+                      <span className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow">Season 04: Velocity</span>
+                    </div>
+                    <p className="text-on-surface-variant font-bold max-w-lg italic uppercase tracking-wider text-[11px]">Deploy the premium battle infrastructure to access top-tier rewards</p>
                   </div>
-                ))}
+                </div>
+                <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                  <span className="material-symbols-outlined text-[160px] text-secondary">military_tech</span>
+                </div>
               </div>
-              <button
-                onClick={() => handlePurchase({ id: 'season-pass', name: 'Premium Season Pass', description: '', price: 999, currency: 'PREMIUM', rarity: 'EPIC', icon: '⭐' })}
-                className="w-full px-6 py-4 bg-neon-cyan/30 hover:bg-neon-cyan/40 hover:shadow-lg hover:shadow-neon-cyan/60 rounded-2xl text-neon-cyan font-black font-barlow text-lg transition-all border-2 border-neon-cyan/50 active:animate-squash-stretch drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]"
-              >
-                Unlock Pass - ◆ 999
-              </button>
+
+              {/* Benefits Grid */}
+              <div className="p-12 border-t border-white/5 bg-white/[0.02]">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                  {[
+                    { title: 'Exclusive Assets', icon: 'auto_awesome' },
+                    { title: '2x Speed Matrix', icon: 'bolt' },
+                    { title: 'Diamond Reserves', icon: 'diamond' },
+                    { title: 'Elite Gear', icon: 'checkroom' },
+                  ].map((benefit) => (
+                    <div key={benefit.title} className="p-6 rounded-3xl bg-white/5 border border-white/5 hover:border-secondary/30 transition-all group/benefit">
+                      <span className="material-symbols-outlined text-secondary/60 group-hover/benefit:text-secondary transition-colors mb-4 block text-3xl">{benefit.icon}</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant leading-tight block">{benefit.title}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => handlePurchase({ id: 'season-pass', name: 'Premium Season Pass', description: '', price: 999, currency: 'PREMIUM', rarity: 'EPIC', icon: '⭐' })}
+                  className="w-full relative group/buy-pass"
+                >
+                  <div className="absolute inset-0 bg-secondary blur-2xl opacity-10 group-hover/buy-pass:opacity-30 transition-all duration-700" />
+                  <div className="relative h-20 bg-secondary/10 border-2 border-secondary/40 hover:border-secondary hover:bg-secondary/20 rounded-[24px] flex items-center justify-center gap-6 transition-all duration-300">
+                    <span className="font-headline text-2xl font-black italic slanted uppercase text-secondary gold-glow">Unlock Access Node</span>
+                    <div className="h-8 w-[1px] bg-secondary/30" />
+                    <div className="flex items-center gap-3 font-headline text-2xl font-black italic slanted text-secondary gold-glow">
+                      <span className="material-symbols-outlined text-2xl">diamond</span>
+                      999
+                    </div>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         );
       case 'BUNDLES':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              {
-                id: 'bundle-1',
-                name: 'Starter Bundle',
-                items: 'Suit + Cap + Goggles',
-                price: 1200,
-              },
-              {
-                id: 'bundle-2',
-                name: 'Champion Bundle',
-                items: 'Full cosmetics + Walkout + Celebration',
-                price: 2500,
-              },
-            ].map((bundle) => (
-              <div
-                key={bundle.id}
-                className="glass-card-elevated rounded-2xl p-6 border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/15 hover:shadow-lg hover:shadow-neon-cyan/30 transition-all bg-gradient-to-br from-neon-cyan/10 to-broadcast-overlay/40 skew-container"
-              >
-                <h3 className="text-2xl font-din font-black text-white mb-2 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">{bundle.name}</h3>
-                <p className="text-sm text-white/80 mb-4 font-barlow font-bold">{bundle.items}</p>
-                <button
-                  onClick={() => handlePurchase({ id: bundle.id, name: bundle.name, description: bundle.items, price: bundle.price, currency: 'PREMIUM', rarity: 'EPIC', icon: '📦' })}
-                  className="w-full px-4 py-3 bg-neon-cyan/30 hover:bg-neon-cyan/40 hover:shadow-lg hover:shadow-neon-cyan/60 rounded-2xl text-neon-cyan font-bold font-barlow transition-all border-2 border-neon-cyan/50 active:animate-squash-stretch drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]"
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
+              Strategic Packages
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                {
+                  id: 'bundle-1',
+                  name: 'Apex Starter Kit',
+                  items: 'Hydro Suit + Neon Cap + Goggles',
+                  price: 1200,
+                  rarity: 'EPIC',
+                },
+                {
+                  id: 'bundle-2',
+                  name: 'Grand Prix Collection',
+                  items: 'Full Kinetic Cosmetics + Walkout + Victory Celebration',
+                  price: 2500,
+                  rarity: 'LEGENDARY',
+                },
+              ].map((bundle) => (
+                <div
+                  key={bundle.id}
+                  className="group/bundle relative p-8 rounded-[32px] border border-white/10 bg-white/5 hover:border-primary/40 transition-all duration-500 overflow-hidden"
                 >
-                  Buy Bundle - ◆ {bundle.price}
-                </button>
-              </div>
-            ))}
+                  <div className="absolute top-0 right-0 p-8 opacity-5">
+                    <span className="material-symbols-outlined text-[100px] text-primary">inventory_2</span>
+                  </div>
+                  
+                  <div className="relative z-10">
+                    <span className={`text-[8px] font-black italic slanted uppercase tracking-[0.4em] px-2 py-1 rounded bg-white/5 border border-white/10 mb-4 inline-block ${bundle.rarity === 'LEGENDARY' ? 'text-secondary border-secondary/30' : 'text-primary border-primary/30'}`}>
+                      {bundle.rarity} Multi-Pack
+                    </span>
+                    <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface mb-2 group-hover/bundle:text-glow transition-all">{bundle.name}</h3>
+                    <p className="text-[11px] text-on-surface-variant font-bold uppercase tracking-wider mb-8">{bundle.items}</p>
+                    
+                    <button
+                      onClick={() => handlePurchase({ id: bundle.id, name: bundle.name, description: bundle.items, price: bundle.price, currency: 'PREMIUM', rarity: 'EPIC', icon: '📦' })}
+                      className="w-full h-14 rounded-2xl bg-primary/10 border border-primary/30 hover:bg-primary/20 hover:border-primary flex items-center justify-between px-6 transition-all group/buy-b"
+                    >
+                      <span className="font-headline font-black italic slanted uppercase text-[10px] tracking-widest text-on-surface-variant group-hover/buy-b:text-primary transition-colors">Acquire Bundle</span>
+                      <div className="flex items-center gap-2 text-primary font-headline text-xl font-black italic slanted">
+                        <span className="material-symbols-outlined text-sm">diamond</span>
+                        {bundle.price}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         );
       case 'CELEBRATION':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {CelebrationPacks.map((item) => (
-              <div
-                key={item.id}
-                className="glass-card-elevated rounded-2xl overflow-hidden border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/15 hover:shadow-lg hover:shadow-neon-cyan/30 transition-all skew-container"
-              >
-                <div className="h-40 bg-gradient-to-br from-neon-cyan/15 to-neon-cyan/5 flex items-center justify-center">
-                  <div className="text-6xl animate-bounce">{item.icon}</div>
-                </div>
-                <div className="p-4 space-y-3">
-                  <div>
-                    <h3 className="font-bold font-din text-white text-sm drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">{item.name}</h3>
-                    <p className="text-xs text-white/70 mt-1 font-barlow">{item.description}</p>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
+              Victory Protocols
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {CelebrationPacks.map((item) => (
+                <div
+                  key={item.id}
+                  className="group/cel rounded-3xl overflow-hidden border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/30 transition-all duration-300"
+                >
+                  <div className="h-44 relative overflow-hidden bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center p-8">
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/cel:opacity-100 transition-opacity duration-500" />
+                    <span className="text-6xl group-hover/cel:scale-110 transition-transform duration-500 drop-shadow-2xl">{item.icon}</span>
                   </div>
-                  <button
-                    onClick={() => handlePurchase(item)}
-                    className="w-full px-3 py-2 bg-neon-cyan/20 hover:bg-neon-cyan/40 hover:shadow-lg hover:shadow-neon-cyan/50 rounded-lg text-xs font-bold text-neon-cyan font-barlow transition-all border border-neon-cyan/30 active:animate-squash-stretch"
-                  >
-                    ◆ {item.price}
-                  </button>
+                  
+                  <div className="p-5">
+                    <h4 className="text-sm font-bold text-on-surface mb-1 truncate">{item.name}</h4>
+                    <p className="text-[10px] text-on-surface-variant mb-4 line-clamp-2 leading-tight uppercase font-bold tracking-tight">{item.description}</p>
+                    
+                    <button
+                      onClick={() => handlePurchase(item)}
+                      className="w-full flex items-center justify-between group/buy-cel"
+                    >
+                      <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant group-hover/buy-cel:text-primary transition-colors">Equip Anim</span>
+                      <div className="flex items-center gap-1 text-primary font-headline font-black italic slanted text-sm">
+                        <span className="material-symbols-outlined text-xs">diamond</span>
+                        {item.price}
+                      </div>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         );
       case 'EVENT_SHOP':
         return (
-          <div className="glass-card-elevated rounded-2xl p-6 border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/15 bg-gradient-to-br from-neon-cyan/10 to-broadcast-overlay/40 skew-container">
-            <h3 className="text-2xl font-din font-black text-neon-cyan mb-2 drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">Event Shop - Sprint Cup</h3>
-            <p className="text-white/80 mb-6 text-sm font-barlow font-bold">Limited-time items available during current event</p>
-            <div className="space-y-3">
-              {[
-                { name: 'Sprint Boost Pack', cost: '500 Event Tokens' },
-                { name: 'Exclusive Sprint Suit', cost: '1000 Event Tokens' },
-                { name: 'VIP Event Pass', cost: '2000 Event Tokens' },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between glass-card-elevated p-4 rounded-lg border border-neon-cyan/30 hover:border-neon-cyan/50">
-                  <div className="font-bold font-din text-white text-lg drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">{item.name}</div>
-                  <button className="px-4 py-2 bg-neon-cyan/20 hover:bg-neon-cyan/40 rounded-lg text-neon-cyan font-bold font-barlow text-sm transition-colors border border-neon-cyan/30 active:animate-squash-stretch">
-                    {item.cost}
-                  </button>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="relative p-8 rounded-[40px] border border-secondary/20 bg-secondary/5 overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-10">
+                <span className="material-symbols-outlined text-[120px] text-secondary">flash_on</span>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="h-[1px] w-12 bg-secondary/40" />
+                  <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em]">Limited Event: Sprint Cup</span>
                 </div>
-              ))}
+                <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-6">Redeem Event Tokens</h3>
+                
+                <div className="grid gap-3">
+                  {[
+                    { name: 'Sprint Boost Pack', cost: '500 Tokens', icon: 'bolt' },
+                    { name: 'Exclusive Sprint Suit', cost: '1000 Tokens', icon: 'apparel' },
+                    { name: 'VIP Event Pass Extension', cost: '2000 Tokens', icon: 'confirmation_number' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="group/ev flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-secondary/40 transition-all flex-wrap gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+                          <span className="material-symbols-outlined text-secondary text-xl">{item.icon}</span>
+                        </div>
+                        <span className="font-headline text-lg font-black italic slanted uppercase text-on-surface group-hover/ev:text-glow transition-all">{item.name}</span>
+                      </div>
+                      <button className="h-12 px-6 rounded-xl bg-secondary/20 border border-secondary/40 hover:bg-secondary hover:text-surface font-headline font-black italic slanted uppercase text-xs tracking-widest text-secondary transition-all">
+                        Redeem: {item.cost}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -377,53 +486,102 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 max-[900px]:p-4 space-y-8 relative safe-zone-x">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header with Currency Display */}
-        <div className="flex items-center justify-between">
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      {/* Cinematic Store Header */}
+      <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-1/2 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+        
+        <div className="relative z-10 flex items-end justify-between gap-8 flex-wrap">
           <div>
-            <h1 className="text-5xl max-[900px]:text-3xl font-din font-black text-white mb-2 drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">Store</h1>
-            <p className="text-white/80 text-lg max-[900px]:text-sm font-barlow font-bold">Premium cosmetics and season pass</p>
-          </div>
-          <div className="flex gap-4 max-[900px]:flex-col max-[900px]:gap-2">
-            <div className="glass-card-elevated px-5 py-4 bg-gradient-to-br from-neon-cyan/20 to-neon-cyan/5 rounded-2xl border border-neon-cyan/50 shadow-lg shadow-neon-cyan/20">
-              <div className="text-xs text-neon-cyan font-bold uppercase font-barlow drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">Premium Currency</div>
-              <div className="text-2xl max-[900px]:text-lg font-din font-black text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.4)]">◆ {playerPremiumCurrency}</div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="h-[1px] w-12 bg-primary/40" />
+              <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Global Marketplace</span>
             </div>
-            <div className="glass-card-elevated px-5 py-4 bg-gradient-to-br from-yellow-400/20 to-yellow-400/5 rounded-2xl border border-yellow-400/50 shadow-lg shadow-yellow-400/20">
-              <div className="text-xs text-yellow-300 font-bold uppercase font-barlow drop-shadow-[0_0_4px_rgba(250,204,21,0.4)]">Coins</div>
-              <div className="text-2xl max-[900px]:text-lg font-din font-black text-yellow-300 drop-shadow-[0_0_6px_rgba(250,204,21,0.4)]">$ {playerCoins.toLocaleString()}</div>
+            
+            <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
+              Premium Store
+            </h1>
+            <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest">Equip your athlete with the finest Hydro-Kinetic gear</p>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="relative group/coin pt-4">
+              <span className="absolute top-0 left-0 text-[8px] font-black text-primary/60 uppercase tracking-widest group-hover/coin:text-primary transition-colors">Premium Diamonds</span>
+              <div className="px-6 py-3 bg-primary/10 border border-primary/30 rounded-2xl flex items-center gap-3 shadow-[0_0_20px_rgba(129,236,255,0.1)] group-hover/coin:border-primary/50 transition-all">
+                <span className="material-symbols-outlined text-primary text-glow text-xl">diamond</span>
+                <span className="font-headline text-2xl font-black italic slanted text-primary text-glow">{playerPremiumCurrency}</span>
+                <button className="ml-2 h-6 w-6 rounded-lg bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors">
+                  <span className="material-symbols-outlined text-sm">add</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="relative group/coin pt-4">
+              <span className="absolute top-0 left-0 text-[8px] font-black text-secondary/60 uppercase tracking-widest group-hover/coin:text-secondary transition-colors">Athlete Coins</span>
+              <div className="px-6 py-3 bg-secondary/10 border border-secondary/30 rounded-2xl flex items-center gap-3 shadow-[0_0_20px_rgba(255,215,9,0.1)] group-hover/coin:border-secondary/50 transition-all">
+                <span className="material-symbols-outlined text-secondary gold-glow text-xl">payments</span>
+                <span className="font-headline text-2xl font-black italic slanted text-secondary gold-glow">{playerCoins.toLocaleString()}</span>
+                <button className="ml-2 h-6 w-6 rounded-lg bg-secondary/20 flex items-center justify-center hover:bg-secondary/40 transition-colors">
+                  <span className="material-symbols-outlined text-sm">add</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Notification */}
+      <div className="p-6 max-w-7xl mx-auto w-full space-y-8 pb-12">
+        {/* Tab Navigation */}
+        <div className="flex gap-2 flex-wrap items-center">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative px-6 py-3 rounded-xl font-headline font-black italic slanted uppercase text-[11px] tracking-wider transition-all duration-300 overflow-hidden border ${
+                  isActive 
+                    ? 'bg-primary/20 border-primary/40 text-primary text-glow shadow-[0_0_20px_rgba(129,236,255,0.2)]' 
+                    : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/10 hover:text-on-surface'
+                }`}
+              >
+                <div className="flex items-center gap-2 relative z-10">
+                  <span className="material-symbols-outlined text-[18px]">{isActive ? 'radio_button_checked' : 'radio_button_unchecked'}</span>
+                  {tab.label}
+                </div>
+                {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Purchase Notification */}
         {purchaseMessage && (
-          <div className="px-6 py-3 glass-card-elevated bg-green-400/20 border border-green-400/60 rounded-2xl text-green-300 font-bold shadow-lg shadow-green-400/20 font-barlow">
-            ✓ {purchaseMessage}
+          <div className="fixed top-24 right-8 z-[100] animate-in slide-in-from-right duration-500">
+            <div className="p-4 bg-primary/20 border border-primary/40 rounded-2xl flex items-center gap-4 backdrop-blur-xl shadow-2xl">
+              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/40">
+                <span className="material-symbols-outlined text-white">shopping_bag</span>
+              </div>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-primary block mb-1">Transaction Success</span>
+                <span className="text-sm font-bold text-on-surface">{purchaseMessage}</span>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="flex gap-3 flex-wrap">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-bold font-barlow uppercase text-sm transition-all border ${
-                activeTab === tab.id
-                  ? 'bg-neon-cyan/30 text-neon-cyan shadow-lg shadow-neon-cyan/40 border-neon-cyan/60 drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]'
-                  : 'glass-card-elevated text-white/70 border-neon-cyan/20 hover:border-neon-cyan/50 hover:bg-neon-cyan/10'
-              }`}
-            >
-              {tab.icon}
-              <span className="hidden md:inline">{tab.label}</span>
-            </button>
-          ))}
+        {/* Dynamic Content Panel */}
+        <div className="min-h-[600px] relative">
+          <div className="absolute -top-4 -right-4 p-8 opacity-5 pointer-events-none">
+            <span className="material-symbols-outlined text-[240px] text-primary">
+              {activeTab === 'FEATURED' ? 'grade' : activeTab === 'COSMETICS' ? 'apparel' : activeTab === 'SEASON_PASS' ? 'military_tech' : activeTab === 'BUNDLES' ? 'inventory_2' : activeTab === 'CELEBRATION' ? 'celebration' : 'event'}
+            </span>
+          </div>
+          
+          <div className="relative z-10 h-full">
+            {renderTab()}
+          </div>
         </div>
-
-        {/* Tab Content */}
-        <div>{renderTab()}</div>
       </div>
     </div>
   );

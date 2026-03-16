@@ -28,105 +28,56 @@ const LiveEvents: EventCard[] = [
   {
     id: 'featured-1',
     title: 'World Sprint Cup',
-    description: 'Global sprint championship with elite swimmers',
+    description: 'Elite global championship series. Top 1% qualification required.',
     category: 'SEASONAL',
-    timeLeft: '05h 14m 22s',
-    reward: '2000 XP • 5000 Coins',
+    timeLeft: '05:14:22',
+    reward: 'Global Founder Emblem • 50k Coins',
     participants: 12500,
     featured: true,
-    color: 'from-yellow-500 to-amber-500',
-    icon: (
-      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    color: 'text-secondary',
+    icon: 'emoji_events',
   },
   {
     id: 'daily-1',
-    title: 'Daily Sprint Challenge',
-    description: 'Complete 2 sprint races for bonus rewards',
+    title: 'Kinetic Drift',
+    description: 'Perfect 5 consecutive turns in training.',
     category: 'DAILY',
-    timeLeft: '18h 42m',
-    reward: '200 XP',
-    color: 'from-emerald-500 to-teal-500',
-    icon: (
-      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-      </svg>
-    ),
+    timeLeft: '18:42:00',
+    reward: '2.5k XP Boost',
+    color: 'text-primary',
+    icon: 'speed',
   },
   {
     id: 'weekly-1',
-    title: 'Butterfly Marathon',
-    description: 'Test your endurance in butterfly events',
+    title: 'Hydro-Endurance',
+    description: 'Maintain 95% efficiency for 800m.',
     category: 'WEEKLY',
-    timeLeft: '2d 14h 30m',
-    reward: '1500 XP • 3000 Coins',
+    timeLeft: '2d 14h',
+    reward: 'Rare Bio-Suit Material',
     participants: 8300,
-    color: 'from-purple-500 to-pink-500',
-    icon: (
-      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
+    color: 'text-primary',
+    icon: 'timer',
   },
   {
     id: 'sponsor-1',
-    title: 'AquaPro Sponsor Challenge',
-    description: 'Win 3 events wearing AquaPro gear',
+    title: 'AquaPulse Intake',
+    description: 'Showcase gear performance in open water.',
     category: 'SPONSOR',
-    timeLeft: '3d 8h',
-    reward: '500 Coins • Exclusive Suit',
-    color: 'from-blue-500 to-cyan-500',
-    icon: (
-      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    id: 'daily-2',
-    title: 'Perfect Turn Drills',
-    description: 'Execute 3 perfect turns for rewards',
-    category: 'DAILY',
-    timeLeft: '18h 42m',
-    reward: '150 XP',
-    color: 'from-cyan-500 to-blue-500',
-    icon: (
-      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-      </svg>
-    ),
-  },
-  {
-    id: 'seasonal-1',
-    title: 'Continental Relay Championship',
-    description: 'Team-based relay event across regions',
-    category: 'SEASONAL',
-    timeLeft: '4d 2h 15m',
-    reward: '3000 XP • Premium Pass Tier',
-    participants: 6200,
-    color: 'from-orange-500 to-red-500',
-    icon: (
-      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zM5 20a3 3 0 015.856-1.487M5 10a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
+    timeLeft: '3d 08h',
+    reward: 'Sponsor Tier Unlock',
+    color: 'text-secondary',
+    icon: 'verified',
   },
   {
     id: 'special-1',
-    title: 'Midnight Finals Series',
-    description: 'Special night-time racing event',
+    title: 'Neon Night Circuit',
+    description: 'Illuminated evening finals series.',
     category: 'SPECIAL',
     timeLeft: '6d 12h',
-    reward: '2500 XP • Neon Cosmetics',
+    reward: 'Glow-Line Cosmetics',
     participants: 4100,
-    color: 'from-indigo-500 to-purple-500',
-    icon: (
-      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 015.646 5.646 9.001 9.001 0 0020.354 15.354z" />
-      </svg>
-    ),
+    color: 'text-primary',
+    icon: 'nights_stay',
   },
 ];
 
@@ -148,140 +99,171 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
   const featuredEvent = LiveEvents.find((e) => e.featured);
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-4xl font-black text-white mb-2">Live Events</h1>
-          <p className="text-slate-400">Limited-time challenges and competitions</p>
+    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      {/* Cinematic Header */}
+      <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
+        
+        <div className="relative z-10 flex items-center justify-between gap-8 flex-wrap">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="h-[1px] w-12 bg-primary/40" />
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-sm animate-pulse">broadcast_on_home</span>
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Live Synchronization Active</span>
+              </div>
+            </div>
+            
+            <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow">
+              Competition Hub
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-6 p-4 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl">
+             <div className="flex flex-col text-right">
+               <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-1">Seasonal Progress</span>
+               <span className="font-headline text-xl font-black italic slanted text-primary text-glow">Tier 42 Elite</span>
+             </div>
+             <div className="h-10 w-10 rounded-full border-2 border-primary/40 p-1">
+                <div className="h-full w-full rounded-full bg-primary/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary text-xl">star</span>
+                </div>
+             </div>
+          </div>
         </div>
+      </div>
 
+      <div className="p-8 max-w-7xl mx-auto w-full space-y-12 pb-24">
         {/* Featured Event Banner */}
         {featuredEvent && (
-          <div
-            className={`relative rounded-lg p-8 overflow-hidden border-2 border-yellow-500/50 cursor-pointer hover:scale-105 transition-transform`}
-          >
-            {/* Background Gradient */}
-            <div
-              className={`absolute inset-0 bg-gradient-to-r ${featuredEvent.color} opacity-20`}
-            ></div>
+          <div className="relative group/featured rounded-[48px] p-1 bg-gradient-to-br from-secondary/40 via-white/5 to-transparent hover:scale-[1.01] transition-all duration-700 shadow-2xl overflow-hidden">
+            <div className="relative z-10 p-12 max-[900px]:p-8 rounded-[46px] bg-surface flex items-center justify-between gap-12 flex-wrap overflow-hidden">
+               {/* Background Effects */}
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-secondary/10 via-transparent to-transparent opacity-40" />
+               <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-secondary/5 blur-3xl animate-pulse" />
+               
+               <div className="flex-1 relative z-10">
+                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/10 border border-secondary/20 mb-8">
+                   <span className="material-symbols-outlined text-secondary text-sm animate-bounce">rocket_launch</span>
+                   <span className="text-[10px] font-black uppercase tracking-widest text-secondary gold-glow italic slanted">Priority Championship</span>
+                 </div>
+                 
+                 <h2 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-6 leading-tight">
+                   {featuredEvent.title}
+                 </h2>
+                 
+                 <p className="text-[13px] text-on-surface-variant uppercase font-black leading-relaxed tracking-tight max-w-xl group-hover/featured:text-on-surface transition-colors duration-500">
+                   {featuredEvent.description}
+                 </p>
+               </div>
 
-            {/* Content */}
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="text-sm font-black text-yellow-400 uppercase tracking-wider mb-2">
-                  Featured Event
-                </div>
-                <h2 className="text-3xl font-black text-white mb-3">{featuredEvent.title}</h2>
-                <p className="text-lg text-slate-300 mb-4">{featuredEvent.description}</p>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-300">Time Remaining:</span>
-                    <span className="text-yellow-300 font-mono font-bold text-lg">{featuredEvent.timeLeft}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-300">Reward:</span>
-                    <span className="text-emerald-300 font-bold">{featuredEvent.reward}</span>
-                  </div>
-                  {featuredEvent.participants && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-300">Participants:</span>
-                      <span className="text-cyan-300 font-bold">{featuredEvent.participants.toLocaleString()}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => onEventSelect?.(featuredEvent.id)}
-                className="px-8 py-6 bg-gradient-to-r from-yellow-500 to-amber-500 hover:shadow-2xl hover:shadow-yellow-500/50 text-white font-black text-2xl rounded-lg uppercase transition-all h-full flex items-center justify-center"
-              >
-                Enter Event
-              </button>
+               <div className="flex flex-col items-center gap-8 relative z-10 min-w-[280px]">
+                 <div className="text-center group/timer">
+                   <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-[0.4em] mb-3 block opacity-60">Registration Closes In</span>
+                   <div className="font-headline text-5xl font-black italic slanted text-secondary gold-glow group-hover/timer:scale-110 transition-transform duration-500">
+                     {featuredEvent.timeLeft}
+                   </div>
+                 </div>
+
+                 <button 
+                   onClick={() => onEventSelect?.(featuredEvent.id)}
+                   className="w-full h-20 rounded-[28px] bg-secondary border border-white/20 shadow-[0_0_40px_rgba(255,215,9,0.3)] hover:shadow-[0_0_60px_rgba(255,215,9,0.5)] hover:scale-105 active:scale-95 transition-all duration-500 flex items-center justify-center gap-4 group/btn overflow-hidden relative"
+                 >
+                    <div className="absolute inset-x-0 bottom-0 h-1 bg-white/40 shadow-[0_0_20px_rgba(255,255,255,1)]" />
+                    <span className="font-headline text-2xl font-black italic slanted uppercase text-surface relative z-10 group-hover/btn:tracking-widest transition-all">Engage Event</span>
+                    <span className="material-symbols-outlined text-surface text-3xl relative z-10 group-hover/btn:translate-x-2 transition-transform">arrow_forward</span>
+                 </button>
+               </div>
             </div>
           </div>
         )}
 
-        {/* Category Filter */}
-        <div className="flex gap-2 flex-wrap">
+        {/* Category Tabs */}
+        <div className="flex gap-4 flex-wrap items-center">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 rounded-lg font-bold uppercase text-sm transition-all ${
+            className={`relative px-8 py-5 rounded-[24px] font-headline font-black italic slanted uppercase text-[11px] tracking-widest transition-all duration-500 border overflow-hidden ${
               selectedCategory === null
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
-                : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
+                ? 'bg-primary/20 border-primary/40 text-primary text-glow shadow-[0_0_30px_rgba(129,236,255,0.2)]'
+                : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20 hover:text-on-surface'
             }`}
           >
-            All Events
+            All Circuits
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-1000" />
           </button>
+          
           {EventCategories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id as EventCategory)}
-              className={`px-4 py-2 rounded-lg font-bold uppercase text-sm transition-all ${
+              className={`relative px-8 py-5 rounded-[24px] font-headline font-black italic slanted uppercase text-[11px] tracking-widest transition-all duration-500 border overflow-hidden ${
                 selectedCategory === cat.id
-                  ? `bg-gradient-to-r ${EventCategories.find((c) => c.id === cat.id)?.color || ''} text-white`
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50'
+                  ? 'bg-primary/20 border-primary/40 text-primary text-glow shadow-[0_0_30px_rgba(129,236,255,0.2)]'
+                  : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20 hover:text-on-surface'
               }`}
             >
               {cat.label}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-1000" />
             </button>
           ))}
         </div>
 
         {/* Events Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredEvents.filter((e) => !e.featured).map((event) => (
-            <button
+            <div
               key={event.id}
+              className="group/card relative p-1 rounded-[40px] bg-gradient-to-br from-white/10 to-transparent hover:from-primary/40 transition-all duration-500 cursor-pointer"
               onClick={() => onEventSelect?.(event.id)}
-              className={`relative rounded-lg overflow-hidden border transition-all hover:scale-105 hover:shadow-lg group`}
             >
-              {/* Background */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${event.color} opacity-90 group-hover:opacity-100`}
-              ></div>
+               <div className="relative z-10 p-8 rounded-[36px] bg-surface h-full flex flex-col justify-between overflow-hidden">
+                 {/* Background Glow */}
+                 <div className="absolute -right-20 -bottom-20 h-40 w-40 bg-primary/5 blur-3xl group-hover/card:bg-primary/10 transition-colors" />
+                 
+                 <div>
+                   <div className="flex items-start justify-between mb-8">
+                     <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover/card:bg-primary/20 group-hover/card:border-primary/40 transition-all">
+                       <span className="material-symbols-outlined text-3xl text-on-surface-variant group-hover/card:text-primary group-hover/card:text-glow transition-all">
+                         {event.icon as string}
+                       </span>
+                     </div>
+                     <div className="text-right">
+                       <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest block opacity-60">Status</span>
+                       <span className="text-[10px] font-black italic slanted text-primary uppercase animate-pulse">Synchronizing</span>
+                     </div>
+                   </div>
 
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                   <div className="mb-8">
+                     <div className="flex items-center gap-2 mb-2">
+                       <span className={`h-2 w-2 rounded-full ${event.color === 'text-secondary' ? 'bg-secondary' : 'bg-primary'}`} />
+                       <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest">{event.category} Dossier</span>
+                     </div>
+                     <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface mb-2 group-hover/card:text-glow transition-all">{event.title}</h3>
+                     <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-tight leading-relaxed group-hover/card:text-on-surface/80 transition-colors">
+                       {event.description}
+                     </p>
+                   </div>
+                 </div>
 
-              {/* Content */}
-              <div className="relative h-full p-6 flex flex-col justify-between min-h-80">
-                {/* Top Section */}
-                <div className="space-y-4">
-                  <div className="text-white/80 group-hover:text-white transition-colors">{event.icon}</div>
-                  <div>
-                    <div className="text-xs font-black text-white/70 uppercase tracking-wider mb-1">
-                      {event.category}
-                    </div>
-                    <h3 className="text-xl font-black text-white">{event.title}</h3>
-                    <p className="text-sm text-gray-200 mt-2">{event.description}</p>
-                  </div>
-                </div>
+                 <div className="space-y-6">
+                   <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+                     <div className="flex items-center justify-between mb-3 text-[9px] font-black uppercase tracking-widest opacity-60">
+                        <span>Terminal Reward</span>
+                        <span>Time Remaining</span>
+                     </div>
+                     <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-black uppercase italic slanted text-on-surface tracking-tight">{event.reward}</span>
+                        <span className="font-headline text-lg font-black italic slanted text-primary text-glow">{event.timeLeft}</span>
+                     </div>
+                   </div>
 
-                {/* Bottom Section */}
-                <div className="space-y-3 pt-4 border-t border-white/20">
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-gray-300">
-                      <span>Ends in:</span>
-                      <span className="font-mono font-bold">{event.timeLeft}</span>
-                    </div>
-                    {event.participants && (
-                      <div className="flex justify-between text-xs text-gray-300">
-                        <span>Players:</span>
-                        <span className="font-bold text-cyan-300">{event.participants.toLocaleString()}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="bg-white/20 rounded px-3 py-2">
-                    <div className="text-xs text-gray-300 mb-1">Reward</div>
-                    <div className="text-sm font-bold text-white">{event.reward}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Shine Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-500 opacity-0 group-hover:opacity-100 pointer-events-none"></div>
-            </button>
+                   <button className="w-full h-12 rounded-[18px] bg-white/5 border border-white/10 group-hover/card:bg-primary group-hover/card:text-surface transition-all duration-500 font-headline font-black italic slanted uppercase text-[10px] tracking-widest flex items-center justify-center gap-2">
+                      Access Data Stream
+                      <span className="material-symbols-outlined text-sm">open_in_new</span>
+                   </button>
+                 </div>
+               </div>
+            </div>
           ))}
         </div>
       </div>
