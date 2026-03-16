@@ -1,6 +1,6 @@
 /**
- * Top Bar - SWIM 26 Material Design 3
- * Shows player profile, currencies with new dark theme design
+ * Top Bar - Broadcast HUD Design
+ * Sleek translucent glass HUD with neon accents and high-contrast information
  */
 
 import React, { useMemo, useState } from 'react';
@@ -54,16 +54,20 @@ export const TopBar: React.FC<TopBarProps> = ({
           <h1 className="font-headline font-bold text-2xl tracking-tighter uppercase italic text-glow">SWIM26</h1>
         </div>
 
-        {/* Profile Button */}
+        {/* Profile Button - Slanted Nameplate */}
         <button
           onClick={onProfileClick}
           className="flex items-center gap-3 hover:bg-white/10 transition-colors px-3 py-2 rounded-full group border border-transparent hover:border-white/15"
         >
+          {/* Slanted glass background */}
+          <div className="absolute inset-0 glass-card-elevated rounded-lg opacity-0 group-hover:opacity-100 transition-opacity -z-10"></div>
+
+          {/* Avatar */}
           {playerAvatarUrl ? (
             <img
               src={playerAvatarUrl}
               alt={playerName}
-              className="w-10 h-10 rounded-full border-2 border-primary group-hover:border-primary-fixed"
+              className="w-10 h-10 rounded-lg border-2 border-neon-cyan group-hover:border-neon-cyan group-hover:shadow-[0_0_12px_rgba(0,255,255,0.6)]"
             />
           ) : (
             <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
@@ -120,11 +124,11 @@ export const TopBar: React.FC<TopBarProps> = ({
           }}
           className="relative p-2 hover:bg-white/10 rounded-full transition-colors group"
         >
-          <span className="material-symbols-outlined text-white group-hover:text-white transition-colors">
+          <span className="material-symbols-outlined text-white group-hover:text-neon-cyan transition-colors drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
             notifications
           </span>
           {notificationCount > 0 && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-error rounded-full flex items-center justify-center text-white text-xs font-bold">
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-[0_0_8px_rgba(255,0,0,0.6)]">
               {notificationCount}
             </div>
           )}
@@ -133,9 +137,9 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Inbox */}
         <button
           onClick={onInboxClick}
-          className="relative p-2 hover:bg-white/10 rounded-full transition-colors group"
+          className="p-2 hover:bg-neon-cyan/10 rounded-lg transition-all duration-300 group border border-transparent hover:border-neon-cyan/30"
         >
-          <span className="material-symbols-outlined text-white group-hover:text-white transition-colors">
+          <span className="material-symbols-outlined text-white group-hover:text-neon-cyan transition-colors drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
             mail
           </span>
         </button>
@@ -143,9 +147,9 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Settings */}
         <button
           onClick={onSettingsClick}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors group"
+          className="p-2 hover:bg-neon-cyan/10 rounded-lg transition-all duration-300 group border border-transparent hover:border-neon-cyan/30"
         >
-          <span className="material-symbols-outlined text-white group-hover:text-white transition-colors group-hover:rotate-90 duration-300">
+          <span className="material-symbols-outlined text-white group-hover:text-neon-cyan transition-colors group-hover:rotate-90 duration-300 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
             settings
           </span>
         </button>

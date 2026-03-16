@@ -1,9 +1,9 @@
 /**
- * Left Navigation Rail - SWIM 26 Material Design 3
- * Core menu tabs with new design
+ * Left Navigation Rail - Game-Focused Vertical Tab Bar
+ * Oversized icons with neon cyan active states and broadcast aesthetic
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MenuScreen } from './GlobalMenuLayout';
 
 interface LeftNavigationRailProps {
@@ -32,6 +32,24 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
   currentScreen,
   onScreenChange,
 }) => {
+  const [hoveredItem, setHoveredItem] = useState<MenuScreen | null>(null);
+  const [tiltX, setTiltX] = useState(0);
+  const [tiltY, setTiltY] = useState(0);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>, itemId: MenuScreen) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientY - rect.top - rect.height / 2) / rect.height;
+    const y = (e.clientX - rect.left - rect.width / 2) / rect.width;
+    setTiltX(x * 8);
+    setTiltY(y * 8);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredItem(null);
+    setTiltX(0);
+    setTiltY(0);
+  };
+
   return (
     <nav className="w-20 bg-gradient-to-b from-[#0b162b]/85 to-[#070f1f]/85 backdrop-blur-md border-r border-white/15 flex flex-col items-center py-4 gap-1 overflow-y-auto overscroll-contain sticky left-0 top-16 self-start h-[calc(100dvh-9rem)] shadow-[8px_0_20px_rgba(0,0,0,0.35)] skew-x-[-6deg]">
       {NavItems.map((item) => (

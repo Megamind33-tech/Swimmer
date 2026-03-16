@@ -1,6 +1,6 @@
 /**
- * Bottom Quick Bar - SWIM 26 Material Design 3
- * Quick access to game modes and features
+ * Power Hub - Game-Focused Bottom-Right Action Cluster
+ * Primary action buttons with magnetic effects and broadcast aesthetic
  */
 
 import React from 'react';
@@ -11,7 +11,7 @@ import championshipActionImage from '../../designs/national_championships/screen
 import trainingActionImage from '../../designs/training_center/screen.png';
 
 interface BottomQuickBarProps {
-  onScreenChange?: (screen: MenuScreen) => void;
+  onScreenChange?: (screen: string) => void;
   onQuickRaceClick?: () => void;
   onTrainingClick?: () => void;
   onRankedClick?: () => void;
@@ -20,13 +20,14 @@ interface BottomQuickBarProps {
   onRewardsClick?: () => void;
 }
 
-interface QuickAction {
+interface PrimaryAction {
   id: string;
   label: string;
   icon: string;
   image: string;
   overlayClass: string;
   onClick?: () => void;
+  route?: string;
 }
 
 export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
@@ -90,6 +91,16 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
       onClick: props.onRewardsClick,
     },
   ];
+
+  const handleActionClick = (action: PrimaryAction) => {
+    setActiveButton(action.id);
+    setTimeout(() => setActiveButton(null), 150);
+
+    action.onClick?.();
+    if (!action.onClick && onScreenChange && action.route) {
+      onScreenChange(action.route);
+    }
+  };
 
   return (
     <nav className="h-20 min-h-20 shrink-0 bg-gradient-to-t from-[#070f1f]/98 to-[#0a162b]/98 backdrop-blur-md border-t-2 border-white/20 px-3 max-[900px]:px-2 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-2 flex items-center justify-center gap-2 sticky bottom-0 z-[70] shadow-[0_-10px_24px_rgba(0,0,0,0.45)] skew-x-[-6deg] max-[900px]:overflow-x-auto max-[900px]:justify-start">
