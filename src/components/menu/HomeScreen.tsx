@@ -80,19 +80,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* Live Race Wire - Broadcast Ticker Style */}
         <div className="glass-card-elevated border-2 border-neon-cyan/40 rounded-xl px-6 max-[900px]:px-4 py-3 max-[900px]:py-2.5 bg-gradient-to-r from-neon-cyan/10 via-neon-cyan/5 to-transparent group hover:border-neon-cyan/70 hover:shadow-[0_0_30px_rgba(0,255,255,0.2)] transition-all duration-300 wave-hover">
           <div className="flex items-center justify-between gap-3 max-[900px]:gap-2">
-            <div className="flex-1">
-              <p className="text-[11px] max-[900px]:text-[9px] font-barlow font-black uppercase tracking-wider text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.5)]">
-                Live Race Wire
-              </p>
-              <p className="text-sm max-[900px]:text-[10px] font-barlow font-bold text-white/90">
-                Rival Queue Active • 126 swimmers searching now
-              </p>
+            <div>
+              <p className="text-[11px] max-[900px]:text-[9px] font-black uppercase tracking-wider text-cyan-200">Live Race Wire</p>
+              <p className="text-sm max-[900px]:text-[10px] font-semibold text-white">Rival Queue Active • 126 swimmers searching now</p>
             </div>
-            <div className="flex items-center gap-2 shrink-0 px-3 py-1 rounded-lg bg-neon-cyan/20 border border-neon-cyan/30">
-              <span className="w-2 h-2 rounded-full bg-neon-cyan animate-live-pulse" />
-              <span className="text-[11px] max-[900px]:text-[9px] font-bold font-barlow uppercase text-neon-cyan tracking-wider">
-                Broadcast
-              </span>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="h-2.5 w-2.5 rounded-full bg-cyan-300 animate-pulse" />
+              <span className="text-[11px] max-[900px]:text-[9px] font-black uppercase text-cyan-100">Broadcast Live</span>
             </div>
           </div>
         </div>
@@ -132,7 +126,30 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </span>
               </span>
             </span>
-          </button>
+          </span>
+        </button>
+        </div>
+
+        {/* Mobile 19.5:9 Action Hub */}
+        <div className="action-hub-shell hidden max-[900px]:flex">
+          <div className="action-hub-arc">
+            <button
+              onClick={onPlayClick}
+              className="action-hub-button action-hub-primary"
+              aria-label="Start quick race"
+            >
+              <span className="material-symbols-outlined text-[22px]">play_arrow</span>
+              <span className="text-[10px] font-black uppercase tracking-wide">Quick Race</span>
+            </button>
+            <button
+              onClick={onCareerClick}
+              className="action-hub-button action-hub-secondary"
+              aria-label="Open training"
+            >
+              <span className="material-symbols-outlined text-[22px]">fitness_center</span>
+              <span className="text-[10px] font-black uppercase tracking-wide">Training</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -309,6 +326,7 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );
