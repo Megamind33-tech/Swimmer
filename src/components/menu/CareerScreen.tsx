@@ -99,75 +99,88 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
   const progressPercent = ((completedTiers + 0.5) / totalTiers) * 100;
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 max-[1024px]:p-3 space-y-8 max-[1024px]:space-y-4 bg-surface relative">
-      <div className="max-w-5xl mx-auto space-y-8 max-[1024px]:space-y-4 max-[1024px]:max-w-[68vw] max-[1024px]:mx-auto">
+    <div className="w-full h-full overflow-y-auto p-8 max-[1024px]:p-5 space-y-6 max-[1024px]:space-y-4 relative safe-zone-x">
+      <div className="max-w-5xl mx-auto space-y-6 max-[1024px]:space-y-4 max-[1024px]:max-w-[68vw] max-[1024px]:mx-auto">
         {/* Header */}
-        <div className="animate-slide-in-down">
-          <h1 className="text-5xl max-[1024px]:text-3xl font-black text-primary mb-2 text-glow">Career Journey</h1>
-          <p className="text-on-surface-variant text-lg max-[1024px]:text-sm">Your path to becoming a championship swimmer</p>
+        <div className="animate-slide-in-down bg-gradient-to-r from-broadcast-overlay via-neon-cyan/5 to-broadcast-overlay p-6 rounded-2xl border border-neon-cyan/20">
+          <h1 className="text-5xl max-[1024px]:text-3xl font-din font-black text-white mb-2 drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">
+            Career Journey
+          </h1>
+          <p className="text-white/80 text-lg max-[1024px]:text-sm font-barlow font-bold">
+            Your path to becoming a championship swimmer
+          </p>
         </div>
 
 
         {/* Career Management Hub */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <div className="glass-panel rounded-lg p-4 border border-secondary/35 kinetic-border shadow-lg shadow-secondary/10">
-            <h2 className="text-2xl font-black text-secondary text-glow mb-3">Sponsors & Partners</h2>
-            <div className="space-y-2">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <div className="glass-card-elevated rounded-2xl p-6 border border-neon-cyan/30 hover:border-neon-cyan/60 transition-all duration-300 group skew-container">
+            <h2 className="text-2xl font-din font-black text-neon-cyan mb-4 drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">
+              Sponsors & Partners
+            </h2>
+            <div className="space-y-3">
               {SponsorshipDeals.map((deal) => (
-                <div key={deal.brand} className="bg-surface-container/40 border border-white/10 rounded-lg p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="font-bold text-on-background">{deal.brand}</div>
-                    <span className={`text-[10px] px-2 py-1 rounded-full font-black uppercase ${
-                      deal.status === 'Active' ? 'bg-secondary/30 text-secondary' : deal.status === 'Incoming' ? 'bg-primary/30 text-primary-fixed' : 'bg-amber-500/25 text-amber-300'
+                <div key={deal.brand} className="bg-neon-cyan/5 border border-neon-cyan/20 rounded-xl p-3 hover:border-neon-cyan/50 transition-all duration-300">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="font-bold font-barlow text-white">{deal.brand}</div>
+                    <span className={`text-[10px] px-2 py-1 rounded-lg font-black uppercase ${
+                      deal.status === 'Active' ? 'bg-green-400/30 text-green-300 border border-green-400/40' : deal.status === 'Incoming' ? 'bg-blue-400/30 text-blue-300 border border-blue-400/40' : 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/30'
                     }`}>{deal.status}</span>
                   </div>
-                  <div className="text-xs mt-1 text-on-surface-variant">{deal.value}</div>
+                  <div className="text-xs font-barlow font-bold text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">{deal.value}</div>
                   <div className="text-[11px] mt-1 text-white/70">{deal.term}</div>
                 </div>
               ))}
             </div>
-            <div className="mt-3 space-y-2">
+            <div className="mt-4 space-y-2 border-t border-neon-cyan/20 pt-4">
               {Partners.map((partner) => (
-                <div key={partner.name} className="bg-surface-container/30 border border-white/10 rounded-lg px-3 py-2 text-xs">
-                  <div className="font-bold text-white">{partner.name}</div>
-                  <div className="text-white/70">{partner.role}</div>
+                <div key={partner.name} className="bg-neon-cyan/5 border border-neon-cyan/20 rounded-xl px-3 py-2 text-xs hover:border-neon-cyan/40 transition-all">
+                  <div className="font-bold font-barlow text-white">{partner.name}</div>
+                  <div className="text-neon-cyan/80 text-[10px] mt-1">{partner.role}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="glass-panel rounded-lg p-4 border border-primary/30 kinetic-border shadow-lg shadow-primary/10 space-y-3">
-            <h2 className="text-2xl font-black text-primary text-glow">Club, Coaches & Fixtures</h2>
+          <div className="glass-card-elevated rounded-2xl p-6 border border-neon-cyan/30 hover:border-neon-cyan/60 transition-all duration-300 group skew-container space-y-4">
+            <h2 className="text-2xl font-din font-black text-neon-cyan drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">
+              Club, Coaches & Fixtures
+            </h2>
             <div className="grid grid-cols-2 gap-2 text-sm">
               {TeamContext.map((item) => (
-                <div key={item.label} className="bg-surface-container/40 border border-white/10 rounded-lg px-3 py-2">
-                  <span className="text-white/70">{item.label}:</span> <span className="font-bold">{item.value}</span>
+                <div key={item.label} className="bg-neon-cyan/5 border border-neon-cyan/20 rounded-lg px-3 py-2 hover:border-neon-cyan/40 transition-all">
+                  <span className="text-white/70 font-barlow text-[10px]">{item.label}</span>
+                  <div className="font-bold text-white mt-1 text-sm">{item.value}</div>
                 </div>
               ))}
             </div>
 
-            <div>
-              <h3 className="text-sm font-black uppercase tracking-wide text-secondary mb-2">Coaching Team</h3>
+            <div className="border-t border-neon-cyan/20 pt-4">
+              <h3 className="text-sm font-barlow font-black uppercase tracking-wider text-neon-cyan mb-3 drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">
+                Coaching Team
+              </h3>
               <div className="space-y-2">
                 {CoachingUnit.map((coach) => (
-                  <div key={coach.name} className="bg-surface-container/40 border border-white/10 rounded-lg px-3 py-2 text-xs">
-                    <div className="font-bold text-white">{coach.name} · <span className="text-secondary">{coach.level}</span></div>
-                    <div className="text-white/75">{coach.focus}</div>
+                  <div key={coach.name} className="bg-neon-cyan/5 border border-neon-cyan/20 rounded-lg px-3 py-2 text-xs hover:border-neon-cyan/40 transition-all">
+                    <div className="font-bold font-barlow text-white">{coach.name} <span className="text-neon-cyan/80">• {coach.level}</span></div>
+                    <div className="text-white/75 text-[10px] mt-1">{coach.focus}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div>
-              <h3 className="text-sm font-black uppercase tracking-wide text-secondary mb-2">Games to Take Part In</h3>
+            <div className="border-t border-neon-cyan/20 pt-4">
+              <h3 className="text-sm font-barlow font-black uppercase tracking-wider text-neon-cyan mb-3 drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">
+                Games to Take Part In
+              </h3>
               <div className="space-y-2">
                 {UpcomingGames.map((game) => (
-                  <button key={game.id} onClick={() => onEventSelect?.(game.id)} className="w-full text-left bg-surface-container/40 border border-white/10 rounded-lg px-3 py-2 hover:border-primary/40 transition-colors">
+                  <button key={game.id} onClick={() => onEventSelect?.(game.id)} className="w-full text-left bg-neon-cyan/5 border border-neon-cyan/20 rounded-lg px-3 py-2 hover:border-neon-cyan/50 transition-all active:animate-squash-stretch">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-bold text-white">{game.name}</span>
-                      <span className="text-[10px] px-2 py-1 rounded-full bg-primary/25 text-primary-fixed font-black uppercase">{game.status}</span>
+                      <span className="text-sm font-bold font-barlow text-white">{game.name}</span>
+                      <span className="text-[10px] px-2 py-1 rounded-lg bg-neon-cyan/20 text-neon-cyan font-black uppercase border border-neon-cyan/30">{game.status}</span>
                     </div>
-                    <div className="text-xs text-white/70">{game.mode}</div>
+                    <div className="text-xs text-white/70 mt-1">{game.mode}</div>
                   </button>
                 ))}
               </div>
@@ -176,51 +189,53 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
         </div>
 
         {/* Career Calendar / Season Timeline */}
-        <div className="glass-panel rounded-lg p-4 border border-primary/30 kinetic-border shadow-lg shadow-primary/10">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-2xl font-black text-primary text-glow">Career Calendar</h2>
-            <span className="text-xs px-3 py-1 rounded-full bg-primary/20 text-primary-fixed font-black uppercase">Season 1</span>
+        <div className="glass-card-elevated rounded-2xl p-6 border border-neon-cyan/30 hover:border-neon-cyan/60 transition-all duration-300 skew-container">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-din font-black text-neon-cyan drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">
+              Career Calendar
+            </h2>
+            <span className="text-xs px-3 py-1 rounded-full bg-neon-cyan/20 text-neon-cyan font-black uppercase border border-neon-cyan/30">Season 1</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2">
             {SeasonCalendar.map((item) => (
-              <div key={item.week} className="bg-surface-container/40 border border-white/10 rounded-lg p-3">
+              <div key={item.week} className="bg-neon-cyan/5 border border-neon-cyan/20 rounded-lg p-3 hover:border-neon-cyan/50 transition-all">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-black uppercase text-secondary">{item.week}</span>
+                  <span className="text-xs font-black uppercase text-neon-cyan/80 font-barlow">{item.week}</span>
                   <span className={`text-[10px] px-2 py-1 rounded-full font-black uppercase ${
                     item.state === 'Current'
-                      ? 'bg-primary/30 text-primary-fixed'
+                      ? 'bg-neon-cyan/30 text-neon-cyan border border-neon-cyan/40'
                       : item.state === 'Completed'
-                      ? 'bg-secondary/30 text-secondary'
+                      ? 'bg-green-400/20 text-green-300 border border-green-400/40'
                       : item.state === 'Upcoming'
-                      ? 'bg-amber-500/25 text-amber-300'
-                      : 'bg-white/10 text-white/70'
+                      ? 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/40'
+                      : 'bg-white/10 text-white/70 border border-white/10'
                   }`}>{item.state}</span>
                 </div>
-                <div className="text-sm font-bold text-white">{item.event}</div>
-                <div className="text-xs text-white/70 mt-1">{item.stage}</div>
+                <div className="text-sm font-bold font-barlow text-white">{item.event}</div>
+                <div className="text-xs text-white/70 mt-1 font-barlow">{item.stage}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Overall Progress */}
-        <div className="glass-panel rounded-full p-8 border border-primary/30 kinetic-border animate-slide-in-left shadow-lg shadow-primary/10">
+        <div className="glass-card-elevated rounded-2xl p-8 border border-neon-cyan/30 hover:border-neon-cyan/60 transition-all duration-300 skew-container">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-on-background text-lg">Career Progression</span>
-              <span className="text-sm text-primary font-bold bg-primary/20 px-3 py-1 rounded-full">{currentTier}/{totalTiers}</span>
+              <span className="font-bold font-barlow text-white text-lg">Career Progression</span>
+              <span className="text-sm text-neon-cyan font-bold bg-neon-cyan/20 px-3 py-1 rounded-full border border-neon-cyan/30 drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">{currentTier}/{totalTiers}</span>
             </div>
-            <div className="w-full bg-surface-container-high rounded-full h-4 overflow-hidden border border-primary/20">
+            <div className="w-full bg-neon-cyan/10 rounded-full h-4 overflow-hidden border border-neon-cyan/30">
               <div
-                className="bg-gradient-to-r from-primary via-secondary to-primary h-4 rounded-full transition-all duration-500 shadow-lg shadow-primary/50"
+                className="bg-gradient-to-r from-neon-cyan via-cyan-400 to-neon-cyan h-4 rounded-full transition-all duration-500 shadow-lg shadow-neon-cyan/50"
                 style={{ width: `${progressPercent}%` }}
               ></div>
             </div>
-            <div className="grid grid-cols-5 gap-2 text-xs text-on-surface-variant mt-4">
+            <div className="grid grid-cols-5 gap-2 text-xs mt-4">
               {CareerTiers.map((tier) => (
-                <div key={tier.tier} className="text-center p-2 bg-surface-container/30 rounded-lg border border-outline/20">
-                  <div className="text-xs font-bold">{tier.name}</div>
-                  <div className="text-primary text-xs">{tier.events} Events</div>
+                <div key={tier.tier} className="text-center p-2 bg-neon-cyan/5 rounded-lg border border-neon-cyan/20 hover:border-neon-cyan/50 transition-all">
+                  <div className="text-xs font-bold font-barlow text-white">{tier.name}</div>
+                  <div className="text-neon-cyan text-xs font-barlow">{tier.events} Events</div>
                 </div>
               ))}
             </div>
@@ -232,32 +247,32 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
           {CareerTiers.map((tier, idx) => (
             <div
               key={tier.tier}
-              className={`rounded-lg border transition-all ${
+              className={`rounded-2xl border transition-all ${
                 expandedTier === tier.tier
-                  ? 'glass-panel border-primary/60 kinetic-border shadow-lg shadow-primary/20'
-                  : 'glass-panel border-outline/30 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10'
+                  ? 'glass-card-elevated border-neon-cyan/60 hover:border-neon-cyan/80 shadow-lg shadow-neon-cyan/20'
+                  : 'glass-card-elevated border-neon-cyan/30 hover:border-neon-cyan/50 hover:shadow-md hover:shadow-neon-cyan/10'
               }`}
             >
               {/* Tier Header */}
               <button
                 onClick={() => setExpandedTier(expandedTier === tier.tier ? -1 : tier.tier)}
                 className={`w-full px-6 max-[1024px]:px-2 py-4 flex items-center justify-between text-left transition-all gap-2 ${
-                  expandedTier === tier.tier ? 'bg-primary/10' : 'hover:bg-primary/5'
+                  expandedTier === tier.tier ? 'bg-neon-cyan/10' : 'hover:bg-neon-cyan/5'
                 }`}
               >
                 <div className="flex items-center gap-4 max-[1024px]:gap-2">
-                  <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${tier.color} border-2 border-primary/50 shadow-lg shadow-primary/20`}></div>
+                  <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${tier.color} border-2 border-neon-cyan/50 shadow-lg shadow-neon-cyan/20`}></div>
                   <div>
-                    <h3 className="font-bold text-on-background text-lg max-[1024px]:text-base">Tier {tier.tier}: {tier.name}</h3>
-                    <p className="text-sm text-on-surface-variant">{tier.events} Events</p>
+                    <h3 className="font-bold font-barlow text-white text-lg max-[1024px]:text-base">Tier {tier.tier}: {tier.name}</h3>
+                    <p className="text-sm text-neon-cyan/70 font-barlow">{tier.events} Events</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 max-[1024px]:gap-2">
                   {idx <= completedTiers && (
-                    <span className="text-lg text-secondary bg-secondary/20 px-3 py-1 rounded-full">✓</span>
+                    <span className="text-lg text-green-400 bg-green-400/20 px-3 py-1 rounded-full border border-green-400/40 font-bold">✓</span>
                   )}
                   <svg
-                    className={`w-6 h-6 text-primary transition-transform ${
+                    className={`w-6 h-6 text-neon-cyan transition-transform ${
                       expandedTier === tier.tier ? 'rotate-180' : ''
                     }`}
                     fill="none"
@@ -271,33 +286,33 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
 
               {/* Events List (Expanded) */}
               {expandedTier === tier.tier && (
-                <div className="border-t border-outline/30 p-6 max-[1024px]:p-3 space-y-3 bg-surface-container/30">
+                <div className="border-t border-neon-cyan/20 p-6 max-[1024px]:p-3 space-y-3 bg-neon-cyan/5">
                   {CareerEvents.filter((e) => e.tier === tier.tier).map((event) => (
                     <button
                       key={event.id}
                       onClick={() => onEventSelect?.(event.id)}
-                      className={`w-full px-4 max-[1024px]:px-2 py-4 rounded-lg text-left transition-all border backdrop-blur-sm ${
+                      className={`w-full px-4 max-[1024px]:px-2 py-4 rounded-lg text-left transition-all border backdrop-blur-sm active:animate-squash-stretch ${
                         event.status === 'CURRENT'
-                          ? 'bg-primary/20 border-primary/50 hover:bg-primary/30 hover:shadow-lg hover:shadow-primary/20 kinetic-border'
+                          ? 'bg-neon-cyan/20 border-neon-cyan/50 hover:bg-neon-cyan/30 hover:shadow-lg hover:shadow-neon-cyan/20'
                           : event.status === 'COMPLETED'
-                          ? 'bg-secondary/15 border-secondary/40 hover:bg-secondary/25 kinetic-border'
-                          : 'bg-surface-container/20 border-outline/20 opacity-50 hover:opacity-60'
+                          ? 'bg-green-400/15 border-green-400/40 hover:bg-green-400/25'
+                          : 'bg-white/5 border-white/10 opacity-50 hover:opacity-60'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-bold text-on-background text-lg">
+                          <div className="font-bold font-barlow text-white text-lg">
                             {event.status === 'CURRENT' && '▶ '}
                             {event.status === 'COMPLETED' && '✓ '}
                             {event.status === 'LOCKED' && '🔒 '}
                             {event.name}
                           </div>
-                          <div className="text-xs text-on-surface-variant">{event.distance} • Difficulty: {event.difficulty}/10</div>
+                          <div className="text-xs text-white/70 font-barlow">{event.distance} • Difficulty: {event.difficulty}/10</div>
                         </div>
                         {event.reward && (
                           <div className="text-right">
-                            <div className="text-xs text-secondary font-bold">{event.reward.xp} XP</div>
-                            <div className="text-xs text-primary font-bold">{event.reward.coins} Coins</div>
+                            <div className="text-xs text-yellow-400 font-bold font-barlow">{event.reward.xp} XP</div>
+                            <div className="text-xs text-neon-cyan font-bold font-barlow drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">{event.reward.coins} Coins</div>
                           </div>
                         )}
                       </div>
@@ -310,22 +325,22 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
         </div>
 
         {/* Milestones */}
-        <div className="glass-panel rounded-lg p-8 border border-secondary/40 kinetic-border animate-slide-in-right shadow-lg shadow-secondary/10">
-          <h2 className="text-3xl font-black text-secondary mb-8 text-glow">Milestones</h2>
+        <div className="glass-card-elevated rounded-2xl p-8 border border-neon-cyan/30 hover:border-neon-cyan/60 transition-all duration-300 skew-container">
+          <h2 className="text-3xl font-din font-black text-neon-cyan mb-8 drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">Milestones</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {Milestones.map((milestone) => (
               <div
                 key={milestone.id}
-                className={`p-6 rounded-lg text-center border transition-all backdrop-blur-sm ${
+                className={`p-6 rounded-2xl text-center border transition-all backdrop-blur-sm ${
                   milestone.achieved
-                    ? 'bg-secondary/20 border-secondary/50 shadow-lg shadow-secondary/20'
-                    : 'bg-surface-container/20 border-outline/30 opacity-50'
+                    ? 'bg-neon-cyan/20 border-neon-cyan/50 shadow-lg shadow-neon-cyan/20 hover:border-neon-cyan/70'
+                    : 'bg-white/5 border-white/10 opacity-50 hover:opacity-70'
                 }`}
               >
                 <div className="text-4xl mb-3">{milestone.icon}</div>
-                <div className="text-sm font-bold text-on-background">{milestone.name}</div>
+                <div className="text-sm font-bold font-barlow text-white">{milestone.name}</div>
                 {milestone.achieved && (
-                  <div className="text-xs text-secondary mt-3 font-bold">✓ Achieved</div>
+                  <div className="text-xs text-neon-cyan mt-3 font-bold font-barlow drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">✓ Achieved</div>
                 )}
               </div>
             ))}

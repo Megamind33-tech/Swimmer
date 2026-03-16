@@ -72,11 +72,22 @@ export default {
         "inverse-primary": "#78a9ff",
 
         "surface-tint": "#0f62fe",
+
+        // New Game-Focus Colors
+        "neon-cyan": "#00ffff",
+        "neon-cyan-glow": "rgba(0, 255, 255, 0.5)",
+        "pool-navy": "#001a33",
+        "pool-teal": "#005a7a",
+        "pool-dark": "#0a0e1a",
+        "broadcast-overlay": "rgba(10, 14, 26, 0.92)",
       },
       fontFamily: {
         "headline": ["IBM Plex Sans", "sans-serif"],
         "body": ["IBM Plex Sans", "sans-serif"],
         "label": ["IBM Plex Sans", "sans-serif"],
+        "din": ["'Din Condensed'", "'Din Next Condensed'", "sans-serif"],
+        "barlow": ["'Barlow Condensed'", "sans-serif"],
+        "chakra": ["'Chakra Petch'", "sans-serif"],
       },
       borderRadius: {
         "DEFAULT": "0px",
@@ -94,6 +105,13 @@ export default {
         "pulse-scale": "pulse-scale 2s ease-in-out infinite",
         "button-glow": "button-glow 2s ease-in-out infinite",
         "skew": "skewX(-12deg)",
+        "squash-stretch": "squashStretch 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "neon-glow": "neonGlow 2s ease-in-out infinite",
+        "neon-pulse": "neonPulse 1.5s ease-in-out infinite",
+        "magnetic-tilt": "magneticTilt 0.3s ease-out",
+        "parallax-float": "parallaxFloat 8s ease-in-out infinite",
+        "ticker-scroll": "tickerScroll 40s linear infinite",
+        "live-pulse": "livePulse 1.2s ease-in-out infinite",
       },
       keyframes: {
         slideInUp: {
@@ -166,6 +184,78 @@ export default {
           },
           "50%": {
             boxShadow: "0 0 20px rgba(15, 98, 254, 0.6)",
+          },
+        },
+        squashStretch: {
+          "0%": {
+            transform: "scale(1)",
+            boxShadow: "0 0 0px rgba(0, 255, 255, 0)",
+          },
+          "50%": {
+            transform: "scale(0.95)",
+            boxShadow: "0 0 20px rgba(0, 255, 255, 0.6)",
+          },
+          "100%": {
+            transform: "scale(1)",
+            boxShadow: "0 0 0px rgba(0, 255, 255, 0)",
+          },
+        },
+        neonGlow: {
+          "0%, 100%": {
+            boxShadow: "0 0 10px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)",
+          },
+          "50%": {
+            boxShadow: "0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.2)",
+          },
+        },
+        neonPulse: {
+          "0%, 100%": {
+            borderColor: "rgba(0, 255, 255, 0.3)",
+            color: "rgba(255, 255, 255, 0.7)",
+          },
+          "50%": {
+            borderColor: "rgba(0, 255, 255, 0.8)",
+            color: "rgba(0, 255, 255, 1)",
+          },
+        },
+        magneticTilt: {
+          "from": {
+            transform: "perspective(1000px) rotateX(0) rotateY(0)",
+          },
+          "to": {
+            transform: "perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))",
+          },
+        },
+        parallaxFloat: {
+          "0%, 100%": {
+            transform: "translateY(0px) translateX(0px)",
+          },
+          "25%": {
+            transform: "translateY(-15px) translateX(10px)",
+          },
+          "50%": {
+            transform: "translateY(0px) translateX(0px)",
+          },
+          "75%": {
+            transform: "translateY(-10px) translateX(-8px)",
+          },
+        },
+        tickerScroll: {
+          "from": {
+            transform: "translateX(100%)",
+          },
+          "to": {
+            transform: "translateX(-100%)",
+          },
+        },
+        livePulse: {
+          "0%, 100%": {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+          "50%": {
+            opacity: "0.7",
+            transform: "scale(1.05)",
           },
         },
       },

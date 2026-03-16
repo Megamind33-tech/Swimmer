@@ -115,6 +115,19 @@ const CelebrationPacks: StoreItem[] = [
   },
 ];
 
+const getRarityColor = (rarity: string) => {
+  switch (rarity) {
+    case 'LEGENDARY':
+      return 'bg-purple-400/20 text-purple-300 border border-purple-400/40';
+    case 'EPIC':
+      return 'bg-blue-400/20 text-blue-300 border border-blue-400/40';
+    case 'RARE':
+      return 'bg-green-400/20 text-green-300 border border-green-400/40';
+    default:
+      return 'bg-white/10 text-white/70 border border-white/20';
+  }
+};
+
 export const StoreScreen: React.FC<StoreScreenProps> = ({
   playerPremiumCurrency = 250,
   playerCoins = 5000,
@@ -192,34 +205,28 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             {FeaturedItems.map((item) => (
               <div
                 key={item.id}
-                className="glass-panel rounded-lg overflow-hidden border-2 border-secondary/50 hover:border-secondary kinetic-border shadow-lg shadow-secondary/20 hover:shadow-lg hover:shadow-secondary/40 transition-all"
+                className="glass-card-elevated rounded-2xl overflow-hidden border-2 border-neon-cyan/40 hover:border-neon-cyan/70 shadow-lg shadow-neon-cyan/20 hover:shadow-lg hover:shadow-neon-cyan/40 transition-all skew-container"
               >
-                <div className="p-6 space-y-4 bg-gradient-to-br from-secondary/15 to-primary/10">
+                <div className="p-6 space-y-4 bg-gradient-to-br from-neon-cyan/10 to-broadcast-overlay/40">
                   <div className="flex items-start justify-between">
                     <div className="text-6xl">{item.icon}</div>
                     {item.tag && (
-                      <span className="px-3 py-1 bg-error text-on-background text-xs font-black rounded-full border border-error/50">
+                      <span className="px-3 py-1 bg-yellow-400/30 text-yellow-300 text-xs font-black rounded-full border border-yellow-400/40">
                         {item.tag}
                       </span>
                     )}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-on-background mb-1">{item.name}</h3>
-                    <p className="text-sm text-on-surface-variant">{item.description}</p>
+                    <h3 className="text-2xl font-din font-black text-white mb-1 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">{item.name}</h3>
+                    <p className="text-sm text-white/70 font-barlow">{item.description}</p>
                   </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-primary/30">
-                    <span
-                      className={`text-xs px-3 py-1 rounded-full font-bold border ${
-                        item.rarity === 'LEGENDARY'
-                          ? 'bg-secondary/30 text-secondary border-secondary/50'
-                          : 'bg-primary/30 text-primary border-primary/50'
-                      }`}
-                    >
+                  <div className="flex items-center justify-between pt-4 border-t border-neon-cyan/20">
+                    <span className={`text-xs px-3 py-1 rounded-full font-bold ${getRarityColor(item.rarity)}`}>
                       {item.rarity}
                     </span>
                     <button
                       onClick={() => handlePurchase(item)}
-                      className="px-6 py-2 bg-gradient-to-r from-secondary to-secondary/70 hover:shadow-lg hover:shadow-secondary/60 rounded-lg text-on-primary font-bold transition-all flex items-center gap-2 border border-secondary/60"
+                      className="px-6 py-2 bg-neon-cyan/30 hover:bg-neon-cyan/40 hover:shadow-lg hover:shadow-neon-cyan/60 rounded-lg text-neon-cyan font-bold font-barlow transition-all flex items-center gap-2 border-2 border-neon-cyan/50 active:animate-squash-stretch drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]"
                     >
                       <span>◆ {item.price}</span>
                     </button>
@@ -235,31 +242,23 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             {CosmeticItems.map((item) => (
               <div
                 key={item.id}
-                className="glass-panel rounded-lg overflow-hidden border border-primary/30 kinetic-border shadow-lg shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-all hover:bg-primary/5"
+                className="glass-card-elevated rounded-2xl overflow-hidden border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/10 hover:shadow-lg hover:shadow-neon-cyan/20 transition-all skew-container"
               >
-                <div className="h-40 bg-gradient-to-br from-primary/20 to-secondary/10 flex items-center justify-center">
+                <div className="h-40 bg-gradient-to-br from-neon-cyan/15 to-neon-cyan/5 flex items-center justify-center">
                   <div className="text-6xl">{item.icon}</div>
                 </div>
                 <div className="p-4 space-y-3">
                   <div>
-                    <h3 className="font-bold text-on-background text-sm">{item.name}</h3>
-                    <p className="text-xs text-on-surface-variant mt-1">{item.description}</p>
+                    <h3 className="font-bold font-din text-white text-sm drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">{item.name}</h3>
+                    <p className="text-xs text-white/70 mt-1 font-barlow">{item.description}</p>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-outline/20">
-                    <span
-                      className={`text-xs px-2 py-1 rounded font-bold border ${
-                        item.rarity === 'EPIC'
-                          ? 'bg-secondary/30 text-secondary border-secondary/40'
-                          : item.rarity === 'LEGENDARY'
-                          ? 'bg-primary/30 text-primary border-primary/40'
-                          : 'bg-secondary/20 text-secondary border-secondary/30'
-                      }`}
-                    >
+                  <div className="flex items-center justify-between pt-3 border-t border-neon-cyan/20">
+                    <span className={`text-xs px-2 py-1 rounded-lg font-bold ${getRarityColor(item.rarity)}`}>
                       {item.rarity}
                     </span>
                     <button
                       onClick={() => handlePurchase(item)}
-                      className="px-3 py-1 bg-primary/40 hover:bg-primary/60 rounded text-xs font-bold text-primary transition-colors border border-primary/40"
+                      className="px-3 py-1 bg-neon-cyan/20 hover:bg-neon-cyan/40 rounded-lg text-xs font-bold text-neon-cyan font-barlow transition-colors border border-neon-cyan/30 active:animate-squash-stretch"
                     >
                       ◆ {item.price}
                     </button>
@@ -272,19 +271,19 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
       case 'SEASON_PASS':
         return (
           <div className="space-y-6">
-            <div className="glass-panel rounded-lg p-8 border border-secondary/50 kinetic-border shadow-lg shadow-secondary/20 bg-gradient-to-br from-secondary/15 to-primary/10">
-              <h3 className="text-3xl font-black text-secondary mb-4 text-glow">Premium Season Pass</h3>
-              <p className="text-on-surface-variant mb-6 text-lg">Unlock 50 premium tiers with exclusive rewards</p>
+            <div className="glass-card-elevated rounded-2xl p-8 border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/20 bg-gradient-to-br from-neon-cyan/10 to-broadcast-overlay/40 skew-container">
+              <h3 className="text-3xl font-din font-black text-neon-cyan mb-4 drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">Premium Season Pass</h3>
+              <p className="text-white/80 mb-6 text-lg font-barlow font-bold">Unlock 50 premium tiers with exclusive rewards</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 {['Exclusive Cosmetics', '2x XP Boost', 'Premium Currency', 'Seasonal Weapon'].map((benefit) => (
-                  <div key={benefit} className="glass-panel rounded-lg p-4 text-center border border-secondary/30 kinetic-border">
-                    <div className="text-sm font-bold text-on-background">{benefit}</div>
+                  <div key={benefit} className="glass-card-elevated rounded-2xl p-4 text-center border border-neon-cyan/30 hover:border-neon-cyan/50">
+                    <div className="text-sm font-bold font-barlow text-white">{benefit}</div>
                   </div>
                 ))}
               </div>
               <button
                 onClick={() => handlePurchase({ id: 'season-pass', name: 'Premium Season Pass', description: '', price: 999, currency: 'PREMIUM', rarity: 'EPIC', icon: '⭐' })}
-                className="w-full px-6 py-4 bg-gradient-to-r from-secondary to-secondary/70 hover:shadow-lg hover:shadow-secondary/60 rounded-lg text-on-primary font-black text-lg transition-all border border-secondary/60 kinetic-border"
+                className="w-full px-6 py-4 bg-neon-cyan/30 hover:bg-neon-cyan/40 hover:shadow-lg hover:shadow-neon-cyan/60 rounded-2xl text-neon-cyan font-black font-barlow text-lg transition-all border-2 border-neon-cyan/50 active:animate-squash-stretch drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]"
               >
                 Unlock Pass - ◆ 999
               </button>
@@ -310,13 +309,13 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             ].map((bundle) => (
               <div
                 key={bundle.id}
-                className="glass-panel rounded-lg p-6 border border-primary/40 kinetic-border shadow-lg shadow-primary/15 hover:shadow-lg hover:shadow-primary/30 transition-all bg-gradient-to-br from-primary/15 to-secondary/10"
+                className="glass-card-elevated rounded-2xl p-6 border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/15 hover:shadow-lg hover:shadow-neon-cyan/30 transition-all bg-gradient-to-br from-neon-cyan/10 to-broadcast-overlay/40 skew-container"
               >
-                <h3 className="text-2xl font-black text-on-background mb-2">{bundle.name}</h3>
-                <p className="text-sm text-on-surface-variant mb-4 font-semibold">{bundle.items}</p>
+                <h3 className="text-2xl font-din font-black text-white mb-2 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">{bundle.name}</h3>
+                <p className="text-sm text-white/80 mb-4 font-barlow font-bold">{bundle.items}</p>
                 <button
                   onClick={() => handlePurchase({ id: bundle.id, name: bundle.name, description: bundle.items, price: bundle.price, currency: 'PREMIUM', rarity: 'EPIC', icon: '📦' })}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-primary to-primary/70 hover:shadow-lg hover:shadow-primary/60 rounded-lg text-on-primary font-bold transition-all border border-primary/60 kinetic-border"
+                  className="w-full px-4 py-3 bg-neon-cyan/30 hover:bg-neon-cyan/40 hover:shadow-lg hover:shadow-neon-cyan/60 rounded-2xl text-neon-cyan font-bold font-barlow transition-all border-2 border-neon-cyan/50 active:animate-squash-stretch drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]"
                 >
                   Buy Bundle - ◆ {bundle.price}
                 </button>
@@ -330,19 +329,19 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             {CelebrationPacks.map((item) => (
               <div
                 key={item.id}
-                className="glass-panel rounded-lg overflow-hidden border border-secondary/40 kinetic-border shadow-lg shadow-secondary/15 hover:shadow-lg hover:shadow-secondary/30 transition-all"
+                className="glass-card-elevated rounded-2xl overflow-hidden border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/15 hover:shadow-lg hover:shadow-neon-cyan/30 transition-all skew-container"
               >
-                <div className="h-40 bg-gradient-to-br from-secondary/20 to-primary/15 flex items-center justify-center">
+                <div className="h-40 bg-gradient-to-br from-neon-cyan/15 to-neon-cyan/5 flex items-center justify-center">
                   <div className="text-6xl animate-bounce">{item.icon}</div>
                 </div>
                 <div className="p-4 space-y-3">
                   <div>
-                    <h3 className="font-bold text-on-background text-sm">{item.name}</h3>
-                    <p className="text-xs text-on-surface-variant mt-1">{item.description}</p>
+                    <h3 className="font-bold font-din text-white text-sm drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">{item.name}</h3>
+                    <p className="text-xs text-white/70 mt-1 font-barlow">{item.description}</p>
                   </div>
                   <button
                     onClick={() => handlePurchase(item)}
-                    className="w-full px-3 py-2 bg-gradient-to-r from-secondary to-secondary/70 hover:shadow-lg hover:shadow-secondary/50 rounded text-xs font-bold text-on-primary transition-all border border-secondary/50 kinetic-border"
+                    className="w-full px-3 py-2 bg-neon-cyan/20 hover:bg-neon-cyan/40 hover:shadow-lg hover:shadow-neon-cyan/50 rounded-lg text-xs font-bold text-neon-cyan font-barlow transition-all border border-neon-cyan/30 active:animate-squash-stretch"
                   >
                     ◆ {item.price}
                   </button>
@@ -353,18 +352,18 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
         );
       case 'EVENT_SHOP':
         return (
-          <div className="glass-panel rounded-lg p-6 border border-primary/40 kinetic-border shadow-lg shadow-primary/15 bg-gradient-to-br from-primary/10 to-secondary/5">
-            <h3 className="text-2xl font-black text-on-background mb-2">Event Shop - Sprint Cup</h3>
-            <p className="text-on-surface-variant mb-6 text-sm font-semibold">Limited-time items available during current event</p>
+          <div className="glass-card-elevated rounded-2xl p-6 border border-neon-cyan/30 hover:border-neon-cyan/60 shadow-lg shadow-neon-cyan/15 bg-gradient-to-br from-neon-cyan/10 to-broadcast-overlay/40 skew-container">
+            <h3 className="text-2xl font-din font-black text-neon-cyan mb-2 drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">Event Shop - Sprint Cup</h3>
+            <p className="text-white/80 mb-6 text-sm font-barlow font-bold">Limited-time items available during current event</p>
             <div className="space-y-3">
               {[
                 { name: 'Sprint Boost Pack', cost: '500 Event Tokens' },
                 { name: 'Exclusive Sprint Suit', cost: '1000 Event Tokens' },
                 { name: 'VIP Event Pass', cost: '2000 Event Tokens' },
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between glass-panel p-4 rounded-lg border border-primary/30 kinetic-border">
-                  <div className="font-bold text-on-background text-lg">{item.name}</div>
-                  <button className="px-4 py-2 bg-primary/40 hover:bg-primary/60 rounded-lg text-primary font-bold text-sm transition-colors border border-primary/40 kinetic-border">
+                <div key={idx} className="flex items-center justify-between glass-card-elevated p-4 rounded-lg border border-neon-cyan/30 hover:border-neon-cyan/50">
+                  <div className="font-bold font-din text-white text-lg drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">{item.name}</div>
+                  <button className="px-4 py-2 bg-neon-cyan/20 hover:bg-neon-cyan/40 rounded-lg text-neon-cyan font-bold font-barlow text-sm transition-colors border border-neon-cyan/30 active:animate-squash-stretch">
                     {item.cost}
                   </button>
                 </div>
@@ -378,43 +377,43 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface relative">
+    <div className="w-full h-full overflow-y-auto p-8 max-[900px]:p-4 space-y-8 relative safe-zone-x">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header with Currency Display */}
-        <div className="flex items-center justify-between animate-slide-in-down">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-5xl font-black text-primary mb-2 text-glow">Store</h1>
-            <p className="text-on-surface-variant text-lg">Premium cosmetics and season pass</p>
+            <h1 className="text-5xl max-[900px]:text-3xl font-din font-black text-white mb-2 drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">Store</h1>
+            <p className="text-white/80 text-lg max-[900px]:text-sm font-barlow font-bold">Premium cosmetics and season pass</p>
           </div>
-          <div className="flex gap-4">
-            <div className="glass-panel px-5 py-4 bg-gradient-to-br from-primary/30 to-primary/10 rounded-lg border border-primary/50 kinetic-border shadow-lg shadow-primary/20">
-              <div className="text-xs text-secondary font-bold uppercase">Premium Currency</div>
-              <div className="text-2xl font-black text-primary">◆ {playerPremiumCurrency}</div>
+          <div className="flex gap-4 max-[900px]:flex-col max-[900px]:gap-2">
+            <div className="glass-card-elevated px-5 py-4 bg-gradient-to-br from-neon-cyan/20 to-neon-cyan/5 rounded-2xl border border-neon-cyan/50 shadow-lg shadow-neon-cyan/20">
+              <div className="text-xs text-neon-cyan font-bold uppercase font-barlow drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">Premium Currency</div>
+              <div className="text-2xl max-[900px]:text-lg font-din font-black text-neon-cyan drop-shadow-[0_0_6px_rgba(0,255,255,0.4)]">◆ {playerPremiumCurrency}</div>
             </div>
-            <div className="glass-panel px-5 py-4 bg-gradient-to-br from-secondary/30 to-secondary/10 rounded-lg border border-secondary/50 kinetic-border shadow-lg shadow-secondary/20">
-              <div className="text-xs text-secondary font-bold uppercase">Coins</div>
-              <div className="text-2xl font-black text-secondary">$ {playerCoins.toLocaleString()}</div>
+            <div className="glass-card-elevated px-5 py-4 bg-gradient-to-br from-yellow-400/20 to-yellow-400/5 rounded-2xl border border-yellow-400/50 shadow-lg shadow-yellow-400/20">
+              <div className="text-xs text-yellow-300 font-bold uppercase font-barlow drop-shadow-[0_0_4px_rgba(250,204,21,0.4)]">Coins</div>
+              <div className="text-2xl max-[900px]:text-lg font-din font-black text-yellow-300 drop-shadow-[0_0_6px_rgba(250,204,21,0.4)]">$ {playerCoins.toLocaleString()}</div>
             </div>
           </div>
         </div>
 
         {/* Notification */}
         {purchaseMessage && (
-          <div className="px-6 py-3 glass-panel bg-secondary/20 border border-secondary/60 rounded-lg text-secondary font-bold kinetic-border shadow-lg shadow-secondary/20">
+          <div className="px-6 py-3 glass-card-elevated bg-green-400/20 border border-green-400/60 rounded-2xl text-green-300 font-bold shadow-lg shadow-green-400/20 font-barlow">
             ✓ {purchaseMessage}
           </div>
         )}
 
         {/* Tab Navigation */}
-        <div className="flex gap-3 flex-wrap animate-slide-in-up">
+        <div className="flex gap-3 flex-wrap">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-full font-bold uppercase text-sm transition-all border ${
+              className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-bold font-barlow uppercase text-sm transition-all border ${
                 activeTab === tab.id
-                  ? 'bg-gradient-to-r from-primary to-secondary text-on-primary shadow-lg shadow-primary/40 kinetic-border border-primary/60'
-                  : 'glass-panel text-on-surface-variant border-outline/30 hover:border-primary/40 hover:bg-primary/5'
+                  ? 'bg-neon-cyan/30 text-neon-cyan shadow-lg shadow-neon-cyan/40 border-neon-cyan/60 drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]'
+                  : 'glass-card-elevated text-white/70 border-neon-cyan/20 hover:border-neon-cyan/50 hover:bg-neon-cyan/10'
               }`}
             >
               {tab.icon}
@@ -424,7 +423,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
         </div>
 
         {/* Tab Content */}
-        <div className="animate-slide-in-left">{renderTab()}</div>
+        <div>{renderTab()}</div>
       </div>
     </div>
   );
