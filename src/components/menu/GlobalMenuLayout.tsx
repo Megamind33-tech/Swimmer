@@ -44,10 +44,10 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
         <img
           src={poolNightBackground}
           alt="Olympic pool at night"
-          className="absolute inset-0 h-full w-full object-cover opacity-35 scale-110 blur-[2px]"
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-70 scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#030a16]/90 via-[#051325]/82 to-[#041223]/94" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#02101f]/75 via-transparent to-[#062031]/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020812]/58 via-[#041223]/52 to-[#041223]/62" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#02101f]/42 via-transparent to-[#062031]/45" />
 
         <div className="ambient-bokeh absolute left-[8%] top-[16%] h-24 w-24 rounded-full bg-cyan-200/20 blur-2xl" />
         <div className="ambient-bokeh absolute left-[35%] top-[10%] h-16 w-16 rounded-full bg-white/20 blur-xl [animation-delay:1.1s]" />
