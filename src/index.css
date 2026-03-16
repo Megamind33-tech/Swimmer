@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,700;1,700&family=IBM+Plex+Sans:wght@300;400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 
 @import "tailwindcss";
 
@@ -205,4 +205,37 @@ body {
 .app-race-theme,
 .app-race-theme * {
   color: #ffffff !important;
+}
+
+
+.sport-header {
+  font-family: "Chakra Petch", "IBM Plex Sans", sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.rewards-glass-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(17, 30, 50, 0.78), rgba(10, 19, 34, 0.72));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  clip-path: polygon(3% 0, 100% 0, 97% 100%, 0 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.rewards-glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(-18deg, rgba(129,236,255,0.10) 0 2px, transparent 2px 12px);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.rewards-glass-card > * {
+  position: relative;
+  z-index: 1;
 }

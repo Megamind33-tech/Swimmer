@@ -33,22 +33,22 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
   onScreenChange,
 }) => {
   return (
-    <nav className="w-20 max-[900px]:w-14 bg-black/45 backdrop-blur-md border-r border-white/10 flex flex-col items-center py-4 max-[900px]:py-2 gap-1 overflow-y-auto sticky left-0 top-16 max-[900px]:top-12">
+    <nav className="w-20 bg-gradient-to-b from-[#0b162b]/85 to-[#070f1f]/85 backdrop-blur-md border-r border-white/15 flex flex-col items-center py-4 gap-1 overflow-y-auto overscroll-contain sticky left-0 top-16 self-start h-[calc(100dvh-9rem)] shadow-[8px_0_20px_rgba(0,0,0,0.35)] skew-x-[-6deg]">
       {NavItems.map((item) => (
         <button
           key={item.id}
           onClick={() => onScreenChange(item.id)}
-          className={`w-16 h-16 max-[900px]:w-11 max-[900px]:h-11 rounded-lg flex flex-col items-center justify-center gap-1 transition-all duration-300 group border ${
+          className={`w-16 h-16 rounded-lg skew-x-[6deg] flex flex-col items-center justify-center gap-1 transition-all duration-300 group border ${
             currentScreen === item.id
-              ? 'bg-primary/25 text-primary-fixed border-primary/60 scale-100 shadow-[0_0_18px_rgba(15,98,254,0.35)]'
-              : 'text-white/70 hover:text-primary-fixed hover:bg-white/10 border-transparent'
+              ? 'bg-primary/30 text-white border-primary/70 scale-100 shadow-[0_0_14px_rgba(120,169,255,0.35)]'
+              : 'text-white hover:text-white hover:bg-white/10 border-transparent hover:border-white/15'
           } active:scale-95`}
           title={item.label}
         >
-          <span className="material-symbols-outlined text-xl max-[900px]:text-lg transition-transform duration-300 group-hover:scale-110">
+          <span className="material-symbols-outlined text-2xl transition-transform duration-300 group-hover:scale-110">
             {item.icon}
           </span>
-          <span className="text-[10px] max-[900px]:hidden font-bold text-center leading-tight">{item.label}</span>
+          <span className="text-[10px] font-bold text-white text-center leading-tight">{item.label}</span>
 
           {/* Active indicator bar */}
           {currentScreen === item.id && (

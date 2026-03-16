@@ -99,12 +99,12 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
   const progressPercent = ((completedTiers + 0.5) / totalTiers) * 100;
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface relative">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="w-full h-full overflow-y-auto p-8 max-[1024px]:p-3 space-y-8 max-[1024px]:space-y-4 bg-surface relative">
+      <div className="max-w-5xl mx-auto space-y-8 max-[1024px]:space-y-4 max-[1024px]:max-w-[68vw] max-[1024px]:mx-auto">
         {/* Header */}
         <div className="animate-slide-in-down">
-          <h1 className="text-5xl font-black text-primary mb-2 text-glow">Career Journey</h1>
-          <p className="text-on-surface-variant text-lg">Your path to becoming a championship swimmer</p>
+          <h1 className="text-5xl max-[1024px]:text-3xl font-black text-primary mb-2 text-glow">Career Journey</h1>
+          <p className="text-on-surface-variant text-lg max-[1024px]:text-sm">Your path to becoming a championship swimmer</p>
         </div>
 
 
@@ -241,18 +241,18 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
               {/* Tier Header */}
               <button
                 onClick={() => setExpandedTier(expandedTier === tier.tier ? -1 : tier.tier)}
-                className={`w-full px-6 py-4 flex items-center justify-between text-left transition-all ${
+                className={`w-full px-6 max-[1024px]:px-2 py-4 flex items-center justify-between text-left transition-all gap-2 ${
                   expandedTier === tier.tier ? 'bg-primary/10' : 'hover:bg-primary/5'
                 }`}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 max-[1024px]:gap-2">
                   <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${tier.color} border-2 border-primary/50 shadow-lg shadow-primary/20`}></div>
                   <div>
-                    <h3 className="font-bold text-on-background text-lg">Tier {tier.tier}: {tier.name}</h3>
+                    <h3 className="font-bold text-on-background text-lg max-[1024px]:text-base">Tier {tier.tier}: {tier.name}</h3>
                     <p className="text-sm text-on-surface-variant">{tier.events} Events</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 max-[1024px]:gap-2">
                   {idx <= completedTiers && (
                     <span className="text-lg text-secondary bg-secondary/20 px-3 py-1 rounded-full">✓</span>
                   )}
@@ -271,12 +271,12 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
 
               {/* Events List (Expanded) */}
               {expandedTier === tier.tier && (
-                <div className="border-t border-outline/30 p-6 space-y-3 bg-surface-container/30">
+                <div className="border-t border-outline/30 p-6 max-[1024px]:p-3 space-y-3 bg-surface-container/30">
                   {CareerEvents.filter((e) => e.tier === tier.tier).map((event) => (
                     <button
                       key={event.id}
                       onClick={() => onEventSelect?.(event.id)}
-                      className={`w-full px-4 py-4 rounded-lg text-left transition-all border backdrop-blur-sm ${
+                      className={`w-full px-4 max-[1024px]:px-2 py-4 rounded-lg text-left transition-all border backdrop-blur-sm ${
                         event.status === 'CURRENT'
                           ? 'bg-primary/20 border-primary/50 hover:bg-primary/30 hover:shadow-lg hover:shadow-primary/20 kinetic-border'
                           : event.status === 'COMPLETED'

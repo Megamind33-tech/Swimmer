@@ -135,7 +135,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
         return (
           <div className="space-y-4">
             {ClaimableRewards.filter((r) => !r.claimed && !claimedItems.has(r.id)).length === 0 ? (
-              <div className="bg-slate-700/50 rounded-lg p-8 text-center border border-slate-600/30">
+              <div className="rewards-glass-card rounded-lg p-8 text-center">
                 <div className="text-5xl mb-3">✓</div>
                 <div className="text-lg font-bold text-white mb-1">All Rewards Claimed!</div>
                 <p className="text-slate-400">Check back soon for more rewards</p>
@@ -145,12 +145,12 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
                 {ClaimableRewards.filter((r) => !r.claimed && !claimedItems.has(r.id)).map((reward) => (
                   <div
                     key={reward.id}
-                    className={`rounded-lg p-6 border ${getTypeColor(reward.type)}`}
+                    className={`rewards-glass-card rounded-lg p-6 border ${getTypeColor(reward.type)}`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <div className="text-xs font-bold uppercase opacity-75 mb-1">{reward.from}</div>
-                        <h3 className="text-lg font-black text-white">{reward.title}</h3>
+                        <h3 className="sport-header text-lg font-black text-white">{reward.title}</h3>
                       </div>
                       <span className="text-xs font-bold opacity-50">{reward.date}</span>
                     </div>
@@ -202,7 +202,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
         return (
           <div className="space-y-3">
             {InboxMessages.map((message) => (
-              <div key={message.id} className={`rounded-lg p-4 border ${getTypeColor(message.type)}`}>
+              <div key={message.id} className={`rewards-glass-card rounded-lg p-4 border ${getTypeColor(message.type)}`}>
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <div className="text-xs font-bold uppercase opacity-75">{message.from}</div>
@@ -223,8 +223,8 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
         );
       case 'HISTORY':
         return (
-          <div className="bg-slate-700/50 rounded-lg p-6 border border-slate-600/30">
-            <h3 className="text-lg font-black text-white mb-4">Claimed Rewards History</h3>
+          <div className="rewards-glass-card rounded-lg p-6">
+            <h3 className="sport-header text-lg font-black text-white mb-4">Claimed Rewards History</h3>
             <div className="space-y-2">
               {[
                 { date: 'Mar 14', item: 'Daily Login Bonus', reward: '✓ 300 XP' },
@@ -253,7 +253,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-black text-white mb-2">Rewards & Inbox</h1>
+          <h1 className="sport-header text-4xl font-black text-white mb-2">Rewards & Inbox</h1>
           <p className="text-slate-400">Claim your rewards and check messages</p>
         </div>
 
