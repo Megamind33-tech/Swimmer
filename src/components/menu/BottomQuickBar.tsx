@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import type { MenuScreen } from './GlobalMenuLayout';
 
 interface BottomQuickBarProps {
-  onScreenChange?: (screen: MenuScreen) => void;
+  onScreenChange?: (screen: string) => void;
   onQuickRaceClick?: () => void;
   onTrainingClick?: () => void;
   onRankedClick?: () => void;
