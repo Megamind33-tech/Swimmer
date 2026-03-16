@@ -22,34 +22,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   return (
     <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col safe-zone-x">
       <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-4 max-[900px]:p-2.5 gap-3 max-[900px]:gap-2 min-h-0 pb-3">
-        {/* Championship Hero Strip - Glassmorphic with Neon */}
-        <div className="glass-card-elevated border border-neon-cyan/30 rounded-2xl overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px] group hover:border-neon-cyan/60 transition-all duration-300 skew-container">
+        {/* Championship Hero Strip - Enhanced Glassmorphic with Water Theme */}
+        <div className="glass-card overflow-hidden w-full flex-[1.25] min-h-[230px] max-[900px]:min-h-[170px] group hover:border-neon-cyan/40 transition-all duration-300 skew-container border border-neon-cyan/25 shadow-lg shadow-neon-cyan/10 rounded-2xl">
           {/* Header with Live Badge */}
-          <div className="px-6 max-[900px]:px-4 py-4 max-[900px]:py-3 bg-gradient-to-r from-broadcast-overlay via-neon-cyan/5 to-broadcast-overlay border-b border-neon-cyan/20">
+          <div className="px-6 max-[900px]:px-4 py-4 max-[900px]:py-3 bg-gradient-to-r from-broadcast-overlay/60 via-neon-cyan/8 to-broadcast-overlay/60 border-b border-neon-cyan/15 backdrop-blur-sm">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-din text-[25px] max-[1100px]:text-2xl max-[900px]:text-sm font-black italic uppercase text-white tracking-wider leading-tight drop-shadow-[0_0_12px_rgba(0,255,255,0.4)]">
+              <h2 className="font-din text-[25px] max-[1100px]:text-2xl max-[900px]:text-sm font-black italic-header uppercase text-white tracking-wider leading-tight drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
                 CHAMPIONSHIP SEASON 7
               </h2>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full border-2 border-neon-cyan bg-neon-cyan/10 animate-live-pulse">
-                <span className="w-2 h-2 rounded-full bg-neon-cyan"></span>
-                <span className="text-xs text-neon-cyan font-bold uppercase tracking-wider">LIVE</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neon-cyan/40 bg-neon-cyan/8 animate-live-pulse backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan"></span>
+                <span className="text-xs text-neon-cyan font-bold font-mono uppercase tracking-wider">LIVE</span>
               </div>
             </div>
           </div>
 
           {/* Hero Content Grid */}
           <div className="grid grid-cols-[1fr_220px] max-[900px]:grid-cols-[1fr_120px] items-stretch min-h-[152px] max-[900px]:min-h-[112px]">
-            <div className="p-6 max-[900px]:p-4 bg-gradient-to-r from-broadcast-overlay/80 via-neon-cyan/5 to-transparent flex flex-col justify-center">
+            <div className="p-6 max-[900px]:p-4 bg-gradient-to-r from-broadcast-overlay/50 via-neon-cyan/3 to-transparent flex flex-col justify-center backdrop-blur-sm">
               <div className="flex items-center justify-between gap-4 mb-3">
-                <p className="text-3xl max-[900px]:text-lg font-din font-black uppercase leading-tight text-white drop-shadow-[0_0_12px_rgba(0,255,255,0.3)]">
+                <p className="text-3xl max-[900px]:text-lg font-din font-black italic-header uppercase leading-tight text-white drop-shadow-[0_0_10px_rgba(0,255,255,0.3)]">
                   START RACE
                 </p>
                 <button
                   onClick={onPlayClick}
-                  className="h-12 w-12 max-[900px]:h-10 max-[900px]:w-10 rounded-xl neon-stroke hover:neon-stroke-active flex items-center justify-center transition-all duration-300 active:animate-squash-stretch group/btn"
+                  className="h-12 w-12 max-[900px]:h-10 max-[900px]:w-10 rounded-xl border border-neon-cyan/40 bg-neon-cyan/10 hover:bg-neon-cyan/20 hover:border-neon-cyan/60 flex items-center justify-center transition-all duration-300 active:animate-squash-stretch group/btn backdrop-blur-sm shadow-lg shadow-neon-cyan/5"
                   aria-label="Play start race"
                 >
-                  <span className="material-symbols-outlined text-neon-cyan text-2xl drop-shadow-[0_0_8px_rgba(0,255,255,0.6)] group-hover/btn:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-neon-cyan text-2xl drop-shadow-[0_0_8px_rgba(0,255,255,0.4)] group-hover/btn:scale-110 transition-transform">
                     play_arrow
                   </span>
                 </button>
@@ -95,7 +95,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className="relative z-20 flex-1 flex">
           <button
             onClick={onPlayClick}
-            className="w-full h-full group relative px-8 max-[900px]:px-5 py-6 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 border-2 border-neon-cyan/40 glass-card-elevated skew-container-reverse active:animate-squash-stretch"
+            className="w-full h-full group relative px-8 max-[900px]:px-5 py-6 max-[900px]:py-4 min-h-[190px] max-[900px]:min-h-[130px] rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-95 border border-neon-cyan/25 glass-card skew-container-reverse active:animate-squash-stretch shadow-lg shadow-neon-cyan/5 hover:shadow-lg hover:shadow-neon-cyan/15"
           >
             {/* Background Image */}
             <img
@@ -152,22 +152,22 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
   return (
     <div className="space-y-4 safe-zone">
       {/* Daily Objectives */}
-      <div className="glass-card-elevated p-5 border border-neon-cyan/30 rounded-xl group hover:border-neon-cyan/60 transition-all duration-300">
-        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">
+      <div className="glass-card p-5 border border-neon-cyan/25 rounded-2xl group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5">
+        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
           Daily Objectives
         </h3>
         <div className="space-y-3">
           {dailyObjectives.map((obj) => (
-            <div key={obj.id} className="flex items-center justify-between p-2 rounded-lg bg-neon-cyan/5 border border-neon-cyan/20 hover:border-neon-cyan/50 transition-all duration-300">
+            <div key={obj.id} className="flex items-center justify-between p-2 rounded-lg bg-neon-cyan/8 border border-neon-cyan/15 hover:border-neon-cyan/35 transition-all duration-300 backdrop-blur-sm">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="material-symbols-outlined text-neon-cyan text-lg shrink-0">
                   {obj.icon}
                 </span>
-                <span className="text-sm font-barlow font-bold text-white/90 truncate">
+                <span className="text-sm font-barlow font-bold text-white/85 truncate">
                   {obj.name}
                 </span>
               </div>
-              <span className="text-xs font-din font-bold text-neon-cyan ml-2 shrink-0 drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">
+              <span className="text-xs font-mono-data text-neon-cyan ml-2 shrink-0 drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">
                 {obj.progress}/{obj.total}
               </span>
             </div>
@@ -176,18 +176,18 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
       </div>
 
       {/* Active Events */}
-      <div className="glass-card-elevated p-5 border border-neon-cyan/30 rounded-xl group hover:border-neon-cyan/60 transition-all duration-300">
-        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.4)]">
+      <div className="glass-card p-5 border border-neon-cyan/25 rounded-2xl group hover:border-neon-cyan/40 transition-all duration-300 backdrop-blur-sm shadow-lg shadow-neon-cyan/5">
+        <h3 className="text-xs font-din font-black text-neon-cyan uppercase tracking-wider mb-4 drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
           Active Events
         </h3>
         <div className="space-y-2">
           {activeEvents.map((event, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between p-2 rounded-lg bg-neon-cyan/5 border border-neon-cyan/20 hover:border-neon-cyan/50 transition-all duration-300"
+              className="flex items-center justify-between p-2 rounded-lg bg-neon-cyan/8 border border-neon-cyan/15 hover:border-neon-cyan/35 transition-all duration-300 backdrop-blur-sm"
             >
-              <span className="text-sm font-barlow font-bold text-white/90">{event.name}</span>
-              <span className="text-xs font-mono font-bold text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.4)]">
+              <span className="text-sm font-barlow font-bold text-white/85">{event.name}</span>
+              <span className="text-xs font-mono-timer text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">
                 {event.time}
               </span>
             </div>
