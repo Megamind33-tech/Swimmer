@@ -237,17 +237,25 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
 
                 {/* Liquid Fill Progress Display */}
                 <div className="flex items-center gap-2 ml-2 shrink-0">
-                  <div className="text-xs font-mono-data text-neon-cyan drop-shadow-[0_0_4px_rgba(0,255,255,0.3)]">
-                    <span className={isCompleted ? 'text-yellow-300' : 'text-neon-cyan'}>
-                      {obj.progress}/{obj.total}
-                    </span>
+                  <div
+                    className={`progress-badge ${isCompleted ? 'progress-badge--complete' : ''}`}
+                    style={{
+                      color: isCompleted ? '#ffd700' : 'currentColor',
+                    }}
+                  >
+                    <span className="font-mono-data">{obj.progress}/{obj.total}</span>
                   </div>
-                  <div className="w-6 h-6 rounded-sm border border-neon-cyan/30 bg-neon-cyan/5 flex items-center justify-center overflow-hidden">
-                    <div
-                      className="w-full bg-gradient-to-t from-neon-cyan/60 to-neon-cyan/40 rounded-sm"
-                      style={{ height: `${fillPercent}%` }}
-                    />
-                  </div>
+                  <div className={`liquid-progress-bar ${
+                    fillPercent === 0
+                      ? 'liquid-progress-bar--empty'
+                      : fillPercent === 100
+                      ? 'liquid-progress-bar--full'
+                      : 'liquid-progress-bar--partial'
+                  }`}
+                    style={{
+                      '--progress-width': `${fillPercent}%`,
+                    } as React.CSSProperties}
+                  />
                 </div>
               </div>
             );
