@@ -7,6 +7,7 @@ import React, { ReactNode } from 'react';
 import { TopBar } from './TopBar';
 import { LeftNavigationRail } from './LeftNavigationRail';
 import { BottomQuickBar } from './BottomQuickBar';
+import poolNightBackground from '../../designs/swim_26_main_menu/screen.png';
 
 export type MenuScreen = 'HOME' | 'PLAY' | 'CAREER' | 'SWIMMER' | 'CLUB' | 'LIVE_EVENTS' | 'SOCIAL' | 'STORE';
 
@@ -38,11 +39,23 @@ export const GlobalMenuLayout: React.FC<GlobalMenuLayoutProps> = ({
 
   return (
     <div className="w-screen h-dvh bg-[#060b14] text-white overflow-hidden flex flex-col">
-      {/* Background Gradient Elements */}
+      {/* Cinematic Pool Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <img
+          src={poolNightBackground}
+          alt="Olympic pool at night"
+          className="absolute inset-0 h-full w-full object-cover opacity-35 scale-110 blur-[2px]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030a16]/90 via-[#051325]/82 to-[#041223]/94" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#02101f]/75 via-transparent to-[#062031]/70" />
+
+        <div className="ambient-bokeh absolute left-[8%] top-[16%] h-24 w-24 rounded-full bg-cyan-200/20 blur-2xl" />
+        <div className="ambient-bokeh absolute left-[35%] top-[10%] h-16 w-16 rounded-full bg-white/20 blur-xl [animation-delay:1.1s]" />
+        <div className="ambient-bokeh absolute right-[14%] top-[22%] h-20 w-20 rounded-full bg-sky-200/20 blur-2xl [animation-delay:2s]" />
+        <div className="ambient-bokeh absolute right-[28%] bottom-[16%] h-24 w-24 rounded-full bg-cyan-100/15 blur-2xl [animation-delay:2.8s]" />
+
+        <div className="ambient-flare absolute -left-24 top-1/4 h-52 w-52 rounded-full bg-cyan-300/18 blur-3xl" />
+        <div className="ambient-flare absolute right-[-7rem] bottom-1/4 h-64 w-64 rounded-full bg-teal-300/14 blur-3xl [animation-delay:1.7s]" />
       </div>
 
       {/* Main Content Container */}
