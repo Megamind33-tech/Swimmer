@@ -2376,3 +2376,45 @@ body {
     font-size: 0.48rem !important;
   }
 }
+
+
+/* Mobile/compact: enforce minimum tap targets */
+@media (max-width: 900px) {
+  .menu-shell button,
+  .menu-shell [role="button"] {
+    min-height: 38px;
+  }
+  .menu-bottom-actions button {
+    min-height: 40px;
+  }
+}
+
+/* Loosen extreme font shrinking in the top HUD */
+@media (max-width: 900px) {
+  .menu-shell header .text-\[9px\],
+  .menu-shell header .text-\[8px\],
+  .menu-shell header .text-\[10px\] {
+    font-size: 0.5rem !important; /* was ~0.42rem */
+    line-height: 1.1 !important;
+  }
+}
+
+/* Desktop HUD polish: subtle inner border highlight */
+.menu-page-surface {
+  position: relative;
+}
+.menu-page-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(129, 236, 255, 0.05);
+  pointer-events: none;
+}
+
+/* Align left rail and grid more tightly on compact heights */
+@media (orientation: landscape) and (max-height: 560px) {
+  .menu-left-rail {
+    background-color: rgba(8, 15, 24, 0.65) !important;
+  }
+}
