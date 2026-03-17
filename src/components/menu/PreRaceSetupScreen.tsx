@@ -38,7 +38,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   ];
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
       {/* Cinematic Header */}
       <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
@@ -72,7 +72,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
         </div>
       </div>
 
-      <div className="p-10 max-w-7xl mx-auto w-full space-y-10 pb-32">
+      <div className="hydro-page-content p-10 max-w-7xl mx-auto w-full space-y-10 pb-32">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Configuration (7 cols) */}
           <div className="lg:col-span-7 space-y-8">
