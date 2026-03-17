@@ -93,21 +93,21 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
   ];
 
   return (
-    <nav className="h-24 bg-surface/60 backdrop-blur-3xl border-t border-white/5 px-6 flex items-center justify-center gap-4 sticky bottom-0 z-40 font-headline overflow-hidden">
+    <nav className="menu-bottom-bar h-24 bg-surface/60 backdrop-blur-3xl border-t border-white/5 px-6 flex items-center justify-center gap-4 z-40 font-headline overflow-hidden">
       {/* Structural Accent Line */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-      
-      {quickActions.map((action) => (
-        <button
-          key={action.id}
-          onClick={() => {
-            action.onClick?.();
-            if (!action.onClick && onScreenChange) {
-              onScreenChange(defaultActionRoute[action.id]);
-            }
-          }}
-          className="group relative h-16 flex-1 min-w-[120px] max-w-[200px] overflow-hidden -skew-x-12 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:scale-105 active:scale-95 group"
-        >
+      <div className="menu-bottom-actions relative z-10 flex w-full items-center justify-center gap-4 overflow-x-auto overflow-y-hidden pb-1">
+        {quickActions.map((action) => (
+          <button
+            key={action.id}
+            onClick={() => {
+              action.onClick?.();
+              if (!action.onClick && onScreenChange) {
+                onScreenChange(defaultActionRoute[action.id]);
+              }
+            }}
+            className="group relative h-16 flex-1 min-w-[120px] max-w-[200px] overflow-hidden -skew-x-12 border border-white/10 hover:border-primary/40 transition-all duration-500 hover:scale-105 active:scale-95 group"
+          >
           {/* Action Image & Gradient HUD */}
           <div className="absolute inset-0 skew-x-12 scale-125 group-hover:scale-110 transition-transform duration-700">
              <img src={action.image} alt={action.label} className="w-full h-full object-cover opacity-40 group-hover:opacity-60 grayscale group-hover:grayscale-0 transition-all duration-500" />
@@ -130,8 +130,9 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
           {/* Luminous Interaction State */}
           <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity" />
           <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left shadow-[0_0_15px_rgba(129,236,255,1)]" />
-        </button>
-      ))}
+          </button>
+        ))}
+      </div>
     </nav>
   );
 };

@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import rewardsBackdropImage from '../../designs/custom_backgrounds/16GDP8cMj1ZeAFtQhML30ak33nG3RZIaL.jpg';
 
 type InboxTab = 'CLAIMABLE' | 'INBOX' | 'HISTORY';
 
@@ -292,9 +293,10 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
   };
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      <img src={rewardsBackdropImage} alt="Rewards background" className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
       {/* Cinematic Header */}
-      <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
+      <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden z-10">
         <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
         
         <div className="relative z-10 flex items-center justify-between gap-8 flex-wrap">
@@ -328,7 +330,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
         </div>
       </div>
 
-      <div className="p-8 max-w-5xl mx-auto w-full space-y-12 pb-24">
+      <div className="hydro-page-content p-8 max-w-5xl mx-auto w-full space-y-12 pb-24 relative z-10">
         {/* Tab Navigation */}
         <div className="flex gap-4 flex-wrap">
           {tabs.map((tab) => (

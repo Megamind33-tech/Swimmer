@@ -42,7 +42,7 @@ export const RaceResultScreen: React.FC<RaceResultScreenProps> = ({
   ];
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body pb-40">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body pb-40">
       {/* Cinematic Announcement Header */}
       <div className={`p-16 max-[900px]:p-10 relative overflow-hidden flex flex-col items-center text-center ${
         isWinner ? 'bg-secondary/10 border-b border-secondary/20' : 'bg-primary/10 border-b border-white/5'

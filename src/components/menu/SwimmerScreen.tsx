@@ -310,7 +310,7 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
   };
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
       {/* Cinematic Athlete Header */}
       <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-[800px] h-[800px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
@@ -357,7 +357,7 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
         </div>
       </div>
 
-      <div className="p-8 max-w-7xl mx-auto w-full space-y-12 pb-24">
+      <div className="hydro-page-content p-8 max-w-7xl mx-auto w-full space-y-12 pb-24">
         {/* Tab Navigation */}
         <div className="flex gap-3 flex-wrap items-center">
           {tabs.map((tab) => {

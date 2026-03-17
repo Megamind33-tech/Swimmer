@@ -35,6 +35,7 @@ export const SocialClubScreen: React.FC = () => {
       level: 0,
       specialty: "Training Mode",
       avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCckRby7_VG2-e4y7eXIk9TOjP3s1qd2rumCGRRxAeLzuWqlD8EvMLsUiYyeBe5kghEddPnHNjz6mnnWMroqUL5Ef_bYJbdn3Zd7RwzyrGVI1GbDH56K94qb22FqyTCGl8KDqax4_ru8zPC1ikYveKpt3KNrtu-avmaL9HceriCXXaTGgRU_t6e_-OVabBMIl9AEexmNwvDU2jZrT_yL7yjxUURIOkV0Tk9gMP60FqEGciTij-_DMTWSarPHrp_VUUaJJGiaS2oIN1G",
+      online: false,
       offline: true,
       grayscale: true,
     },

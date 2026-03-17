@@ -4,6 +4,8 @@
  */
 
 import React, { useState } from 'react';
+import marketplaceBackdropImage from '../../designs/custom_backgrounds/1dLNpgVzO02ceJe0YsHoa4tMHenXscN9M.jpg';
+import { HeroBackgroundMedia } from '../ui/MediaPrimitives';
 
 type StoreTab = 'FEATURED' | 'COSMETICS' | 'SEASON_PASS' | 'BUNDLES' | 'CELEBRATION' | 'EVENT_SHOP';
 
@@ -486,13 +488,15 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
   };
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
       {/* Cinematic Store Header */}
       <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden">
+        <HeroBackgroundMedia src={marketplaceBackdropImage} alt="Global marketplace background" className="absolute inset-0 pointer-events-none opacity-85" focalPoint="50% 35%" />
+        <div className="absolute inset-0 bg-gradient-to-r from-surface/68 via-surface/28 to-surface/45 pointer-events-none" />
         <div className="absolute top-0 right-1/2 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="relative z-10 flex items-end justify-between gap-8 flex-wrap">
-          <div>
+          <div className="p-4 rounded-2xl bg-surface/40 border border-white/10 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-4">
               <span className="h-[1px] w-12 bg-primary/40" />
               <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Global Marketplace</span>
@@ -530,7 +534,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
         </div>
       </div>
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-8 pb-12">
+      <div className="hydro-page-content page-template-store p-6 max-w-7xl mx-auto w-full space-y-8 pb-12">
         {/* Tab Navigation */}
         <div className="flex gap-2 flex-wrap items-center">
           {tabs.map((tab) => {
