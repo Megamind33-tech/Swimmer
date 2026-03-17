@@ -1676,36 +1676,30 @@ body {
   background: linear-gradient(160deg, rgba(9, 30, 36, 0.46), rgba(5, 15, 18, 0.22));
   border: 1px solid rgba(128, 236, 255, 0.16);
   border-radius: 1rem;
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
 }
 
 .hydro-home-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem;
-  padding-bottom: 1rem;
-  flex: 1;
-  align-items: stretch;
-  grid-auto-rows: 1fr;
+  gap: 1rem;
 }
 
 .hydro-feature-card {
   position: relative;
-  min-height: clamp(28rem, 56vh, 38rem);
-  height: 100%;
+  height: clamp(200px, 36vh, 300px);
   border-radius: 0.8rem;
   overflow: hidden;
   border: 1px solid rgba(128, 236, 255, 0.2);
-  background: linear-gradient(180deg, rgba(9, 35, 41, 0.22), rgba(5, 15, 18, 0.18));
-  box-shadow: 0 0 34px rgba(128, 236, 255, 0.14);
-  transform: perspective(1000px) rotateY(-9deg) rotateX(3deg);
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  background: #070f14;
+  box-shadow: 0 0 24px rgba(128, 236, 255, 0.10);
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .hydro-feature-card:hover {
-  transform: perspective(1000px) rotateY(-5deg) rotateX(2deg) scale(1.01);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 8px 32px rgba(128, 236, 255, 0.22);
+  border-color: rgba(128, 236, 255, 0.45);
 }
 
 .hydro-feature-image,
@@ -1722,46 +1716,55 @@ body {
 }
 
 .hydro-feature-overlay {
-  background: linear-gradient(to top, rgba(128, 236, 255, 0.24), rgba(5, 15, 18, 0.68) 58%);
+  background: linear-gradient(to top, rgba(5, 15, 18, 0.92) 0%, rgba(5, 15, 18, 0.55) 45%, rgba(128, 236, 255, 0.08) 100%);
 }
 
 .hydro-feature-overlay-gold {
-  background: linear-gradient(to top, rgba(255, 215, 9, 0.24), rgba(5, 15, 18, 0.68) 58%);
+  background: linear-gradient(to top, rgba(5, 15, 18, 0.92) 0%, rgba(5, 15, 18, 0.55) 45%, rgba(255, 215, 9, 0.12) 100%);
 }
 
 .hydro-feature-overlay-neutral {
-  background: linear-gradient(to top, rgba(96, 165, 250, 0.2), rgba(5, 15, 18, 0.68) 58%);
+  background: linear-gradient(to top, rgba(5, 15, 18, 0.92) 0%, rgba(5, 15, 18, 0.55) 45%, rgba(96, 165, 250, 0.10) 100%);
 }
 
 .hydro-feature-content {
   position: absolute;
   inset: auto 0 0 0;
   z-index: 2;
-  padding: 1.4rem;
+  padding: 1rem 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
 .hydro-feature-content h3 {
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 900;
   text-transform: uppercase;
   font-style: italic;
   line-height: 1;
-  margin: 0.6rem 0 0.3rem;
+  margin: 0.25rem 0 0.15rem;
 }
 
 .hydro-feature-content p {
-  font-size: 0.85rem;
-  opacity: 0.85;
-  margin-bottom: 1rem;
+  font-size: 0.78rem;
+  opacity: 0.80;
+  margin-bottom: 0.6rem;
   max-width: 16rem;
+}
+
+.hydro-feature-content .hydro-cta {
+  margin-top: 0.2rem;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.75rem;
 }
 
 .hydro-feature-icon {
   position: absolute;
-  right: 1rem;
-  top: 1rem;
-  font-size: 5.5rem;
-  opacity: 0.25;
+  right: 0.75rem;
+  top: 0.75rem;
+  font-size: 4rem;
+  opacity: 0.18;
   z-index: 1;
 }
 
@@ -1800,24 +1803,46 @@ body {
   color: #fff;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1100px) {
   .hydro-home-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
   }
 }
 
 @media (max-width: 820px) {
+  /* Horizontal swipe cards — all visible, no vertical scroll needed */
   .hydro-home-cards {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    /* hide scrollbar on mobile but keep functionality */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hydro-home-cards::-webkit-scrollbar {
+    display: none;
   }
 
   .hydro-feature-card {
-    min-height: 22rem;
-    transform: none;
+    flex: 0 0 78vw;
+    height: 220px;
+    scroll-snap-align: start;
+    transform: none !important;
   }
 
   .hydro-feature-card:hover {
-    transform: scale(1.01);
+    transform: none !important;
+  }
+
+  .hydro-feature-content h3 {
+    font-size: 1.35rem;
   }
 }
 
