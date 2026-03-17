@@ -1832,7 +1832,7 @@ body {
 
   .hydro-feature-card {
     flex: 0 0 78vw;
-    height: 220px;
+    height: 172px;
     scroll-snap-align: start;
     transform: none !important;
   }
@@ -1932,8 +1932,12 @@ body {
 }
 
 @media (max-width: 900px) {
+  :root {
+    --shell-top-hud-height: 2.72rem;
+  }
+
   .menu-shell header {
-    height: 3.4rem !important;
+    height: 2.72rem !important;
     padding-left: 0.45rem !important;
     padding-right: 0.45rem !important;
   }
@@ -2002,7 +2006,8 @@ body {
   }
 
   .hydro-feature-card {
-    min-height: 10.5rem !important;
+    min-height: 8.4rem !important;
+    height: auto !important;
     transform: perspective(1000px) rotateY(-4deg) rotateX(1.5deg);
     border-radius: 0.65rem;
   }
@@ -2123,7 +2128,7 @@ body {
     --type-h2: clamp(0.95rem, 1.15vw, 1.3rem);
     --type-body: clamp(0.62rem, 0.95vw, 0.82rem);
     --type-meta: clamp(0.4rem, 0.5vw, 0.58rem);
-    --size-card-min-height: clamp(8rem, 30vh, 13.5rem);
+    --size-card-min-height: clamp(6.5rem, 22vh, 10.5rem);
   }
 
   .top-hud .top-hud-logo h1 { font-size: clamp(1.05rem, 1.3vw, 1.6rem) !important; }
