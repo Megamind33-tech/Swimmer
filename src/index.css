@@ -2400,6 +2400,81 @@ body {
   .hydro-feature-content p {
     font-size: 0.48rem !important;
   }
+
+  /* ── Game-UI layout: fill viewport, all 3 cards visible with no scroll ── */
+  /* Like PS/Switch menus — cards own the remaining space, not a fixed px height */
+
+  .home-main-content {
+    overflow: hidden !important;
+    height: 100% !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hydro-home-shell {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    display: flex !important;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .hydro-home-hero {
+    flex: 0 0 auto;
+    margin-bottom: 0.3rem !important;
+  }
+
+  /* Underline bar below title */
+  .hydro-home-hero .mt-4 {
+    margin-top: 0.25rem !important;
+  }
+
+  .hydro-home-cards {
+    flex: 1 1 0;
+    min-height: 0;
+    /* Always show all 3 — no horizontal scroll on landscape */
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: 1fr;
+    overflow: hidden !important;
+    gap: 0.4rem !important;
+    padding-bottom: 0 !important;
+  }
+
+  .hydro-feature-card {
+    /* Let height be driven by the grid row, not a fixed value */
+    height: 100% !important;
+    min-height: 0 !important;
+    /* Reset horizontal-scroll flex sizing from ≤820px breakpoint */
+    flex: none !important;
+    width: auto !important;
+    scroll-snap-align: none !important;
+    /* Kill the 900px perspective tilt — looks broken in a flex-fill grid */
+    transform: none !important;
+  }
+
+  .hydro-feature-card:hover {
+    transform: scale(1.015) !important;
+  }
+
+  /* CTA button: shrink tap target slightly to save card real-estate */
+  .hydro-feature-card .hydro-cta {
+    padding: 0.28rem 0.45rem !important;
+    font-size: 0.44rem !important;
+    min-height: 0 !important;
+  }
+
+  /* Badge: keep readable but compact */
+  .hydro-badge {
+    padding: 0.15rem 0.35rem !important;
+    font-size: 0.44rem !important;
+  }
+
+  /* Icon: tone down so it doesn't crowd the card */
+  .hydro-feature-icon {
+    font-size: 2.2rem !important;
+  }
 }
 
 
