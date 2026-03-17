@@ -85,9 +85,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   return (
-    <div className="home-main-content hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      <div className="hydro-home-shell page-template-dashboard relative z-10 flex-1 min-h-0 overflow-y-auto p-6">
-        <section className="hydro-home-hero mb-6">
+    <div className="home-main-content hydro-page-shell flex-1 relative w-full h-full overflow-y-auto font-body">
+      <div className="hydro-home-shell p-4 md:p-6">
+        <section className="hydro-home-hero mb-5">
           <h2 className="text-4xl md:text-5xl font-black italic uppercase leading-none tracking-tight text-on-surface">
             Race <span className="text-primary">Command</span>
           </h2>
@@ -98,39 +98,39 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           renderSubPage()
         ) : (
           <section className="hydro-home-cards">
-            <article className="hydro-feature-card hydro-feature-primary">
+            <article className="hydro-feature-card hydro-feature-primary" onClick={() => openSubPage('QUICK_RACE')}>
               <FeatureCardMedia src={p2pQuickMatchImage} alt="Quick race" className="hydro-feature-image" overlayClassName="hydro-feature-overlay" focalPoint="50% 45%" />
               <div className="hydro-feature-content">
                 <span className="hydro-badge bg-primary text-background">Competitive</span>
                 <h3>Quick Race</h3>
-                <p>Instant hydro-matchmaking with precision global tracking.</p>
-                <button onClick={() => openSubPage('QUICK_RACE')} className="hydro-cta hydro-cta-primary">
-                  Start Quick Race
+                <p>Instant matchmaking &amp; global tracking.</p>
+                <button onClick={(e) => { e.stopPropagation(); openSubPage('QUICK_RACE'); }} className="hydro-cta hydro-cta-primary">
+                  Start
                 </button>
               </div>
               <span className="material-symbols-outlined hydro-feature-icon text-primary">speed</span>
             </article>
 
-            <article className="hydro-feature-card hydro-feature-gold">
+            <article className="hydro-feature-card hydro-feature-gold" onClick={() => openSubPage('CAREER')}>
               <FeatureCardMedia src={miaPhiriAthleteImage} alt="Career mode" className="hydro-feature-image" overlayClassName="hydro-feature-overlay hydro-feature-overlay-gold" focalPoint="50% 22%" />
               <div className="hydro-feature-content">
                 <span className="hydro-badge bg-secondary text-background">Achievements</span>
                 <h3>Career</h3>
-                <p>Path to pro achievements and legendary trophy unlocks.</p>
-                <button onClick={() => openSubPage('CAREER')} className="hydro-cta hydro-cta-gold">
-                  Continue Career
+                <p>Pro path, trophies &amp; season goals.</p>
+                <button onClick={(e) => { e.stopPropagation(); openSubPage('CAREER'); }} className="hydro-cta hydro-cta-gold">
+                  Continue
                 </button>
               </div>
               <span className="material-symbols-outlined hydro-feature-icon text-secondary">emoji_events</span>
             </article>
 
-            <article className="hydro-feature-card hydro-feature-neutral">
+            <article className="hydro-feature-card hydro-feature-neutral" onClick={() => openSubPage('SOCIAL')}>
               <FeatureCardMedia src={p2pQuickMatchImage} alt="Social club" className="hydro-feature-image" overlayClassName="hydro-feature-overlay hydro-feature-overlay-neutral" focalPoint="50% 52%" />
               <div className="hydro-feature-content">
-                <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">+12 Online</span>
+                <span className="hydro-badge bg-blue-500/30 text-blue-300 border border-blue-400/30">+12 Online</span>
                 <h3>Chat</h3>
-                <p>Connect with your swim team and coordinate events.</p>
-                <button onClick={() => openSubPage('SOCIAL')} className="hydro-cta hydro-cta-neutral">Go to Chat</button>
+                <p>Squad chat, rivals &amp; club feed.</p>
+                <button onClick={(e) => { e.stopPropagation(); openSubPage('SOCIAL'); }} className="hydro-cta hydro-cta-neutral">Open</button>
               </div>
               <span className="material-symbols-outlined hydro-feature-icon text-blue-300">hub</span>
             </article>
