@@ -447,6 +447,52 @@ export class BroadcastCamera {
   }
 
   /**
+   * Legacy compatibility APIs used by examples and ArenaManager.
+   * These route to the current broadcast camera controls.
+   */
+  public setConfig(config: Partial<typeof BroadcastCamera.prototype['playerFollowConfig']> & Record<string, unknown>): void {
+    this.setFollowConfig(config);
+  }
+
+  public focusOnFinishLine(duration: number = 900): void {
+    this.transitionToCamera('CAM_18_FINISH_COMPRESSION', duration);
+  }
+
+  public panToSwimmer(_laneX: number, duration: number = 1200): void {
+    this.transitionToCamera('CAM_16_OVERHEAD_TRACKING', duration);
+  }
+
+  public showReplayWideAngle(duration: number = 900): void {
+    this.transitionToCamera('CAM_01_ARENA_ESTABLISHING', duration);
+  }
+
+  public enableDynamicShotRotation(intervalMs: number = 5000): void {
+    void intervalMs;
+    this.loadPhaseSequence('MID_RACE');
+  }
+
+  public disableDynamicShotRotation(): void {
+    this.currentShotSequence = [];
+    this.currentSequenceIndex = 0;
+    this.sequenceTimer = 0;
+  }
+
+  public onRaceProgress(data: { raceDistance?: number; leaderPosition?: number; swimmers?: ISwimmerRaceState[] }): void {
+    const leadSwimmer = data.swimmers?.[0];
+    if (leadSwimmer) {
+      this.playerSwimmer = leadSwimmer;
+    }
+
+    const raceDistance = data.raceDistance ?? data.leaderPosition ?? 0;
+    const remainingDistance = Math.max(0, 100 - raceDistance);
+    this.onFinishThreshold(remainingDistance);
+  }
+
+  public onSwimmerFinished(_data: { swimmerId?: string; position?: number; name?: string; rank?: number }): void {
+    this.onRaceFinish();
+  }
+
+  /**
    * Easing functions
    */
   private applyEasing(t: number, easing: string): number {

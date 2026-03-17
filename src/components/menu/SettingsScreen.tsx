@@ -358,8 +358,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onSave, onLogout
   };
 
   return (
-    <div className="w-full h-full overflow-y-auto p-8 space-y-8 bg-surface">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="hydro-page-shell w-full h-full overflow-y-auto p-8 space-y-8 bg-surface">
+      <div className="hydro-page-content max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="animate-slide-in-down">
           <h1 className="text-5xl font-black text-primary mb-2 text-glow">Settings</h1>

@@ -5,6 +5,21 @@
 
 import React, { useMemo, useState } from 'react';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
+import staffManagementReferenceImage from '../../designs/staff_management_mentors/screen.png';
+import clubBackdropImage from '../../designs/custom_backgrounds/1UtKXnTbZwj4daOsDHH1HLUgmCfvf81V9.jpg';
+import scoutingBackdropImage from '../../designs/custom_backgrounds/1dLNpgVzO02ceJe0YsHoa4tMHenXscN9M.jpg';
+import athlete01Image from '../../designs/custom_models/athlete-01.png';
+import athlete02Image from '../../designs/custom_models/athlete-02.png';
+import athlete03Image from '../../designs/custom_models/athlete-03.png';
+import athlete04Image from '../../designs/custom_models/athlete-04.png';
+import athlete05Image from '../../designs/custom_models/athlete-05.png';
+import athlete06Image from '../../designs/custom_models/athlete-06.png';
+import athlete07Image from '../../designs/custom_models/athlete-07.png';
+import athlete08Image from '../../designs/custom_models/athlete-08.png';
+import athlete09Image from '../../designs/custom_models/athlete-09.png';
+import athlete10Image from '../../designs/custom_models/athlete-10.png';
+import athlete11Image from '../../designs/custom_models/athlete-11.png';
+import { AthletePortraitMedia } from '../ui/MediaPrimitives';
 
 type ClubTab = 'OVERVIEW' | 'FACILITIES' | 'ROSTER' | 'RELAY' | 'STAFF' | 'BRANDING';
 type ClubSubPage =
@@ -22,14 +37,18 @@ type ClubSubPage =
 
 type ManagerMode = 'OWNER' | 'HIRED';
 
-interface ClubMember {
+interface AthleteProfile {
   id: string;
   name: string;
+  age: number;
   level: number;
   specialty: string;
-  joinDate: string;
   nationality: string;
-  wage: string;
+  marketValue: string;
+  weeklyWage: string;
+  joinDate: string;
+  image: string;
+  portraitFocalPoint?: string;
   relayPosition?: number;
 }
 
@@ -38,12 +57,21 @@ interface ClubScreenProps {
   onLaunchArenaRace?: () => void;
 }
 
-const ClubMembers: ClubMember[] = [
-  { id: '1', name: 'Lane Master', level: 45, specialty: 'Freestyle', joinDate: 'Mar 1, 2025', nationality: 'Zambia', wage: '14,000', relayPosition: 1 },
-  { id: '2', name: 'James Chen', level: 42, specialty: 'Butterfly', joinDate: 'Jan 15, 2025', nationality: 'China', wage: '11,200', relayPosition: 2 },
-  { id: '3', name: 'Maya Patel', level: 39, specialty: 'Breaststroke', joinDate: 'Feb 20, 2025', nationality: 'India', wage: '9,500', relayPosition: 3 },
-  { id: '4', name: 'Alex Wilson', level: 41, specialty: 'Backstroke', joinDate: 'Dec 10, 2024', nationality: 'USA', wage: '10,800', relayPosition: 4 },
+const scoutingAthletes: AthleteProfile[] = [
+  { id: 'athlete-01', name: 'Chipo Banda', age: 19, level: 86, specialty: 'Freestyle', nationality: 'Zambia', marketValue: '1,200,000', weeklyWage: '18,500', joinDate: 'Jun 03, 2026', image: athlete01Image, portraitFocalPoint: '50% 18%' },
+  { id: 'athlete-02', name: 'Natasha Phiri', age: 20, level: 84, specialty: 'Butterfly', nationality: 'Zambia', marketValue: '1,050,000', weeklyWage: '16,400', joinDate: 'Jun 03, 2026', image: athlete02Image, portraitFocalPoint: '50% 18%' },
+  { id: 'athlete-03', name: 'Amahle Dlamini', age: 18, level: 82, specialty: 'Backstroke', nationality: 'South Africa', marketValue: '980,000', weeklyWage: '14,900', joinDate: 'Jun 03, 2026', image: athlete03Image, portraitFocalPoint: '50% 22%' },
+  { id: 'athlete-04', name: 'Selma Ndeitunga', age: 21, level: 88, specialty: 'Medley', nationality: 'Namibia', marketValue: '1,450,000', weeklyWage: '21,300', joinDate: 'Jun 03, 2026', image: athlete04Image, portraitFocalPoint: '50% 20%' },
+  { id: 'athlete-05', name: 'Thoko Mvula', age: 19, level: 83, specialty: 'Breaststroke', nationality: 'Malawi', marketValue: '1,000,000', weeklyWage: '15,600', joinDate: 'Jun 03, 2026', image: athlete05Image, portraitFocalPoint: '50% 18%' },
+  { id: 'athlete-06', name: 'Hana Bekele', age: 20, level: 85, specialty: 'Freestyle', nationality: 'Ethiopia', marketValue: '1,180,000', weeklyWage: '17,900', joinDate: 'Jun 03, 2026', image: athlete06Image, portraitFocalPoint: '50% 19%' },
+  { id: 'athlete-07', name: 'Tariro Moyo', age: 22, level: 89, specialty: 'Sprint', nationality: 'Zimbabwe', marketValue: '1,620,000', weeklyWage: '24,800', joinDate: 'Jun 03, 2026', image: athlete07Image, portraitFocalPoint: '50% 16%' },
+  { id: 'athlete-08', name: 'Lin Xia', age: 19, level: 81, specialty: 'Backstroke', nationality: 'China', marketValue: '920,000', weeklyWage: '13,800', joinDate: 'Jun 03, 2026', image: athlete08Image, portraitFocalPoint: '50% 18%' },
+  { id: 'athlete-09', name: 'Megan Carter', age: 20, level: 87, specialty: 'Butterfly', nationality: 'United States', marketValue: '1,360,000', weeklyWage: '20,500', joinDate: 'Jun 03, 2026', image: athlete09Image, portraitFocalPoint: '50% 18%' },
+  { id: 'athlete-10', name: 'Imani Clarke', age: 18, level: 80, specialty: 'Distance', nationality: 'Canada', marketValue: '890,000', weeklyWage: '12,700', joinDate: 'Jun 03, 2026', image: athlete10Image, portraitFocalPoint: '50% 18%' },
+  { id: 'athlete-11', name: 'Nour El-Sayed', age: 21, level: 90, specialty: 'Medley', nationality: 'Egypt', marketValue: '1,780,000', weeklyWage: '27,000', joinDate: 'Jun 03, 2026', image: athlete11Image, portraitFocalPoint: '50% 18%' },
 ];
+
+const initialRosterIds = ['athlete-01', 'athlete-02', 'athlete-03', 'athlete-04'];
 
 const sponsorCards = [
   { logo: 'AP', name: 'AquaPulse', deal: '50,000 / season', status: 'Active' },
@@ -150,7 +178,7 @@ const baseRoutes: { key: ClubSubPage; title: string; description: string; icon: 
   { key: 'SPONSORS', title: 'Sponsors & Partners', description: 'Sign and manage sponsor/partner deals.', icon: 'handshake' },
   { key: 'UPCOMING_EVENTS', title: 'Upcoming Events', description: 'See events and register entries in advance.', icon: 'event' },
   { key: 'LEAGUES_TOURNAMENTS', title: 'Leagues & Tournaments', description: 'Join P2P/PvE tournaments, leagues, and tours.', icon: 'emoji_events' },
-  { key: 'SCOUTING', title: 'Scouting Market', description: 'Scout and recruit talent worldwide.', icon: 'travel_explore' },
+  { key: 'SCOUTING', title: 'Transfers & Scouts', description: 'Buy from clubs, scout talent, and sign future stars.', icon: 'travel_explore' },
   { key: 'FUNDING', title: 'Funding & Finance', description: 'Track team/player earnings and source funding.', icon: 'payments' },
   { key: 'CLUB_COMPETITIONS', title: 'Club Competitions', description: 'Launch arena races for tournaments/leagues.', icon: 'sports_score' },
 ];
@@ -158,9 +186,21 @@ const baseRoutes: { key: ClubSubPage; title: string; description: string; icon: 
 export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons', onLaunchArenaRace }) => {
   const [activeTab, setActiveTab] = useState<ClubTab>('OVERVIEW');
   const [activeSubPage, setActiveSubPage] = useState<ClubSubPage | null>(null);
-  const [managerMode, setManagerMode] = useState<ManagerMode | null>(null);
-  const [relayOrder] = useState<string[]>(['1', '2', '3', '4']);
+  const [managerMode, setManagerMode] = useState<ManagerMode | null>('OWNER');
+  const [rosterMembers, setRosterMembers] = useState<AthleteProfile[]>(() => scoutingAthletes.filter((athlete) => initialRosterIds.includes(athlete.id)).map((athlete, index) => ({ ...athlete, relayPosition: index + 1 })));
+  const [careerStarterId, setCareerStarterId] = useState<string>(scoutingAthletes[0]?.id ?? '');
   const [clubSetup, setClubSetup] = useState({ name: 'Aqua Dragons', city: 'Lusaka', nation: 'Zambia', emblem: 'Wave Crest' });
+
+  const relayOrder = useMemo(() => rosterMembers.slice(0, 4).map((member) => member.id), [rosterMembers]);
+  const signedAthleteIds = useMemo(() => new Set(rosterMembers.map((member) => member.id)), [rosterMembers]);
+
+  const signAthlete = (athlete: AthleteProfile) => {
+    setRosterMembers((current) => {
+      if (current.some((member) => member.id === athlete.id)) return current;
+      const relayPosition = current.length < 4 ? current.length + 1 : undefined;
+      return [...current, { ...athlete, joinDate: 'Jun 09, 2026', relayPosition }];
+    });
+  };
 
   const tabs: { id: ClubTab; label: string; icon: string }[] = [
     { id: 'OVERVIEW', label: 'Overview', icon: 'home' },
@@ -206,6 +246,23 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               <p className="text-on-surface-variant font-bold uppercase tracking-[0.2em] text-[11px]">Choose your career trajectory in the professional aquatic league</p>
             </div>
             
+            <div className="p-6 rounded-[32px] border border-white/10 bg-white/5 max-w-4xl mx-auto">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-primary mb-4">Career Starter Athletes</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {scoutingAthletes.slice(0, 6).map((athlete) => (
+                  <button
+                    key={athlete.id}
+                    onClick={() => setCareerStarterId(athlete.id)}
+                    className={`p-2 rounded-2xl border transition-all ${careerStarterId === athlete.id ? 'border-primary bg-primary/15' : 'border-white/10 bg-white/5 hover:border-primary/40'}`}
+                  >
+                    <img src={athlete.image} alt={athlete.name} className="h-16 w-full rounded-xl object-contain bg-black/30 mb-2" />
+                    <div className="text-[8px] font-black uppercase tracking-tight text-on-surface">{athlete.name}</div>
+                    <div className="text-[8px] font-bold uppercase text-primary">{athlete.nationality}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
               {/* Owner Path */}
               <div className="group/path relative p-10 rounded-[48px] border border-primary/20 bg-primary/5 hover:border-primary/60 transition-all duration-700 flex flex-col items-center text-center overflow-hidden">
@@ -319,11 +376,11 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                 <div className="p-10 rounded-[40px] border border-primary/20 bg-primary/5 space-y-6 flex-1">
                   <h3 className="font-headline text-xl font-black italic slanted uppercase text-primary text-glow">Academy Core</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    {[1, 2].map((idx) => (
-                      <div key={idx} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-center group">
-                        <img src={miaPhiriAthleteImage} alt="Teen prospect" className="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 border border-white/10 group-hover:border-primary/50 transition-all" />
-                        <div className="text-[9px] font-black uppercase text-on-surface tracking-widest mb-1">Prospect Alpha-{idx}</div>
-                        <div className="text-[8px] font-bold text-primary uppercase tracking-widest">POT: 82-90</div>
+                    {scoutingAthletes.slice(0, 2).map((athlete) => (
+                      <div key={athlete.id} className="p-4 bg-white/5 border border-white/5 rounded-2xl text-center group">
+                        <img src={athlete.image} alt={athlete.name} className="w-16 h-16 rounded-2xl object-contain bg-black/30 mx-auto mb-3 border border-white/10 group-hover:border-primary/50 transition-all" />
+                        <div className="text-[9px] font-black uppercase text-on-surface tracking-widest mb-1">{athlete.name}</div>
+                        <div className="text-[8px] font-bold text-primary uppercase tracking-widest">POT: {athlete.level + 3}</div>
                       </div>
                     ))}
                   </div>
@@ -455,6 +512,16 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
       case 'STAFF_MANAGEMENT':
         return (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="relative overflow-hidden rounded-[36px] border border-primary/20 bg-surface/30">
+              <img src={staffManagementReferenceImage} alt="Staff management operations" className="h-56 w-full object-cover object-top opacity-60" />
+              <div className="absolute inset-0 bg-gradient-to-r from-surface/90 via-surface/50 to-transparent" />
+              <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">Club Department</p>
+                <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow">Staff & Mentors Control</h3>
+                <p className="mt-2 text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">This view now lives under Club as requested.</p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">External Consultation</h3>
@@ -507,19 +574,19 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Athlete Coordination</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {ClubMembers.map((player) => (
+              {rosterMembers.map((player) => (
                 <div key={player.id} className="group/play relative p-8 rounded-[40px] border border-white/5 bg-white/5 hover:border-primary/40 transition-all duration-500">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-6">
-                      <img src={miaPhiriAthleteImage} alt={player.name} className="w-20 h-20 rounded-[24px] object-cover border-2 border-white/10 group-hover/play:border-primary/50 transition-all" />
+                      <img src={player.image} alt={player.name} className="w-20 h-20 rounded-[24px] object-cover border-2 border-white/10 group-hover/play:border-primary/50 transition-all" />
                       <div>
                         <h4 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface group-hover/play:text-glow transition-all">{player.name}</h4>
-                        <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.3em]">{player.nationality} • {player.specialty} Specialist</p>
+                        <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.3em]">{player.nationality} • {player.specialty} • AGE {player.age} Specialist</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <span className="block text-[8px] font-black text-primary/60 uppercase tracking-widest mb-1">Weekly Wage</span>
-                      <span className="font-headline text-xl font-black italic slanted text-on-surface">{player.wage}</span>
+                      <span className="font-headline text-xl font-black italic slanted text-on-surface">{player.weeklyWage}</span>
                     </div>
                   </div>
                   
@@ -664,11 +731,13 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
         );
       case 'SCOUTING':
         return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Talent Discovery Matrix</h3>
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative overflow-hidden rounded-[36px] border border-primary/10 p-6">
+            <img src={scoutingBackdropImage} alt="Scout background" className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
+            <div className="relative z-10 space-y-8">
+            <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Transfers & Scouting Market</h3>
             <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
               <div className="p-8 rounded-[32px] border border-white/5 bg-white/5 space-y-8">
-                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Filter Directives</h4>
+                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Transfer Filters</h4>
                 <div className="space-y-3">
                   {[
                     { label: 'Age Bracket', value: 'U18-U21' },
@@ -682,26 +751,53 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                   ))}
                 </div>
                 <button className="w-full h-14 rounded-2xl bg-primary/10 border border-primary/30 hover:bg-primary hover:text-surface font-headline font-black italic slanted uppercase text-[10px] tracking-widest text-primary transition-all">
-                  Update Parameter
+                  Refresh Market
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                {['Sophia Chen', 'Marta Nkomo', 'Irene Kole', 'Aya Khan', 'Saran Bhean', 'Prilia Karei'].map((name, idx) => (
-                  <div key={name} className="group/prospect p-5 rounded-[28px] border border-white/5 bg-white/5 hover:border-primary/40 transition-all duration-300">
-                    <div className="relative mb-4">
-                      <img src={miaPhiriAthleteImage} className="w-full h-32 rounded-2xl object-cover border border-white/10 group-hover/prospect:border-primary/50 transition-all" />
-                      <div className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-surface/80 backdrop-blur-md border border-white/10 font-headline font-black italic slanted text-primary text-[10px]">
-                        {88 + idx}
+              <div className="space-y-3">
+                <div className="p-4 rounded-2xl border border-white/10 bg-black/40">
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-secondary">Transfer Exchange</p>
+                  <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">Sign swimmers directly from other clubs or shortlist prospects for negotiation.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {scoutingAthletes.map((athlete) => {
+                  const isSigned = signedAthleteIds.has(athlete.id);
+                  return (
+                    <div key={athlete.id} className="group/prospect p-2.5 md:p-4 rounded-[24px] border border-white/5 bg-white/5 hover:border-primary/40 transition-all duration-300">
+                      <div className="relative mb-3">
+                        <AthletePortraitMedia src={athlete.image} alt={athlete.name} fit="contain" className="w-full h-20 md:h-28 rounded-xl border border-white/10 bg-black/35 group-hover/prospect:border-primary/50 transition-all" focalPoint={athlete.portraitFocalPoint ?? '50% 20%'} />
+                        <div className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-lg bg-surface/80 backdrop-blur-md border border-white/10 font-headline font-black italic slanted text-primary text-[9px]">
+                          OVR {athlete.level}
+                        </div>
                       </div>
+                      <div className="text-xs font-black italic slanted uppercase text-on-surface">{athlete.name}</div>
+                      <div className="mt-2 text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">{athlete.nationality} • Age {athlete.age}</div>
+                      <div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-primary">{athlete.specialty}</div>
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-[8px] font-black uppercase tracking-wider">
+                        <div className="rounded-lg bg-white/5 border border-white/10 p-2">
+                          <span className="block text-on-surface-variant">Worth</span>
+                          <span className="text-secondary">${athlete.marketValue}</span>
+                        </div>
+                        <div className="rounded-lg bg-white/5 border border-white/10 p-2">
+                          <span className="block text-on-surface-variant">Weekly</span>
+                          <span className="text-primary">${athlete.weeklyWage}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => signAthlete(athlete)}
+                        disabled={isSigned}
+                        className={`mt-3 w-full h-7 rounded-lg text-[8px] font-black uppercase transition-all ${isSigned ? 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 cursor-default' : 'bg-secondary/10 border border-secondary/20 hover:bg-secondary hover:text-surface text-secondary'}`}
+                      >
+                        {isSigned ? 'Signed' : 'Sign Athlete'}
+                      </button>
                     </div>
-                    <div className="text-xs font-black italic slanted uppercase text-on-surface mb-4">{name}</div>
-                    <button className="w-full h-8 rounded-lg bg-secondary/10 border border-secondary/20 hover:bg-secondary hover:text-surface text-[9px] font-black uppercase text-secondary transition-all">
-                      Shortlist
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
+              </div>
+            </div>
             </div>
           </div>
         );
@@ -870,11 +966,11 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
           <div className="space-y-8">
             <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Active Roster</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {ClubMembers.map((member) => (
+              {rosterMembers.map((member) => (
                 <div key={member.id} className="group/member relative p-5 rounded-3xl border border-white/5 bg-white/5 hover:border-primary/40 transition-all duration-300">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="relative">
-                      <img src={miaPhiriAthleteImage} alt={member.name} className="w-16 h-16 rounded-2xl object-cover border border-white/10 group-hover/member:border-primary/50 transition-colors" />
+                      <AthletePortraitMedia src={member.image} alt={member.name} fit="contain" className="w-14 h-14 rounded-xl border border-white/10 bg-black/35 group-hover/member:border-primary/50 transition-colors" focalPoint={member.portraitFocalPoint ?? '50% 20%'} />
                       <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-lg bg-surface border border-white/10 flex items-center justify-center">
                         <span className="text-[10px] font-black italic slanted text-primary">{member.level}</span>
                       </div>
@@ -900,13 +996,13 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
             <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Relay Formation</h3>
             <div className="grid gap-3">
               {relayOrder.map((id, idx) => {
-                const member = ClubMembers.find((m) => m.id === id);
+                const member = rosterMembers.find((m) => m.id === id);
                 return (
                   <div key={id} className="group/leg flex items-center gap-6 p-4 rounded-2xl border border-white/5 bg-white/5 hover:border-primary/40 transition-all">
                     <div className="h-10 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center font-headline font-black italic slanted text-primary">
                       L{idx + 1}
                     </div>
-                    <img src={miaPhiriAthleteImage} className="w-10 h-10 rounded-xl object-cover border border-white/10" />
+                    <img src={member?.image ?? miaPhiriAthleteImage} className="w-10 h-10 rounded-xl object-cover border border-white/10" />
                     <div className="flex-1">
                       <div className="text-xs font-black italic slanted uppercase text-on-surface">{member?.name}</div>
                       <div className="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">{member?.specialty} Strategy Matrix</div>
@@ -972,9 +1068,10 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
   };
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      <img src={clubBackdropImage} alt="Club background" className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
       {/* Cinematic Club Header */}
-      <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden">
+      <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden z-10">
         <div className="absolute top-0 right-1/2 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="relative z-10 flex items-end justify-between gap-8 flex-wrap">
@@ -1017,7 +1114,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
         </div>
       </div>
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-8 pb-12">
+      <div className="hydro-page-content p-6 max-w-7xl mx-auto w-full space-y-8 pb-12 relative z-10">
         {/* Tab Navigation */}
         {!activeSubPage && (
           <div className="flex gap-2 flex-wrap items-center">
