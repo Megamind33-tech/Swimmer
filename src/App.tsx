@@ -14,6 +14,9 @@ import RewardsInboxScreen from './components/menu/RewardsInboxScreen';
 import PreRaceSetupScreen from './components/menu/PreRaceSetupScreen';
 import SettingsScreen from './components/menu/SettingsScreen';
 import RaceResultScreen from './components/menu/RaceResultScreen';
+import marketplaceBackdropImage from './designs/custom_backgrounds/1dLNpgVzO02ceJe0YsHoa4tMHenXscN9M.jpg';
+import eventsMainCardBackdropImage from './designs/custom_backgrounds/16GDP8cMj1ZeAFtQhML30ak33nG3RZIaL.jpg';
+import careerMainCardBackdropImage from './designs/custom_backgrounds/1UtKXnTbZwj4daOsDHH1HLUgmCfvf81V9.jpg';
 
 interface IntegrationNotice {
   id: number;
@@ -40,7 +43,12 @@ export default function App() {
 
   const navigate = (screen: MenuScreen) => setCurrentScreen(screen);
 
-  const [isPortrait, setIsPortrait] = useState(() => window.innerHeight > window.innerWidth);
+  const [isPortrait, setIsPortrait] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    return window.innerHeight > window.innerWidth;
+  });
 
   useEffect(() => {
     const updateOrientation = () => {
@@ -51,8 +59,12 @@ export default function App() {
     window.addEventListener('resize', updateOrientation);
     window.addEventListener('orientationchange', updateOrientation);
 
-    if (screen.orientation && 'lock' in screen.orientation) {
-      screen.orientation.lock('landscape').catch(() => {
+    const orientationApi = screen.orientation as ScreenOrientation & {
+      lock?: (orientation: 'landscape' | 'portrait') => Promise<void>;
+    };
+
+    if (orientationApi?.lock) {
+      orientationApi.lock('landscape').catch(() => {
         // Some mobile browsers require fullscreen/user gesture.
       });
     }
@@ -61,6 +73,31 @@ export default function App() {
       window.removeEventListener('resize', updateOrientation);
       window.removeEventListener('orientationchange', updateOrientation);
     };
+  }, []);
+
+
+  useEffect(() => {
+    const criticalImages = [
+      marketplaceBackdropImage,
+      eventsMainCardBackdropImage,
+      careerMainCardBackdropImage,
+    ];
+
+    const preload = () => {
+      criticalImages.forEach((src) => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = src;
+      });
+    };
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback?.(preload);
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(preload, 0);
+    return () => globalThis.clearTimeout(timeoutId);
   }, []);
 
   const handleModeSelect = (modeId: string) => {
@@ -145,7 +182,13 @@ export default function App() {
         );
       case 'HOME':
       default:
-        return <HomeScreen onPlayClick={() => setCurrentScreen('PLAY')} onCareerClick={() => setCurrentScreen('CAREER')} />;
+        return (
+          <HomeScreen
+            onPlayClick={() => setCurrentScreen('PLAY')}
+            onCareerClick={() => setCurrentScreen('CAREER')}
+            onSocialClick={() => setCurrentScreen('SOCIAL')}
+          />
+        );
     }
   }, [currentScreen]);
 

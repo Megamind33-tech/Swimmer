@@ -4,6 +4,8 @@
  */
 
 import React, { useState } from 'react';
+import careerMainCardBackdropImage from '../../designs/custom_backgrounds/1UtKXnTbZwj4daOsDHH1HLUgmCfvf81V9.jpg';
+import { HeroBackgroundMedia } from '../ui/MediaPrimitives';
 
 interface CareerEvent {
   id: string;
@@ -99,7 +101,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
   const progressPercent = ((completedTiers + 0.5) / totalTiers) * 100;
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
       {/* Cinematic Header */}
       <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
@@ -121,7 +123,18 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
         </div>
       </div>
 
-      <div className="p-6 max-w-7xl mx-auto w-full space-y-8 pb-12">
+      <div className="hydro-page-content page-template-detail p-6 max-w-7xl mx-auto w-full space-y-8 pb-12">
+
+        <div className="relative rounded-[36px] overflow-hidden border border-primary/25 min-h-[250px] p-8 flex items-end">
+          <HeroBackgroundMedia src={careerMainCardBackdropImage} alt="Career spotlight" className="absolute inset-0 opacity-80" focalPoint="50% 35%" />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface/85 via-surface/45 to-surface/15" />
+          <div className="relative z-10 max-w-2xl">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3">Main Career Card</p>
+            <h2 className="font-headline text-4xl max-[900px]:text-2xl font-black italic slanted uppercase text-on-surface text-glow mb-2">Road To World Championships</h2>
+            <p className="text-xs font-bold uppercase tracking-wider text-on-surface">Follow your national path, complete objectives, and unlock elite contracts.</p>
+          </div>
+        </div>
+
         {/* Career Management Hub */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* Sponsors & Partners Panel */}

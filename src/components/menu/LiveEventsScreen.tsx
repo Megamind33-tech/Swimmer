@@ -4,6 +4,8 @@
  */
 
 import React, { useState } from 'react';
+import eventsMainCardBackdropImage from '../../designs/custom_backgrounds/16GDP8cMj1ZeAFtQhML30ak33nG3RZIaL.jpg';
+import { HeroBackgroundMedia } from '../ui/MediaPrimitives';
 
 type EventCategory = 'DAILY' | 'WEEKLY' | 'SEASONAL' | 'SPONSOR' | 'SPECIAL';
 
@@ -99,7 +101,7 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
   const featuredEvent = LiveEvents.find((e) => e.featured);
 
   return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
       {/* Cinematic Header */}
       <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
@@ -133,16 +135,17 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
         </div>
       </div>
 
-      <div className="p-8 max-w-7xl mx-auto w-full space-y-12 pb-24">
+      <div className="hydro-page-content page-template-card-grid p-8 max-w-7xl mx-auto w-full space-y-12 pb-24">
         {/* Featured Event Banner */}
         {featuredEvent && (
           <div className="relative group/featured rounded-[48px] p-1 bg-gradient-to-br from-secondary/40 via-white/5 to-transparent hover:scale-[1.01] transition-all duration-700 shadow-2xl overflow-hidden">
             <div className="relative z-10 p-12 max-[900px]:p-8 rounded-[46px] bg-surface flex items-center justify-between gap-12 flex-wrap overflow-hidden">
+               <HeroBackgroundMedia src={eventsMainCardBackdropImage} alt="Featured events backdrop" className="absolute inset-0 opacity-78 pointer-events-none" focalPoint="50% 35%" />
                {/* Background Effects */}
-               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-secondary/10 via-transparent to-transparent opacity-40" />
-               <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-secondary/5 blur-3xl animate-pulse" />
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-secondary/20 via-surface/48 to-surface/72 opacity-100" />
+               <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-secondary/10 blur-3xl animate-pulse" />
                
-               <div className="flex-1 relative z-10">
+               <div className="flex-1 relative z-10 p-4 rounded-2xl bg-surface/35 border border-white/10 backdrop-blur-sm">
                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/10 border border-secondary/20 mb-8">
                    <span className="material-symbols-outlined text-secondary text-sm animate-bounce">rocket_launch</span>
                    <span className="text-[10px] font-black uppercase tracking-widest text-secondary gold-glow italic slanted">Priority Championship</span>

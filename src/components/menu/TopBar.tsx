@@ -43,11 +43,11 @@ export const TopBar: React.FC<TopBarProps> = ({
   }, [playerLevel]);
 
   return (
-    <header className="h-24 bg-surface/80 backdrop-blur-3xl border-b border-white/5 px-10 flex items-center justify-between z-50 sticky top-0 font-body">
+    <header className="top-hud h-24 bg-surface/80 backdrop-blur-3xl border-b border-white/5 px-10 flex items-center justify-between z-50 font-body">
       {/* Left Section: Command Logo & Operator Profile */}
-      <div className="flex items-center gap-10">
+      <div className="top-hud-left flex items-center gap-10">
         {/* Luminous Game Logo */}
-        <div className="flex items-center gap-3 group cursor-pointer transition-all duration-500 hover:scale-105 active:scale-95">
+        <div className="top-hud-logo flex items-center gap-3 group cursor-pointer transition-all duration-500 hover:scale-105 active:scale-95">
           <div className="relative">
              <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse" />
              <span className="material-symbols-outlined text-primary text-4xl text-glow relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -62,7 +62,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* Operator Profile - Command HUD Style */}
         <button
           onClick={onProfileClick}
-          className="flex items-center gap-5 p-2 pr-6 rounded-[32px] bg-white/[0.03] border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 group relative overflow-hidden"
+          className="top-hud-profile flex items-center gap-5 p-2 pr-6 rounded-[32px] bg-white/[0.03] border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 group relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-primary/5 -translate-x-full group-hover:translate-x-0 transition-transform duration-700" />
           
@@ -90,9 +90,9 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       {/* Center Section: Global Telemetry HUD */}
-      <div className="flex items-center gap-6">
+      <div className="top-hud-center flex items-center gap-6">
         {/* Tier / Rank Display */}
-        <div className="px-8 py-3 rounded-[28px] bg-white/[0.03] border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+        <div className="top-hud-rank px-8 py-3 rounded-[28px] bg-white/[0.03] border border-white/10 relative overflow-hidden group hover:border-white/20 transition-all duration-500">
            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
            <div className="text-center relative z-10">
               <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-[0.3em] mb-1 block">Global Vector</span>
@@ -101,7 +101,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         </div>
 
         {/* Currency Array */}
-        <div className="flex items-center gap-3">
+        <div className="top-hud-currencies flex items-center gap-3">
            {/* Electric Gold Pod */}
            <div className="px-6 py-3 rounded-[28px] bg-secondary/5 border border-secondary/20 flex items-center gap-4 hover:border-secondary/50 hover:bg-secondary/10 transition-all duration-500 cursor-pointer shadow-[0_0_20px_rgba(255,215,9,0.05)]">
               <span className="material-symbols-outlined text-secondary text-2xl gold-glow" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
@@ -123,7 +123,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       {/* Right Section: Access Terminals */}
-      <div className="flex items-center gap-4">
+      <div className="top-hud-right flex items-center gap-4">
         {/* Utility Buttons */}
         <div className="flex items-center gap-2 p-1 rounded-full bg-white/[0.03] border border-white/5">
            {[

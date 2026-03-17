@@ -7,154 +7,135 @@ import React, { useState, useRef } from 'react';
 import { IPlayerSwimmer } from '../../types';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 import p2pQuickMatchImage from '../../designs/doh9161_copy.width_800.jpg/screen.png';
+import { FeatureCardMedia } from '../ui/MediaPrimitives';
 
 interface HomeScreenProps {
   player?: IPlayerSwimmer;
   onPlayClick?: () => void;
   onCareerClick?: () => void;
+  onSocialClick?: () => void;
 }
+
+type HomeSubPage = 'QUICK_RACE' | 'CAREER' | 'SOCIAL' | null;
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   player,
   onPlayClick,
   onCareerClick,
+  onSocialClick,
 }) => {
-  return (
-    <div className="flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto p-5 gap-4 min-h-0 pb-5">
-        {/* Championship Hero Strip - Enhanced Glassmorphic */}
-        <div className="glass-card overflow-hidden w-full flex-[1.25] min-h-[230px] group transition-all duration-300 rounded-2xl relative">
-          {/* Header with Live Badge */}
-          <div className="px-6 py-4 bg-gradient-to-r from-surface-high/60 via-primary/5 to-transparent border-b border-white/5 backdrop-blur-sm">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface tracking-widest text-glow">
-                Championship Season 7
-              </h2>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(129,236,255,1)]"></span>
-                <span className="text-[10px] text-primary font-black uppercase tracking-widest">Live Event</span>
-              </div>
-            </div>
-          </div>
+  const [activeSubPage, setActiveSubPage] = useState<HomeSubPage>(null);
 
-          {/* Hero Content Grid */}
-          <div className="grid grid-cols-[1fr_240px] items-stretch min-h-[160px]">
-            <div className="p-8 bg-gradient-to-r from-surface-high/40 to-transparent flex flex-col justify-center">
-              <div className="flex items-center justify-between gap-4 mb-2">
-                <p className="text-4xl font-headline font-black italic slanted uppercase leading-tight text-on-surface text-glow">
-                  Start Race
-                </p>
-                <button
-                  onClick={onPlayClick}
-                  className="h-14 w-14 rounded-2xl border border-primary/40 bg-primary/10 hover:bg-primary/20 hover:border-primary/60 flex items-center justify-center transition-all duration-300 active:scale-90 group/btn shadow-xl shadow-primary/5"
-                  aria-label="Play start race"
-                >
-                  <span className="material-symbols-outlined text-primary text-3xl text-glow group-hover/btn:scale-110 transition-transform">
-                    play_arrow
-                  </span>
+  const openSubPage = (subPage: Exclude<HomeSubPage, null>) => setActiveSubPage(subPage);
+
+  const renderSubPage = () => {
+    if (!activeSubPage) return null;
+
+    if (activeSubPage === 'QUICK_RACE') {
+      return (
+        <div className="rounded-2xl border border-primary/20 bg-surface/60 p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-headline text-3xl font-black italic uppercase text-primary text-glow">Quick Race Ops</h3>
+            <button onClick={() => setActiveSubPage(null)} className="hydro-cta hydro-cta-neutral max-w-40">Back</button>
+          </div>
+          <p className="text-on-surface-variant font-bold uppercase tracking-[0.15em] text-xs">Queue setup, matchmaking telemetry and race launch controls.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {['Sprint Queue', 'Time Trial', 'Relay Warmup'].map((item) => (
+              <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-black italic uppercase">{item}</div>
+            ))}
+          </div>
+          <button onClick={onPlayClick} className="hydro-cta hydro-cta-primary max-w-sm">Launch Quick Race</button>
+        </div>
+      );
+    }
+
+    if (activeSubPage === 'CAREER') {
+      return (
+        <div className="rounded-2xl border border-secondary/30 bg-surface/60 p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-headline text-3xl font-black italic uppercase text-secondary gold-glow">Career Command</h3>
+            <button onClick={() => setActiveSubPage(null)} className="hydro-cta hydro-cta-neutral max-w-40">Back</button>
+          </div>
+          <p className="text-on-surface-variant font-bold uppercase tracking-[0.15em] text-xs">Milestone tracking, contract objectives and season progression.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {['Season Milestones', 'Sponsor Targets', 'Coach Notes', 'Rank Projection'].map((item) => (
+              <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-black italic uppercase">{item}</div>
+            ))}
+          </div>
+          <button onClick={onCareerClick} className="hydro-cta hydro-cta-gold max-w-sm">Open Career Screen</button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="rounded-2xl border border-blue-300/30 bg-surface/60 p-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="font-headline text-3xl font-black italic uppercase text-blue-300">Social Hub</h3>
+          <button onClick={() => setActiveSubPage(null)} className="hydro-cta hydro-cta-neutral max-w-40">Back</button>
+        </div>
+        <p className="text-on-surface-variant font-bold uppercase tracking-[0.15em] text-xs">Friends online, rival challenges and club communication feed.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {['Squad Chat', 'Rival Alerts', 'Club Requests'].map((item) => (
+            <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-black italic uppercase">{item}</div>
+          ))}
+        </div>
+        <button onClick={onSocialClick} className="hydro-cta hydro-cta-neutral max-w-sm">Open Social Screen</button>
+      </div>
+    );
+  };
+
+  return (
+    <div className="home-main-content hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
+      <div className="hydro-home-shell page-template-dashboard relative z-10 flex-1 min-h-0 overflow-y-auto p-6">
+        <section className="hydro-home-hero mb-6">
+          <h2 className="text-4xl md:text-5xl font-black italic uppercase leading-none tracking-tight text-on-surface">
+            Race <span className="text-primary">Command</span>
+          </h2>
+          <div className="h-1 w-24 bg-primary mt-4 skew-slanted" />
+        </section>
+
+        {activeSubPage ? (
+          renderSubPage()
+        ) : (
+          <section className="hydro-home-cards">
+            <article className="hydro-feature-card hydro-feature-primary">
+              <FeatureCardMedia src={p2pQuickMatchImage} alt="Quick race" className="hydro-feature-image" overlayClassName="hydro-feature-overlay" focalPoint="50% 45%" />
+              <div className="hydro-feature-content">
+                <span className="hydro-badge bg-primary text-background">Competitive</span>
+                <h3>Quick Race</h3>
+                <p>Instant hydro-matchmaking with precision global tracking.</p>
+                <button onClick={() => openSubPage('QUICK_RACE')} className="hydro-cta hydro-cta-primary">
+                  Start Quick Race
                 </button>
               </div>
-              <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
-                <span className="w-4 h-[1px] bg-primary/40"></span>
-                Enter Championship • Instant Matchmaking
-              </p>
-            </div>
+              <span className="material-symbols-outlined hydro-feature-icon text-primary">speed</span>
+            </article>
 
-
-            {/* Hero Image */}
-            <div className="relative bg-gradient-to-l from-neon-cyan/20 via-neon-cyan/10 to-transparent overflow-hidden">
-              <img
-                src={miaPhiriAthleteImage}
-                alt="Championship athlete"
-                className="h-full w-full object-cover object-top opacity-70 group-hover:opacity-90 transition-opacity duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-broadcast-overlay/20"></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Wave divider */}
-        <div className="wave-divider"></div>
-
-        {/* Live Race Wire - Broadcast Ticker Style */}
-        <div className="glass-card border-none rounded-xl px-6 py-3 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent group hover:bg-primary/15 transition-all duration-300 overflow-hidden relative">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(129,236,255,1)]" />
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary text-glow">Live Race Wire</p>
-              <p className="text-sm font-semibold text-on-surface">Rival Queue Active • 126 swimmers searching now</p>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <span className="flex items-center gap-1.5 px-2 py-1 rounded border border-primary/20 bg-primary/5">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-primary">Broadcast</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="relative z-20 flex-1 flex gap-4 min-h-[190px]">
-          <button
-            onClick={onPlayClick}
-            className="flex-1 group relative px-8 py-6 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95 glass-card border-white/5 hover:border-primary/40 shadow-xl"
-          >
-            {/* Background Image */}
-            <img
-              src={p2pQuickMatchImage}
-              alt="P2P Quick matches"
-              className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-40 group-hover:scale-110 transition-all duration-700 brightness-50"
-            />
-
-            {/* Content */}
-            <div className="relative h-full flex flex-col justify-end">
-              <div className="flex items-center justify-between">
-                <div className="text-left">
-                  <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-1">PVP Arena</p>
-                  <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow leading-none">
-                    Multiplayer
-                  </h3>
-                </div>
-                <div className="h-12 w-12 rounded-xl border border-primary/40 bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all">
-                  <span className="material-symbols-outlined text-primary text-2xl text-glow">
-                    groups
-                  </span>
-                </div>
+            <article className="hydro-feature-card hydro-feature-gold">
+              <FeatureCardMedia src={miaPhiriAthleteImage} alt="Career mode" className="hydro-feature-image" overlayClassName="hydro-feature-overlay hydro-feature-overlay-gold" focalPoint="50% 22%" />
+              <div className="hydro-feature-content">
+                <span className="hydro-badge bg-secondary text-background">Achievements</span>
+                <h3>Career</h3>
+                <p>Path to pro achievements and legendary trophy unlocks.</p>
+                <button onClick={() => openSubPage('CAREER')} className="hydro-cta hydro-cta-gold">
+                  Continue Career
+                </button>
               </div>
-            </div>
-          </button>
+              <span className="material-symbols-outlined hydro-feature-icon text-secondary">emoji_events</span>
+            </article>
 
-          <button
-            onClick={onCareerClick}
-            className="w-48 group relative px-6 py-6 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.01] active:scale-95 glass-card border-white/5 hover:border-secondary/40 shadow-xl"
-          >
-            <div className="relative h-full flex flex-col items-center justify-center text-center gap-3">
-              <div className="h-16 w-16 rounded-full border border-secondary/40 bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-all shadow-lg shadow-secondary/5">
-                <span className="material-symbols-outlined text-secondary text-3xl gold-glow" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  emoji_events
-                </span>
+            <article className="hydro-feature-card hydro-feature-neutral">
+              <FeatureCardMedia src={p2pQuickMatchImage} alt="Social club" className="hydro-feature-image" overlayClassName="hydro-feature-overlay hydro-feature-overlay-neutral" focalPoint="50% 52%" />
+              <div className="hydro-feature-content">
+                <span className="text-[10px] font-black uppercase tracking-widest text-blue-300">+12 Online</span>
+                <h3>Chat</h3>
+                <p>Connect with your swim team and coordinate events.</p>
+                <button onClick={() => openSubPage('SOCIAL')} className="hydro-cta hydro-cta-neutral">Go to Chat</button>
               </div>
-              <div>
-                <p className="text-[9px] font-bold text-secondary uppercase tracking-[0.2em] mb-0.5">Progress</p>
-                <h3 className="font-headline text-lg font-black italic slanted uppercase text-on-surface leading-none">
-                  Career
-                </h3>
-              </div>
-            </div>
-          </button>
-        </div>
-
-        {/* Mobile Action Hub - Hydro Kinetic Refinement */}
-        <div className="hidden max-[900px]:flex h-16 glass-panel rounded-2xl items-center justify-around px-4 border border-white/10">
-          <button onClick={onPlayClick} className="flex flex-col items-center gap-1 group">
-            <span className="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">play_arrow</span>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-primary/80">Race</span>
-          </button>
-          <button onClick={onCareerClick} className="flex flex-col items-center gap-1 group">
-            <span className="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform">fitness_center</span>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-secondary/80">Train</span>
-          </button>
-        </div>
+              <span className="material-symbols-outlined hydro-feature-icon text-blue-300">hub</span>
+            </article>
+          </section>
+        )}
       </div>
     </div>
   );

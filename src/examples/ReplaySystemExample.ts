@@ -258,14 +258,12 @@ export class HighlightsReplayExample {
 export function ReplayScreenExample({ replay, onClose }: { replay: IRaceReplay; onClose: () => void }) {
   const broadcastCameraRef = React.useRef<BroadcastCamera>(null);
 
-  return (
-    <RaceReplayScreen
-      replay={replay}
-      onReplayEnd={onClose}
-      onBackToResults={onClose}
-      broadcastCameraRef={broadcastCameraRef}
-    />
-  );
+  return React.createElement(RaceReplayScreen, {
+    replay,
+    onReplayEnd: onClose,
+    onBackToResults: onClose,
+    broadcastCameraRef,
+  });
 }
 
 /**
