@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'motion/react'
-import { ZapIcon, CalendarIcon, GiftIcon, StarIcon, AwardIcon } from 'lucide-react'
+import { TargetIcon, CalendarIcon, GiftIcon, StarIcon, AwardIcon } from 'lucide-react'
 
 interface SideMenuProps {
   onSelect: (id: string) => void
@@ -8,7 +8,7 @@ interface SideMenuProps {
 
 export function SideMenu({ onSelect }: SideMenuProps) {
   const menuItems = [
-    { id: 'training', label: 'TRAINING', icon: ZapIcon, color: 'text-blue-400' },
+    { id: 'training', label: 'TRAINING', icon: TargetIcon, color: 'text-blue-400' },
     { id: 'events', label: 'EVENTS', icon: CalendarIcon, color: 'text-purple-400', badge: true },
     { id: 'rewards', label: 'REWARDS', icon: GiftIcon, color: 'text-green-400' },
     { id: 'pass', label: 'STAR PASS', icon: StarIcon, color: 'text-yellow-400', tag: 'NEW' },

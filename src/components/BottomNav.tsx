@@ -2,11 +2,12 @@ import React from 'react'
 import { motion } from 'motion/react'
 import {
   HomeIcon,
-  TrophyIcon,
+  MedalIcon,
   ShieldIcon,
   SearchIcon,
   ShoppingCartIcon,
-  MedalIcon,
+  TrophyIcon,
+  PlayIcon,
 } from 'lucide-react'
 
 interface BottomNavProps {
@@ -19,13 +20,13 @@ export function BottomNav({ activeTab, onChange, onPlay }: BottomNavProps) {
   // Nav tabs — the PLAY button is injected between club and scouts
   const leftTabs = [
     { id: 'home',   label: 'HOME',   icon: HomeIcon },
-    { id: 'career', label: 'CAREER', icon: TrophyIcon },
+    { id: 'career', label: 'CAREER', icon: MedalIcon },
     { id: 'club',   label: 'CLUB',   icon: ShieldIcon },
   ]
   const rightTabs = [
     { id: 'scouts', label: 'SCOUTS', icon: SearchIcon, badge: 'NEW' },
     { id: 'market', label: 'MARKET', icon: ShoppingCartIcon },
-    { id: 'champs', label: 'CHAMPS', icon: MedalIcon },
+    { id: 'champs', label: 'CHAMPS', icon: TrophyIcon },
   ]
 
   const renderTab = (tab: { id: string; label: string; icon: React.ElementType; badge?: string }) => {
@@ -76,7 +77,7 @@ export function BottomNav({ activeTab, onChange, onPlay }: BottomNavProps) {
           className="relative flex flex-col items-center justify-center w-16 -mt-3 rounded-2xl bg-gradient-to-b from-[#0D7C66] to-[#065A46] border border-[#0D7C66]/60 shadow-[0_0_18px_rgba(13,124,102,0.5)] text-white shrink-0"
           aria-label="Play"
         >
-          <span className="text-xl mb-0.5">▶</span>
+          <PlayIcon size={20} className="mb-0.5" fill="currentColor" />
           <span className="text-[8px] font-black tracking-widest uppercase">PLAY</span>
           {/* Pulse ring */}
           <span className="absolute inset-0 rounded-2xl animate-ping opacity-20 bg-[#0D7C66] pointer-events-none" />

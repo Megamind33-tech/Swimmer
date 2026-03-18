@@ -14,7 +14,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ChevronRight, Timer, Medal, MapPin } from 'lucide-react';
+import { ChevronRight, TimerReset, Medal, MapPin } from 'lucide-react';
 import { lobby } from '../theme/tokens';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -180,7 +180,7 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
 
         {/* Countdown */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Timer size={11} color={lobby.textSecondary} />
+          <TimerReset size={11} color={lobby.textSecondary} />
           <span
             style={{
               fontFamily: "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
