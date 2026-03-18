@@ -2,17 +2,25 @@
  * RaceScene - Babylon.js 3D arena canvas mount
  *
  * Mounts the WebGL canvas, boots ArenaManager, runs the race render loop,
- * and layers the DOM HUD on top.  This component owns the entire screen
- * while a race is active; the menu is unmounted behind it.
+ * and layers the Phase 3 HUDRoot DOM overlay on top.
+ *
+ * This component owns the entire screen while a race is active.
  *
  * Layout contract (landscape mobile):
- *   - canvas fills 100vw × 100vh (no scroll)
- *   - HUD overlays are position:fixed, pointer-events-none except for
- *     interactive tap zones (stroke buttons, pause)
+ *   - canvas fills 100vw × 100vh (no scroll, touch-action: none)
+ *   - HUDRoot is position:fixed, pointer-events-none by default
+ *   - Only HUD interactive zones (stroke buttons, pause) have pointer-events: auto
+ *   - Center screen is never blocked by persistent HUD elements
+ *
+ * Race simulation:
+ *   The Babylon arena drives visuals; this component owns simplified
+ *   race state (elapsed time, distance, stamina, oxygen, rhythm, position).
+ *   In a full implementation these values would come from RaceEngine/GameManager.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ArenaManager } from '../graphics/ArenaManager';
+import { HUDRoot, CountdownOverlay } from '../hud/HUDRoot';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -20,20 +28,20 @@ import { ArenaManager } from '../graphics/ArenaManager';
 
 export interface RaceConfig {
   distance: string;   // e.g. "100M"
-  stroke: string;     // e.g. "FREESTYLE"
-  venue: string;      // e.g. "olympic"
+  stroke:   string;   // e.g. "FREESTYLE"
+  venue:    string;   // e.g. "olympic"
 }
 
 export interface RaceResult {
-  rank: number;
-  time: string;
-  xp: number;
-  coins: number;
+  rank:   number;
+  time:   string;
+  xp:     number;
+  coins:  number;
 }
 
 interface RaceSceneProps {
-  config: RaceConfig;
-  onPause: () => void;
+  config:         RaceConfig;
+  onPause:        () => void;
   onRaceComplete: (result: RaceResult) => void;
 }
 
@@ -41,209 +49,53 @@ interface RaceSceneProps {
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-function formatTime(ms: number): string {
-  const totalSec = ms / 1000;
-  const mins = Math.floor(totalSec / 60);
-  const secs = (totalSec % 60).toFixed(2).padStart(5, '0');
-  return `${String(mins).padStart(2, '0')}:${secs}`;
-}
-
 function getVenueTheme(venue: string): 'OLYMPIC' | 'CHAMPIONSHIP' | 'NEON' | 'SUNSET' | 'CUSTOM' {
   const map: Record<string, 'OLYMPIC' | 'CHAMPIONSHIP' | 'NEON' | 'SUNSET' | 'CUSTOM'> = {
-    olympic: 'OLYMPIC',
-    training: 'CUSTOM',
-    championship: 'CHAMPIONSHIP',
-    neon: 'NEON',
-    sunset: 'SUNSET',
+    olympic:        'OLYMPIC',
+    training:       'CUSTOM',
+    championship:   'CHAMPIONSHIP',
+    neon:           'NEON',
+    sunset:         'SUNSET',
   };
   return map[venue] ?? 'OLYMPIC';
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Race HUD (lightweight DOM overlay on top of the canvas)
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface HUDProps {
-  elapsedMs: number;
-  position: number;
-  distanceM: number;
-  totalDistanceM: number;
-  stamina: number;
-  onPause: () => void;
-  onStrokeLeft: () => void;
-  onStrokeRight: () => void;
+function formatFinalTime(ms: number): string {
+  const totalSec = ms / 1000;
+  const mins  = Math.floor(totalSec / 60);
+  const secs  = Math.floor(totalSec % 60);
+  const cents = Math.floor((ms % 1000) / 10);
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(cents).padStart(2, '0')}`;
 }
-
-const RaceHUDOverlay: React.FC<HUDProps> = ({
-  elapsedMs,
-  position,
-  distanceM,
-  totalDistanceM,
-  stamina,
-  onPause,
-  onStrokeLeft,
-  onStrokeRight,
-}) => {
-  const progressPct = Math.min((distanceM / totalDistanceM) * 100, 100);
-  const staminaPct = Math.min(stamina, 100);
-  const ordinal = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'][position] ?? `${position}th`;
-
-  // Stroke flash feedback
-  const [leftFlash, setLeftFlash] = useState(false);
-  const [rightFlash, setRightFlash] = useState(false);
-
-  const handleLeft = () => {
-    setLeftFlash(true);
-    setTimeout(() => setLeftFlash(false), 120);
-    onStrokeLeft();
-  };
-  const handleRight = () => {
-    setRightFlash(true);
-    setTimeout(() => setRightFlash(false), 120);
-    onStrokeRight();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 pointer-events-none select-none">
-
-      {/* ── TOP BAR ──────────────────────────────────────────────────── */}
-      <div className="absolute top-0 left-0 right-0 flex items-start justify-between gap-2 p-3 pointer-events-auto">
-
-        {/* Timer + rank */}
-        <div className="flex flex-col items-start bg-black/60 border border-white/15 backdrop-blur-sm rounded-xl px-3 py-2 min-w-[96px]">
-          <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Time</span>
-          <span className="font-mono text-xl font-black text-white leading-none">{formatTime(elapsedMs)}</span>
-          <span className="text-[10px] font-black text-[#D4A843] uppercase mt-0.5">{ordinal}</span>
-        </div>
-
-        {/* Lane progress bar */}
-        <div className="flex-1 flex flex-col justify-center pt-3 px-2">
-          <div className="relative h-3 w-full rounded-full bg-white/10 overflow-hidden border border-white/10">
-            {/* Player marker */}
-            <div
-              className="absolute top-0 left-0 h-full bg-[#00E5FF] shadow-[0_0_8px_rgba(0,229,255,0.8)] transition-all duration-200"
-              style={{ width: `${progressPct}%` }}
-            />
-            {/* Rival markers (static for demo) */}
-            <div className="absolute top-0 h-full w-1 bg-red-400 opacity-60" style={{ left: '48%' }} />
-            <div className="absolute top-0 h-full w-1 bg-white/40 opacity-40" style={{ left: '38%' }} />
-          </div>
-          <div className="flex justify-between mt-0.5">
-            <span className="text-[8px] text-white/40 font-bold">0m</span>
-            <span className="text-[8px] text-white/40 font-bold">{totalDistanceM}m</span>
-          </div>
-        </div>
-
-        {/* Pause button */}
-        <button
-          onClick={onPause}
-          className="mt-1 w-10 h-10 rounded-xl bg-black/60 border border-white/15 backdrop-blur-sm flex items-center justify-center text-white active:scale-90 transition-transform"
-          aria-label="Pause"
-        >
-          <span className="font-black text-base leading-none">⏸</span>
-        </button>
-      </div>
-
-      {/* ── BOTTOM STROKE CONTROLS ────────────────────────────────────── */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-2 p-3 pointer-events-auto">
-
-        {/* Left stroke */}
-        <button
-          onPointerDown={handleLeft}
-          className={`h-24 w-36 rounded-2xl border-2 flex flex-col items-center justify-center transition-all active:scale-95 select-none
-            ${leftFlash
-              ? 'bg-[#00E5FF]/30 border-[#00E5FF] shadow-[0_0_20px_rgba(0,229,255,0.6)]'
-              : 'bg-black/50 border-white/15 backdrop-blur-sm'
-            }`}
-          aria-label="Left stroke"
-        >
-          <span className="text-2xl mb-1">🫴</span>
-          <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">Left</span>
-        </button>
-
-        {/* Centre: stamina arc + distance readout */}
-        <div className="flex flex-col items-center gap-1 pb-1">
-          {/* Stamina ring */}
-          <div className="relative w-20 h-20 flex items-center justify-center">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
-              <circle
-                cx="40" cy="40" r="34" fill="none"
-                stroke={staminaPct > 40 ? '#00E5FF' : staminaPct > 20 ? '#D4A843' : '#ef4444'}
-                strokeWidth="7"
-                strokeDasharray={`${2 * Math.PI * 34}`}
-                strokeDashoffset={2 * Math.PI * 34 * (1 - staminaPct / 100)}
-                strokeLinecap="round"
-                style={{ filter: 'drop-shadow(0 0 4px currentColor)', transition: 'stroke-dashoffset 0.3s ease' }}
-              />
-            </svg>
-            <div className="absolute flex flex-col items-center">
-              <span className="font-mono text-sm font-black text-white leading-none">{Math.round(staminaPct)}%</span>
-              <span className="text-[7px] text-white/40 uppercase font-bold">Stamina</span>
-            </div>
-          </div>
-
-          {/* Distance readout */}
-          <div className="text-center">
-            <span className="font-mono text-base font-black text-white">{Math.round(distanceM)}</span>
-            <span className="text-[9px] text-white/40 font-bold">/{totalDistanceM}m</span>
-          </div>
-        </div>
-
-        {/* Right stroke */}
-        <button
-          onPointerDown={handleRight}
-          className={`h-24 w-36 rounded-2xl border-2 flex flex-col items-center justify-center transition-all active:scale-95 select-none
-            ${rightFlash
-              ? 'bg-[#D4A843]/30 border-[#D4A843] shadow-[0_0_20px_rgba(212,168,67,0.6)]'
-              : 'bg-black/50 border-white/15 backdrop-blur-sm'
-            }`}
-          aria-label="Right stroke"
-        >
-          <span className="text-2xl mb-1">🤲</span>
-          <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">Right</span>
-        </button>
-      </div>
-
-      {/* ── TICKER BAR ───────────────────────────────────────────────── */}
-      <div className="absolute bottom-28 left-0 right-0 h-5 bg-black/50 border-t border-white/5 overflow-hidden flex items-center pointer-events-none">
-        <div className="flex whitespace-nowrap gap-16 px-4 animate-[scroll_18s_linear_infinite]">
-          <span className="text-[8px] font-bold text-white/40 uppercase tracking-wider">● LANE 4: MCKENZIE (USA) 0.2s LEAD</span>
-          <span className="text-[8px] font-bold text-white/40 uppercase tracking-wider">● CHAMPIONSHIP SERIES — SEMI FINAL 1</span>
-          <span className="text-[8px] font-bold text-white/40 uppercase tracking-wider">● LANE 2: NEW PERSONAL BEST PACE</span>
-          <span className="text-[8px] font-bold text-[#D4A843] uppercase tracking-wider">● SWIM26 SEASON 4 — LIVE</span>
-        </div>
-      </div>
-
-    </div>
-  );
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RaceScene
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceComplete }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const arenaRef = useRef<ArenaManager | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const canvasRef    = useRef<HTMLCanvasElement>(null);
+  const arenaRef     = useRef<ArenaManager | null>(null);
+  const rafRef       = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
 
-  // Race simulation state
-  const [elapsedMs, setElapsedMs] = useState(0);
-  const [distanceM, setDistanceM] = useState(0);
-  const [stamina, setStamina] = useState(100);
-  const [position, setPosition] = useState(4); // starts mid-pack
-  const [raceStarted, setRaceStarted] = useState(false);
-
   const totalDistanceM = parseInt(config.distance.replace('M', ''), 10) || 100;
+
+  // ── Race state ──────────────────────────────────────────────────────────
+  const [raceStarted, setRaceStarted] = useState(false);
+  const [countdown,   setCountdown]   = useState(3);     // 3 → 2 → 1 → 0 (GO!)
+  const [elapsedMs,   setElapsedMs]   = useState(0);
+  const [distanceM,   setDistanceM]   = useState(0);
+  const [position,    setPosition]    = useState(4);     // 1-8
+  const [stamina,     setStamina]     = useState(100);
+  const [oxygen,      setOxygen]      = useState(100);
+  const [rhythm,      setRhythm]      = useState(75);
 
   // ── Babylon.js boot ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!canvasRef.current) return;
 
     let disposed = false;
-    const arena = new ArenaManager(canvasRef.current);
+    const arena  = new ArenaManager(canvasRef.current);
     arenaRef.current = arena;
 
     arena.initialize().then(() => {
@@ -262,61 +114,69 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
       arena.dispose();
       arenaRef.current = null;
     };
-  }, []); // mount once
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Countdown then race simulation loop ─────────────────────────────────
+  // ── Animated countdown (3 → 2 → 1 → GO!) ───────────────────────────────
   useEffect(() => {
-    const countdown = setTimeout(() => {
+    const t1 = setTimeout(() => setCountdown(2), 1000);
+    const t2 = setTimeout(() => setCountdown(1), 2000);
+    const t3 = setTimeout(() => {
+      setCountdown(0);   // "GO!"
       startTimeRef.current = performance.now();
       setRaceStarted(true);
-    }, 3000); // 3-second countdown before race starts
+    }, 3000);
 
-    return () => clearTimeout(countdown);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
+  // ── Race simulation loop ─────────────────────────────────────────────────
   useEffect(() => {
     if (!raceStarted) return;
 
-    const SPEED_BASE = totalDistanceM / 55000; // ~55s to cover 100m at base speed
-    const STAMINA_DRAIN = 0.018; // % per ms
-    const AI_CATCH_SPEED = 0.00002; // rival catch factor
+    const SPEED_BASE    = totalDistanceM / 55_000; // ~55 s to finish at base speed
+    const STAMINA_DRAIN = 0.018;  // % per ms
+    const OXYGEN_DRAIN  = 0.013;  // % per ms (recovers with strokes)
+    const AI_CATCH_SPEED = 0.000_02;
 
     const tick = () => {
-      const now = performance.now();
+      const now     = performance.now();
       const elapsed = now - startTimeRef.current;
 
       setElapsedMs(elapsed);
 
-      setStamina((prev) => {
-        const drained = Math.max(0, prev - STAMINA_DRAIN);
-        return drained;
+      setStamina((prev) => Math.max(0, prev - STAMINA_DRAIN));
+      setOxygen((prev)  => Math.max(0, prev - OXYGEN_DRAIN));
+
+      // Rhythm oscillates naturally — strokes push it up (handled in callback)
+      setRhythm(() => {
+        const base = 65 + 20 * Math.sin(elapsed / 4_500);
+        return Math.min(100, Math.max(0, base));
       });
 
       setDistanceM((prev) => {
-        const speed = SPEED_BASE * (0.7 + 0.3 * (stamina / 100));
-        const next = prev + speed * 16; // ~16ms per frame
+        const speed = SPEED_BASE * (0.65 + 0.35 * (stamina / 100));
+        const next  = prev + speed * 16; // ~16 ms per frame
+
         if (next >= totalDistanceM) {
           // Race complete
-          const finalTime = formatTime(elapsed);
-          const rank = position;
-          cancelAnimationFrame(rafRef.current!);
-          rafRef.current = null;
-
-          // Slight delay so user sees the finish before results
+          if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = null;
+          }
           setTimeout(() => {
             onRaceComplete({
-              rank,
-              time: finalTime,
-              xp: rank === 1 ? 400 : rank <= 3 ? 250 : 100,
-              coins: rank === 1 ? 3000 : rank <= 3 ? 1500 : 500,
+              rank:   position,
+              time:   formatFinalTime(elapsed),
+              xp:     position === 1 ? 400 : position <= 3 ? 250 : 100,
+              coins:  position === 1 ? 3000 : position <= 3 ? 1500 : 500,
             });
-          }, 800);
+          }, 900);
           return totalDistanceM;
         }
         return next;
       });
 
-      // Slowly improve position as race goes on (simple AI sim)
+      // AI slowly closes or falls behind
       setPosition((prev) => {
         if (prev > 1 && Math.random() < AI_CATCH_SPEED * elapsed) {
           return Math.max(1, prev - 1);
@@ -328,57 +188,71 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
     };
 
     rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [raceStarted]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Stroke handlers (gamefeel — boost stamina burst) ───────────────────
+  // ── Stroke handlers ──────────────────────────────────────────────────────
   const handleStrokeLeft = useCallback(() => {
-    setStamina((prev) => Math.min(100, prev + 0.5));
+    setStamina((prev) => Math.min(100, prev + 0.4));
+    setOxygen((prev)  => Math.min(100, prev + 0.6));
+    setRhythm((prev)  => Math.min(100, prev + 4));
   }, []);
 
   const handleStrokeRight = useCallback(() => {
-    setStamina((prev) => Math.min(100, prev + 0.5));
+    setStamina((prev) => Math.min(100, prev + 0.4));
+    setOxygen((prev)  => Math.min(100, prev + 0.6));
+    setRhythm((prev)  => Math.min(100, prev + 4));
   }, []);
 
-  // ── Render ──────────────────────────────────────────────────────────────
+  const handleSprint = useCallback(() => {
+    // Sprint burns stamina/oxygen faster but boosts rhythm
+    setStamina((prev) => Math.max(0, prev - 6));
+    setOxygen((prev)  => Math.max(0, prev - 8));
+    setRhythm((prev)  => Math.min(100, prev + 10));
+  }, []);
+
+  // ── Lap / heat derivation ────────────────────────────────────────────────
+  //  For distances ≤ 100m: 1 lap.  For 200m: 2 laps. Etc.
+  const totalLaps = Math.max(1, totalDistanceM / 100);
+  const lapNumber = Math.min(totalLaps, Math.floor((distanceM / totalDistanceM) * totalLaps) + 1);
+  const heat      = config.stroke === 'FREESTYLE' ? 'QUICK RACE' : `${config.stroke} HEAT`;
+  const playerLane = 4; // default lane
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-[100] bg-black overflow-hidden">
-      {/* Babylon.js canvas — fills the entire viewport */}
+      {/* Babylon.js canvas */}
       <canvas
         ref={canvasRef}
         className="w-full h-full block touch-none"
         style={{ touchAction: 'none' }}
       />
 
-      {/* 3-second countdown overlay */}
-      {!raceStarted && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center pointer-events-none">
-          <div className="text-center">
-            <div className="text-8xl font-black text-white animate-pulse drop-shadow-[0_0_40px_rgba(0,229,255,0.8)]">
-              3
-            </div>
-            <div className="text-[#D4A843] font-black uppercase tracking-widest text-lg mt-2">GET READY</div>
-          </div>
-        </div>
-      )}
+      {/* Countdown overlay (shows before race starts) */}
+      {!raceStarted && <CountdownOverlay value={countdown} />}
 
-      {/* DOM HUD layered over canvas */}
+      {/* Phase 3 HUD (shows once race is active) */}
       {raceStarted && (
-        <RaceHUDOverlay
+        <HUDRoot
           elapsedMs={elapsedMs}
           position={position}
           distanceM={distanceM}
           totalDistanceM={totalDistanceM}
+          lapNumber={lapNumber}
+          totalLaps={totalLaps}
+          heat={heat}
           stamina={stamina}
+          oxygen={oxygen}
+          rhythm={rhythm}
+          playerLane={playerLane}
           onPause={onPause}
           onStrokeLeft={handleStrokeLeft}
           onStrokeRight={handleStrokeRight}
+          onSprint={handleSprint}
         />
       )}
 
-      {/* Ticker keyframe */}
+      {/* Ticker keyframe kept for any legacy usage */}
       <style>{`
         @keyframes scroll {
           0%   { transform: translateX(0); }
