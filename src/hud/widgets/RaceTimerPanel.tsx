@@ -15,14 +15,18 @@
  */
 
 import React from 'react';
+import { motion } from 'motion/react';
 import { HUD_PANEL_STRONG, HUD_COLOR, HUD_FONT, ordinal, formatRaceTime } from '../hudTokens';
+import { urgencyPulseAnimate } from '../../feedback/motionVariants';
 
 interface RaceTimerPanelProps {
   elapsedMs:    number;
   position:     number;  // 1-8
   lapNumber:    number;
   totalLaps:    number;
-  heat:         string;  // e.g. "SEMI FINAL 1" or "QUICK RACE"
+  heat:         string;
+  /** When true, panel pulses to signal the race is nearly over */
+  urgent?:      boolean;
 }
 
 function positionColor(pos: number): string {
@@ -43,6 +47,7 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
   lapNumber,
   totalLaps,
   heat,
+  urgent = false,
 }) => {
   const posColor  = positionColor(position);
   const posGlow   = positionGlow(position);
@@ -50,7 +55,8 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
   const posStr    = ordinal(position);
 
   return (
-    <div
+    <motion.div
+      animate={urgent ? urgencyPulseAnimate : {}}
       style={{
         ...HUD_PANEL_STRONG,
         display:     'inline-flex',
@@ -59,6 +65,8 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
         padding:     '5px 14px',
         userSelect:  'none',
         WebkitUserSelect: 'none',
+        // Urgency: subtle danger tint replaces panel border
+        ...(urgent && { border: '1px solid rgba(255,93,115,0.35)' }),
       }}
     >
       {/* ── Race timer ── */}
@@ -179,6 +187,6 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
           {heat}
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 };

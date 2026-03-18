@@ -28,9 +28,7 @@ import React, { useState } from 'react';
 import { AppShell } from '../app/AppShell';
 import { PlayScreen } from './menu/PlayScreen';
 import { PreRaceSetupScreen } from './menu/PreRaceSetupScreen';
-import { RaceResultScreen } from './menu/RaceResultScreen';
 import { RaceScene, RaceConfig, RaceResult } from './RaceScene';
-import { PauseMenu } from './PauseMenu';
 import lockerRoomBackground from '../designs/locker_room_custom/screen.png';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -41,9 +39,7 @@ type GamePhase =
   | 'menu'          // AppShell — lobby/management UI
   | 'mode-select'   // PlayScreen — choose race mode
   | 'pre-race'      // PreRaceSetupScreen — configure the race
-  | 'racing'        // RaceScene — Babylon.js arena + HUD
-  | 'paused'        // RaceScene (still mounted) + PauseMenu overlay
-  | 'results';      // RaceResultScreen — podium and rewards
+  | 'racing';       // RaceScene — handles pause/results internally (Phase 5)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Full-screen overlay wrapper (used for all non-menu game phases)
@@ -108,22 +104,16 @@ export function GameShell() {
 
   const onCancelPreRace = () => setPhase('mode-select');
 
-  const onPause    = () => setPhase('paused');
-  const onResume   = () => setPhase('racing');
-
-  const onAbandonRace = () => {
-    setRaceResult(null);
-    setPhase('menu');
-  };
+  const onPause       = () => { /* RaceScene handles pause internally */ };
+  const onExitToLobby = () => { setRaceResult(null); setPhase('menu'); };
+  const onRestart     = () => { setRaceResult(null); setPhase('pre-race'); };
 
   const onRaceComplete = (result: RaceResult) => {
     setRaceResult(result);
-    setPhase('results');
+    // Phase 5: ResultsOverlay is shown inside RaceScene.
+    // GameShell remains in 'racing' phase so the canvas stays mounted.
+    // The overlay's "Continue" / "Lobby" buttons call onExitToLobby / onRestart.
   };
-
-  const onReturnHome   = () => { setRaceResult(null); setPhase('menu'); };
-  const onRematch      = () => { setRaceResult(null); setPhase('pre-race'); };
-  const onContinue     = () => { setRaceResult(null); setPhase('menu'); };
 
   // ── Mode-select ──────────────────────────────────────────────────────────
 
@@ -161,38 +151,17 @@ export function GameShell() {
     );
   }
 
-  // ── Racing + Paused ──────────────────────────────────────────────────────
+  // ── Racing (pause + results handled by RaceScene internally) ─────────────
 
-  if (phase === 'racing' || phase === 'paused') {
+  if (phase === 'racing') {
     return (
-      <>
-        <RaceScene
-          config={raceConfig}
-          onPause={onPause}
-          onRaceComplete={onRaceComplete}
-        />
-        {phase === 'paused' && (
-          <PauseMenu onResume={onResume} onMainMenu={onAbandonRace} />
-        )}
-      </>
-    );
-  }
-
-  // ── Results ──────────────────────────────────────────────────────────────
-
-  if (phase === 'results' && raceResult) {
-    return (
-      <OverlayShell backgroundOpacity={0.2}>
-        <RaceResultScreen
-          playerRank={raceResult.rank}
-          playerTime={raceResult.time}
-          playerName="You"
-          onContinue={onContinue}
-          onRematch={onRematch}
-          onReturnHome={onReturnHome}
-          onWatchReplay={onReturnHome}
-        />
-      </OverlayShell>
+      <RaceScene
+        config={raceConfig}
+        onPause={onPause}
+        onRaceComplete={onRaceComplete}
+        onRestart={onRestart}
+        onExitToLobby={onExitToLobby}
+      />
     );
   }
 

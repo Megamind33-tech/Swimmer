@@ -32,6 +32,7 @@ import { PauseButton }           from './widgets/PauseButton';
 import { ContextPromptBanner, useContextPrompts } from './widgets/ContextPromptBanner';
 import { VirtualJoystick, StaminaRing, ActionCluster } from './widgets/StrokeControls';
 import { HUD_PANEL, HUD_COLOR, HUD_FONT } from './hudTokens';
+import { staminaPulseAnimate }   from '../feedback/motionVariants';
 import type { ControlsPreset }   from '../input/inputTypes';
 import type { UseTouchControlsResult } from '../input/useTouchControls';
 
@@ -271,12 +272,14 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
   onPause,
   visible = true,
 }) => {
-  const progress    = Math.min(1, distanceM / Math.max(1, totalDistanceM));
-  const laneData    = useMemo(
+  const progress       = Math.min(1, distanceM / Math.max(1, totalDistanceM));
+  const urgent         = progress >= 0.82;           // final ~18% triggers urgency pulse
+  const criticalStamina = stamina < 25;              // drives state-cluster opacity throb
+  const laneData       = useMemo(
     () => buildLaneData(elapsedMs, distanceM, totalDistanceM, playerLane),
     [elapsedMs, distanceM, totalDistanceM, playerLane],
   );
-  const activePrompt = useContextPrompts(elapsedMs, position, distanceM, totalDistanceM, stamina);
+  const activePrompt   = useContextPrompts(elapsedMs, position, distanceM, totalDistanceM, stamina);
 
   if (!visible) return null;
 
@@ -329,7 +332,8 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
         }}
       >
         {/* TOP-LEFT: Swimmer state cluster */}
-        <div
+        <motion.div
+          animate={criticalStamina ? staminaPulseAnimate : {}}
           style={{
             ...HUD_PANEL,
             display:        'flex',
@@ -340,12 +344,13 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
             minWidth:       '128px',
             flexShrink:     0,
             height:         '48px',
+            borderColor:    criticalStamina ? 'rgba(255,93,115,0.30)' : undefined,
           }}
         >
           <StaminaBar value={stamina} />
           <OxygenBar  value={oxygen}  />
           <RhythmMeter value={rhythm} />
-        </div>
+        </motion.div>
 
         {/* TOP-CENTER: Race telemetry */}
         <div
@@ -361,6 +366,7 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
             lapNumber={lapNumber}
             totalLaps={totalLaps}
             heat={heat}
+            urgent={urgent}
           />
         </div>
 
