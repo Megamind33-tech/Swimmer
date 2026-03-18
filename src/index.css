@@ -323,3 +323,338 @@ body {
   background: #38D6FF;
   box-shadow: 0 0 10px rgba(56, 214, 255, 0.90), 0 0 20px rgba(56, 214, 255, 0.45);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GAME UI UTILITY CLASSES
+   Referenced throughout menu components. Missing these caused plain/web-app look.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Glass card — dark glassmorphic game card */
+.glass-card {
+  background: rgba(10, 22, 40, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Glass panel — slightly lighter glass surface */
+.glass-panel {
+  background: rgba(10, 22, 40, 0.50);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.40);
+}
+
+/* Aqua text glow — primary interactive elements */
+.text-glow {
+  text-shadow:
+    0 0  8px rgba(0, 229, 255, 0.70),
+    0 0 20px rgba(0, 229, 255, 0.40);
+}
+
+/* Gold text glow — rewards, achievements */
+.gold-glow {
+  text-shadow:
+    0 0  8px rgba(212, 168, 67, 0.65),
+    0 0 20px rgba(212, 168, 67, 0.35);
+}
+
+/* Italic slant — Barlow Condensed display text transform */
+.slanted {
+  font-style: italic;
+}
+
+/* Speed lines — diagonal racing stripes background texture */
+.speed-lines {
+  background-image: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 6px,
+    rgba(255, 255, 255, 0.025) 6px,
+    rgba(255, 255, 255, 0.025) 7px
+  );
+  background-size: 20px 20px;
+}
+
+/* Page shell — fills available layout space */
+.hydro-page-shell {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* ─── CTA Button System ───────────────────────────────────────────────────── */
+
+.hydro-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-family: "Barlow Condensed", "Arial Narrow", Impact, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.hydro-cta:active {
+  transform: scale(0.96);
+}
+
+.hydro-cta-primary {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.50);
+  color: #00E5FF;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.20);
+}
+
+.hydro-cta-primary:hover {
+  background: rgba(0, 229, 255, 0.25);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+}
+
+.hydro-cta-gold {
+  background: rgba(212, 168, 67, 0.15);
+  border-color: rgba(212, 168, 67, 0.50);
+  color: #D4A843;
+  box-shadow: 0 0 12px rgba(212, 168, 67, 0.20);
+}
+
+.hydro-cta-gold:hover {
+  background: rgba(212, 168, 67, 0.25);
+  box-shadow: 0 0 20px rgba(212, 168, 67, 0.35);
+}
+
+.hydro-cta-neutral {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.80);
+}
+
+.hydro-cta-neutral:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* ─── Feature Card System (HomeScreen) ───────────────────────────────────── */
+
+.hydro-feature-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 22, 40, 0.60);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.hydro-feature-card:hover {
+  transform: translateY(-2px);
+}
+
+.hydro-feature-primary:hover {
+  border-color: rgba(0, 229, 255, 0.40);
+  box-shadow: 0 8px 40px rgba(0, 229, 255, 0.15);
+}
+
+.hydro-feature-gold:hover {
+  border-color: rgba(212, 168, 67, 0.40);
+  box-shadow: 0 8px 40px rgba(212, 168, 67, 0.15);
+}
+
+.hydro-feature-neutral:hover {
+  border-color: rgba(255, 255, 255, 0.20);
+  box-shadow: 0 8px 40px rgba(255, 255, 255, 0.08);
+}
+
+.hydro-feature-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+}
+
+.hydro-feature-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5, 11, 20, 0.92) 0%, rgba(5, 11, 20, 0.50) 50%, transparent 100%);
+}
+
+.hydro-feature-overlay-gold {
+  background: linear-gradient(to top, rgba(15, 10, 0, 0.92) 0%, rgba(15, 10, 0, 0.50) 50%, transparent 100%);
+}
+
+.hydro-feature-overlay-neutral {
+  background: linear-gradient(to top, rgba(5, 11, 20, 0.88) 0%, rgba(5, 11, 20, 0.40) 50%, transparent 100%);
+}
+
+.hydro-feature-content {
+  position: relative;
+  z-index: 10;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hydro-feature-content h3 {
+  font-family: "Barlow Condensed", "Arial Narrow", Impact, system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 1;
+  margin: 0;
+}
+
+.hydro-feature-content p {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.60);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.hydro-feature-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 36px !important;
+  opacity: 0.35;
+  z-index: 5;
+}
+
+.hydro-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+/* ─── Home Screen Layout ─────────────────────────────────────────────────── */
+
+.hydro-home-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hydro-home-hero {
+  padding-top: 8px;
+}
+
+.hydro-home-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.skew-slanted {
+  transform: skewX(-12deg);
+}
+
+/* ─── Icon state colors ──────────────────────────────────────────────────── */
+.icon-progress-complete { color: #D4A843; }
+.icon-progress-active   { color: #00E5FF; }
+.icon-progress-grey     { color: rgba(255, 255, 255, 0.35); }
+
+/* ─── Menu layout grid ───────────────────────────────────────────────────── */
+
+.menu-safe-zone {
+  position: relative;
+}
+
+.menu-shell {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-shell-grid {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.menu-content-grid {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.menu-main-frame {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-main-columns {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.menu-primary-surface {
+  /* Defined alongside Tailwind utility classes inline */
+}
+
+.menu-page-surface {
+  /* Defined alongside Tailwind utility classes inline */
+}
+
+.menu-aux-surface {
+  /* Defined alongside Tailwind utility classes inline */
+}
+
+.menu-utility-surface {
+  /* Defined alongside Tailwind utility classes inline */
+}
+
+.menu-utility-switch {
+  /* Defined alongside Tailwind utility classes inline */
+}
+
+.menu-utility-drawer {
+  display: none;
+}
+
+.menu-utility-drawer.is-open {
+  display: block;
+}
+
+.menu-mobile-hidden {
+  /* On mobile landscape, hide main when utility mode is active */
+}
+
+.safe-zone {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
