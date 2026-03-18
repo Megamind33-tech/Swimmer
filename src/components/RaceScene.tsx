@@ -2,25 +2,20 @@
  * RaceScene - Babylon.js 3D arena canvas mount
  *
  * Mounts the WebGL canvas, boots ArenaManager, runs the race render loop,
- * and layers the Phase 3 HUDRoot DOM overlay on top.
+ * and layers the Phase 4 HUDRoot DOM overlay on top.
  *
- * This component owns the entire screen while a race is active.
- *
- * Layout contract (landscape mobile):
- *   - canvas fills 100vw × 100vh (no scroll, touch-action: none)
- *   - HUDRoot is position:fixed, pointer-events-none by default
- *   - Only HUD interactive zones (stroke buttons, pause) have pointer-events: auto
- *   - Center screen is never blocked by persistent HUD elements
- *
- * Race simulation:
- *   The Babylon arena drives visuals; this component owns simplified
- *   race state (elapsed time, distance, stamina, oxygen, rhythm, position).
- *   In a full implementation these values would come from RaceEngine/GameManager.
+ * Phase 4: wires useTouchControls master hook so all input (touch, keyboard,
+ * gamepad) flows through a single surface. ControlsPreset loaded from
+ * localStorage via loadPreset(). Sprint is now fired from the controls
+ * hook rather than a standalone callback.
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ArenaManager } from '../graphics/ArenaManager';
-import { HUDRoot, CountdownOverlay } from '../hud/HUDRoot';
+import { ArenaManager }                from '../graphics/ArenaManager';
+import { HUDRoot, CountdownOverlay }   from '../hud/HUDRoot';
+import { useTouchControls }            from '../input/useTouchControls';
+import { loadPreset }                  from '../input/controlsSettings';
+import { destroyInputManager }         from '../input/InputManager';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -80,20 +75,74 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
 
   const totalDistanceM = parseInt(config.distance.replace('M', ''), 10) || 100;
 
+  // Load controls preset from localStorage (Phase 4)
+  const preset = loadPreset();
+
   // ── Race state ──────────────────────────────────────────────────────────
   const [raceStarted, setRaceStarted] = useState(false);
-  const [countdown,   setCountdown]   = useState(3);     // 3 → 2 → 1 → 0 (GO!)
+  const [countdown,   setCountdown]   = useState(3);
   const [elapsedMs,   setElapsedMs]   = useState(0);
   const [distanceM,   setDistanceM]   = useState(0);
-  const [position,    setPosition]    = useState(4);     // 1-8
+  const [position,    setPosition]    = useState(4);
   const [stamina,     setStamina]     = useState(100);
   const [oxygen,      setOxygen]      = useState(100);
   const [rhythm,      setRhythm]      = useState(75);
 
+  // ── Stroke callbacks (referenced by touch controls) ──────────────────────
+  const handleStrokeLeft = useCallback(() => {
+    setStamina((prev) => Math.min(100, prev + 0.4));
+    setOxygen((prev)  => Math.min(100, prev + 0.6));
+    setRhythm((prev)  => Math.min(100, prev + 4));
+  }, []);
+
+  const handleStrokeRight = useCallback(() => {
+    setStamina((prev) => Math.min(100, prev + 0.4));
+    setOxygen((prev)  => Math.min(100, prev + 0.6));
+    setRhythm((prev)  => Math.min(100, prev + 4));
+  }, []);
+
+  const handleSprint = useCallback(() => {
+    setStamina((prev) => Math.max(0, prev - 6));
+    setOxygen((prev)  => Math.max(0, prev - 8));
+    setRhythm((prev)  => Math.min(100, prev + 10));
+  }, []);
+
+  // ── Touch controls master hook (Phase 4) ─────────────────────────────────
+  const controls = useTouchControls({
+    preset,
+    onPause,
+    onJoystick: undefined,   // future: pass to ArenaManager for camera/steering
+  });
+
+  // Mirror sprint from controls buffer into game state
+  useEffect(() => {
+    const { buffer } = controls;
+    const SPRINT_WINDOW = 80; // ms
+
+    // Poll for sprint in the buffer on each render cycle
+    // (buffer itself does not trigger re-renders)
+    if (buffer.wasPressed('sprint', SPRINT_WINDOW)) {
+      handleSprint();
+    }
+    if (buffer.wasPressed('strokeLeft', SPRINT_WINDOW)) {
+      handleStrokeLeft();
+    }
+    if (buffer.wasPressed('strokeRight', SPRINT_WINDOW)) {
+      handleStrokeRight();
+    }
+  }); // no deps — runs every render (intentional polling)
+
+  // ── Cleanup InputManager on unmount ──────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      destroyInputManager();
+      controls.gestureLock.clear();
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Babylon.js boot ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!canvasRef.current) return;
-
     let disposed = false;
     const arena  = new ArenaManager(canvasRef.current);
     arenaRef.current = arena;
@@ -121,11 +170,10 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
     const t1 = setTimeout(() => setCountdown(2), 1000);
     const t2 = setTimeout(() => setCountdown(1), 2000);
     const t3 = setTimeout(() => {
-      setCountdown(0);   // "GO!"
+      setCountdown(0);
       startTimeRef.current = performance.now();
       setRaceStarted(true);
     }, 3000);
-
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
@@ -133,9 +181,9 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
   useEffect(() => {
     if (!raceStarted) return;
 
-    const SPEED_BASE    = totalDistanceM / 55_000; // ~55 s to finish at base speed
-    const STAMINA_DRAIN = 0.018;  // % per ms
-    const OXYGEN_DRAIN  = 0.013;  // % per ms (recovers with strokes)
+    const SPEED_BASE     = totalDistanceM / 55_000;
+    const STAMINA_DRAIN  = 0.018;
+    const OXYGEN_DRAIN   = 0.013;
     const AI_CATCH_SPEED = 0.000_02;
 
     const tick = () => {
@@ -143,22 +191,15 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
       const elapsed = now - startTimeRef.current;
 
       setElapsedMs(elapsed);
-
       setStamina((prev) => Math.max(0, prev - STAMINA_DRAIN));
       setOxygen((prev)  => Math.max(0, prev - OXYGEN_DRAIN));
-
-      // Rhythm oscillates naturally — strokes push it up (handled in callback)
-      setRhythm(() => {
-        const base = 65 + 20 * Math.sin(elapsed / 4_500);
-        return Math.min(100, Math.max(0, base));
-      });
+      setRhythm(() => Math.min(100, Math.max(0, 65 + 20 * Math.sin(elapsed / 4_500))));
 
       setDistanceM((prev) => {
         const speed = SPEED_BASE * (0.65 + 0.35 * (stamina / 100));
-        const next  = prev + speed * 16; // ~16 ms per frame
+        const next  = prev + speed * 16;
 
         if (next >= totalDistanceM) {
-          // Race complete
           if (rafRef.current) {
             cancelAnimationFrame(rafRef.current);
             rafRef.current = null;
@@ -176,11 +217,8 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
         return next;
       });
 
-      // AI slowly closes or falls behind
       setPosition((prev) => {
-        if (prev > 1 && Math.random() < AI_CATCH_SPEED * elapsed) {
-          return Math.max(1, prev - 1);
-        }
+        if (prev > 1 && Math.random() < AI_CATCH_SPEED * elapsed) return Math.max(1, prev - 1);
         return prev;
       });
 
@@ -191,32 +229,11 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [raceStarted]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Stroke handlers ──────────────────────────────────────────────────────
-  const handleStrokeLeft = useCallback(() => {
-    setStamina((prev) => Math.min(100, prev + 0.4));
-    setOxygen((prev)  => Math.min(100, prev + 0.6));
-    setRhythm((prev)  => Math.min(100, prev + 4));
-  }, []);
-
-  const handleStrokeRight = useCallback(() => {
-    setStamina((prev) => Math.min(100, prev + 0.4));
-    setOxygen((prev)  => Math.min(100, prev + 0.6));
-    setRhythm((prev)  => Math.min(100, prev + 4));
-  }, []);
-
-  const handleSprint = useCallback(() => {
-    // Sprint burns stamina/oxygen faster but boosts rhythm
-    setStamina((prev) => Math.max(0, prev - 6));
-    setOxygen((prev)  => Math.max(0, prev - 8));
-    setRhythm((prev)  => Math.min(100, prev + 10));
-  }, []);
-
   // ── Lap / heat derivation ────────────────────────────────────────────────
-  //  For distances ≤ 100m: 1 lap.  For 200m: 2 laps. Etc.
-  const totalLaps = Math.max(1, totalDistanceM / 100);
-  const lapNumber = Math.min(totalLaps, Math.floor((distanceM / totalDistanceM) * totalLaps) + 1);
-  const heat      = config.stroke === 'FREESTYLE' ? 'QUICK RACE' : `${config.stroke} HEAT`;
-  const playerLane = 4; // default lane
+  const totalLaps  = Math.max(1, totalDistanceM / 100);
+  const lapNumber  = Math.min(totalLaps, Math.floor((distanceM / totalDistanceM) * totalLaps) + 1);
+  const heat       = config.stroke === 'FREESTYLE' ? 'QUICK RACE' : `${config.stroke} HEAT`;
+  const playerLane = 4;
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
@@ -228,10 +245,10 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
         style={{ touchAction: 'none' }}
       />
 
-      {/* Countdown overlay (shows before race starts) */}
+      {/* Countdown overlay */}
       {!raceStarted && <CountdownOverlay value={countdown} />}
 
-      {/* Phase 3 HUD (shows once race is active) */}
+      {/* Phase 4 HUD */}
       {raceStarted && (
         <HUDRoot
           elapsedMs={elapsedMs}
@@ -245,14 +262,12 @@ export const RaceScene: React.FC<RaceSceneProps> = ({ config, onPause, onRaceCom
           oxygen={oxygen}
           rhythm={rhythm}
           playerLane={playerLane}
+          controls={controls}
+          preset={preset}
           onPause={onPause}
-          onStrokeLeft={handleStrokeLeft}
-          onStrokeRight={handleStrokeRight}
-          onSprint={handleSprint}
         />
       )}
 
-      {/* Ticker keyframe kept for any legacy usage */}
       <style>{`
         @keyframes scroll {
           0%   { transform: translateX(0); }

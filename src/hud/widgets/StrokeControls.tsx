@@ -1,97 +1,184 @@
 /**
- * StrokeControls — bottom-zone action controls
+ * StrokeControls — functional bottom-zone controls
  *
  * Layout zones (landscape ergonomics):
  *
- *  BOTTOM-LEFT: JoystickZone
- *    Visual placeholder for directional input (pool steering).
- *    Currently decorative; future: full virtual joystick with touch tracking.
- *    Positioned for LEFT THUMB accessibility.
+ *  VirtualJoystick (Bottom-Left or Bottom-Right depending on handedness)
+ *    Real virtual joystick using useVirtualJoystick.
+ *    Knob tracks pointer with setPointerCapture; dead zone 8%.
+ *    Positioned for thumb accessibility.
  *
- *  BOTTOM-CENTER: StaminaRing
- *    Circular SVG stamina gauge + distance readout.
- *    Read-only — placed at natural visual center.
+ *  StaminaRing (Bottom-Center)
+ *    Circular SVG stamina gauge + distance readout. Read-only.
  *
- *  BOTTOM-RIGHT: ActionCluster
- *    LEFT stroke button + RIGHT stroke button (primary swim inputs)
- *    SPRINT button above them (burst of speed, drains stamina faster)
- *    Positioned for RIGHT THUMB accessibility.
+ *  ActionCluster (Bottom-Left or Bottom-Right)
+ *    Sprint + LEFT stroke + RIGHT stroke buttons.
+ *    Wired to useActionButtons (haptic + audio + flash state).
  *
  * Touch contract:
  *   - All buttons use onPointerDown (not onClick) for minimum latency
- *   - 80px minimum tap target on stroke buttons (WCAG 2.5.5 extended)
- *   - Flash animation on each press (visual + tactile feedback)
+ *   - 80px+ tap targets on stroke buttons
+ *   - useGestureLock prevents conflicting simultaneous gestures
+ *   - Visual: scale compression + glow pulse + flash on press
  */
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
+import type { UseActionButtonsResult } from '../../input/useActionButtons';
+import type { VirtualJoystickResult as UseVirtualJoystickResult } from '../../input/useVirtualJoystick';
+import type { UseGestureLockResult } from '../../input/useGestureLock';
+import type { InputAction } from '../../input/inputTypes';
 import { HUD_COLOR, HUD_FONT, staminaColor } from '../hudTokens';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Joystick Zone (Bottom-Left)
+// VirtualJoystick (Bottom-Left)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const JoystickZone: React.FC = () => (
-  <div
-    style={{
-      width:          '130px',
-      height:         '88px',
-      borderRadius:   '24px',
-      background:     'rgba(4,20,33,0.50)',
-      border:         '1px solid rgba(56,214,255,0.10)',
-      display:        'flex',
-      alignItems:     'center',
-      justifyContent: 'center',
-      position:       'relative',
-      flexShrink:     0,
-    }}
-  >
-    {/* Crosshair H */}
+export interface VirtualJoystickProps {
+  joystick:    UseVirtualJoystickResult;
+  gestureLock: UseGestureLockResult;
+  size:        number;  // px diameter of the joystick container
+}
+
+export const VirtualJoystick: React.FC<VirtualJoystickProps> = ({
+  joystick,
+  gestureLock,
+  size,
+}) => {
+  const { handlers, knobOffset, active } = joystick;
+  const ZONE_ID = 'joystick';
+
+  // Wrap handlers with gesture lock so no other zone steals the pointer
+  const wrappedHandlers = {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (!gestureLock.tryLock(ZONE_ID, e.pointerId)) return;
+      handlers.onPointerDown(e);
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      if (!gestureLock.isLocked(ZONE_ID, e.pointerId)) return;
+      handlers.onPointerMove(e);
+    },
+    onPointerUp: (e: React.PointerEvent) => {
+      gestureLock.unlock(e.pointerId);
+      handlers.onPointerUp(e);
+    },
+    onPointerCancel: (e: React.PointerEvent) => {
+      gestureLock.unlock(e.pointerId);
+      handlers.onPointerCancel(e);
+    },
+  };
+
+  const containerBorder = active
+    ? `1.5px solid rgba(56,214,255,0.45)`
+    : `1px solid rgba(56,214,255,0.12)`;
+  const containerGlow   = active ? '0 0 20px rgba(56,214,255,0.18)' : 'none';
+
+  return (
     <div
+      {...wrappedHandlers}
       style={{
-        position:   'absolute',
-        width:      '48px',
-        height:     '1px',
-        background: 'rgba(56,214,255,0.15)',
-      }}
-    />
-    {/* Crosshair V */}
-    <div
-      style={{
-        position:   'absolute',
-        width:      '1px',
-        height:     '48px',
-        background: 'rgba(56,214,255,0.15)',
-      }}
-    />
-    {/* Thumb circle */}
-    <div
-      style={{
-        width:        '28px',
-        height:       '28px',
-        borderRadius: '50%',
-        background:   'rgba(56,214,255,0.12)',
-        border:       '1.5px solid rgba(56,214,255,0.28)',
-        boxShadow:    '0 0 10px rgba(56,214,255,0.18)',
-      }}
-    />
-    {/* Label */}
-    <span
-      style={{
-        position:      'absolute',
-        bottom:        '6px',
-        fontFamily:    HUD_FONT.label,
-        fontWeight:    700,
-        fontSize:      '7px',
-        color:         'rgba(169,211,231,0.30)',
-        letterSpacing: '0.10em',
-        textTransform: 'uppercase',
+        width:          `${size}px`,
+        height:         `${size}px`,
+        borderRadius:   '50%',
+        background:     active
+          ? 'rgba(4,20,33,0.62)'
+          : 'rgba(4,20,33,0.44)',
+        border:         containerBorder,
+        boxShadow:      containerGlow,
+        position:       'relative',
+        flexShrink:     0,
+        touchAction:    'none',
+        cursor:         'grab',
+        transition:     'border-color 0.12s, box-shadow 0.12s, background 0.12s',
       }}
     >
-      MOVE
-    </span>
-  </div>
-);
+      {/* Guide ring */}
+      <div
+        style={{
+          position:     'absolute',
+          inset:        '18%',
+          borderRadius: '50%',
+          border:       '1px solid rgba(56,214,255,0.08)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Crosshair H */}
+      <div
+        style={{
+          position:   'absolute',
+          top:        '50%',
+          left:       '18%',
+          right:      '18%',
+          height:     '1px',
+          marginTop:  '-0.5px',
+          background: 'rgba(56,214,255,0.10)',
+          pointerEvents: 'none',
+        }}
+      />
+      {/* Crosshair V */}
+      <div
+        style={{
+          position:   'absolute',
+          left:       '50%',
+          top:        '18%',
+          bottom:     '18%',
+          width:      '1px',
+          marginLeft: '-0.5px',
+          background: 'rgba(56,214,255,0.10)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Knob */}
+      <div
+        style={{
+          position:     'absolute',
+          top:          '50%',
+          left:         '50%',
+          width:        `${size * 0.34}px`,
+          height:       `${size * 0.34}px`,
+          marginTop:    `${-(size * 0.34) / 2}px`,
+          marginLeft:   `${-(size * 0.34) / 2}px`,
+          borderRadius: '50%',
+          background:   active
+            ? `radial-gradient(circle at 35% 35%, rgba(122,232,255,0.85), rgba(56,214,255,0.55))`
+            : 'rgba(56,214,255,0.20)',
+          border:       active
+            ? '2px solid rgba(122,232,255,0.80)'
+            : '1.5px solid rgba(56,214,255,0.30)',
+          boxShadow:    active
+            ? '0 0 14px rgba(56,214,255,0.55), 0 2px 6px rgba(0,0,0,0.5)'
+            : '0 0 8px rgba(56,214,255,0.18)',
+          transform:    `translate(${knobOffset.x}px, ${knobOffset.y}px)`,
+          transition:   active ? 'none' : 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* MOVE label */}
+      <span
+        style={{
+          position:      'absolute',
+          bottom:        '7px',
+          left:          0,
+          right:         0,
+          textAlign:     'center',
+          fontFamily:    HUD_FONT.label,
+          fontWeight:    700,
+          fontSize:      '7px',
+          color:         active ? 'rgba(56,214,255,0.60)' : 'rgba(169,211,231,0.28)',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          pointerEvents: 'none',
+          transition:    'color 0.12s',
+        }}
+      >
+        MOVE
+      </span>
+    </div>
+  );
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Stamina Ring (Bottom-Center)
@@ -219,39 +306,51 @@ export const StaminaRing: React.FC<StaminaRingProps> = ({ stamina, distanceM, to
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Action Cluster (Bottom-Right)
+// Stroke Button
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface ActionClusterProps {
-  onStrokeLeft:  () => void;
-  onStrokeRight: () => void;
-  onSprint?:     () => void;
-}
-
 interface StrokeButtonProps {
-  label:     string;
-  icon:      string;
-  onPress:   () => void;
+  action:     InputAction;
+  label:      string;
+  icon:       string;
+  size:       number;
+  buttons:    UseActionButtonsResult;
+  gestureLock:UseGestureLockResult;
   flashColor: string;
   glowColor:  string;
 }
 
-const StrokeButton: React.FC<StrokeButtonProps> = ({ label, icon, onPress, flashColor, glowColor }) => {
-  const [flashing, setFlashing] = useState(false);
-
-  const handlePress = useCallback(() => {
-    setFlashing(true);
-    setTimeout(() => setFlashing(false), 110);
-    onPress();
-  }, [onPress]);
+const StrokeButton: React.FC<StrokeButtonProps> = ({
+  action, label, icon, size, buttons, gestureLock, flashColor, glowColor,
+}) => {
+  const state   = buttons.states[action];
+  const flash   = state?.flash ?? false;
+  const pressed = state?.pressed ?? false;
 
   return (
     <motion.button
-      onPointerDown={handlePress}
-      whileTap={{ scale: 0.93 }}
+      onPointerDown={(e) => {
+        if (!gestureLock.tryLock(action, e.pointerId)) return;
+        buttons.press(action);
+      }}
+      onPointerUp={(e) => {
+        gestureLock.unlock(e.pointerId);
+        buttons.release(action);
+      }}
+      onPointerCancel={(e) => {
+        gestureLock.unlock(e.pointerId);
+        buttons.release(action);
+      }}
+      animate={{
+        scale:     pressed ? 0.93 : 1,
+        boxShadow: flash
+          ? `0 0 28px ${glowColor}, 0 0 10px ${glowColor}, inset 0 0 8px rgba(255,255,255,0.06)`
+          : 'none',
+      }}
+      transition={{ type: 'spring', stiffness: 700, damping: 32 }}
       style={{
-        width:          '82px',
-        height:         '76px',
+        width:          `${size}px`,
+        height:         `${size * 0.93}px`,
         borderRadius:   '16px',
         display:        'flex',
         flexDirection:  'column',
@@ -259,13 +358,13 @@ const StrokeButton: React.FC<StrokeButtonProps> = ({ label, icon, onPress, flash
         justifyContent: 'center',
         gap:            '4px',
         cursor:         'pointer',
-        border:         `2px solid ${flashing ? flashColor : 'rgba(255,255,255,0.12)'}`,
-        background:     flashing
-          ? `rgba(${flashColor.replace(/[^,\d]/g, '').split(',').slice(0,3).join(',')},0.18)`
+        border:         `2px solid ${flash ? flashColor : 'rgba(255,255,255,0.12)'}`,
+        background:     flash
+          ? `rgba(56,214,255,0.14)`
           : 'rgba(4,20,33,0.65)',
         backdropFilter: 'blur(8px)',
-        boxShadow:      flashing ? `0 0 24px ${glowColor}, 0 0 8px ${glowColor}` : 'none',
-        transition:     'border-color 0.1s, box-shadow 0.1s, background 0.1s',
+        transition:     'border-color 0.08s, background 0.08s',
+        touchAction:    'none',
         userSelect:     'none',
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none',
@@ -279,7 +378,8 @@ const StrokeButton: React.FC<StrokeButtonProps> = ({ label, icon, onPress, flash
           fontSize:      '9px',
           letterSpacing: '0.10em',
           textTransform: 'uppercase',
-          color:         flashing ? flashColor : HUD_COLOR.textMuted,
+          color:         flash ? flashColor : HUD_COLOR.textMuted,
+          transition:    'color 0.08s',
         }}
       >
         {label}
@@ -288,18 +388,24 @@ const StrokeButton: React.FC<StrokeButtonProps> = ({ label, icon, onPress, flash
   );
 };
 
-export const ActionCluster: React.FC<ActionClusterProps> = ({
-  onStrokeLeft,
-  onStrokeRight,
-  onSprint,
-}) => {
-  const [sprintActive, setSprintActive] = useState(false);
+// ─────────────────────────────────────────────────────────────────────────────
+// Action Cluster (Bottom-Right)
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const handleSprint = useCallback(() => {
-    setSprintActive(true);
-    setTimeout(() => setSprintActive(false), 600);
-    onSprint?.();
-  }, [onSprint]);
+export interface ActionClusterProps {
+  buttons:     UseActionButtonsResult;
+  gestureLock: UseGestureLockResult;
+  buttonSize:  number;
+}
+
+export const ActionCluster: React.FC<ActionClusterProps> = ({
+  buttons,
+  gestureLock,
+  buttonSize,
+}) => {
+  const sprintState   = buttons.states['sprint'];
+  const sprintPressed = sprintState?.pressed ?? false;
+  const sprintFlash   = sprintState?.flash   ?? false;
 
   return (
     <div
@@ -313,23 +419,40 @@ export const ActionCluster: React.FC<ActionClusterProps> = ({
     >
       {/* Sprint button (above stroke buttons) */}
       <motion.button
-        onPointerDown={handleSprint}
-        whileTap={{ scale: 0.91 }}
+        onPointerDown={(e) => {
+          if (!gestureLock.tryLock('sprint', e.pointerId)) return;
+          buttons.press('sprint');
+        }}
+        onPointerUp={(e) => {
+          gestureLock.unlock(e.pointerId);
+          buttons.release('sprint');
+        }}
+        onPointerCancel={(e) => {
+          gestureLock.unlock(e.pointerId);
+          buttons.release('sprint');
+        }}
+        animate={{
+          scale:     sprintPressed ? 0.94 : 1,
+          boxShadow: sprintFlash
+            ? `0 0 22px ${HUD_COLOR.warningGlow}, 0 0 8px ${HUD_COLOR.warningGlow}`
+            : 'none',
+        }}
+        transition={{ type: 'spring', stiffness: 700, damping: 32 }}
         style={{
           height:         '26px',
-          width:          '170px',
+          width:          `${buttonSize * 2 + 6}px`,
           borderRadius:   '8px',
           display:        'flex',
           alignItems:     'center',
           justifyContent: 'center',
           gap:            '5px',
           cursor:         'pointer',
-          border:         `1px solid ${sprintActive ? HUD_COLOR.warning : 'rgba(255,194,71,0.22)'}`,
-          background:     sprintActive
+          border:         `1px solid ${sprintFlash ? HUD_COLOR.warning : 'rgba(255,194,71,0.22)'}`,
+          background:     sprintFlash
             ? 'rgba(255,194,71,0.18)'
             : 'rgba(255,194,71,0.06)',
-          boxShadow:      sprintActive ? `0 0 18px ${HUD_COLOR.warningGlow}` : 'none',
-          transition:     'all 0.1s ease',
+          transition:     'border-color 0.08s, background 0.08s',
+          touchAction:    'none',
           userSelect:     'none',
           WebkitUserSelect: 'none',
         }}
@@ -342,7 +465,8 @@ export const ActionCluster: React.FC<ActionClusterProps> = ({
             fontSize:      '9px',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            color:         sprintActive ? HUD_COLOR.warning : 'rgba(255,194,71,0.55)',
+            color:         sprintFlash ? HUD_COLOR.warning : 'rgba(255,194,71,0.55)',
+            transition:    'color 0.08s',
           }}
         >
           SPRINT
@@ -352,16 +476,22 @@ export const ActionCluster: React.FC<ActionClusterProps> = ({
       {/* L / R stroke buttons */}
       <div style={{ display: 'flex', gap: '6px' }}>
         <StrokeButton
+          action="strokeLeft"
           label="LEFT"
           icon="🫴"
-          onPress={onStrokeLeft}
+          size={buttonSize}
+          buttons={buttons}
+          gestureLock={gestureLock}
           flashColor={HUD_COLOR.aqua}
           glowColor={HUD_COLOR.aquaGlow}
         />
         <StrokeButton
+          action="strokeRight"
           label="RIGHT"
           icon="🤲"
-          onPress={onStrokeRight}
+          size={buttonSize}
+          buttons={buttons}
+          gestureLock={gestureLock}
           flashColor={HUD_COLOR.cyanGlow}
           glowColor="rgba(122,232,255,0.65)"
         />

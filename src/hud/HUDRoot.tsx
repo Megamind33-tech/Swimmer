@@ -1,45 +1,39 @@
 /**
- * HUDRoot — Phase 3 race HUD root component
+ * HUDRoot — Phase 4 race HUD root component
  *
  * Assembles all HUD widgets into the five ergonomic zones:
  *
  *   TOP-LEFT    swimmer state: StaminaBar · OxygenBar · RhythmMeter
  *   TOP-CENTER  telemetry:     RaceTimerPanel (timer + position + lap + heat)
  *   TOP-RIGHT   navigation:    LaneRadar · PauseButton
- *   CENTER      transient:     ContextPromptBanner (only zone with ephemeral content)
- *   BOTTOM-LEFT joystick:      JoystickZone (directional movement)
- *   BOTTOM-CTR  stamina ring:  StaminaRing + distance readout
- *   BOTTOM-RIGHT action:       ActionCluster (sprint + L/R stroke)
+ *   MID-RIGHT   camera:        CameraToggleButton
+ *   CENTER      transient:     ContextPromptBanner (only ephemeral zone)
+ *   BOTTOM      controls:      VirtualJoystick | StaminaRing | ActionCluster
+ *                              (order flips with handedness)
  *
- * Architecture rules:
- *   - HUDRoot is position:fixed, fills full screen, z-index: hudBase (50)
- *   - Default pointer-events: none — only interactive zones override to auto
- *   - Center screen is NEVER blocked by persistent elements
- *   - All widgets are pure presentational — HUDRoot owns all state
- *   - Modular: any widget can be toggled via `visible` flags without refactor
- *
- * Styling rules:
- *   - Translucent dark panels (rgba(4,20,33,0.74)) — no flat opaque blocks
- *   - Aqua glow on interactive/active elements
- *   - Bebas Neue for large numbers, Rajdhani for labels
- *   - Tabular-nums everywhere numerical
- *
- * Performance:
- *   - No expensive calculations inside render — caller pre-computes values
- *   - AnimatePresence only around ContextPromptBanner (rare mounts/unmounts)
- *   - CSS transitions on bar fills (not JS animations)
+ * Phase 4 additions:
+ *   - Accepts ControlsPreset: joystickSize, buttonSize, handedness, hudScale
+ *   - hudScale applied via CSS transform on bottom zone
+ *   - handedness='left': joystick BL, buttons BR (default)
+ *     handedness='right': buttons BL, joystick BR (right-hand layout)
+ *   - Camera toggle button mid-right (always reachable)
+ *   - All interactive zones use useGestureLock via useTouchControls
  */
 
 import React, { useMemo } from 'react';
-import { RaceTimerPanel }      from './widgets/RaceTimerPanel';
-import { StaminaBar }          from './widgets/StaminaBar';
-import { OxygenBar }           from './widgets/OxygenBar';
-import { RhythmMeter }         from './widgets/RhythmMeter';
-import { LaneRadar }           from './widgets/LaneRadar';
-import { PauseButton }         from './widgets/PauseButton';
+import { motion }                from 'motion/react';
+import { Camera }                from 'lucide-react';
+import { RaceTimerPanel }        from './widgets/RaceTimerPanel';
+import { StaminaBar }            from './widgets/StaminaBar';
+import { OxygenBar }             from './widgets/OxygenBar';
+import { RhythmMeter }           from './widgets/RhythmMeter';
+import { LaneRadar }             from './widgets/LaneRadar';
+import { PauseButton }           from './widgets/PauseButton';
 import { ContextPromptBanner, useContextPrompts } from './widgets/ContextPromptBanner';
-import { JoystickZone, StaminaRing, ActionCluster } from './widgets/StrokeControls';
+import { VirtualJoystick, StaminaRing, ActionCluster } from './widgets/StrokeControls';
 import { HUD_PANEL, HUD_COLOR, HUD_FONT } from './hudTokens';
+import type { ControlsPreset }   from '../input/inputTypes';
+import type { UseTouchControlsResult } from '../input/useTouchControls';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -53,7 +47,7 @@ export interface HUDRootProps {
   totalDistanceM: number;
   lapNumber:      number;
   totalLaps:      number;
-  heat:           string;       // "QUICK RACE" | "SEMI FINAL 1" | etc.
+  heat:           string;
 
   /* Swimmer state */
   stamina:  number;             // 0-100
@@ -63,13 +57,14 @@ export interface HUDRootProps {
   /* Lane info */
   playerLane: number;           // 1-8
 
-  /* Callbacks */
-  onPause:       () => void;
-  onStrokeLeft:  () => void;
-  onStrokeRight: () => void;
-  onSprint?:     () => void;
+  /* Controls — Phase 4 */
+  controls:  UseTouchControlsResult;
+  preset:    ControlsPreset;
 
-  /* Toggle flags */
+  /* Callbacks */
+  onPause:  () => void;
+
+  /* Toggle */
   visible?: boolean;
 }
 
@@ -77,11 +72,6 @@ export interface HUDRootProps {
 // Simulated AI lane positions
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Generates pseudo-random but stable AI lane progress values
- * based on elapsed time and player progress, so AI swimmers
- * feel realistic without a separate AI engine running.
- */
 function buildLaneData(
   elapsedMs:      number,
   distanceM:      number,
@@ -89,34 +79,29 @@ function buildLaneData(
   playerLane:     number,
 ) {
   const playerProgress = Math.min(1, distanceM / Math.max(1, totalDistanceM));
-  const t = elapsedMs / 1000; // seconds
-
-  // Deterministic per-lane offsets (seeded by lane number)
+  const t = elapsedMs / 1000;
   const laneOffsets = [0.02, -0.03, 0.01, -0.01, 0.04, -0.02, 0.03, -0.04];
 
   return Array.from({ length: 8 }, (_, i) => {
-    const lane = i + 1;
+    const lane    = i + 1;
     const isPlayer = lane === playerLane;
     const offset  = laneOffsets[i] ?? 0;
     const wave    = Math.sin(t * 0.4 + i * 0.7) * 0.015;
-
     return {
       lane,
-      progress: isPlayer ? playerProgress : Math.min(0.98, Math.max(0.02, playerProgress + offset + wave)),
+      progress: isPlayer
+        ? playerProgress
+        : Math.min(0.98, Math.max(0.02, playerProgress + offset + wave)),
       isPlayer,
     };
   });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Race progress bar (thin strip below top zone)
+// Race progress bar
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface RaceProgressBarProps {
-  progress: number;  // 0-1
-}
-
-const RaceProgressBar: React.FC<RaceProgressBarProps> = ({ progress }) => (
+const RaceProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
   <div
     style={{
       position:      'absolute',
@@ -138,7 +123,6 @@ const RaceProgressBar: React.FC<RaceProgressBarProps> = ({ progress }) => (
         transition:   'width 0.25s linear',
       }}
     />
-    {/* Player marker dot */}
     <div
       style={{
         position:     'absolute',
@@ -157,7 +141,54 @@ const RaceProgressBar: React.FC<RaceProgressBarProps> = ({ progress }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Countdown overlay (shown before race starts)
+// Camera toggle button (mid-right)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface CameraToggleButtonProps {
+  label:    string;
+  onToggle: () => void;
+}
+
+const CameraToggleButton: React.FC<CameraToggleButtonProps> = ({ label, onToggle }) => (
+  <motion.button
+    onPointerDown={onToggle}
+    whileTap={{ scale: 0.88 }}
+    style={{
+      width:          '42px',
+      height:         '42px',
+      borderRadius:   '12px',
+      display:        'flex',
+      flexDirection:  'column',
+      alignItems:     'center',
+      justifyContent: 'center',
+      gap:            '2px',
+      cursor:         'pointer',
+      background:     HUD_PANEL.background as string,
+      border:         HUD_PANEL.border     as string,
+      backdropFilter: 'blur(10px)',
+      pointerEvents:  'auto',
+      userSelect:     'none',
+      WebkitUserSelect: 'none',
+    }}
+  >
+    <Camera size={14} color={HUD_COLOR.aqua} />
+    <span
+      style={{
+        fontFamily:    HUD_FONT.label,
+        fontWeight:    700,
+        fontSize:      '7px',
+        letterSpacing: '0.10em',
+        color:         HUD_COLOR.aqua,
+        textTransform: 'uppercase',
+      }}
+    >
+      {label}
+    </span>
+  </motion.button>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Countdown overlay
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface CountdownOverlayProps {
@@ -165,10 +196,10 @@ export interface CountdownOverlayProps {
 }
 
 export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ value }) => {
-  const isGo    = value === 0;
-  const label   = isGo ? 'GO!' : String(value);
-  const color   = isGo ? HUD_COLOR.success : HUD_COLOR.textPrimary;
-  const shadow  = isGo
+  const isGo   = value === 0;
+  const label  = isGo ? 'GO!' : String(value);
+  const color  = isGo ? HUD_COLOR.success : HUD_COLOR.textPrimary;
+  const shadow = isGo
     ? `0 0 30px ${HUD_COLOR.successGlow}, 0 0 60px ${HUD_COLOR.successGlow}`
     : `0 0 30px rgba(243,251,255,0.5)`;
 
@@ -235,20 +266,39 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
   oxygen,
   rhythm,
   playerLane,
+  controls,
+  preset,
   onPause,
-  onStrokeLeft,
-  onStrokeRight,
-  onSprint,
   visible = true,
 }) => {
-  const progress  = Math.min(1, distanceM / Math.max(1, totalDistanceM));
-  const laneData  = useMemo(
+  const progress    = Math.min(1, distanceM / Math.max(1, totalDistanceM));
+  const laneData    = useMemo(
     () => buildLaneData(elapsedMs, distanceM, totalDistanceM, playerLane),
     [elapsedMs, distanceM, totalDistanceM, playerLane],
   );
   const activePrompt = useContextPrompts(elapsedMs, position, distanceM, totalDistanceM, stamina);
 
   if (!visible) return null;
+
+  // Handedness: 'right' = joystick BL, buttons BR (default ergonomics)
+  //             'left'  = buttons BL, joystick BR (left-hand joystick)
+  const joystickLeft = preset.handedness === 'right';
+
+  const joystickEl = (
+    <VirtualJoystick
+      joystick={controls.joystick}
+      gestureLock={controls.gestureLock}
+      size={preset.joystickSize}
+    />
+  );
+
+  const actionEl = (
+    <ActionCluster
+      buttons={controls.buttons}
+      gestureLock={controls.gestureLock}
+      buttonSize={preset.buttonSize}
+    />
+  );
 
   return (
     <div
@@ -278,18 +328,18 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
           pointerEvents: 'auto',
         }}
       >
-        {/* ── TOP-LEFT: Swimmer state cluster ── */}
+        {/* TOP-LEFT: Swimmer state cluster */}
         <div
           style={{
             ...HUD_PANEL,
-            display:       'flex',
-            flexDirection: 'column',
-            justifyContent:'center',
-            gap:           '5px',
-            padding:       '6px 10px',
-            minWidth:      '128px',
-            flexShrink:    0,
-            height:        '48px',
+            display:        'flex',
+            flexDirection:  'column',
+            justifyContent: 'center',
+            gap:            '5px',
+            padding:        '6px 10px',
+            minWidth:       '128px',
+            flexShrink:     0,
+            height:         '48px',
           }}
         >
           <StaminaBar value={stamina} />
@@ -297,7 +347,7 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
           <RhythmMeter value={rhythm} />
         </div>
 
-        {/* ── TOP-CENTER: Race telemetry ── */}
+        {/* TOP-CENTER: Race telemetry */}
         <div
           style={{
             flex:           1,
@@ -314,7 +364,7 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
           />
         </div>
 
-        {/* ── TOP-RIGHT: Lane radar + pause ── */}
+        {/* TOP-RIGHT: Lane radar + pause */}
         <div
           style={{
             display:    'flex',
@@ -329,17 +379,35 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
       </div>
 
       {/* ════════════════════════════════════════════════════════════
-          RACE PROGRESS BAR — thin strip at top: 60px
+          RACE PROGRESS BAR
           ════════════════════════════════════════════════════════════ */}
       <RaceProgressBar progress={progress} />
 
       {/* ════════════════════════════════════════════════════════════
-          CENTER ZONE — transient prompts only, nothing persistent
+          MID-RIGHT: Camera toggle
+          ════════════════════════════════════════════════════════════ */}
+      <div
+        style={{
+          position:      'absolute',
+          right:         '10px',
+          top:           '50%',
+          transform:     'translateY(-50%)',
+          pointerEvents: 'auto',
+        }}
+      >
+        <CameraToggleButton
+          label={controls.camera.label}
+          onToggle={controls.camera.toggle}
+        />
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════
+          CENTER ZONE — transient prompts only
           ════════════════════════════════════════════════════════════ */}
       <ContextPromptBanner prompt={activePrompt} />
 
       {/* ════════════════════════════════════════════════════════════
-          BOTTOM ZONE — controls
+          BOTTOM ZONE — controls (respects handedness + hudScale)
           ════════════════════════════════════════════════════════════ */}
       <div
         style={{
@@ -353,27 +421,23 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
           justifyContent: 'space-between',
           padding:        '0 8px 8px',
           pointerEvents:  'auto',
+          // hudScale applied here — scales controls without touching top HUD
+          transform:      `scale(${preset.hudScale})`,
+          transformOrigin:'bottom center',
         }}
       >
-        {/* Bottom-left: joystick zone */}
-        <JoystickZone />
+        {joystickLeft ? joystickEl : actionEl}
 
-        {/* Bottom-center: stamina ring + distance */}
         <StaminaRing
           stamina={stamina}
           distanceM={distanceM}
           totalDistanceM={totalDistanceM}
         />
 
-        {/* Bottom-right: sprint + stroke buttons */}
-        <ActionCluster
-          onStrokeLeft={onStrokeLeft}
-          onStrokeRight={onStrokeRight}
-          onSprint={onSprint}
-        />
+        {joystickLeft ? actionEl : joystickEl}
       </div>
 
-      {/* Injected keyframes (scoped to HUD, avoids polluting global CSS) */}
+      {/* Injected keyframes */}
       <style>{`
         @keyframes hud-countdown-pop {
           0%   { transform: scale(1.4); opacity: 0.6; }
@@ -382,7 +446,7 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
         }
         @keyframes hud-critical-pulse {
           0%, 100% { opacity: 1; }
-          50%       { opacity: 0.45; }
+          50%      { opacity: 0.45; }
         }
       `}</style>
     </div>
