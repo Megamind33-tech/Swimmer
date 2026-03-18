@@ -1,38 +1,98 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'motion/react'
 import { MARKET_LISTINGS } from '../utils/gameData'
 import { SwimmerCard } from '../components/SwimmerCard'
-import { SearchIcon, TrendingUpIcon, TrendingDownIcon, MinusIcon } from 'lucide-react'
+import { SearchIcon, TrendingUpIcon, TrendingDownIcon, MinusIcon, SlidersHorizontalIcon } from 'lucide-react'
+
+const AQUA = '#38D6FF'
+const GOLD = '#D4A843'
+const PANEL = 'rgba(4,20,33,0.76)'
+const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 
 export function TransferMarket() {
-  return (
-    <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }} className="w-full h-full pt-20 pb-24 px-8 overflow-y-auto">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-black text-white italic drop-shadow-md">TRANSFER <span className="text-[#D4A843]">MARKET</span></h1>
-          <div className="flex gap-4">
-            <div className="relative">
-              <input type="text" placeholder="Search players..." className="bg-black/40 border border-white/20 rounded-full py-2 pl-10 pr-4 text-white placeholder:text-white/40 focus:outline-none focus:border-[#D4A843] w-64 transition-colors" />
-              <SearchIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-            </div>
-            <button className="bg-[#1A1A2E] hover:bg-[#2A2A4A] text-white font-bold px-4 py-2 rounded-lg border border-white/10 transition-colors shadow-sm">FILTERS</button>
-          </div>
-        </div>
+  const [search, setSearch] = useState('')
 
-        <div className="grid grid-cols-3 gap-6">
-          {MARKET_LISTINGS.map((listing, i) => (
-            <motion.div key={listing.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }} className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 border border-white/10 flex gap-4 shadow-lg hover:border-[#00FF88]/50 transition-colors group">
-              <div className="shrink-0"><SwimmerCard swimmer={listing.swimmer} size="sm" /></div>
-              <div className="flex flex-col justify-between flex-1 py-1">
+  const filtered = MARKET_LISTINGS.filter((l) =>
+    l.swimmer.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -30 }}
+      style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px' }}
+    >
+      {/* ── Top bar ── */}
+      <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: '#F3FBFF', letterSpacing: '0.06em', lineHeight: 1 }}>TRANSFER <span style={{ color: GOLD }}>MARKET</span></div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>{MARKET_LISTINGS.length} active listings</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Search */}
+          <div style={{ position: 'relative' }}>
+            <SearchIcon size={12} color="rgba(169,211,231,0.45)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <input
+              type="text"
+              placeholder="Search players..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ height: '30px', paddingLeft: '28px', paddingRight: '12px', borderRadius: '8px', background: 'rgba(0,0,0,0.35)', border: `1px solid rgba(56,214,255,0.18)`, outline: 'none', fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: '12px', color: '#F3FBFF', width: '180px', letterSpacing: '0.04em' }}
+            />
+          </div>
+          <button style={{ height: '30px', paddingInline: '12px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, display: 'flex', alignItems: 'center', gap: '5px', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', letterSpacing: '0.10em', textTransform: 'uppercase', color: AQUA }}>
+            <SlidersHorizontalIcon size={11} />
+            FILTERS
+          </button>
+        </div>
+      </div>
+
+      {/* ── Listings grid ── */}
+      <div style={{ flex: 1, overflow: 'hidden', borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px' }}>
+        <div style={{ height: '100%', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', alignContent: 'start' }}>
+          {filtered.map((listing, i) => (
+            <motion.div
+              key={listing.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.06 }}
+              whileHover={{ scale: 1.01 }}
+              style={{ borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(4,20,33,0.70) 100%)', padding: '10px', display: 'flex', gap: '10px', cursor: 'pointer', transition: 'border-color 0.2s' }}
+            >
+              <div style={{ flexShrink: 0 }}>
+                <SwimmerCard swimmer={listing.swimmer} size="sm" />
+              </div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
                 <div>
-                  <div className="flex justify-between items-start"><h3 className="text-white font-bold text-lg leading-tight">{listing.swimmer.name}</h3><TrendIcon trend={listing.trend} /></div>
-                  <div className="text-white/50 text-xs mt-1">Ends in: <span className="text-white font-mono">{listing.timeLeft}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '4px', marginBottom: '3px' }}>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '13px', color: '#F3FBFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{listing.swimmer.name}</div>
+                    <TrendIcon trend={listing.trend} />
+                  </div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)' }}>
+                    Ends: <span style={{ fontFamily: "'Bebas Neue', sans-serif", color: '#F3FBFF', letterSpacing: '0.04em', fontSize: '12px' }}>{listing.timeLeft}</span>
+                  </div>
                 </div>
                 <div>
-                  <div className="text-[#D4A843] font-black text-xl mb-2 flex items-center gap-1"><div className="w-4 h-4 rounded-full bg-[#D4A843] flex items-center justify-center text-black text-[10px]">C</div>{listing.price.toLocaleString()}</div>
-                  <div className="flex gap-2">
-                    <motion.button whileTap={{ scale: 0.95 }} className="flex-1 bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2 rounded-lg border border-white/20 transition-colors">BID</motion.button>
-                    <motion.button whileTap={{ scale: 0.95 }} className="flex-1 bg-[#0D7C66] hover:bg-[#0A6352] text-white text-xs font-bold py-2 rounded-lg border border-[#0D7C66] transition-colors shadow-md">BUY NOW</motion.button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
+                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '8px', color: '#041421' }}>C</span>
+                    </div>
+                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: GOLD, letterSpacing: '0.04em', textShadow: '0 0 8px rgba(212,168,67,0.40)' }}>{listing.price.toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      style={{ flex: 1, height: '26px', borderRadius: '7px', cursor: 'pointer', background: 'rgba(255,255,255,0.06)', border: `1px solid rgba(255,255,255,0.15)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(169,211,231,0.80)' }}
+                    >
+                      BID
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      style={{ flex: 1, height: '26px', borderRadius: '7px', cursor: 'pointer', background: 'rgba(13,124,102,0.30)', border: `1px solid rgba(13,124,102,0.60)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.10em', textTransform: 'uppercase', color: '#34D399' }}
+                    >
+                      BUY
+                    </motion.button>
                   </div>
                 </div>
               </div>
@@ -45,7 +105,7 @@ export function TransferMarket() {
 }
 
 function TrendIcon({ trend }: { trend: string }) {
-  if (trend === 'up') return <TrendingUpIcon size={16} className="text-red-500" />
-  if (trend === 'down') return <TrendingDownIcon size={16} className="text-green-500" />
-  return <MinusIcon size={16} className="text-white/40" />
+  if (trend === 'up')   return <TrendingUpIcon   size={13} color="#EF4444" />
+  if (trend === 'down') return <TrendingDownIcon size={13} color="#34D399" />
+  return <MinusIcon size={13} color="rgba(169,211,231,0.40)" />
 }
