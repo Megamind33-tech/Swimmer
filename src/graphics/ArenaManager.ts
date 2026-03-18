@@ -149,7 +149,12 @@ export class ArenaManager {
     this.architecture = new ArenaArchitecture();
     this.architecture.build(scene, this.arenaConfig, this.matLib);
 
-    // ── 11. Static cameras ────────────────────────────────────────────────
+    // ── 12. Water render targets ──────────────────────────────────────────
+    // Called after all geometry modules so scene.meshes is fully populated.
+    // No-op for LOW quality tier (PBRMaterial — no render targets).
+    this.poolWater?.setupRenderTargets(scene);
+
+    // ── 13. Static cameras ────────────────────────────────────────────────
     this.cameraSupport = new CameraSupport();
     this.cameraSupport.build(scene, this.canvas, this.arenaConfig);
 
