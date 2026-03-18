@@ -1,292 +1,202 @@
 /**
- * GameShell — top-level layout and game-flow controller
+ * GameShell — Top-level game-flow coordinator
  *
- * Game phases:
- *   menu          → normal menu/lobby screens (TopBar + BottomNav + pages)
- *   mode-select   → full-screen PlayScreen (game mode picker)
- *   pre-race      → full-screen PreRaceSetupScreen
- *   racing        → full-screen Babylon.js RaceScene + HUD
- *   paused        → RaceScene still mounted, PauseMenu overlaid on top
- *   results       → full-screen RaceResultScreen
+ * Manages which "shell" is visible at any moment:
  *
- * The Babylon.js canvas is ONLY mounted while phase === 'racing' | 'paused'.
- * All other phases render the menu system without a WebGL context.
+ *   AppShell (menu phase)
+ *     All non-race screens: home, career, club, scouts, market,
+ *     champs, and all utility pages.  Babylon.js is NOT active here.
+ *
+ *   Game-flow phases (race pipeline)
+ *     mode-select  → PlayScreen (full-screen, no BottomNav)
+ *     pre-race     → PreRaceSetupScreen (full-screen)
+ *     racing       → RaceScene (Babylon canvas + DOM HUD)
+ *     paused       → RaceScene still mounted + PauseMenu overlay
+ *     results      → RaceResultScreen (full-screen, no canvas)
+ *
+ * The Babylon.js canvas is only created during 'racing' and 'paused' phases.
+ * Destroying and recreating the WebGL context for each race is acceptable
+ * at this stage; see FUTURE_WORK.md for persistent-canvas optimisation.
+ *
+ * Folder role:
+ *   src/app/AppShell.tsx  — menu UI logic
+ *   src/components/GameShell.tsx  — race flow state machine (this file)
+ *   src/components/RaceScene.tsx  — Babylon canvas + HUD
  */
 
-import React, { useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import { TopBar } from './TopBar'
-import { BottomNav } from './BottomNav'
-import { BrowserToolkit } from './BrowserToolkit'
-import { PauseMenu } from './PauseMenu'
-import { RaceScene, RaceConfig, RaceResult } from './RaceScene'
-import { PlayScreen } from './menu/PlayScreen'
-import { PreRaceSetupScreen } from './menu/PreRaceSetupScreen'
-import { RaceResultScreen } from './menu/RaceResultScreen'
-import { HomePage } from '../pages/HomePage'
-import { CareerMode } from '../pages/CareerMode'
-import { ClubManagement } from '../pages/ClubManagement'
-import { Scouts } from '../pages/Scouts'
-import { TransferMarket } from '../pages/TransferMarket'
-import { Championships } from '../pages/Championships'
-import lockerRoomBackground from '../designs/locker_room_custom/screen.png'
-import {
-  BonusMissionsPage,
-  EventsPage,
-  FriendsPage,
-  InboxPage,
-  RewardsPage,
-  SettingsPage,
-  StarPassPage,
-  TrainingPage,
-} from '../pages/UtilityPages'
+import React, { useState } from 'react';
+import { AppShell } from '../app/AppShell';
+import { PlayScreen } from './menu/PlayScreen';
+import { PreRaceSetupScreen } from './menu/PreRaceSetupScreen';
+import { RaceResultScreen } from './menu/RaceResultScreen';
+import { RaceScene, RaceConfig, RaceResult } from './RaceScene';
+import { PauseMenu } from './PauseMenu';
+import lockerRoomBackground from '../designs/locker_room_custom/screen.png';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-type MainTab = 'home' | 'career' | 'club' | 'scouts' | 'market' | 'champs'
-
-export type UtilityPage =
-  | 'friends'
-  | 'inbox'
-  | 'settings'
-  | 'training'
-  | 'events'
-  | 'rewards'
-  | 'pass'
-  | 'bonus'
-
 type GamePhase =
-  | 'menu'
-  | 'mode-select'
-  | 'pre-race'
-  | 'racing'
-  | 'paused'
-  | 'results'
+  | 'menu'          // AppShell — lobby/management UI
+  | 'mode-select'   // PlayScreen — choose race mode
+  | 'pre-race'      // PreRaceSetupScreen — configure the race
+  | 'racing'        // RaceScene — Babylon.js arena + HUD
+  | 'paused'        // RaceScene (still mounted) + PauseMenu overlay
+  | 'results';      // RaceResultScreen — podium and rewards
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Full-screen overlay wrapper (used for all non-menu game phases)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface OverlayShellProps {
+  children: React.ReactNode;
+  backgroundOpacity?: number;
+  /** Whether to show the locker-room background */
+  showBackground?: boolean;
+}
+
+const OverlayShell: React.FC<OverlayShellProps> = ({
+  children,
+  backgroundOpacity = 0.2,
+  showBackground = true,
+}) => (
+  <div className="w-full h-full relative overflow-hidden bg-[#050B14]">
+    {showBackground && (
+      <img
+        src={lockerRoomBackground}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ opacity: backgroundOpacity }}
+      />
+    )}
+    <div className="absolute inset-0 bg-[#050B14]/80 pointer-events-none" />
+    <div className="relative z-10 h-full overflow-y-auto">
+      {children}
+    </div>
+  </div>
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GameShell
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function GameShell() {
-  // ── Menu navigation state ────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<MainTab>('home')
-  const [utilityPage, setUtilityPage] = useState<UtilityPage | null>(null)
-
-  // ── Game flow state ──────────────────────────────────────────────────────
-  const [gamePhase, setGamePhase] = useState<GamePhase>('menu')
-  const [selectedMode, setSelectedMode] = useState<string>('quick-race')
+  const [phase, setPhase] = useState<GamePhase>('menu');
+  const [selectedMode, setSelectedMode] = useState<string>('quick-race');
   const [raceConfig, setRaceConfig] = useState<RaceConfig>({
     distance: '100M',
     stroke: 'FREESTYLE',
     venue: 'olympic',
-  })
-  const [raceResult, setRaceResult] = useState<RaceResult | null>(null)
+  });
+  const [raceResult, setRaceResult] = useState<RaceResult | null>(null);
 
-  // ── Menu navigation helpers ──────────────────────────────────────────────
-  const openTab = (tab: string) => {
-    setUtilityPage(null)
-    setActiveTab(tab as MainTab)
-  }
+  // ── Transitions ─────────────────────────────────────────────────────────
 
-  const renderMenuPage = (): { key: string; node: React.ReactNode } => {
-    if (utilityPage) {
-      switch (utilityPage) {
-        case 'friends':   return { key: 'friends',   node: <FriendsPage /> }
-        case 'inbox':     return { key: 'inbox',     node: <InboxPage /> }
-        case 'settings':  return { key: 'settings',  node: <SettingsPage /> }
-        case 'training':  return { key: 'training',  node: <TrainingPage /> }
-        case 'events':    return { key: 'events',    node: <EventsPage /> }
-        case 'rewards':   return { key: 'rewards',   node: <RewardsPage /> }
-        case 'pass':      return { key: 'pass',      node: <StarPassPage /> }
-        case 'bonus':     return { key: 'bonus',     node: <BonusMissionsPage /> }
-        default:          return { key: 'home',      node: <HomePage onSideMenuSelect={(id) => setUtilityPage(id as UtilityPage)} onPlay={enterModeSelect} /> }
-      }
-    }
+  const enterModeSelect = () => setPhase('mode-select');
 
-    switch (activeTab) {
-      case 'home':    return { key: 'home',    node: <HomePage onSideMenuSelect={(id) => setUtilityPage(id as UtilityPage)} onPlay={enterModeSelect} /> }
-      case 'career':  return { key: 'career',  node: <CareerMode /> }
-      case 'club':    return { key: 'club',    node: <ClubManagement /> }
-      case 'scouts':  return { key: 'scouts',  node: <Scouts /> }
-      case 'market':  return { key: 'market',  node: <TransferMarket /> }
-      case 'champs':  return { key: 'champs',  node: <Championships /> }
-      default:        return { key: 'home',    node: <HomePage onSideMenuSelect={(id) => setUtilityPage(id as UtilityPage)} onPlay={enterModeSelect} /> }
-    }
-  }
+  const onModeSelected = (modeId: string) => {
+    setSelectedMode(modeId);
+    setPhase('pre-race');
+  };
 
-  // ── Game flow transitions ────────────────────────────────────────────────
+  const onConfirmRace = () => setPhase('racing');
 
-  const enterModeSelect = () => setGamePhase('mode-select')
+  const onConfigChange = (partial: Partial<RaceConfig>) =>
+    setRaceConfig((prev) => ({ ...prev, ...partial }));
 
-  const handleModeSelected = (modeId: string) => {
-    setSelectedMode(modeId)
-    setGamePhase('pre-race')
-  }
+  const onCancelPreRace = () => setPhase('mode-select');
 
-  const handleConfirmRace = (cfg: RaceConfig) => {
-    setRaceConfig(cfg)
-    setGamePhase('racing')
-  }
+  const onPause    = () => setPhase('paused');
+  const onResume   = () => setPhase('racing');
 
-  const handleCancelPreRace = () => setGamePhase('mode-select')
+  const onAbandonRace = () => {
+    setRaceResult(null);
+    setPhase('menu');
+  };
 
-  const handlePause = () => setGamePhase('paused')
-  const handleResume = () => setGamePhase('racing')
+  const onRaceComplete = (result: RaceResult) => {
+    setRaceResult(result);
+    setPhase('results');
+  };
 
-  const handleAbandonRace = () => {
-    setGamePhase('menu')
-    setRaceResult(null)
-  }
+  const onReturnHome   = () => { setRaceResult(null); setPhase('menu'); };
+  const onRematch      = () => { setRaceResult(null); setPhase('pre-race'); };
+  const onContinue     = () => { setRaceResult(null); setPhase('menu'); };
 
-  const handleRaceComplete = (result: RaceResult) => {
-    setRaceResult(result)
-    setGamePhase('results')
-  }
+  // ── Mode-select ──────────────────────────────────────────────────────────
 
-  const handleReturnHome = () => {
-    setGamePhase('menu')
-    setActiveTab('home')
-    setRaceResult(null)
-  }
-
-  const handleRematch = () => {
-    setGamePhase('pre-race')
-    setRaceResult(null)
-  }
-
-  const handleContinue = () => {
-    setGamePhase('menu')
-    setActiveTab('career')
-    setRaceResult(null)
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Full-screen game phases (overlay the entire viewport, no menu chrome)
-  // ─────────────────────────────────────────────────────────────────────────
-
-  if (gamePhase === 'mode-select') {
+  if (phase === 'mode-select') {
     return (
-      <div className="w-full h-full relative overflow-hidden bg-[#050B14]">
-        {/* Subtle background for mode-select */}
-        <img
-          src={lockerRoomBackground}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover opacity-30"
-        />
-        <div className="absolute inset-0 bg-[#050B14]/70" />
-
-        {/* Back button */}
+      <OverlayShell backgroundOpacity={0.3}>
+        {/* Back to menu */}
         <button
-          onClick={() => setGamePhase('menu')}
+          onClick={() => setPhase('menu')}
           className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white/70 text-xs font-bold uppercase tracking-wider backdrop-blur-sm hover:bg-black/70 active:scale-95 transition-all"
         >
           ← Back
         </button>
-
-        <div className="relative z-10 h-full overflow-y-auto">
-          <PlayScreen onModeSelect={handleModeSelected} />
-        </div>
-      </div>
-    )
+        <PlayScreen onModeSelect={onModeSelected} />
+      </OverlayShell>
+    );
   }
 
-  if (gamePhase === 'pre-race') {
+  // ── Pre-race setup ───────────────────────────────────────────────────────
+
+  if (phase === 'pre-race') {
+    const modeName = selectedMode
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+
     return (
-      <div className="w-full h-full relative overflow-hidden bg-[#050B14]">
-        <img
-          src={lockerRoomBackground}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
+      <OverlayShell backgroundOpacity={0.2}>
+        <PreRaceSetupScreen
+          mode={modeName}
+          onConfirmRace={onConfirmRace}
+          onCancel={onCancelPreRace}
+          onConfigChange={onConfigChange}
         />
-        <div className="absolute inset-0 bg-[#050B14]/80" />
-        <div className="relative z-10 h-full overflow-y-auto">
-          <PreRaceSetupScreen
-            mode={selectedMode.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-            onConfirmRace={() =>
-              handleConfirmRace(raceConfig)
-            }
-            onCancel={handleCancelPreRace}
-            onConfigChange={(cfg) => setRaceConfig((prev) => ({ ...prev, ...cfg }))}
-          />
-        </div>
-      </div>
-    )
+      </OverlayShell>
+    );
   }
 
-  if (gamePhase === 'racing' || gamePhase === 'paused') {
+  // ── Racing + Paused ──────────────────────────────────────────────────────
+
+  if (phase === 'racing' || phase === 'paused') {
     return (
       <>
         <RaceScene
           config={raceConfig}
-          onPause={handlePause}
-          onRaceComplete={handleRaceComplete}
+          onPause={onPause}
+          onRaceComplete={onRaceComplete}
         />
-        {gamePhase === 'paused' && (
-          <PauseMenu onResume={handleResume} onMainMenu={handleAbandonRace} />
+        {phase === 'paused' && (
+          <PauseMenu onResume={onResume} onMainMenu={onAbandonRace} />
         )}
       </>
-    )
+    );
   }
 
-  if (gamePhase === 'results' && raceResult) {
+  // ── Results ──────────────────────────────────────────────────────────────
+
+  if (phase === 'results' && raceResult) {
     return (
-      <div className="w-full h-full relative overflow-hidden bg-[#050B14]">
-        <img
-          src={lockerRoomBackground}
-          alt=""
-          aria-hidden
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
+      <OverlayShell backgroundOpacity={0.2}>
+        <RaceResultScreen
+          playerRank={raceResult.rank}
+          playerTime={raceResult.time}
+          playerName="You"
+          onContinue={onContinue}
+          onRematch={onRematch}
+          onReturnHome={onReturnHome}
+          onWatchReplay={onReturnHome}
         />
-        <div className="absolute inset-0 bg-[#050B14]/80" />
-        <div className="relative z-10 h-full overflow-y-auto">
-          <RaceResultScreen
-            playerRank={raceResult.rank}
-            playerTime={raceResult.time}
-            playerName="You"
-            onContinue={handleContinue}
-            onRematch={handleRematch}
-            onReturnHome={handleReturnHome}
-            onWatchReplay={handleReturnHome}
-          />
-        </div>
-      </div>
-    )
+      </OverlayShell>
+    );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Default: menu phase — existing lobby/management UI
-  // ─────────────────────────────────────────────────────────────────────────
+  // ── Default: menu (AppShell) ─────────────────────────────────────────────
 
-  const currentPage = renderMenuPage()
-
-  return (
-    <div className="w-full h-full relative overflow-hidden font-sans select-none">
-      <img src={lockerRoomBackground} alt="Locker room backdrop" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-[#050B14]/72 pointer-events-none" />
-
-      <TopBar
-        onOpenFriends={() => setUtilityPage('friends')}
-        onOpenInbox={() => setUtilityPage('inbox')}
-        onOpenSettings={() => setUtilityPage('settings')}
-      />
-
-      <AnimatePresence mode="wait">
-        <React.Fragment key={currentPage.key}>{currentPage.node}</React.Fragment>
-      </AnimatePresence>
-
-      <BrowserToolkit
-        activeTab={activeTab}
-        utilityPage={utilityPage}
-        onOpenTab={openTab}
-        onOpenUtility={(page) => setUtilityPage(page as UtilityPage)}
-        onCloseUtility={() => setUtilityPage(null)}
-      />
-
-      <BottomNav activeTab={activeTab} onChange={openTab} onPlay={enterModeSelect} />
-    </div>
-  )
+  return <AppShell onPlay={enterModeSelect} />;
 }
