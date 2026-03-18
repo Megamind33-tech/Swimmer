@@ -1,594 +1,345 @@
 /**
- * Store Screen - Premium marketplace
- * Cosmetics, Season Pass, Sponsorship Bundles, Equipment, Celebration Packs
+ * Store Screen — Game UI premium marketplace
+ * Compact fixed layout, no scrolling, game font + color system.
  */
 
 import React, { useState } from 'react';
-import marketplaceBackdropImage from '../../designs/custom_backgrounds/1dLNpgVzO02ceJe0YsHoa4tMHenXscN9M.jpg';
-import { HeroBackgroundMedia } from '../ui/MediaPrimitives';
+import { motion, AnimatePresence } from 'motion/react';
+import { ShoppingBagIcon, StarIcon, TagIcon, ZapIcon, PackageIcon, CalendarIcon } from 'lucide-react';
+
+const AQUA        = '#38D6FF';
+const GOLD        = '#D4A843';
+const PANEL       = 'rgba(4,20,33,0.76)';
+const PANEL_BORDER = 'rgba(56,214,255,0.13)';
 
 type StoreTab = 'FEATURED' | 'COSMETICS' | 'SEASON_PASS' | 'BUNDLES' | 'CELEBRATION' | 'EVENT_SHOP';
 
 interface StoreItem {
   id: string;
   name: string;
-  description: string;
+  desc: string;
   price: number;
-  currency: 'PREMIUM' | 'EVENT_TOKEN' | 'COINS';
+  currency: 'PREMIUM' | 'COINS';
   rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
   icon: string;
   tag?: string;
 }
+
+const FEATURED: StoreItem[] = [
+  { id: 'f1', name: 'Championship Bundle', desc: 'Suit + Cap + Goggles + Victory Pose', price: 1999, currency: 'PREMIUM', rarity: 'LEGENDARY', icon: '👑', tag: 'LIMITED' },
+  { id: 'f2', name: 'Premium Season Pass',  desc: '50 exclusive reward tiers',          price: 999,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '⭐', tag: 'NEW' },
+  { id: 'f3', name: 'Neon Cyber Suit',      desc: 'Futuristic racing suit + LED FX',     price: 500,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '🩱' },
+  { id: 'f4', name: 'Gold Elite Suit',      desc: 'Premium gold suit for champions',     price: 800,  currency: 'PREMIUM', rarity: 'LEGENDARY', icon: '🩱' },
+];
+
+const COSMETICS: StoreItem[] = [
+  { id: 'c1', name: 'Neon Cyber Suit',    desc: 'Futuristic suit with LED FX',       price: 500,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '🩱' },
+  { id: 'c2', name: 'Gold Elite Suit',    desc: 'Champion gold racing suit',         price: 800,  currency: 'PREMIUM', rarity: 'LEGENDARY', icon: '🩱' },
+  { id: 'c3', name: 'Dragon Cap',         desc: 'Legendary dragon racing cap',       price: 300,  currency: 'PREMIUM', rarity: 'RARE',      icon: '🎩' },
+  { id: 'c4', name: 'Vision Pro Goggles', desc: 'Advanced goggles with HUD display', price: 350,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '🔍' },
+  { id: 'c5', name: 'Shadow Gloves',      desc: 'Grip gloves for open water',        price: 200,  currency: 'COINS',   rarity: 'RARE',      icon: '🧤' },
+  { id: 'c6', name: 'Hydro Fins',         desc: 'Speed fins for underwater kicks',   price: 450,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '🦶' },
+];
+
+const CELEBRATIONS: StoreItem[] = [
+  { id: 'cel1', name: 'Victory Fireworks', desc: 'Spectacular fireworks animation', price: 250, currency: 'PREMIUM', rarity: 'EPIC',   icon: '🎆' },
+  { id: 'cel2', name: 'Champion Poses',    desc: '5 premium victory poses',         price: 400, currency: 'PREMIUM', rarity: 'EPIC',   icon: '💪' },
+  { id: 'cel3', name: 'Elite Walkout',     desc: 'Premium pool walkout animation',  price: 200, currency: 'PREMIUM', rarity: 'RARE',   icon: '🚶' },
+  { id: 'cel4', name: 'Wave Celebration',  desc: 'Water splash victory move',       price: 150, currency: 'COINS',   rarity: 'COMMON', icon: '🌊' },
+];
+
+const RARITY_STYLES: Record<string, { border: string; label: string; bg: string }> = {
+  LEGENDARY: { border: 'rgba(212,168,67,0.35)',   label: GOLD,   bg: 'rgba(212,168,67,0.08)' },
+  EPIC:      { border: 'rgba(167,139,250,0.30)',   label: '#A78BFA', bg: 'rgba(88,28,135,0.10)' },
+  RARE:      { border: 'rgba(56,214,255,0.25)',    label: AQUA,  bg: 'rgba(56,214,255,0.06)' },
+  COMMON:    { border: 'rgba(255,255,255,0.10)',   label: 'rgba(169,211,231,0.55)', bg: 'rgba(255,255,255,0.03)' },
+};
 
 interface StoreScreenProps {
   playerPremiumCurrency?: number;
   playerCoins?: number;
 }
 
-const FeaturedItems: StoreItem[] = [
-  {
-    id: 'featured-1',
-    name: 'Championship Bundle',
-    description: 'Complete outfit for champions - Suit + Cap + Goggles + Victory Pose',
-    price: 1999,
-    currency: 'PREMIUM',
-    rarity: 'LEGENDARY',
-    icon: '👑',
-    tag: 'LIMITED',
-  },
-  {
-    id: 'featured-2',
-    name: 'Premium Season Pass',
-    description: 'Unlock 50 exclusive tiers with premium rewards',
-    price: 999,
-    currency: 'PREMIUM',
-    rarity: 'EPIC',
-    icon: '⭐',
-    tag: 'NEW',
-  },
+const TABS: { id: StoreTab; label: string; icon: React.ReactNode }[] = [
+  { id: 'FEATURED',    label: 'FEATURED',  icon: <StarIcon    size={11} /> },
+  { id: 'COSMETICS',   label: 'COSMETICS', icon: <TagIcon     size={11} /> },
+  { id: 'SEASON_PASS', label: 'SEASON',    icon: <StarIcon    size={11} /> },
+  { id: 'BUNDLES',     label: 'BUNDLES',   icon: <PackageIcon size={11} /> },
+  { id: 'CELEBRATION', label: 'VICTORY',   icon: <ZapIcon     size={11} /> },
+  { id: 'EVENT_SHOP',  label: 'EVENTS',    icon: <CalendarIcon size={11} /> },
 ];
-
-const CosmeticItems: StoreItem[] = [
-  {
-    id: 'suit-1',
-    name: 'Neon Cyber Suit',
-    description: 'Futuristic racing suit with LED effects',
-    price: 500,
-    currency: 'PREMIUM',
-    rarity: 'EPIC',
-    icon: '🩱',
-  },
-  {
-    id: 'suit-2',
-    name: 'Gold Elite Suit',
-    description: 'Premium gold racing suit for champions',
-    price: 800,
-    currency: 'PREMIUM',
-    rarity: 'LEGENDARY',
-    icon: '🩱',
-  },
-  {
-    id: 'cap-1',
-    name: 'Dragon Cap',
-    description: 'Legendary dragon-themed racing cap',
-    price: 300,
-    currency: 'PREMIUM',
-    rarity: 'RARE',
-    icon: '🎩',
-  },
-  {
-    id: 'goggles-1',
-    name: 'Vision Pro Max',
-    description: 'Advanced goggles with HUD display',
-    price: 350,
-    currency: 'PREMIUM',
-    rarity: 'EPIC',
-    icon: '🔍',
-  },
-];
-
-const CelebrationPacks: StoreItem[] = [
-  {
-    id: 'celebration-1',
-    name: 'Victory Fireworks',
-    description: 'Spectacular fireworks celebration animation',
-    price: 250,
-    currency: 'PREMIUM',
-    rarity: 'EPIC',
-    icon: '🎆',
-  },
-  {
-    id: 'celebration-2',
-    name: 'Champion Pose Pack',
-    description: 'Premium victory pose animations (5 poses)',
-    price: 400,
-    currency: 'PREMIUM',
-    rarity: 'EPIC',
-    icon: '💪',
-  },
-  {
-    id: 'celebration-3',
-    name: 'Elite Walkout',
-    description: 'Premium pool walkout animation',
-    price: 200,
-    currency: 'PREMIUM',
-    rarity: 'RARE',
-    icon: '🚶',
-  },
-];
-
-const getRarityColor = (rarity: string) => {
-  switch (rarity) {
-    case 'LEGENDARY':
-      return 'bg-purple-400/20 text-purple-300 border border-purple-400/40';
-    case 'EPIC':
-      return 'bg-blue-400/20 text-blue-300 border border-blue-400/40';
-    case 'RARE':
-      return 'bg-green-400/20 text-green-300 border border-green-400/40';
-    default:
-      return 'bg-white/10 text-white/70 border border-white/20';
-  }
-};
 
 export const StoreScreen: React.FC<StoreScreenProps> = ({
   playerPremiumCurrency = 250,
   playerCoins = 5000,
 }) => {
   const [activeTab, setActiveTab] = useState<StoreTab>('FEATURED');
-  const [purchaseMessage, setPurchaseMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
-  const tabs: { id: StoreTab; label: string; icon: React.ReactNode }[] = [
-    {
-      id: 'FEATURED',
-      label: 'Featured',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'COSMETICS',
-      label: 'Cosmetics',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'SEASON_PASS',
-      label: 'Pass',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'BUNDLES',
-      label: 'Bundles',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'CELEBRATION',
-      label: 'Celebrations',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M7 12a5 5 0 1110 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'EVENT_SHOP',
-      label: 'Events',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-    },
-  ];
-
-  const handlePurchase = (item: StoreItem) => {
-    setPurchaseMessage(`Purchased: ${item.name}`);
-    setTimeout(() => setPurchaseMessage(null), 3000);
-  };
-
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'FEATURED':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {FeaturedItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="group/featured relative h-[400px] rounded-[40px] overflow-hidden border border-white/10 hover:border-primary/40 transition-all duration-700 shadow-2xl"
-                >
-                  {/* Background Image/Gradients */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-surface/40 to-transparent z-0" />
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(129,236,255,0.15),transparent)] opacity-0 group-hover/featured:opacity-100 transition-opacity duration-700" />
-                  
-                  {/* Content Overlays */}
-                  <div className="absolute top-0 right-0 p-8 z-10">
-                    {item.tag && (
-                      <span className="px-4 py-2 bg-secondary/20 text-secondary font-headline font-black italic slanted uppercase text-[10px] tracking-widest border border-secondary/40 gold-glow rounded-full">
-                        {item.tag} Offer
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="absolute inset-0 flex flex-col justify-end p-10 z-20">
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className={`text-[9px] font-black italic slanted uppercase tracking-[0.4em] px-3 py-1 rounded bg-white/5 border border-white/10 ${item.rarity === 'LEGENDARY' ? 'text-secondary border-secondary/30 gold-glow' : 'text-primary border-primary/30 text-glow'}`}>
-                        {item.rarity} Bundle
-                      </span>
-                    </div>
-                    
-                    <h3 className="font-headline text-4xl font-black italic slanted uppercase text-on-surface text-glow mb-2 group-hover/featured:scale-105 transition-transform duration-700 origin-left">
-                      {item.name}
-                    </h3>
-                    <p className="text-on-surface-variant text-sm mb-8 leading-relaxed max-w-sm">{item.description}</p>
-                    
-                    <button
-                      onClick={() => handlePurchase(item)}
-                      className="w-full relative group/buy"
-                    >
-                      <div className="absolute inset-0 bg-primary blur-xl opacity-20 group-hover/buy:opacity-40 transition-all duration-500" />
-                      <div className="relative h-14 bg-white/5 border border-white/10 group-hover/buy:border-primary group-hover/buy:bg-primary/20 rounded-2xl flex items-center justify-between px-8 transition-all duration-300">
-                        <span className="font-headline font-black italic slanted uppercase text-xs tracking-widest group-hover/buy:text-primary transition-colors">Acquire Assets</span>
-                        <span className="font-headline font-black italic slanted text-xl text-primary text-glow flex items-center gap-2 tracking-tighter">
-                          <span className="material-symbols-outlined text-[18px]">diamond</span>
-                          {item.price}
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case 'COSMETICS':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
-              Visual Adjustments
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {CosmeticItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="group/cos rounded-3xl overflow-hidden border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/30 transition-all duration-300"
-                >
-                  <div className="h-44 relative overflow-hidden bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center p-8">
-                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/cos:opacity-100 transition-opacity duration-500" />
-                    <span className="text-6xl group-hover/cos:scale-110 transition-transform duration-500 drop-shadow-2xl">{item.icon}</span>
-                  </div>
-                  
-                  <div className="p-5">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-[7px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
-                        item.rarity === 'LEGENDARY' ? 'bg-secondary/20 text-secondary border border-secondary/30' : 
-                        item.rarity === 'EPIC' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-white/10 text-on-surface-variant'
-                      }`}>
-                        {item.rarity}
-                      </span>
-                    </div>
-                    <h4 className="text-sm font-bold text-on-surface mb-4 truncate">{item.name}</h4>
-                    
-                    <button
-                      onClick={() => handlePurchase(item)}
-                      className="w-full flex items-center justify-between group/buy-cos"
-                    >
-                      <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant group-hover/buy-cos:text-primary transition-colors">Purchase</span>
-                      <div className="flex items-center gap-1 text-primary font-headline font-black italic slanted text-sm">
-                        <span className="material-symbols-outlined text-xs">diamond</span>
-                        {item.price}
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case 'SEASON_PASS':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="group/pass relative overflow-hidden rounded-[40px] border border-white/10 bg-surface shadow-2xl">
-              {/* Season Banner */}
-              <div className="h-64 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-secondary/40 via-surface to-surface z-0" />
-                <div className="absolute inset-0 flex items-center px-12 z-10">
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="h-8 w-1 bg-secondary shadow-[0_0_15px_rgba(255,215,9,0.5)]" />
-                      <span className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow">Season 04: Velocity</span>
-                    </div>
-                    <p className="text-on-surface-variant font-bold max-w-lg italic uppercase tracking-wider text-[11px]">Deploy the premium battle infrastructure to access top-tier rewards</p>
-                  </div>
-                </div>
-                <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-                  <span className="material-symbols-outlined text-[160px] text-secondary">military_tech</span>
-                </div>
-              </div>
-
-              {/* Benefits Grid */}
-              <div className="p-12 border-t border-white/5 bg-white/[0.02]">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-                  {[
-                    { title: 'Exclusive Assets', icon: 'auto_awesome' },
-                    { title: '2x Speed Matrix', icon: 'bolt' },
-                    { title: 'Diamond Reserves', icon: 'diamond' },
-                    { title: 'Elite Gear', icon: 'checkroom' },
-                  ].map((benefit) => (
-                    <div key={benefit.title} className="p-6 rounded-3xl bg-white/5 border border-white/5 hover:border-secondary/30 transition-all group/benefit">
-                      <span className="material-symbols-outlined text-secondary/60 group-hover/benefit:text-secondary transition-colors mb-4 block text-3xl">{benefit.icon}</span>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant leading-tight block">{benefit.title}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => handlePurchase({ id: 'season-pass', name: 'Premium Season Pass', description: '', price: 999, currency: 'PREMIUM', rarity: 'EPIC', icon: '⭐' })}
-                  className="w-full relative group/buy-pass"
-                >
-                  <div className="absolute inset-0 bg-secondary blur-2xl opacity-10 group-hover/buy-pass:opacity-30 transition-all duration-700" />
-                  <div className="relative h-20 bg-secondary/10 border-2 border-secondary/40 hover:border-secondary hover:bg-secondary/20 rounded-[24px] flex items-center justify-center gap-6 transition-all duration-300">
-                    <span className="font-headline text-2xl font-black italic slanted uppercase text-secondary gold-glow">Unlock Access Node</span>
-                    <div className="h-8 w-[1px] bg-secondary/30" />
-                    <div className="flex items-center gap-3 font-headline text-2xl font-black italic slanted text-secondary gold-glow">
-                      <span className="material-symbols-outlined text-2xl">diamond</span>
-                      999
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      case 'BUNDLES':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
-              Strategic Packages
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                {
-                  id: 'bundle-1',
-                  name: 'Apex Starter Kit',
-                  items: 'Hydro Suit + Neon Cap + Goggles',
-                  price: 1200,
-                  rarity: 'EPIC',
-                },
-                {
-                  id: 'bundle-2',
-                  name: 'Grand Prix Collection',
-                  items: 'Full Kinetic Cosmetics + Walkout + Victory Celebration',
-                  price: 2500,
-                  rarity: 'LEGENDARY',
-                },
-              ].map((bundle) => (
-                <div
-                  key={bundle.id}
-                  className="group/bundle relative p-8 rounded-[32px] border border-white/10 bg-white/5 hover:border-primary/40 transition-all duration-500 overflow-hidden"
-                >
-                  <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <span className="material-symbols-outlined text-[100px] text-primary">inventory_2</span>
-                  </div>
-                  
-                  <div className="relative z-10">
-                    <span className={`text-[8px] font-black italic slanted uppercase tracking-[0.4em] px-2 py-1 rounded bg-white/5 border border-white/10 mb-4 inline-block ${bundle.rarity === 'LEGENDARY' ? 'text-secondary border-secondary/30' : 'text-primary border-primary/30'}`}>
-                      {bundle.rarity} Multi-Pack
-                    </span>
-                    <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface mb-2 group-hover/bundle:text-glow transition-all">{bundle.name}</h3>
-                    <p className="text-[11px] text-on-surface-variant font-bold uppercase tracking-wider mb-8">{bundle.items}</p>
-                    
-                    <button
-                      onClick={() => handlePurchase({ id: bundle.id, name: bundle.name, description: bundle.items, price: bundle.price, currency: 'PREMIUM', rarity: 'EPIC', icon: '📦' })}
-                      className="w-full h-14 rounded-2xl bg-primary/10 border border-primary/30 hover:bg-primary/20 hover:border-primary flex items-center justify-between px-6 transition-all group/buy-b"
-                    >
-                      <span className="font-headline font-black italic slanted uppercase text-[10px] tracking-widest text-on-surface-variant group-hover/buy-b:text-primary transition-colors">Acquire Bundle</span>
-                      <div className="flex items-center gap-2 text-primary font-headline text-xl font-black italic slanted">
-                        <span className="material-symbols-outlined text-sm">diamond</span>
-                        {bundle.price}
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case 'CELEBRATION':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
-              Victory Protocols
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {CelebrationPacks.map((item) => (
-                <div
-                  key={item.id}
-                  className="group/cel rounded-3xl overflow-hidden border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/30 transition-all duration-300"
-                >
-                  <div className="h-44 relative overflow-hidden bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center p-8">
-                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/cel:opacity-100 transition-opacity duration-500" />
-                    <span className="text-6xl group-hover/cel:scale-110 transition-transform duration-500 drop-shadow-2xl">{item.icon}</span>
-                  </div>
-                  
-                  <div className="p-5">
-                    <h4 className="text-sm font-bold text-on-surface mb-1 truncate">{item.name}</h4>
-                    <p className="text-[10px] text-on-surface-variant mb-4 line-clamp-2 leading-tight uppercase font-bold tracking-tight">{item.description}</p>
-                    
-                    <button
-                      onClick={() => handlePurchase(item)}
-                      className="w-full flex items-center justify-between group/buy-cel"
-                    >
-                      <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant group-hover/buy-cel:text-primary transition-colors">Equip Anim</span>
-                      <div className="flex items-center gap-1 text-primary font-headline font-black italic slanted text-sm">
-                        <span className="material-symbols-outlined text-xs">diamond</span>
-                        {item.price}
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case 'EVENT_SHOP':
-        return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="relative p-8 rounded-[40px] border border-secondary/20 bg-secondary/5 overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-10">
-                <span className="material-symbols-outlined text-[120px] text-secondary">flash_on</span>
-              </div>
-              
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="h-[1px] w-12 bg-secondary/40" />
-                  <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em]">Limited Event: Sprint Cup</span>
-                </div>
-                <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-6">Redeem Event Tokens</h3>
-                
-                <div className="grid gap-3">
-                  {[
-                    { name: 'Sprint Boost Pack', cost: '500 Tokens', icon: 'bolt' },
-                    { name: 'Exclusive Sprint Suit', cost: '1000 Tokens', icon: 'apparel' },
-                    { name: 'VIP Event Pass Extension', cost: '2000 Tokens', icon: 'confirmation_number' },
-                  ].map((item, idx) => (
-                    <div key={idx} className="group/ev flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-secondary/40 transition-all flex-wrap gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-secondary/10 flex items-center justify-center">
-                          <span className="material-symbols-outlined text-secondary text-xl">{item.icon}</span>
-                        </div>
-                        <span className="font-headline text-lg font-black italic slanted uppercase text-on-surface group-hover/ev:text-glow transition-all">{item.name}</span>
-                      </div>
-                      <button className="h-12 px-6 rounded-xl bg-secondary/20 border border-secondary/40 hover:bg-secondary hover:text-surface font-headline font-black italic slanted uppercase text-xs tracking-widest text-secondary transition-all">
-                        Redeem: {item.cost}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
+  const buy = (name: string) => {
+    setToast(`Purchased: ${name}`);
+    setTimeout(() => setToast(null), 2500);
   };
 
   return (
-    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      {/* Cinematic Store Header */}
-      <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden">
-        <HeroBackgroundMedia src={marketplaceBackdropImage} alt="Global marketplace background" className="absolute inset-0 pointer-events-none opacity-85" focalPoint="50% 35%" />
-        <div className="absolute inset-0 bg-gradient-to-r from-surface/68 via-surface/28 to-surface/45 pointer-events-none" />
-        <div className="absolute top-0 right-1/2 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-        
-        <div className="relative z-10 flex items-end justify-between gap-8 flex-wrap">
-          <div className="p-4 rounded-2xl bg-surface/40 border border-white/10 backdrop-blur-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="h-[1px] w-12 bg-primary/40" />
-              <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Global Marketplace</span>
-            </div>
-            
-            <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
-              Premium Store
-            </h1>
-            <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-widest">Equip your athlete with the finest Hydro-Kinetic gear</p>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px' }}>
+      {/* ── Header ── */}
+      <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(14px)', padding: '10px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShoppingBagIcon size={14} color={AQUA} />
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: '#F3FBFF', letterSpacing: '0.06em' }}>PREMIUM <span style={{ color: AQUA }}>STORE</span></span>
           </div>
-
-          <div className="flex gap-4">
-            <div className="relative group/coin pt-4">
-              <span className="absolute top-0 left-0 text-[8px] font-black text-primary/60 uppercase tracking-widest group-hover/coin:text-primary transition-colors">Premium Diamonds</span>
-              <div className="px-6 py-3 bg-primary/10 border border-primary/30 rounded-2xl flex items-center gap-3 shadow-[0_0_20px_rgba(129,236,255,0.1)] group-hover/coin:border-primary/50 transition-all">
-                <span className="material-symbols-outlined text-primary text-glow text-xl">diamond</span>
-                <span className="font-headline text-2xl font-black italic slanted text-primary text-glow">{playerPremiumCurrency}</span>
-                <button className="ml-2 h-6 w-6 rounded-lg bg-primary/20 flex items-center justify-center hover:bg-primary/40 transition-colors">
-                  <span className="material-symbols-outlined text-sm">add</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="relative group/coin pt-4">
-              <span className="absolute top-0 left-0 text-[8px] font-black text-secondary/60 uppercase tracking-widest group-hover/coin:text-secondary transition-colors">Athlete Coins</span>
-              <div className="px-6 py-3 bg-secondary/10 border border-secondary/30 rounded-2xl flex items-center gap-3 shadow-[0_0_20px_rgba(255,215,9,0.1)] group-hover/coin:border-secondary/50 transition-all">
-                <span className="material-symbols-outlined text-secondary gold-glow text-xl">payments</span>
-                <span className="font-headline text-2xl font-black italic slanted text-secondary gold-glow">{playerCoins.toLocaleString()}</span>
-                <button className="ml-2 h-6 w-6 rounded-lg bg-secondary/20 flex items-center justify-center hover:bg-secondary/40 transition-colors">
-                  <span className="material-symbols-outlined text-sm">add</span>
-                </button>
-              </div>
-            </div>
-          </div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Global Marketplace</div>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <CurrencyBadge icon={<span style={{ fontFamily: "'Bebas Neue'", fontSize: '12px', color: AQUA, lineHeight: 1 }}>◆</span>} value={playerPremiumCurrency} label="Diamonds" color={AQUA} />
+          <CurrencyBadge icon={<span style={{ fontFamily: "'Bebas Neue'", fontSize: '11px', color: GOLD, lineHeight: 1 }}>C</span>} value={playerCoins} label="Coins" color={GOLD} />
         </div>
       </div>
 
-      <div className="hydro-page-content page-template-store p-6 max-w-7xl mx-auto w-full space-y-8 pb-12">
-        {/* Tab Navigation */}
-        <div className="flex gap-2 flex-wrap items-center">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative px-6 py-3 rounded-xl font-headline font-black italic slanted uppercase text-[11px] tracking-wider transition-all duration-300 overflow-hidden border ${
-                  isActive 
-                    ? 'bg-primary/20 border-primary/40 text-primary text-glow shadow-[0_0_20px_rgba(129,236,255,0.2)]' 
-                    : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/10 hover:text-on-surface'
-                }`}
-              >
-                <div className="flex items-center gap-2 relative z-10">
-                  <span className="material-symbols-outlined text-[18px]">{isActive ? 'radio_button_checked' : 'radio_button_unchecked'}</span>
-                  {tab.label}
-                </div>
-                {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />}
-              </button>
-            );
-          })}
-        </div>
+      {/* ── Tab bar ── */}
+      <div style={{ display: 'flex', gap: '5px', flexShrink: 0 }}>
+        {TABS.map((tab) => {
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{ flex: 1, height: '30px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.14)' : 'rgba(255,255,255,0.04)', border: active ? `1px solid rgba(56,214,255,0.40)` : `1px solid ${PANEL_BORDER}`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.10em', color: active ? AQUA : 'rgba(169,211,231,0.50)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', transition: 'all 0.15s', boxShadow: active ? '0 0 10px rgba(56,214,255,0.15)' : 'none' }}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
-        {/* Purchase Notification */}
-        {purchaseMessage && (
-          <div className="fixed top-24 right-8 z-[100] animate-in slide-in-from-right duration-500">
-            <div className="p-4 bg-primary/20 border border-primary/40 rounded-2xl flex items-center gap-4 backdrop-blur-xl shadow-2xl">
-              <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/40">
-                <span className="material-symbols-outlined text-white">shopping_bag</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-primary block mb-1">Transaction Success</span>
-                <span className="text-sm font-bold text-on-surface">{purchaseMessage}</span>
-              </div>
-            </div>
-          </div>
+      {/* ── Content ── */}
+      <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(14px)', overflow: 'hidden', position: 'relative' }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.16 }}
+            style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '12px' }}
+          >
+            {renderContent(activeTab, buy)}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* ── Toast ── */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            style={{ position: 'absolute', bottom: '74px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, background: 'rgba(4,20,33,0.95)', border: `1px solid rgba(56,214,255,0.35)`, borderRadius: '10px', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 0 24px rgba(56,214,255,0.20)', backdropFilter: 'blur(12px)', whiteSpace: 'nowrap' }}
+          >
+            <ShoppingBagIcon size={14} color={AQUA} />
+            <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '13px', color: '#F3FBFF' }}>{toast}</span>
+          </motion.div>
         )}
-
-        {/* Dynamic Content Panel */}
-        <div className="min-h-[600px] relative">
-          <div className="absolute -top-4 -right-4 p-8 opacity-5 pointer-events-none">
-            <span className="material-symbols-outlined text-[240px] text-primary">
-              {activeTab === 'FEATURED' ? 'grade' : activeTab === 'COSMETICS' ? 'apparel' : activeTab === 'SEASON_PASS' ? 'military_tech' : activeTab === 'BUNDLES' ? 'inventory_2' : activeTab === 'CELEBRATION' ? 'celebration' : 'event'}
-            </span>
-          </div>
-          
-          <div className="relative z-10 h-full">
-            {renderTab()}
-          </div>
-        </div>
-      </div>
+      </AnimatePresence>
     </div>
   );
 };
+
+// ─────────────────────────────────────────────────────────
+// Tab content renderers
+// ─────────────────────────────────────────────────────────
+
+function renderContent(tab: StoreTab, buy: (name: string) => void): React.ReactNode {
+  switch (tab) {
+    case 'FEATURED':
+      return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+          {FEATURED.map((item) => <ItemCard key={item.id} item={item} onBuy={buy} featured />)}
+        </div>
+      );
+    case 'COSMETICS':
+      return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+          {COSMETICS.map((item) => <ItemCard key={item.id} item={item} onBuy={buy} />)}
+        </div>
+      );
+    case 'SEASON_PASS':
+      return <SeasonPassContent buy={buy} />;
+    case 'BUNDLES':
+      return <BundlesContent buy={buy} />;
+    case 'CELEBRATION':
+      return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+          {CELEBRATIONS.map((item) => <ItemCard key={item.id} item={item} onBuy={buy} />)}
+        </div>
+      );
+    case 'EVENT_SHOP':
+      return <EventShopContent />;
+    default:
+      return null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// Item Card
+// ─────────────────────────────────────────────────────────
+
+function ItemCard({ item, onBuy, featured }: { item: StoreItem; onBuy: (name: string) => void; featured?: boolean }) {
+  const rs = RARITY_STYLES[item.rarity] ?? RARITY_STYLES.COMMON;
+  return (
+    <motion.div
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      style={{ borderRadius: '12px', border: `1px solid ${rs.border}`, background: rs.bg, padding: featured ? '14px' : '10px', display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative', overflow: 'hidden' }}
+    >
+      {item.tag && (
+        <div style={{ position: 'absolute', top: '8px', right: '8px', background: item.tag === 'LIMITED' ? 'rgba(196,30,58,0.90)' : 'rgba(13,124,102,0.90)', borderRadius: '5px', padding: '2px 7px', fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', letterSpacing: '0.12em', color: '#fff' }}>
+          {item.tag}
+        </div>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ fontSize: featured ? '28px' : '22px', lineHeight: 1 }}>{item.icon}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: featured ? '16px' : '14px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: rs.label, letterSpacing: '0.10em', marginTop: '2px', textTransform: 'uppercase' }}>{item.rarity}</div>
+        </div>
+      </div>
+      {featured && (
+        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.60)', lineHeight: 1.4 }}>{item.desc}</div>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: item.currency === 'PREMIUM' ? AQUA : GOLD, letterSpacing: '0.04em', textShadow: item.currency === 'PREMIUM' ? '0 0 8px rgba(56,214,255,0.40)' : '0 0 8px rgba(212,168,67,0.40)' }}>{item.price.toLocaleString()}</span>
+          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase' }}>{item.currency === 'PREMIUM' ? '◆' : 'C'}</span>
+        </div>
+        <button
+          onClick={() => onBuy(item.name)}
+          style={{ height: '26px', paddingInline: '12px', borderRadius: '7px', cursor: 'pointer', background: item.currency === 'PREMIUM' ? 'rgba(56,214,255,0.12)' : 'rgba(212,168,67,0.12)', border: `1px solid ${item.currency === 'PREMIUM' ? 'rgba(56,214,255,0.30)' : 'rgba(212,168,67,0.30)'}`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.10em', color: item.currency === 'PREMIUM' ? AQUA : GOLD }}
+        >
+          BUY
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Season Pass
+// ─────────────────────────────────────────────────────────
+
+function SeasonPassContent({ buy }: { buy: (name: string) => void }) {
+  const benefits = [
+    { label: 'Exclusive Assets',  icon: '✦' },
+    { label: '2× XP Boost',       icon: '⚡' },
+    { label: 'Diamond Reserves',  icon: '◆' },
+    { label: 'Elite Gear Bundle',  icon: '🎽' },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Banner */}
+      <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.28)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.90) 0%, rgba(11,17,32,0.92) 100%)', padding: '14px 18px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', right: 0, top: 0, width: '160px', height: '160px', borderRadius: '50%', background: GOLD, opacity: 0.06, filter: 'blur(50px)', pointerEvents: 'none' }} />
+        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', fontWeight: 700, color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '4px' }}>Season Pass</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '28px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1 }}>SEASON 04: <span style={{ color: GOLD }}>VELOCITY</span></div>
+        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(232,224,208,0.60)', marginTop: '4px', marginBottom: '14px' }}>Deploy the premium infrastructure — unlock top-tier rewards</div>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+          {benefits.map((b) => (
+            <div key={b.label} style={{ flex: 1, borderRadius: '10px', border: `1px solid rgba(212,168,67,0.18)`, background: 'rgba(212,168,67,0.05)', padding: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '16px' }}>{b.icon}</span>
+              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: 'rgba(212,168,67,0.70)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>{b.label}</span>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => buy('Premium Season Pass')}
+          style={{ width: '100%', height: '38px', borderRadius: '10px', cursor: 'pointer', background: 'rgba(212,168,67,0.15)', border: `1.5px solid rgba(212,168,67,0.45)`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', letterSpacing: '0.10em', color: GOLD, boxShadow: '0 0 16px rgba(212,168,67,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}
+        >
+          UNLOCK ACCESS · <span style={{ color: AQUA }}>◆ 999</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Bundles
+// ─────────────────────────────────────────────────────────
+
+function BundlesContent({ buy }: { buy: (name: string) => void }) {
+  const bundles = [
+    { id: 'b1', name: 'Apex Starter Kit',      items: 'Hydro Suit · Neon Cap · Goggles',                         price: 1200, rarity: 'EPIC' as const },
+    { id: 'b2', name: 'Grand Prix Collection', items: 'Full Kinetic Cosmetics · Walkout · Victory Celebration',   price: 2500, rarity: 'LEGENDARY' as const },
+  ];
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+      {bundles.map((b) => {
+        const rs = RARITY_STYLES[b.rarity];
+        return (
+          <motion.div key={b.id} whileHover={{ scale: 1.01 }} style={{ borderRadius: '12px', border: `1px solid ${rs.border}`, background: rs.bg, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: rs.label, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '4px' }}>{b.rarity} BUNDLE</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1 }}>{b.name}</div>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.55)', marginTop: '5px', lineHeight: 1.4 }}>{b.items}</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: AQUA, letterSpacing: '0.04em', textShadow: '0 0 10px rgba(56,214,255,0.40)' }}>◆ {b.price.toLocaleString()}</span>
+              <button onClick={() => buy(b.name)} style={{ height: '30px', paddingInline: '16px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(56,214,255,0.10)', border: `1px solid rgba(56,214,255,0.30)`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', letterSpacing: '0.10em', color: AQUA }}>
+                ACQUIRE
+              </button>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Event Shop
+// ─────────────────────────────────────────────────────────
+
+function EventShopContent() {
+  const items = [
+    { name: 'Sprint Boost Pack',       cost: '500 Tokens' },
+    { name: 'Exclusive Sprint Suit',   cost: '1,000 Tokens' },
+    { name: 'VIP Event Pass',          cost: '2,000 Tokens' },
+  ];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ borderRadius: '10px', border: `1px solid rgba(212,168,67,0.20)`, background: 'rgba(212,168,67,0.05)', padding: '10px 14px', marginBottom: '4px' }}>
+        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '3px' }}>Limited Event</div>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: '#F3FBFF', letterSpacing: '0.04em' }}>SPRINT CUP <span style={{ color: GOLD }}>TOKEN SHOP</span></div>
+      </div>
+      {items.map((item) => (
+        <div key={item.name} style={{ borderRadius: '10px', border: `1px solid ${PANEL_BORDER}`, background: 'rgba(56,214,255,0.03)', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '13px', color: '#F3FBFF' }}>{item.name}</span>
+          <button style={{ height: '28px', paddingInline: '14px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(212,168,67,0.12)', border: `1px solid rgba(212,168,67,0.30)`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.10em', color: GOLD, whiteSpace: 'nowrap' }}>
+            {item.cost}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Currency Badge
+// ─────────────────────────────────────────────────────────
+
+function CurrencyBadge({ icon, value, label, color }: { icon: React.ReactNode; value: number; label: string; color: string }) {
+  return (
+    <div style={{ borderRadius: '9px', border: `1px solid rgba(56,214,255,0.18)`, background: 'rgba(0,0,0,0.30)', padding: '5px 10px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: `${color}90`, textTransform: 'uppercase', letterSpacing: '0.10em' }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        {icon}
+        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color, letterSpacing: '0.04em', textShadow: `0 0 8px ${color}40` }}>{value.toLocaleString()}</span>
+      </div>
+    </div>
+  );
+}
 
 export default StoreScreen;
