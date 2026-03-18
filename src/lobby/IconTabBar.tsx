@@ -17,10 +17,10 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import {
-  Waves,
+  Play,
+  Medal,
+  Target,
   Trophy,
-  Zap,
-  BarChart2,
   Shirt,
   ShoppingBag,
 } from 'lucide-react';
@@ -39,12 +39,12 @@ interface TabDef {
 }
 
 const TABS: TabDef[] = [
-  { id: 'race',     icon: <Waves     size={20} />, label: 'RACE'   },
-  { id: 'career',   icon: <Trophy    size={20} />, label: 'CAREER' },
-  { id: 'training', icon: <Zap       size={20} />, label: 'TRAIN'  },
-  { id: 'rankings', icon: <BarChart2 size={20} />, label: 'RANK'   },
-  { id: 'style',    icon: <Shirt     size={20} />, label: 'STYLE'  },
-  { id: 'store',    icon: <ShoppingBag size={20} />, label: 'STORE' },
+  { id: 'race',     icon: <Play        size={20} />, label: 'RACE'   },
+  { id: 'career',   icon: <Medal       size={20} />, label: 'CAREER' },
+  { id: 'training', icon: <Target      size={20} />, label: 'TRAIN'  },
+  { id: 'rankings', icon: <Trophy      size={20} />, label: 'RANK'   },
+  { id: 'style',    icon: <Shirt       size={20} />, label: 'STYLE'  },
+  { id: 'store',    icon: <ShoppingBag size={20} />, label: 'STORE'  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

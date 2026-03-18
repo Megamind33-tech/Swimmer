@@ -25,9 +25,11 @@
  */
 
 import React, { useState } from 'react';
+import { ChevronLeft } from 'lucide-react';
 import { AppShell } from '../app/AppShell';
 import { PlayScreen } from './menu/PlayScreen';
 import { PreRaceSetupScreen } from './menu/PreRaceSetupScreen';
+import { PreMatchScreen } from '../hud/overlays/PreMatchScreen';
 import { RaceScene, RaceConfig, RaceResult } from './RaceScene';
 import lockerRoomBackground from '../designs/locker_room_custom/screen.png';
 
@@ -39,6 +41,7 @@ type GamePhase =
   | 'menu'          // AppShell — lobby/management UI
   | 'mode-select'   // PlayScreen — choose race mode
   | 'pre-race'      // PreRaceSetupScreen — configure the race
+  | 'pre-match'     // PreMatchScreen — 13s lineup reveal before race
   | 'racing';       // RaceScene — handles pause/results internally (Phase 5)
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,7 +100,7 @@ export function GameShell() {
     setPhase('pre-race');
   };
 
-  const onConfirmRace = () => setPhase('racing');
+  const onConfirmRace = () => setPhase('pre-match');
 
   const onConfigChange = (partial: Partial<RaceConfig>) =>
     setRaceConfig((prev) => ({ ...prev, ...partial }));
@@ -125,7 +128,8 @@ export function GameShell() {
           onClick={() => setPhase('menu')}
           className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white/70 text-xs font-bold uppercase tracking-wider backdrop-blur-sm hover:bg-black/70 active:scale-95 transition-all"
         >
-          ← Back
+          <ChevronLeft size={14} />
+          Lobby
         </button>
         <PlayScreen onModeSelect={onModeSelected} />
       </OverlayShell>
@@ -148,6 +152,20 @@ export function GameShell() {
           onConfigChange={onConfigChange}
         />
       </OverlayShell>
+    );
+  }
+
+  // ── Pre-match lineup reveal (13-second countdown) ────────────────────────
+
+  if (phase === 'pre-match') {
+    const eventName = `${raceConfig.distance} ${raceConfig.stroke}`;
+    return (
+      <PreMatchScreen
+        eventName={eventName}
+        heat="HEAT 1"
+        onStart={() => setPhase('racing')}
+        onBack={() => setPhase('pre-race')}
+      />
     );
   }
 

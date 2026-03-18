@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'motion/react'
 import { ACHIEVEMENTS, CAREER_TRACK, HOME_EVENTS } from '../utils/gameData'
 import { ProgressBar } from '../components/ProgressBar'
-import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerIcon } from 'lucide-react'
+import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerResetIcon, SparklesIcon } from 'lucide-react'
 
 const AQUA = '#38D6FF'
 const GOLD = '#D4A843'
@@ -86,7 +86,7 @@ export function CareerMode() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.14em' }}>{event.status}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <TimerIcon size={11} color={GOLD} />
+                    <TimerResetIcon size={11} color={GOLD} />
                     <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', color: 'rgba(169,211,231,0.70)' }}>{event.time}</span>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ export function CareerMode() {
               >
                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: ach.completed ? 'rgba(52,211,153,0.15)' : 'rgba(0,0,0,0.35)', border: ach.completed ? '1px solid rgba(52,211,153,0.30)' : '1px solid rgba(255,255,255,0.06)' }}>
                   {ach.completed
-                    ? <TrophyIcon size={15} color="#34D399" />
+                    ? <SparklesIcon size={15} color="#34D399" />
                     : <StarIcon   size={15} color="rgba(255,255,255,0.30)" />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>

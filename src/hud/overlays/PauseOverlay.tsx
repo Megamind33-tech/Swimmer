@@ -18,7 +18,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Play, RefreshCw, Settings, LogOut, X } from 'lucide-react';
+import { Play, RotateCcw, Settings, DoorOpen, X } from 'lucide-react';
 import { panelSlideUp, overlayFade, staggerContainer, staggerChild } from '../../feedback/motionVariants';
 import { HUD_COLOR, HUD_FONT } from '../hudTokens';
 import { SettingsPage } from '../../pages/UtilityPages';
@@ -243,9 +243,9 @@ export const PauseOverlay: React.FC<PauseOverlayProps> = ({ onResume, onRestart,
               style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
             >
               <PauseBtn icon={<Play />}      label="RESUME"    onClick={onResume}                       variant="primary" />
-              <PauseBtn icon={<RefreshCw />} label="RESTART"   onClick={onRestart}                      variant="ghost"   />
+              <PauseBtn icon={<RotateCcw />} label="RESTART"   onClick={onRestart}                      variant="ghost"   />
               <PauseBtn icon={<Settings />}  label="SETTINGS"  onClick={() => setShowSettings(true)}    variant="ghost"   />
-              <PauseBtn icon={<LogOut />}    label="EXIT"      onClick={onExit}                         variant="danger"  />
+              <PauseBtn icon={<DoorOpen />}  label="EXIT"      onClick={onExit}                         variant="danger"  />
             </motion.div>
           </motion.div>
         )}

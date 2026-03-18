@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShoppingBagIcon, StarIcon, TagIcon, ZapIcon, PackageIcon, CalendarIcon } from 'lucide-react';
+import { ShoppingBagIcon, StarIcon, TagIcon, SparklesIcon, PackageIcon, CalendarIcon } from 'lucide-react';
 
 const AQUA        = '#38D6FF';
 const GOLD        = '#D4A843';
@@ -65,7 +65,7 @@ const TABS: { id: StoreTab; label: string; icon: React.ReactNode }[] = [
   { id: 'COSMETICS',   label: 'COSMETICS', icon: <TagIcon     size={11} /> },
   { id: 'SEASON_PASS', label: 'SEASON',    icon: <StarIcon    size={11} /> },
   { id: 'BUNDLES',     label: 'BUNDLES',   icon: <PackageIcon size={11} /> },
-  { id: 'CELEBRATION', label: 'VICTORY',   icon: <ZapIcon     size={11} /> },
+  { id: 'CELEBRATION', label: 'VICTORY',   icon: <SparklesIcon size={11} /> },
   { id: 'EVENT_SHOP',  label: 'EVENTS',    icon: <CalendarIcon size={11} /> },
 ];
 

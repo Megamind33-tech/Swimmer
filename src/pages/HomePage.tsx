@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import { SideMenu } from '../components/SideMenu'
 import { SwimmerCard } from '../components/SwimmerCard'
 import { HOME_EVENTS, ROSTER_HIGHLIGHTS, SWIMMERS, USER_DATA } from '../utils/gameData'
-import { ChevronRightIcon, ShieldIcon, TimerIcon, TrophyIcon } from 'lucide-react'
+import { ChevronRightIcon, ShieldIcon, TimerResetIcon, MedalIcon } from 'lucide-react'
 
 interface HomePageProps {
   onSideMenuSelect: (id: string) => void
@@ -61,7 +61,7 @@ export function HomePage({ onSideMenuSelect, onPlay }: HomePageProps) {
                     <div className="space-y-3 min-w-0">
                       <div className="flex items-center justify-between gap-3">
                         <div className="text-[9px] font-black tracking-[0.2em] uppercase text-[#D4A843] truncate">{event.status}</div>
-                        <div className="flex items-center gap-1.5 text-white/70 text-[11px] font-bold shrink-0"><TimerIcon size={12} className="text-[#D4A843]" />{event.time}</div>
+                        <div className="flex items-center gap-1.5 text-white/70 text-[11px] font-bold shrink-0"><TimerResetIcon size={12} className="text-[#D4A843]" />{event.time}</div>
                       </div>
                       <div className="text-white font-black text-base leading-tight max-w-[16rem]">{event.name}</div>
                       <div className="text-white/65 text-[12px] leading-relaxed max-w-[18rem]">{event.reward}</div>
@@ -79,7 +79,7 @@ export function HomePage({ onSideMenuSelect, onPlay }: HomePageProps) {
             <div className="bg-gradient-to-br from-[#1A1A2E]/90 to-[#0B1120]/90 rounded-2xl border border-white/10 p-3 overflow-hidden">
               <div className="flex items-center justify-between mb-3 gap-2">
                 <h3 className="text-white font-black italic text-sm">ROSTER CORE</h3>
-                <TrophyIcon size={14} className="text-[#D4A843] shrink-0" />
+                <MedalIcon size={14} className="text-[#D4A843] shrink-0" />
               </div>
               <div className="space-y-2">
                 {ROSTER_HIGHLIGHTS.map((entry) => {

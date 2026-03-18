@@ -4,9 +4,9 @@ import {
   BellIcon,
   GiftIcon,
   StarIcon,
-  TrophyIcon,
+  SparklesIcon,
   UsersIcon,
-  ZapIcon,
+  GaugeIcon,
   CalendarIcon,
   ShieldCheckIcon,
   RefreshCwIcon,
@@ -18,10 +18,9 @@ import {
   EyeIcon,
   UserIcon,
   ActivityIcon,
-  TimerIcon,
+  TimerResetIcon,
   TargetIcon,
-  HeartIcon,
-  FlameIcon,
+  HeartPulseIcon,
   ChevronRightIcon,
 } from 'lucide-react'
 import type { ControlsPreset } from '../input/inputTypes'
@@ -493,7 +492,7 @@ interface Drill {
 
 const DRILLS: Drill[] = [
   {
-    id: 'starts', label: 'STARTS', icon: <ZapIcon size={16} />, stat: 'Reaction', delta: '+0.8%',
+    id: 'starts', label: 'STARTS', icon: <GaugeIcon size={16} />, stat: 'Reaction', delta: '+0.8%',
     color: AQUA, desc: 'Explosive block departure. Trains fast-twitch fibers for sub-0.6s entry.',
     sets: 6, reps: '×1 dive', rest: '90s',
     impact: [
@@ -511,7 +510,7 @@ const DRILLS: Drill[] = [
     ],
   },
   {
-    id: 'stroke', label: 'STROKE RATE', icon: <TimerIcon size={16} />, stat: 'Efficiency', delta: '+0.6%',
+    id: 'stroke', label: 'STROKE RATE', icon: <TimerResetIcon size={16} />, stat: 'Efficiency', delta: '+0.6%',
     color: '#34D399', desc: 'Stroke cycle drills with cadence metronome. Target 48–52 strokes/min.',
     sets: 4, reps: '200m', rest: '120s',
     impact: [
@@ -520,7 +519,7 @@ const DRILLS: Drill[] = [
     ],
   },
   {
-    id: 'endurance', label: 'ENDURANCE', icon: <HeartIcon size={16} />, stat: 'VO2 Max', delta: '+2.1%',
+    id: 'endurance', label: 'ENDURANCE', icon: <HeartPulseIcon size={16} />, stat: 'VO2 Max', delta: '+2.1%',
     color: '#F87171', desc: 'Lactate threshold sets. Builds aerobic base for 400m+ events.',
     sets: 3, reps: '400m', rest: '180s',
     impact: [
@@ -538,7 +537,7 @@ const DRILLS: Drill[] = [
     ],
   },
   {
-    id: 'power', label: 'POWER', icon: <FlameIcon size={16} />, stat: 'Peak Force', delta: '+1.7%',
+    id: 'power', label: 'POWER', icon: <GaugeIcon size={16} />, stat: 'Peak Force', delta: '+1.7%',
     color: '#FB923C', desc: 'Resistance band + pull-buoy sets for peak propulsion force.',
     sets: 5, reps: '50m', rest: '60s',
     impact: [
@@ -549,10 +548,10 @@ const DRILLS: Drill[] = [
 ];
 
 const DRILL_STATS = [
-  { label: 'SPEED DRILL',  icon: <ZapIcon size={12} />,    value: 'Lv. 7', color: AQUA },
+  { label: 'SPEED DRILL',  icon: <GaugeIcon size={12} />,    value: 'Lv. 7', color: AQUA },
   { label: 'TECHNIQUE',    icon: <TargetIcon size={12} />, value: 'Lv. 6', color: '#A78BFA' },
-  { label: 'ENDURANCE',    icon: <HeartIcon size={12} />,  value: 'Lv. 8', color: '#F87171' },
-  { label: 'POWER',        icon: <FlameIcon size={12} />,  value: 'Lv. 5', color: '#FB923C' },
+  { label: 'ENDURANCE',    icon: <HeartPulseIcon size={12} />,  value: 'Lv. 8', color: '#F87171' },
+  { label: 'POWER',        icon: <GaugeIcon size={12} />,  value: 'Lv. 5', color: '#FB923C' },
 ];
 
 export function TrainingPage() {
@@ -796,7 +795,7 @@ export function RewardsPage() {
     <UtilityLayout title="REWARDS" subtitle="Claim milestones, daily rewards, and event prizes." accent="#34D399">
       <div className="grid grid-cols-3 gap-4">
         <MetricCard icon={<GiftIcon size={13} />}   label="DAILY"  value="Ready" />
-        <MetricCard icon={<TrophyIcon size={13} />} label="SEASON" value="3 Claims" />
+        <MetricCard icon={<SparklesIcon size={13} />} label="SEASON" value="3 Claims" />
         <MetricCard icon={<StarIcon size={13} />}   label="EVENT"  value="1 Claim" />
       </div>
     </UtilityLayout>

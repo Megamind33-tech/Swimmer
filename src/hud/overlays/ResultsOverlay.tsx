@@ -27,7 +27,7 @@
 
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, RefreshCw, ArrowRight, Home, Star, Coins } from 'lucide-react';
+import { Sparkles, RotateCcw, ArrowRight, Home, Star, Coins } from 'lucide-react';
 import {
   finishBurst,
   resultCrashIn,
@@ -427,7 +427,7 @@ export const ResultsOverlay: React.FC<ResultsOverlayProps> = ({
                     marginTop:   '2px',
                   }}
                 >
-                  <Trophy size={10} color="#37E28D" />
+                  <Sparkles size={10} color="#37E28D" />
                   <span
                     style={{
                       fontFamily:    HUD_FONT.impact,
@@ -663,7 +663,7 @@ export const ResultsOverlay: React.FC<ResultsOverlayProps> = ({
                 border:         '1px solid rgba(255,255,255,0.14)',
               }}
             >
-              <RefreshCw size={12} color={HUD_COLOR.textSecondary} />
+              <RotateCcw size={12} color={HUD_COLOR.textSecondary} />
               <span
                 style={{
                   fontFamily:    HUD_FONT.impact,

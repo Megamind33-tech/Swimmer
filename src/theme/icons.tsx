@@ -10,7 +10,16 @@
  *   2. Every icon is given a semantic alias that describes its GAME meaning,
  *      not the graphic shape (e.g. Career not Trophy).
  *   3. All icons accept the same size/color props for consistency.
- *   4. Custom SVG icons live in this file; never scatter inline SVGs.
+ *   4. Custom SVGs live in this file; never scatter inline SVGs.
+ *
+ * Canonical icon mapping (per design spec):
+ *   Start Race → Play        Career → Medal        Training → Target
+ *   Rankings   → Trophy      Customise → Shirt     Store → ShoppingBag
+ *   Settings   → Settings    Audio → Volume2       Camera → Camera
+ *   Timer      → TimerReset  Speed/Intensity → Gauge  Stamina → HeartPulse
+ *   Water      → Waves       Pause → Pause         Resume → Play
+ *   Back       → ChevronLeft Exit → DoorOpen       Replay → RotateCcw
+ *   Warning    → TriangleAlert  Achievement/PB → Sparkles
  *
  * Usage:
  *   import { GameIcon } from '../theme/icons'
@@ -34,9 +43,13 @@ import {
   ChevronRight,
   ChevronLeft,
   ArrowRight,
-  // HUD
-  Timer,
-  Zap,
+  DoorOpen,
+  // HUD / Race
+  TimerReset,
+  HeartPulse,
+  Gauge,
+  Camera,
+  Waves,
   // Social
   Users,
   Mail,
@@ -46,15 +59,20 @@ import {
   Gift,
   Star,
   Award,
+  Sparkles,
   Settings,
+  // Customise
+  Target,
   // Currency
   Plus,
   Coins,
   Gem,
   // Status
   CheckCircle,
-  AlertTriangle,
+  TriangleAlert,
   Info,
+  // Audio
+  Volume2,
   // Misc
   Flag,
   Globe,
@@ -69,11 +87,12 @@ import {
 const iconMap = {
   // ── Navigation ──────────────────────────────────────────────────────────
   Home,
-  Career:           Trophy,
+  Career:           Medal,
   Club:             Shield,
   Scouts:           Search,
   Market:           ShoppingCart,
   Championships:    Medal,
+  Rankings:         Trophy,
 
   // ── Core Actions ────────────────────────────────────────────────────────
   Play,
@@ -83,10 +102,18 @@ const iconMap = {
   Forward:          ChevronRight,
   Back:             ChevronLeft,
   Continue:         ArrowRight,
+  Exit:             DoorOpen,
+
+  // ── Training / Customise ────────────────────────────────────────────────
+  Training:         Target,
 
   // ── Race HUD ────────────────────────────────────────────────────────────
-  Timer,
-  Stamina:          Zap,
+  Timer:            TimerReset,
+  Stamina:          HeartPulse,
+  Speed:            Gauge,
+  Camera:           Camera,
+  Water:            Waves,
+  Audio:            Volume2,
 
   // ── Social ──────────────────────────────────────────────────────────────
   Friends:          Users,
@@ -100,6 +127,9 @@ const iconMap = {
   Bonus:            Award,
   Settings,
 
+  // ── Achievement / PB ────────────────────────────────────────────────────
+  Achievement:      Sparkles,
+
   // ── Currency ────────────────────────────────────────────────────────────
   AddCurrency:      Plus,
   Coins,
@@ -107,7 +137,7 @@ const iconMap = {
 
   // ── Status ──────────────────────────────────────────────────────────────
   Success:          CheckCircle,
-  Warning:          AlertTriangle,
+  Warning:          TriangleAlert,
   Info,
 
   // ── Race ────────────────────────────────────────────────────────────────
@@ -125,14 +155,6 @@ export type IconName = keyof typeof iconMap;
 interface SvgProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
 }
-
-/** Water wave — used for pool/swim themed contexts */
-export const WaveIcon: React.FC<SvgProps> = ({ size = 24, ...props }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" {...props}>
-    <path d="M2 12c1.5-2 3-2 4.5 0s3 2 4.5 0 3-2 4.5 0 3 2 4.5 0" />
-    <path d="M2 17c1.5-2 3-2 4.5 0s3 2 4.5 0 3-2 4.5 0 3 2 4.5 0" />
-  </svg>
-);
 
 /** Swimmer silhouette — player avatar, swimmer cards */
 export const SwimmerIcon: React.FC<SvgProps> = ({ size = 24, ...props }) => (

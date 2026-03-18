@@ -24,7 +24,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { Play, Zap, Swords } from 'lucide-react';
+import { Play, Target, Medal } from 'lucide-react';
 import { PrimaryButton, SecondaryButton } from './GameButtons';
 import { FeaturedEventCard } from './FeaturedEventCard';
 import { lobby } from '../theme/tokens';
@@ -267,7 +267,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
             onClick={onStartRace}
           />
           <SecondaryButton
-            icon={<Zap size={14} />}
+            icon={<Target size={14} />}
             label="TRAINING"
             onClick={() => onNavigate('training')}
           />
@@ -299,7 +299,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
               cursor:        'pointer',
             }}
           >
-            <Swords size={10} /> CAREER
+            <Medal size={10} /> CAREER
           </button>
         </motion.div>
 
