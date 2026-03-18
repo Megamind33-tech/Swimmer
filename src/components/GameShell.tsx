@@ -88,7 +88,7 @@ export function GameShell() {
   return (
     <div className="w-full h-full relative overflow-hidden font-sans select-none">
       <img src={lockerRoomBackground} alt="Locker room backdrop" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-[#050B14]/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-[#050B14]/72 pointer-events-none" />
 
       <TopBar
         onOpenFriends={() => setUtilityPage('friends')}
