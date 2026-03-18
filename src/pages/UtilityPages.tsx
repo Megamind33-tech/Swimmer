@@ -19,6 +19,8 @@ import {
 import type { ControlsPreset } from '../input/inputTypes'
 import { DEFAULT_CONTROLS_PRESET } from '../input/inputTypes'
 import { loadPreset, savePreset, resetPreset, clampPreset } from '../input/controlsSettings'
+import type { PerformancePreset, PostProcessQuality } from '../performance/performancePreset'
+import { loadPerformancePreset, savePerformancePreset, DEFAULT_PERFORMANCE_PRESET } from '../performance/performancePreset'
 
 interface UtilityLayoutProps {
   title: string
@@ -262,16 +264,23 @@ function ControlsPreview({ preset }: { preset: ControlsPreset }) {
 }
 
 export function SettingsPage() {
-  const [preset,  setPreset]  = useState<ControlsPreset>(loadPreset);
-  const [saved,   setSaved]   = useState(false);
+  const [preset,     setPreset]     = useState<ControlsPreset>(loadPreset);
+  const [perfPreset, setPerfPreset] = useState<PerformancePreset>(loadPerformancePreset);
+  const [saved,      setSaved]      = useState(false);
 
   const update = useCallback(<K extends keyof ControlsPreset>(key: K, val: ControlsPreset[K]) => {
     setPreset((p) => clampPreset({ ...p, [key]: val }));
     setSaved(false);
   }, []);
 
+  const updatePerf = useCallback(<K extends keyof PerformancePreset>(key: K, val: PerformancePreset[K]) => {
+    setPerfPreset((p) => ({ ...p, [key]: val }));
+    setSaved(false);
+  }, []);
+
   const handleSave = () => {
     savePreset(preset);
+    savePerformancePreset(perfPreset);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -279,6 +288,7 @@ export function SettingsPage() {
   const handleReset = () => {
     const fresh = resetPreset();
     setPreset(fresh);
+    setPerfPreset({ ...DEFAULT_PERFORMANCE_PRESET });
     setSaved(false);
   };
 
@@ -357,6 +367,68 @@ export function SettingsPage() {
             value={preset.audioCuesEnabled}
             onChange={(v) => update('audioCuesEnabled', v)}
           />
+        </section>
+
+        {/* Performance */}
+        <section style={{ marginBottom: '24px' }}>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(169,211,231,0.50)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '4px' }}>PERFORMANCE</div>
+
+          {/* Post-process quality picker */}
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: '12px', color: '#A9D3E7', marginBottom: '6px' }}>Post-Process Quality</div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {(['off', 'low', 'medium', 'high'] as PostProcessQuality[]).map((q) => (
+                <button
+                  key={q}
+                  onClick={() => updatePerf('postProcessQuality', q)}
+                  style={{
+                    flex: 1, height: '32px', borderRadius: '8px', cursor: 'pointer',
+                    background: perfPreset.postProcessQuality === q ? 'rgba(56,214,255,0.20)' : 'rgba(255,255,255,0.05)',
+                    border: perfPreset.postProcessQuality === q ? '1px solid rgba(56,214,255,0.50)' : '1px solid rgba(255,255,255,0.10)',
+                    fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px',
+                    letterSpacing: '0.10em', textTransform: 'uppercase',
+                    color: perfPreset.postProcessQuality === q ? AQUA : '#A9D3E7',
+                  }}
+                >
+                  {q.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <ToggleRow
+            label="Reduced Effects"
+            hint="Disable blur & glow for better FPS"
+            value={perfPreset.reducedEffects}
+            onChange={(v) => updatePerf('reducedEffects', v)}
+          />
+          <ToggleRow
+            label="Reduced Motion"
+            hint="Stop caustic & pulse animations"
+            value={perfPreset.reducedMotion}
+            onChange={(v) => updatePerf('reducedMotion', v)}
+          />
+          <ToggleRow
+            label="Low-End Mode"
+            hint="Half resolution + 30fps Babylon target"
+            value={perfPreset.lowEndMode}
+            onChange={(v) => updatePerf('lowEndMode', v)}
+          />
+
+          <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <SliderRow
+              label="Timer Update Rate"
+              value={perfPreset.timerHz}
+              min={10} max={60} step={5} unit="Hz"
+              onChange={(v) => updatePerf('timerHz', v)}
+            />
+            <SliderRow
+              label="Cosmetic Update Rate"
+              value={perfPreset.cosmeticHz}
+              min={5} max={30} step={5} unit="Hz"
+              onChange={(v) => updatePerf('cosmeticHz', v)}
+            />
+          </div>
         </section>
 
         {/* Save / Reset buttons */}

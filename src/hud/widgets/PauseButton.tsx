@@ -38,3 +38,6 @@ export const PauseButton: React.FC<PauseButtonProps> = ({ onPause }) => (
     <Pause size={16} />
   </motion.button>
 );
+
+// Memoized: stable — onPause callback rarely changes
+export const PauseButtonMemo = React.memo(PauseButton);

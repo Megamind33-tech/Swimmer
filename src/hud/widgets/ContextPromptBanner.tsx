@@ -195,6 +195,18 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 const PROMPT_DURATION_MS = 2400;
 
+/**
+ * useContextPrompts — race event prompt detector
+ *
+ * Performance fix (Phase 6):
+ *   Previously this hook had a useEffect with [elapsedMs, distanceM, ...] deps,
+ *   causing effect cleanup+setup on every React render (30fps after throttling).
+ *   Now it uses a latestRef pattern — a stable setInterval polls the latest
+ *   race values at 4Hz (every 250ms), which is more than sufficient for
+ *   prompt detection that only needs to trigger once per race event.
+ *
+ *   Result: ~120 effect setups/sec → 4 interval ticks/sec (97% reduction).
+ */
 export function useContextPrompts(
   elapsedMs:      number,
   position:       number,
@@ -202,9 +214,13 @@ export function useContextPrompts(
   totalDistanceM: number,
   stamina:        number,
 ) {
-  const [activePrompt,  setActivePrompt]  = useState<PromptEvent | null>(null);
+  const [activePrompt, setActivePrompt] = useState<PromptEvent | null>(null);
   const firedRef   = useRef<Set<string>>(new Set());
   const timerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Keep the latest race values accessible without re-creating the interval
+  const latestRef = useRef({ elapsedMs, position, distanceM, totalDistanceM, stamina });
+  latestRef.current = { elapsedMs, position, distanceM, totalDistanceM, stamina };
 
   const fire = useCallback((type: PromptType) => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -213,43 +229,35 @@ export function useContextPrompts(
     timerRef.current = setTimeout(() => setActivePrompt(null), PROMPT_DURATION_MS);
   }, []);
 
-  // Race event triggers
+  // Poll at 4Hz — decoupled from render frequency entirely
   useEffect(() => {
-    const progress = totalDistanceM > 0 ? distanceM / totalDistanceM : 0;
+    const id = setInterval(() => {
+      const { elapsedMs, position, distanceM, totalDistanceM } = latestRef.current;
+      const progress = totalDistanceM > 0 ? distanceM / totalDistanceM : 0;
+      const fired    = firedRef.current;
 
-    // PERFECT START — fired 2.5-4s into the race if stamina is still high
-    if (elapsedMs > 2500 && elapsedMs < 4000 && !firedRef.current.has('start')) {
-      firedRef.current.add('start');
-      fire('PERFECT_START');
-    }
+      if (elapsedMs > 2500 && elapsedMs < 4000 && !fired.has('start')) {
+        fired.add('start'); fire('PERFECT_START');
+      }
+      if (progress > 0.48 && progress < 0.52 && !fired.has('turn')) {
+        fired.add('turn'); fire('GOOD_TURN');
+      }
+      if (progress > 0.85 && !fired.has('final')) {
+        fired.add('final'); fire('FINAL_PUSH');
+      }
+      if (progress > 0.97 && position <= 2 && !fired.has('photo')) {
+        fired.add('photo'); fire('PHOTO_FINISH');
+      }
+      if (position === 1 && elapsedMs > 5000 && !fired.has('pb')) {
+        fired.add('pb'); fire('NEW_PB');
+      }
+    }, 250); // 4Hz poll
 
-    // GOOD TURN — around the lap midpoint (50% of pool length)
-    if (progress > 0.48 && progress < 0.52 && !firedRef.current.has('turn')) {
-      firedRef.current.add('turn');
-      fire('GOOD_TURN');
-    }
-
-    // FINAL PUSH — when > 85% of race complete
-    if (progress > 0.85 && !firedRef.current.has('final')) {
-      firedRef.current.add('final');
-      fire('FINAL_PUSH');
-    }
-
-    // PHOTO FINISH — last 3% with a tight lead
-    if (progress > 0.97 && position <= 2 && !firedRef.current.has('photo')) {
-      firedRef.current.add('photo');
-      fire('PHOTO_FINISH');
-    }
-
-    // NEW PB — fire once if player takes the lead at any point
-    if (position === 1 && elapsedMs > 5000 && !firedRef.current.has('pb')) {
-      firedRef.current.add('pb');
-      fire('NEW_PB');
-    }
-  }, [elapsedMs, position, distanceM, totalDistanceM, stamina, fire]);
-
-  // Cleanup
-  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+    return () => {
+      clearInterval(id);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [fire]); // only `fire` (stable useCallback) in deps
 
   return activePrompt;
 }

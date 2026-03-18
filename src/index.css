@@ -271,6 +271,47 @@ body {
   border: 1px solid rgba(56, 214, 255, 0.14);
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   PERFORMANCE MODE OVERRIDES (Phase 6)
+   Applied via data-perf-mode attribute on <html> by optimizationHelpers.ts
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* reduced: disable backdrop-filter and box-shadow (biggest mobile GPU win) */
+[data-perf-mode="reduced"] .lobby-glass,
+[data-perf-mode="reduced"] [style*="backdropFilter"],
+[data-perf-mode="reduced"] [style*="backdrop-filter"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-perf-mode="reduced"] .caustic-blob {
+  display: none;
+}
+
+/* low: all of reduced + stop all caustic animations + strip Framer Motion transitions */
+[data-perf-mode="low"] .lobby-glass,
+[data-perf-mode="low"] [style*="backdropFilter"],
+[data-perf-mode="low"] [style*="backdrop-filter"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-perf-mode="low"] .caustic-blob {
+  display: none;
+}
+
+[data-perf-mode="low"] * {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* reduced-motion: honour user preference by killing countdown/ticker anims */
+[data-reduced-motion="true"] .animate-ticker,
+[data-reduced-motion="true"] .animate-countdown,
+[data-reduced-motion="true"] .caustic-blob {
+  animation: none !important;
+}
+
 /* Icon tab active indicator — aqua line at top of tab */
 .tab-indicator {
   position: absolute;

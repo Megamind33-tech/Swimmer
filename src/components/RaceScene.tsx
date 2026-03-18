@@ -8,6 +8,11 @@
  *   - PauseOverlay: in-scene pause menu (resume, restart, settings, exit)
  *   - ResultsOverlay: premium results screen with animated placement reveal
  *   - Stamina warning: triggerWarningHaptic when crossing 25% threshold once
+ *
+ * Phase 6 additions:
+ *   - useRaceState: sim ref (60fps) + throttled display state (30Hz timer, 15Hz cosmetics)
+ *   - rAF loop mutates sim.current, calls commitDisplay() — no individual setState calls
+ *   - prewarmCriticalAssets() called before race start
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -21,6 +26,9 @@ import { loadPreset }                    from '../input/controlsSettings';
 import { destroyInputManager }           from '../input/InputManager';
 import { useFeedback }                   from '../feedback/useFeedback';
 import { formatRaceTime }                from '../hud/hudTokens';
+import { useRaceState }                  from '../performance/useRaceState';
+import { loadPerformancePreset }         from '../performance/performancePreset';
+import { prewarmCriticalAssets }         from '../performance/optimizationHelpers';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -104,31 +112,26 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
 
   const totalDistanceM = parseInt(config.distance.replace('M', ''), 10) || 100;
 
-  // Load controls preset
-  const preset  = loadPreset();
-  const feedback = useFeedback(preset);
+  // Load presets
+  const preset      = loadPreset();
+  const perfPreset  = loadPerformancePreset();
+  const feedback    = useFeedback(preset);
 
-  // ── Race state ──────────────────────────────────────────────────────────
+  // Phase 6: throttled sim state (replaces 6 individual useState calls)
+  const { sim, timerDisplay, cosmeticDisplay, commitDisplay, resetState } = useRaceState(perfPreset);
+
+  // ── Race phase state (these stay as useState — infrequent transitions) ──
   const [raceStarted,  setRaceStarted]  = useState(false);
   const [isPaused,     setIsPaused]     = useState(false);
   const [raceFinished, setRaceFinished] = useState(false);
   const [resultsData,  setResultsData]  = useState<ResultsData | null>(null);
   const [countdown,    setCountdown]    = useState(3);
-  const [elapsedMs,    setElapsedMs]    = useState(0);
-  const [distanceM,    setDistanceM]    = useState(0);
-  const [position,     setPosition]     = useState(4);
-  const [stamina,      setStamina]      = useState(100);
-  const [oxygen,       setOxygen]       = useState(100);
-  const [rhythm,       setRhythm]       = useState(75);
 
-  // Tracking refs (avoid stale closures in rAF loop)
-  const staminaRef   = useRef(100);
-  const distanceRef  = useRef(0);
-  const positionRef  = useRef(4);
-  const pausedRef    = useRef(false);
+  // Pause guard ref (avoids stale closure in rAF)
+  const pausedRef = useRef(false);
 
   // Low-stamina warning — fires haptic once when crossing 25% threshold
-  const warnedRef    = useRef(false);
+  const warnedRef = useRef(false);
 
   // ── Split tracking ───────────────────────────────────────────────────────
   interface SplitCheckpoint { pct: number; label: string; firedAt: number | null }
@@ -144,24 +147,24 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
     onPause: () => handlePause(),
   });
 
-  // ── Stroke callbacks ──────────────────────────────────────────────────────
+  // ── Stroke callbacks — mutate sim.current directly ───────────────────────
   const handleStrokeLeft = useCallback(() => {
-    setStamina((p) => { const v = Math.min(100, p + 0.4); staminaRef.current = v; return v; });
-    setOxygen((p) => Math.min(100, p + 0.6));
-    setRhythm((p) => Math.min(100, p + 4));
-  }, []);
+    sim.current.stamina = Math.min(100, sim.current.stamina + 0.4);
+    sim.current.oxygen  = Math.min(100, sim.current.oxygen  + 0.6);
+    sim.current.rhythm  = Math.min(100, sim.current.rhythm  + 4);
+  }, [sim]);
 
   const handleStrokeRight = useCallback(() => {
-    setStamina((p) => { const v = Math.min(100, p + 0.4); staminaRef.current = v; return v; });
-    setOxygen((p) => Math.min(100, p + 0.6));
-    setRhythm((p) => Math.min(100, p + 4));
-  }, []);
+    sim.current.stamina = Math.min(100, sim.current.stamina + 0.4);
+    sim.current.oxygen  = Math.min(100, sim.current.oxygen  + 0.6);
+    sim.current.rhythm  = Math.min(100, sim.current.rhythm  + 4);
+  }, [sim]);
 
   const handleSprint = useCallback(() => {
-    setStamina((p) => { const v = Math.max(0, p - 6); staminaRef.current = v; return v; });
-    setOxygen((p) => Math.max(0, p - 8));
-    setRhythm((p) => Math.min(100, p + 10));
-  }, []);
+    sim.current.stamina = Math.max(0, sim.current.stamina - 6);
+    sim.current.oxygen  = Math.max(0, sim.current.oxygen  - 8);
+    sim.current.rhythm  = Math.min(100, sim.current.rhythm + 10);
+  }, [sim]);
 
   // Mirror controls buffer → game state
   useEffect(() => {
@@ -183,17 +186,18 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
 
   const handleResume = useCallback(() => {
     if (!raceStarted || raceFinished) return;
-    // Shift startTime forward by the pause duration so elapsed stays accurate
-    startTimeRef.current = performance.now() - elapsedMs;
+    // Shift startTime forward by pause duration so elapsed stays accurate
+    startTimeRef.current = performance.now() - sim.current.elapsed;
     setIsPaused(false);
     pausedRef.current = false;
-  }, [raceStarted, raceFinished, elapsedMs]);
+  }, [raceStarted, raceFinished, sim]);
 
   const handleRestart = useCallback(() => {
     setIsPaused(false);
     pausedRef.current = false;
+    resetState();
     onRestart?.();
-  }, [onRestart]);
+  }, [onRestart, resetState]);
 
   const handleExitToLobby = useCallback(() => {
     setIsPaused(false);
@@ -231,8 +235,11 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Countdown with audio beeps ───────────────────────────────────────────
+  // ── Countdown with audio beeps + asset prewarm ───────────────────────────
   useEffect(() => {
+    // Prewarm audio, fonts, and compositor before race starts
+    prewarmCriticalAssets().catch(() => { /* non-critical */ });
+
     feedback.playCountdownBeep(false); // beep on mount (3)
     const t1 = setTimeout(() => { setCountdown(2); feedback.playCountdownBeep(false); }, 1000);
     const t2 = setTimeout(() => { setCountdown(1); feedback.playCountdownBeep(false); }, 2000);
@@ -261,76 +268,72 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
       const now     = performance.now();
       const elapsed = now - startTimeRef.current;
 
-      setElapsedMs(elapsed);
+      // ── Mutate sim ref (no React re-renders) ──────────────────────────
+      sim.current.elapsed = elapsed;
 
-      setStamina((prev) => {
-        const next = Math.max(0, prev - STAMINA_DRAIN);
-        staminaRef.current = next;
+      const nextStamina = Math.max(0, sim.current.stamina - STAMINA_DRAIN);
+      sim.current.stamina = nextStamina;
 
-        // One-shot haptic warning at 25% stamina
-        if (next < 25 && !warnedRef.current) {
-          warnedRef.current = true;
-          feedback.triggerWarningHaptic();
+      // One-shot haptic warning at 25% stamina
+      if (nextStamina < 25 && !warnedRef.current) {
+        warnedRef.current = true;
+        feedback.triggerWarningHaptic();
+      }
+
+      sim.current.oxygen = Math.max(0, sim.current.oxygen - OXYGEN_DRAIN);
+      sim.current.rhythm = Math.min(100, Math.max(0, 65 + 20 * Math.sin(elapsed / 4_500)));
+
+      const speed   = SPEED_BASE * (0.65 + 0.35 * (sim.current.stamina / 100));
+      const newDist = Math.min(totalDistanceM, sim.current.distance + speed * 16);
+      sim.current.distance = newDist;
+
+      // Record split times
+      const progress = newDist / totalDistanceM;
+      for (const split of splitsRef.current) {
+        if (split.firedAt === null && progress >= split.pct) {
+          split.firedAt = elapsed;
         }
-        return next;
-      });
+      }
 
-      setOxygen((prev) => Math.max(0, prev - OXYGEN_DRAIN));
-      setRhythm(() => Math.min(100, Math.max(0, 65 + 20 * Math.sin(elapsed / 4_500))));
+      // AI position simulation
+      if (sim.current.position > 1 && Math.random() < AI_CATCH_SPEED * elapsed) {
+        sim.current.position = Math.max(1, sim.current.position - 1);
+      }
 
-      setDistanceM((prev) => {
-        const speed = SPEED_BASE * (0.65 + 0.35 * (staminaRef.current / 100));
-        const next  = prev + speed * 16;
-        distanceRef.current = next;
+      // ── Push sim → throttled React display state ──────────────────────
+      commitDisplay();
 
-        // Record split times
-        const progress = next / totalDistanceM;
-        for (const split of splitsRef.current) {
-          if (split.firedAt === null && progress >= split.pct) {
-            split.firedAt = elapsed;
-          }
-        }
+      // ── Race finish ───────────────────────────────────────────────────
+      if (newDist >= totalDistanceM) {
+        if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+        setRaceFinished(true);
 
-        if (next >= totalDistanceM) {
-          if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
-          setRaceFinished(true);
+        const isPB   = checkAndStorePB(config.distance, config.stroke, elapsed);
+        const splits: SplitEntry[] = splitsRef.current
+          .filter((s) => s.firedAt !== null)
+          .map((s) => ({ label: s.label, time: formatRaceTime(s.firedAt!) }));
 
-          const isPB   = checkAndStorePB(config.distance, config.stroke, elapsed);
-          const splits: SplitEntry[] = splitsRef.current
-            .filter((s) => s.firedAt !== null)
-            .map((s) => ({ label: s.label, time: formatRaceTime(s.firedAt!) }));
+        const rank   = sim.current.position;
+        const result: ResultsData = {
+          rank,
+          time:   formatFinalTime(elapsed),
+          xp:     rank === 1 ? 400 : rank <= 3 ? 250 : 100,
+          coins:  rank === 1 ? 3000 : rank <= 3 ? 1500 : 500,
+          isPB,
+          splits,
+        };
+        setResultsData(result);
 
-          const rank   = positionRef.current;
-          const result: ResultsData = {
-            rank,
-            time:   formatFinalTime(elapsed),
-            xp:     rank === 1 ? 400 : rank <= 3 ? 250 : 100,
-            coins:  rank === 1 ? 3000 : rank <= 3 ? 1500 : 500,
-            isPB,
-            splits,
-          };
-          setResultsData(result);
-
-          // Notify GameShell (for phase transition)
-          onRaceComplete({
-            rank:   result.rank,
-            time:   result.time,
-            xp:     result.xp,
-            coins:  result.coins,
-            isPB,
-            splits,
-          });
-
-          return totalDistanceM;
-        }
-        return next;
-      });
-
-      setPosition((prev) => {
-        const next = prev > 1 && Math.random() < AI_CATCH_SPEED * elapsed ? Math.max(1, prev - 1) : prev;
-        positionRef.current = next;
-        return next;
-      });
+        onRaceComplete({
+          rank:   result.rank,
+          time:   result.time,
+          xp:     result.xp,
+          coins:  result.coins,
+          isPB,
+          splits,
+        });
+        return;
+      }
 
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -339,16 +342,9 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [raceStarted, raceFinished]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resume: restart rAF after un-pause
-  useEffect(() => {
-    if (!isPaused && raceStarted && !raceFinished) {
-      // tick loop restarted via the raceStarted effect on state flip
-    }
-  }, [isPaused, raceStarted, raceFinished]);
-
-  // ── Derived values ───────────────────────────────────────────────────────
+  // ── Derived values (from throttled display state) ────────────────────────
   const totalLaps  = Math.max(1, totalDistanceM / 100);
-  const lapNumber  = Math.min(totalLaps, Math.floor((distanceM / totalDistanceM) * totalLaps) + 1);
+  const lapNumber  = Math.min(totalLaps, Math.floor((timerDisplay.distanceM / totalDistanceM) * totalLaps) + 1);
   const heat       = config.stroke === 'FREESTYLE' ? 'QUICK RACE' : `${config.stroke} HEAT`;
   const playerLane = 4;
 
@@ -365,19 +361,19 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
       {/* Countdown */}
       {!raceStarted && <CountdownOverlay value={countdown} />}
 
-      {/* HUD */}
+      {/* HUD — fed from throttled display state (30Hz timer, 15Hz cosmetics) */}
       {raceStarted && !raceFinished && (
         <HUDRoot
-          elapsedMs={elapsedMs}
-          position={position}
-          distanceM={distanceM}
+          elapsedMs={timerDisplay.elapsedMs}
+          position={cosmeticDisplay.position}
+          distanceM={timerDisplay.distanceM}
           totalDistanceM={totalDistanceM}
           lapNumber={lapNumber}
           totalLaps={totalLaps}
           heat={heat}
-          stamina={stamina}
-          oxygen={oxygen}
-          rhythm={rhythm}
+          stamina={cosmeticDisplay.stamina}
+          oxygen={cosmeticDisplay.oxygen}
+          rhythm={cosmeticDisplay.rhythm}
           playerLane={playerLane}
           controls={controls}
           preset={preset}

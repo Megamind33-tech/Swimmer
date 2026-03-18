@@ -118,3 +118,6 @@ export const RhythmMeter: React.FC<RhythmMeterProps> = ({ value }) => {
     </div>
   );
 };
+
+// Memoized: only re-renders when `value` prop changes (15Hz cosmetic update)
+export const RhythmMeterMemo = React.memo(RhythmMeter);

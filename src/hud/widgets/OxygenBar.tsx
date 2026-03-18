@@ -101,3 +101,6 @@ export const OxygenBar: React.FC<OxygenBarProps> = ({ value }) => {
     </div>
   );
 };
+
+// Memoized: only re-renders when `value` prop changes (15Hz cosmetic update)
+export const OxygenBarMemo = React.memo(OxygenBar);

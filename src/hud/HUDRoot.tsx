@@ -23,12 +23,12 @@
 import React, { useMemo } from 'react';
 import { motion }                from 'motion/react';
 import { Camera }                from 'lucide-react';
-import { RaceTimerPanel }        from './widgets/RaceTimerPanel';
-import { StaminaBar }            from './widgets/StaminaBar';
-import { OxygenBar }             from './widgets/OxygenBar';
-import { RhythmMeter }           from './widgets/RhythmMeter';
-import { LaneRadar }             from './widgets/LaneRadar';
-import { PauseButton }           from './widgets/PauseButton';
+import { RaceTimerPanelMemo as RaceTimerPanel } from './widgets/RaceTimerPanel';
+import { StaminaBarMemo    as StaminaBar }     from './widgets/StaminaBar';
+import { OxygenBarMemo     as OxygenBar }      from './widgets/OxygenBar';
+import { RhythmMeterMemo   as RhythmMeter }    from './widgets/RhythmMeter';
+import { LaneRadarMemo     as LaneRadar }      from './widgets/LaneRadar';
+import { PauseButtonMemo   as PauseButton }    from './widgets/PauseButton';
 import { ContextPromptBanner, useContextPrompts } from './widgets/ContextPromptBanner';
 import { VirtualJoystick, StaminaRing, ActionCluster } from './widgets/StrokeControls';
 import { HUD_PANEL, HUD_COLOR, HUD_FONT } from './hudTokens';

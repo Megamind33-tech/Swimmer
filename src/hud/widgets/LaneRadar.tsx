@@ -125,3 +125,6 @@ export const LaneRadar: React.FC<LaneRadarProps> = ({ lanes, playerLane }) => {
     </div>
   );
 };
+
+// Memoized: only re-renders when `lanes` or `playerLane` prop changes
+export const LaneRadarMemo = React.memo(LaneRadar);

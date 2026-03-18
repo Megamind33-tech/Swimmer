@@ -190,3 +190,6 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
     </motion.div>
   );
 };
+
+// Memoized: re-renders at timerHz (30fps) when elapsedMs/position changes
+export const RaceTimerPanelMemo = React.memo(RaceTimerPanel);

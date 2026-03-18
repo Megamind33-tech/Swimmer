@@ -92,3 +92,6 @@ export const StaminaBar: React.FC<StaminaBarProps> = ({ value }) => {
     </div>
   );
 };
+
+// Memoized: only re-renders when `value` prop changes (15Hz cosmetic update)
+export const StaminaBarMemo = React.memo(StaminaBar);
