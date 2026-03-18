@@ -4,91 +4,132 @@ import { ACHIEVEMENTS, CAREER_TRACK, HOME_EVENTS } from '../utils/gameData'
 import { ProgressBar } from '../components/ProgressBar'
 import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerIcon } from 'lucide-react'
 
+const AQUA = '#38D6FF'
+const GOLD = '#D4A843'
+const PANEL = 'rgba(4,20,33,0.76)'
+const PANEL_BORDER = 'rgba(56,214,255,0.13)'
+
 export function CareerMode() {
   return (
-    <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="w-full h-full pt-16 pb-18 px-6 overflow-y-auto">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-black text-white italic mb-4 drop-shadow-md">CAREER <span className="text-yellow-400">JOURNEY</span></h1>
-        <div className="grid grid-cols-[16rem_minmax(0,1fr)] gap-4 items-start">
-          <div className="flex flex-col gap-4 min-w-0">
-            <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 border border-white/10 shadow-xl">
-              <h3 className="text-white/60 font-bold text-xs tracking-wider mb-3">CURRENT SEASON</h3>
-              <div className="flex items-end gap-2 mb-4">
-                <span className="text-4xl font-black text-white leading-none">S4</span><span className="text-[#D4A843] font-bold text-sm mb-1">PRO LEAGUE</span>
-              </div>
-              <div className="space-y-3">
-                <StatRow label="WINS" value="142" icon={<TrophyIcon size={14} className="text-[#D4A843]" />} />
-                <StatRow label="MEDALS" value="86" icon={<MedalIcon size={14} className="text-slate-300" />} />
-                <StatRow label="RECORDS" value="12" icon={<StarIcon size={14} className="text-[#D4A843]" />} />
-              </div>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-purple-900/50 to-slate-900 rounded-2xl p-4 border border-purple-500/30 shadow-xl">
-              <h3 className="text-white/60 font-bold text-xs tracking-wider mb-3">NEXT UNLOCK</h3>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-black/50 rounded-xl flex items-center justify-center border border-white/10 shrink-0"><LockIcon size={20} className="text-white/40" /></div>
-                <div className="min-w-0"><div className="text-white font-bold text-sm truncate">Olympic Pool</div><div className="text-[11px] text-[#D4A843] mt-1">Unlocks at Level 35</div></div>
-              </div>
-            </motion.div>
-            <div className="bg-black/40 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
-              <h3 className="text-white font-bold text-base mb-3 flex items-center gap-2"><CalendarIcon size={14} className="text-[#D4A843]" /> ROADMAP</h3>
-              <div className="space-y-2">
-                {CAREER_TRACK.map((item) => (
-                  <div key={item.id} className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-white font-bold text-xs truncate">{item.event}</div>
-                        <div className="text-white/50 text-[9px] uppercase tracking-[0.2em] mt-1 truncate">{item.week} • {item.stage}</div>
-                      </div>
-                      <div className={`text-[9px] font-black uppercase tracking-[0.2em] shrink-0 ${item.state === 'Current' ? 'text-[#D4A843]' : item.state === 'Completed' ? 'text-emerald-400' : 'text-white/40'}`}>{item.state}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -50 }}
+      style={{ position: 'absolute', inset: 0, display: 'flex', gap: '10px', padding: '10px' }}
+    >
+      {/* ── LEFT COLUMN ── */}
+      <div style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {/* Season card */}
+        <div style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.25)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.90) 0%, rgba(26,19,8,0.90) 100%)', backdropFilter: 'blur(12px)', padding: '14px 16px' }}>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '8px' }}>Current Season</div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', marginBottom: '12px' }}>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '40px', color: '#F3FBFF', lineHeight: 1, letterSpacing: '0.04em' }}>S4</span>
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: GOLD, letterSpacing: '0.06em', marginBottom: '4px' }}>PRO LEAGUE</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <StatRow label="WINS"    value="142" icon={<TrophyIcon size={13} color={GOLD} />} />
+            <StatRow label="MEDALS"  value="86"  icon={<MedalIcon  size={13} color="rgba(169,211,231,0.70)" />} />
+            <StatRow label="RECORDS" value="12"  icon={<StarIcon   size={13} color={GOLD} />} />
+          </div>
+        </div>
+
+        {/* Next unlock */}
+        <div style={{ borderRadius: '14px', border: '1px solid rgba(167,139,250,0.25)', background: 'linear-gradient(135deg, rgba(88,28,135,0.40) 0%, rgba(11,17,32,0.90) 100%)', backdropFilter: 'blur(12px)', padding: '14px 16px' }}>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(167,139,250,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '10px' }}>Next Unlock</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(0,0,0,0.40)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <LockIcon size={18} color="rgba(255,255,255,0.35)" />
+            </div>
+            <div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: '#F3FBFF', letterSpacing: '0.04em' }}>Olympic Pool</div>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: GOLD, marginTop: '3px' }}>Unlocks at Level 35</div>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col gap-4 min-w-0">
-            <div className="bg-black/40 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
-              <h3 className="text-white font-bold text-base mb-3 flex items-center gap-2"><TrophyIcon size={16} className="text-[#D4A843]" /> FEATURED EVENTS</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {HOME_EVENTS.map((event) => (
-                  <div key={event.id} className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-4 min-w-0 overflow-hidden flex flex-col justify-between">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-[9px] font-black uppercase tracking-[0.2em] text-[#D4A843] truncate">{event.status}</div>
-                        <div className="flex items-center gap-1 text-white/70 text-[11px] font-bold shrink-0"><TimerIcon size={12} className="text-[#D4A843]" />{event.time}</div>
-                      </div>
-                      <div className="text-white font-bold text-base leading-tight max-w-[18rem]">{event.name}</div>
-                      <div className="text-white/60 text-[12px] leading-relaxed max-w-[18rem]">{event.reward}</div>
+        {/* Roadmap */}
+        <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '14px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', flexShrink: 0 }}>
+            <CalendarIcon size={13} color={GOLD} />
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: '#F3FBFF', letterSpacing: '0.06em' }}>ROADMAP</span>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {CAREER_TRACK.map((item) => {
+              const stateColor = item.state === 'Current' ? GOLD : item.state === 'Completed' ? '#34D399' : 'rgba(255,255,255,0.25)'
+              return (
+                <div key={item.id} style={{ borderRadius: '10px', border: `1px solid ${PANEL_BORDER}`, background: 'rgba(56,214,255,0.03)', padding: '8px 10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '12px', color: '#F3FBFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.event}</div>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.10em', marginTop: '2px' }}>{item.week} · {item.stage}</div>
                     </div>
-                    <button className="mt-4 self-start rounded-lg border border-white/15 bg-white/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white hover:bg-white/12 transition-colors whitespace-nowrap">
-                      Enter Race
-                    </button>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: stateColor, letterSpacing: '0.10em', flexShrink: 0 }}>{item.state.toUpperCase()}</div>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
 
-            <div className="bg-black/40 rounded-2xl p-4 border border-white/10 backdrop-blur-md h-full">
-              <h3 className="text-white font-bold text-base mb-3 flex items-center gap-2"><StarIcon size={16} className="text-[#D4A843]" /> MILESTONES</h3>
-              <div className="space-y-3">
-                {ACHIEVEMENTS.map((ach, i) => (
-                  <motion.div key={ach.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className={`p-3 rounded-xl border ${ach.completed ? 'bg-green-900/20 border-green-500/30' : 'bg-white/5 border-white/10'} flex items-center gap-3 min-w-0`}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${ach.completed ? 'bg-green-500/20 text-green-400' : 'bg-black/50 text-white/40'}`}>
-                      {ach.completed ? <TrophyIcon size={18} /> : <StarIcon size={18} />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start gap-3 mb-1">
-                        <h4 className="text-white font-bold text-sm truncate">{ach.title}</h4>
-                        <span className="text-[10px] font-bold text-[#D4A843] bg-[#D4A843]/10 px-2 py-1 rounded shrink-0">{ach.reward}</span>
-                      </div>
-                      <p className="text-white/60 text-[11px] mb-2 leading-snug">{ach.desc}</p>
-                      <ProgressBar progress={ach.progress} max={ach.max} color={ach.completed ? 'bg-[#0D7C66]' : 'bg-[#D4A843]'} showLabel />
-                    </div>
-                  </motion.div>
-                ))}
+      {/* ── RIGHT COLUMN ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
+        {/* Featured events */}
+        <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '14px 16px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
+            <TrophyIcon size={14} color={GOLD} />
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: '#F3FBFF', letterSpacing: '0.06em' }}>FEATURED EVENTS</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+            {HOME_EVENTS.map((event) => (
+              <div key={event.id} style={{ borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: 'linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)', padding: '12px 14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.14em' }}>{event.status}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <TimerIcon size={11} color={GOLD} />
+                    <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', color: 'rgba(169,211,231,0.70)' }}>{event.time}</span>
+                  </div>
+                </div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1.1, marginBottom: '6px' }}>{event.name}</div>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.55)', marginBottom: '10px', lineHeight: 1.4 }}>{event.reward}</div>
+                <button style={{ height: '28px', paddingInline: '12px', borderRadius: '7px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA }}>
+                  Enter Race
+                </button>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Milestones */}
+        <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '14px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px', flexShrink: 0 }}>
+            <StarIcon size={14} color={GOLD} />
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: '#F3FBFF', letterSpacing: '0.06em' }}>MILESTONES</span>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {ACHIEVEMENTS.map((ach, i) => (
+              <motion.div
+                key={ach.id}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                style={{ padding: '10px 12px', borderRadius: '10px', border: ach.completed ? '1px solid rgba(52,211,153,0.25)' : `1px solid ${PANEL_BORDER}`, background: ach.completed ? 'rgba(52,211,153,0.06)' : 'rgba(56,214,255,0.03)', display: 'flex', alignItems: 'center', gap: '10px' }}
+              >
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: ach.completed ? 'rgba(52,211,153,0.15)' : 'rgba(0,0,0,0.35)', border: ach.completed ? '1px solid rgba(52,211,153,0.30)' : '1px solid rgba(255,255,255,0.06)' }}>
+                  {ach.completed
+                    ? <TrophyIcon size={15} color="#34D399" />
+                    : <StarIcon   size={15} color="rgba(255,255,255,0.30)" />}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '13px', color: '#F3FBFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ach.title}</span>
+                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: GOLD, background: 'rgba(212,168,67,0.10)', padding: '2px 8px', borderRadius: '5px', flexShrink: 0 }}>{ach.reward}</span>
+                  </div>
+                  <p style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.55)', marginBottom: '6px', lineHeight: 1.4 }}>{ach.desc}</p>
+                  <ProgressBar progress={ach.progress} max={ach.max} color={ach.completed ? 'bg-[#0D7C66]' : 'bg-[#D4A843]'} showLabel />
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>
@@ -98,9 +139,12 @@ export function CareerMode() {
 
 function StatRow({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 bg-black/30 p-2.5 rounded-lg border border-white/5 min-w-0">
-      <div className="flex items-center gap-2 min-w-0">{icon}<span className="text-white/80 text-xs font-bold truncate">{label}</span></div>
-      <span className="text-white font-black text-sm shrink-0">{value}</span>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', background: 'rgba(0,0,0,0.25)', padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {icon}
+        <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', color: 'rgba(255,255,255,0.70)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{label}</span>
+      </div>
+      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: '#F3FBFF', letterSpacing: '0.04em' }}>{value}</span>
     </div>
   )
 }

@@ -45,9 +45,6 @@ import {
 import { SwimmerScreen }  from '../components/menu/SwimmerScreen';
 import { StoreScreen }    from '../components/menu/StoreScreen';
 
-// Dev inspector
-import { BrowserToolkit } from '../components/BrowserToolkit';
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
@@ -152,15 +149,6 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           aria-label="Close settings"
         />
       )}
-
-      {/* ── Dev inspector ── */}
-      <BrowserToolkit
-        activeTab={activeTab}
-        utilityPage={overlayPage}
-        onOpenTab={handleTabChange}
-        onOpenUtility={(p) => p === 'settings' ? openSettings() : undefined}
-        onCloseUtility={closeOverlay}
-      />
 
       {/* ── Persistent bottom tab bar ── */}
       <IconTabBar
