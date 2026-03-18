@@ -30,13 +30,14 @@
 import * as BABYLON from '@babylonjs/core';
 import { IArenaConfig } from '../../types';
 import { logger } from '../../utils';
+import { ArenaMaterialLibrary } from './ArenaMaterialLibrary';
 
 export interface IPoolStructureHandles {
   root:         BABYLON.TransformNode;
   floorMesh:    BABYLON.Mesh;
   wallMeshes:   BABYLON.Mesh[];
   copingMeshes: BABYLON.Mesh[];
-  poolMaterial: BABYLON.StandardMaterial;
+  poolMaterial: BABYLON.PBRMaterial;
 }
 
 export class PoolStructure {
@@ -53,12 +54,11 @@ export class PoolStructure {
   private copingMeshes: BABYLON.Mesh[] = [];
   private detailMeshes: BABYLON.Mesh[] = []; // markings, pads, anchors
 
-  private poolMaterial:  BABYLON.StandardMaterial | null = null;
-  private wallMaterial:  BABYLON.StandardMaterial | null = null;
-  private floorTileTex:  BABYLON.DynamicTexture   | null = null;
+  private poolMaterial:  BABYLON.PBRMaterial | null = null;
+  private wallMaterial:  BABYLON.PBRMaterial | null = null;
 
   // ─────────────────────────────────────────────────────────────────────────
-  build(scene: BABYLON.Scene, config: IArenaConfig): IPoolStructureHandles {
+  build(scene: BABYLON.Scene, config: IArenaConfig, matLib: ArenaMaterialLibrary): IPoolStructureHandles {
     const { poolLength: L, poolWidth: W, laneCount: LC } = config;
     const D  = PoolStructure.BASIN_DEPTH;
     const WT = PoolStructure.WALL_THICKNESS;
@@ -67,57 +67,24 @@ export class PoolStructure {
 
     this.root = new BABYLON.TransformNode('PoolStructure', scene);
 
-    // ── 1. Materials ──────────────────────────────────────────────────────
+    // ── 1. Materials (from shared library) ───────────────────────────────
 
-    // 1a. Floor tile texture — procedurally generated 1 m ceramic tile grid
-    this.floorTileTex = this._makeTileTexture(scene);
-
-    this.poolMaterial = new BABYLON.StandardMaterial('poolFloorMat', scene);
-    this.poolMaterial.diffuseTexture  = this.floorTileTex;
-    this.poolMaterial.specularColor   = new BABYLON.Color3(0.5, 0.7, 0.9);
-    this.poolMaterial.specularPower   = 48;
+    this.poolMaterial = matLib.poolFloor;
+    this.wallMaterial = matLib.poolWall;
 
     // UV tiling: 1 texture repeat per metre → tile count = inner dimension
     const innerW = W - WT * 2;
     const innerL = L - WT * 2;
-    this.floorTileTex.uScale = Math.round(innerW); // ~24 for 25 m pool
-    this.floorTileTex.vScale = Math.round(innerL); // ~49 for 50 m pool
+    if (matLib.poolFloor.albedoTexture) {
+      matLib.poolFloor.albedoTexture.uScale = Math.round(innerW); // ~24 for 25 m pool
+      matLib.poolFloor.albedoTexture.vScale = Math.round(innerL); // ~49 for 50 m pool
+    }
 
-    // 1b. Wall material — solid tinted colour, slightly lighter near top
-    //     Emissive adds a faint glow to simulate light penetrating from above
-    this.wallMaterial = new BABYLON.StandardMaterial('poolWallMat', scene);
-    this.wallMaterial.diffuseColor  = new BABYLON.Color3(0.04, 0.32, 0.72);
-    this.wallMaterial.specularColor = new BABYLON.Color3(0.4, 0.6, 0.9);
-    this.wallMaterial.specularPower = 32;
-    this.wallMaterial.emissiveColor = new BABYLON.Color3(0.01, 0.05, 0.12);
-
-    // 1c. Coping cap
-    const copingMat = new BABYLON.StandardMaterial('copingMat', scene);
-    copingMat.diffuseColor  = new BABYLON.Color3(0.90, 0.92, 0.94);
-    copingMat.specularColor = new BABYLON.Color3(0.55, 0.55, 0.55);
-    copingMat.specularPower = 40;
-
-    // 1d. Overflow gutter (dark near-black channel at pool rim)
-    const gutterMat = new BABYLON.StandardMaterial('gutterMat', scene);
-    gutterMat.diffuseColor  = new BABYLON.Color3(0.05, 0.06, 0.08);
-    gutterMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
-
-    // 1e. Floor markings — dark navy, emissive so they show through water
-    const markingMat = new BABYLON.StandardMaterial('laneMarkingMat', scene);
-    markingMat.diffuseColor  = new BABYLON.Color3(0.02, 0.04, 0.18);
-    markingMat.emissiveColor = new BABYLON.Color3(0.01, 0.02, 0.08);
-
-    // 1f. Turn-wall touch pads — competition white/cream
-    const padMat = new BABYLON.StandardMaterial('touchPadMat', scene);
-    padMat.diffuseColor  = new BABYLON.Color3(0.95, 0.96, 0.95);
-    padMat.specularColor = new BABYLON.Color3(0.30, 0.30, 0.30);
-    padMat.specularPower = 24;
-
-    // 1g. Stainless rope anchor posts
-    const anchorMat = new BABYLON.StandardMaterial('anchorMat', scene);
-    anchorMat.diffuseColor  = new BABYLON.Color3(0.75, 0.76, 0.78);
-    anchorMat.specularColor = new BABYLON.Color3(0.80, 0.80, 0.80);
-    anchorMat.specularPower = 80;
+    const copingMat   = matLib.coping;
+    const gutterMat   = matLib.gutter;
+    const markingMat  = matLib.laneMarking;
+    const padMat      = matLib.touchPad;
+    const anchorMat   = matLib.stainless;
 
     // ── 2. Pool floor ─────────────────────────────────────────────────────
     this.floorMesh = BABYLON.MeshBuilder.CreateBox('poolFloor', {
@@ -310,78 +277,21 @@ export class PoolStructure {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Procedural tile texture
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /**
-   * Generates a 128 × 128 DynamicTexture representing a single 1 m × 1 m
-   * ceramic pool tile.  Wrapped via uScale / vScale on the floor material
-   * to create a full tile grid across the basin floor.
-   *
-   * Visual spec:
-   *   • Light blue-white tile body  (#c4e0f0)
-   *   • Thin gray-blue grout border (3 px at this resolution ≈ 2.3 cm at 1 m tile)
-   *   • Slight inner highlight on top-left quarter for depth impression
-   */
-  private _makeTileTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
-    const S   = 128;
-    const tex = new BABYLON.DynamicTexture('poolTileTex', { width: S, height: S }, scene, true);
-    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
-
-    // Tile body: competition pool ceramic (light desaturated blue-white)
-    ctx.fillStyle = '#c4e0f0';
-    ctx.fillRect(0, 0, S, S);
-
-    // Subtle inner bevel highlight (top-left quarter of tile slightly lighter)
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.fillRect(3, 3, S / 2, S / 2);
-
-    // Grout border (3 px = ~2.3 cm at 1 m tile — realistic competition pool grout)
-    const GROUT = 3;
-    ctx.fillStyle = '#4a7890';
-    // Top / bottom
-    ctx.fillRect(0,         0,         S,     GROUT);
-    ctx.fillRect(0,         S - GROUT, S,     GROUT);
-    // Left / right
-    ctx.fillRect(0,         0,         GROUT, S);
-    ctx.fillRect(S - GROUT, 0,         GROUT, S);
-
-    tex.update();
-    return tex;
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
   // Public API
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Recolour the pool basin to match the current venue theme.
-   * The tinted overlay is applied via diffuseColor on the wall material
-   * and via a colour multiply on the floor texture (emulated through specular).
+   * No-op in Phase 3 — theme colour is applied by ArenaMaterialLibrary.applyTheme().
+   * Kept for backward-compatibility with ArenaManager._applyThemeInternal().
    */
-  public setPoolColor(color: BABYLON.Color3): void {
-    if (this.wallMaterial) {
-      this.wallMaterial.diffuseColor = color;
-    }
-    if (this.poolMaterial) {
-      // Tint the floor by blending the theme colour into the specular tint —
-      // the tile texture itself stays neutral, the specular gives colour cast
-      this.poolMaterial.specularColor = new BABYLON.Color3(
-        0.3 + color.r * 0.4,
-        0.5 + color.g * 0.3,
-        0.7 + color.b * 0.2,
-      );
-    }
-  }
+  public setPoolColor(_color: BABYLON.Color3): void { /* handled by ArenaMaterialLibrary */ }
 
   public dispose(): void {
     this.floorMesh?.dispose();
     this.wallMeshes.forEach(m => m.dispose());
     this.copingMeshes.forEach(m => m.dispose());
     this.detailMeshes.forEach(m => m.dispose());
-    this.poolMaterial?.dispose();
-    this.wallMaterial?.dispose();
-    this.floorTileTex?.dispose();
+    // Materials are owned by ArenaMaterialLibrary — do not dispose here
     this.root?.dispose();
     logger.log('[PoolStructure] Disposed');
   }

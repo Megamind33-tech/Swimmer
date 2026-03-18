@@ -22,6 +22,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { IArenaConfig } from '../../types';
 import { logger } from '../../utils';
+import { ArenaMaterialLibrary } from './ArenaMaterialLibrary';
 
 export class PoolDeck {
   static readonly DECK_MARGIN   = 12;   // deck extends this far beyond pool on each side (m)
@@ -32,47 +33,18 @@ export class PoolDeck {
   private ladderMeshes:  BABYLON.Mesh[] = [];
   private drainMeshes:   BABYLON.Mesh[] = [];
 
-  private deckMat:    BABYLON.StandardMaterial | null = null;
-  private wetMat:     BABYLON.StandardMaterial | null = null;
-  private ladderMat:  BABYLON.StandardMaterial | null = null;
-  private drainMat:   BABYLON.StandardMaterial | null = null;
-
-  build(scene: BABYLON.Scene, config: IArenaConfig): BABYLON.TransformNode {
+  build(scene: BABYLON.Scene, config: IArenaConfig, matLib: ArenaMaterialLibrary): BABYLON.TransformNode {
     const { poolLength: L, poolWidth: W } = config;
     const M  = PoolDeck.DECK_MARGIN;
     const ST = PoolDeck.SLAB_THICKNESS;
 
     const root = new BABYLON.TransformNode('PoolDeck', scene);
 
-    // ── Materials ──────────────────────────────────────────────────────────
-
-    // Main deck: competition-pool light concrete grey
-    this.deckMat = new BABYLON.StandardMaterial('deckMat', scene);
-    this.deckMat.diffuseColor  = new BABYLON.Color3(0.80, 0.82, 0.84);
-    this.deckMat.specularColor = new BABYLON.Color3(0.20, 0.20, 0.20);
-    this.deckMat.specularPower = 10;
-
-    // Slab-edge face: slightly darker — shaded underside of concrete slab
-    const slabEdgeMat = new BABYLON.StandardMaterial('slabEdgeMat', scene);
-    slabEdgeMat.diffuseColor  = new BABYLON.Color3(0.62, 0.64, 0.66);
-    slabEdgeMat.specularColor = new BABYLON.Color3(0.08, 0.08, 0.08);
-
-    // Wet zone: slightly darker / more saturated grey to suggest wet concrete
-    this.wetMat = new BABYLON.StandardMaterial('wetDeckMat', scene);
-    this.wetMat.diffuseColor  = new BABYLON.Color3(0.66, 0.70, 0.74);
-    this.wetMat.specularColor = new BABYLON.Color3(0.35, 0.35, 0.35);
-    this.wetMat.specularPower = 28; // wetter = more specular
-
-    // Ladder rails + rungs: brushed stainless steel
-    this.ladderMat = new BABYLON.StandardMaterial('ladderMat', scene);
-    this.ladderMat.diffuseColor  = new BABYLON.Color3(0.72, 0.74, 0.76);
-    this.ladderMat.specularColor = new BABYLON.Color3(0.85, 0.85, 0.85);
-    this.ladderMat.specularPower = 96;
-
-    // Drain grate strips: near-black cast iron
-    this.drainMat = new BABYLON.StandardMaterial('drainMat', scene);
-    this.drainMat.diffuseColor  = new BABYLON.Color3(0.10, 0.10, 0.11);
-    this.drainMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+    // ── Materials (from shared library) ───────────────────────────────────
+    const deckMat   = matLib.deckDry;
+    const wetMat    = matLib.deckWet;
+    const ladderMat = matLib.stainless;
+    const drainMat  = matLib.drainGrate;
 
     // ── 1. Main deck slab (box with visible thickness) ─────────────────────
     // Top face at y = 0 (deck level), bottom face at y = -ST.
@@ -88,7 +60,7 @@ export class PoolDeck {
       depth:  deckL,
     }, scene);
     this.deckSlab.position.y = -ST / 2; // top face sits at y = 0
-    this.deckSlab.material   = this.deckMat;
+    this.deckSlab.material   = deckMat;
     this.deckSlab.parent     = root;
 
     // ── 2. Wet zone bands along each pool edge ─────────────────────────────
@@ -115,7 +87,7 @@ export class PoolDeck {
         width: def.w, height: def.h, depth: def.d,
       }, scene);
       wz.position = new BABYLON.Vector3(def.px, WZ_Y, def.pz);
-      wz.material = this.wetMat;
+      wz.material = wetMat;
       wz.parent   = root;
       this.wetZoneMeshes.push(wz);
     }
@@ -138,7 +110,7 @@ export class PoolDeck {
           width: GRATE_W, height: GRATE_T, depth: GRATE_L,
         }, scene);
         grate.position = new BABYLON.Vector3(sideX, GRATE_Y, gz);
-        grate.material = this.drainMat;
+        grate.material = drainMat;
         grate.parent   = root;
         this.drainMeshes.push(grate);
       }
@@ -170,7 +142,7 @@ export class PoolDeck {
           scene,
         );
         rail.position = new BABYLON.Vector3(RAIL_X, (RAIL_TOP + RAIL_BOT) / 2, lz + railZOff);
-        rail.material = this.ladderMat;
+        rail.material = ladderMat;
         rail.parent   = root;
         this.ladderMeshes.push(rail);
       }
@@ -187,7 +159,7 @@ export class PoolDeck {
         );
         rung.rotation.z = Math.PI / 2; // lay horizontal
         rung.position   = new BABYLON.Vector3(RAIL_X, ry, lz);
-        rung.material   = this.ladderMat;
+        rung.material   = ladderMat;
         rung.parent     = root;
         this.ladderMeshes.push(rung);
       }
@@ -202,10 +174,7 @@ export class PoolDeck {
     this.wetZoneMeshes.forEach(m => m.dispose());
     this.ladderMeshes.forEach(m => m.dispose());
     this.drainMeshes.forEach(m => m.dispose());
-    this.deckMat?.dispose();
-    this.wetMat?.dispose();
-    this.ladderMat?.dispose();
-    this.drainMat?.dispose();
+    // Materials are owned by ArenaMaterialLibrary — do not dispose here
     logger.log('[PoolDeck] Disposed');
   }
 }

@@ -24,6 +24,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { IArenaConfig } from '../../types';
 import { logger } from '../../utils';
+import { ArenaMaterialLibrary } from './ArenaMaterialLibrary';
 
 export class ArenaArchitecture {
   private root:      BABYLON.TransformNode | null = null;
@@ -35,7 +36,7 @@ export class ArenaArchitecture {
   static readonly ARENA_MARGIN_X = 22;
   static readonly ARENA_MARGIN_Z = 22;
 
-  build(scene: BABYLON.Scene, config: IArenaConfig): BABYLON.TransformNode {
+  build(scene: BABYLON.Scene, config: IArenaConfig, matLib: ArenaMaterialLibrary): BABYLON.TransformNode {
     const { poolLength: L, poolWidth: W, arenaHeight: AH } = config;
 
     const AW = W + ArenaArchitecture.ARENA_MARGIN_X * 2; // arena total width
@@ -43,25 +44,12 @@ export class ArenaArchitecture {
 
     this.root = new BABYLON.TransformNode('ArenaArchitecture', scene);
 
-    // ── Materials ─────────────────────────────────────────────────────────
-    const ceilingMat = new BABYLON.StandardMaterial('ceilingMat', scene);
-    ceilingMat.diffuseColor    = new BABYLON.Color3(0.88, 0.90, 0.90);
-    ceilingMat.backFaceCulling = false;
-
-    const wallMat = new BABYLON.StandardMaterial('arenaWallMat', scene);
-    wallMat.diffuseColor    = new BABYLON.Color3(0.78, 0.80, 0.82);
-    wallMat.backFaceCulling = false;
-
-    const columnMat = new BABYLON.StandardMaterial('columnMat', scene);
-    columnMat.diffuseColor  = new BABYLON.Color3(0.70, 0.72, 0.75);
-    columnMat.specularColor = new BABYLON.Color3(0.10, 0.10, 0.10);
-
-    const bleacherMat = new BABYLON.StandardMaterial('bleacherMat', scene);
-    bleacherMat.diffuseColor  = new BABYLON.Color3(0.18, 0.20, 0.24);
-    bleacherMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
-
-    const seatMat = new BABYLON.StandardMaterial('seatMat', scene);
-    seatMat.diffuseColor = new BABYLON.Color3(0.06, 0.22, 0.58); // Olympic blue seats
+    // ── Materials (from shared library) ───────────────────────────────────
+    const ceilingMat  = matLib.arenaCeiling;
+    const wallMat     = matLib.arenaWall;
+    const columnMat   = matLib.column;
+    const bleacherMat = matLib.bleacher;
+    const seatMat     = matLib.seat;
 
     // ── Ceiling ───────────────────────────────────────────────────────────
     const ceiling = BABYLON.MeshBuilder.CreateBox('arenaCeiling', {

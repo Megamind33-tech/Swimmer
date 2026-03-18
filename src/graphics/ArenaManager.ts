@@ -40,6 +40,7 @@ import { BroadcastCamera } from './BroadcastCamera';
 import { ArenaRoot }                 from './arena/ArenaRoot';
 import { PerformanceQualityManager } from './arena/PerformanceQualityManager';
 import { ArenaAtmosphere }           from './arena/ArenaAtmosphere';
+import { ArenaMaterialLibrary }      from './arena/ArenaMaterialLibrary';
 import { PoolStructure }             from './arena/PoolStructure';
 import { PoolWater }                 from './arena/PoolWater';
 import { PoolDeck }                  from './arena/PoolDeck';
@@ -57,6 +58,7 @@ export class ArenaManager {
   private arenaRoot:      ArenaRoot                  | null = null;
   private qualityMgr:     PerformanceQualityManager  | null = null;
   private atmosphere:     ArenaAtmosphere             | null = null;
+  private matLib:         ArenaMaterialLibrary        | null = null;
   private poolStructure:  PoolStructure               | null = null;
   private poolWater:      PoolWater                   | null = null;
   private poolDeck:       PoolDeck                    | null = null;
@@ -115,33 +117,37 @@ export class ArenaManager {
     this.atmosphere = new ArenaAtmosphere();
     this.atmosphere.build(scene, this.arenaConfig);
 
-    // ── 4. Lighting (before geometry so shadow casters can be registered) ─
+    // ── 4. Material library (PBR materials + procedural textures) ────────
+    this.matLib = new ArenaMaterialLibrary();
+    this.matLib.build(scene, this.arenaConfig, qt);
+
+    // ── 5. Lighting (before geometry so shadow casters can be registered) ─
     this.lighting = new ArenaLighting();
     this.lighting.build(scene, this.arenaConfig, qt);
 
-    // ── 5. Pool structure ────────────────────────────────────────────────
+    // ── 6. Pool structure ─────────────────────────────────────────────────
     this.poolStructure = new PoolStructure();
-    this.poolStructure.build(scene, this.arenaConfig);
+    this.poolStructure.build(scene, this.arenaConfig, this.matLib);
 
-    // ── 6. Water surface ─────────────────────────────────────────────────
+    // ── 7. Water surface ──────────────────────────────────────────────────
     this.poolWater = new PoolWater();
     this.poolWater.build(scene, this.arenaConfig, qt);
 
-    // ── 7. Deck ───────────────────────────────────────────────────────────
+    // ── 8. Deck ───────────────────────────────────────────────────────────
     this.poolDeck = new PoolDeck();
-    this.poolDeck.build(scene, this.arenaConfig);
+    this.poolDeck.build(scene, this.arenaConfig, this.matLib);
 
-    // ── 8. Lane system ────────────────────────────────────────────────────
+    // ── 9. Lane system ────────────────────────────────────────────────────
     this.laneSystem = new LaneSystem();
-    this.laneSystem.build(scene, this.arenaConfig);
+    this.laneSystem.build(scene, this.arenaConfig, this.matLib);
 
-    // ── 9. Starting blocks ────────────────────────────────────────────────
+    // ── 10. Starting blocks ───────────────────────────────────────────────
     this.startingBlocks = new StartingBlocks();
-    this.startingBlocks.build(scene, this.arenaConfig);
+    this.startingBlocks.build(scene, this.arenaConfig, this.matLib);
 
-    // ── 10. Arena architecture (walls, bleachers, scoreboard) ─────────────
+    // ── 11. Arena architecture (walls, bleachers, scoreboard) ─────────────
     this.architecture = new ArenaArchitecture();
-    this.architecture.build(scene, this.arenaConfig);
+    this.architecture.build(scene, this.arenaConfig, this.matLib);
 
     // ── 11. Static cameras ────────────────────────────────────────────────
     this.cameraSupport = new CameraSupport();
@@ -186,7 +192,8 @@ export class ArenaManager {
     const waterColor = this.atmosphere.applyTheme(scene, theme);
 
     this.poolWater?.setColor(waterColor);
-    this.poolStructure?.setPoolColor(waterColor);
+    this.matLib?.applyTheme(theme);
+    this.poolStructure?.setPoolColor(waterColor); // no-op in Phase 3; kept for safety
   }
 
   public setTimeOfDay(time: TimeOfDay): void {
@@ -324,6 +331,7 @@ export class ArenaManager {
     this.poolDeck?.dispose();
     this.poolWater?.dispose();
     this.poolStructure?.dispose();
+    this.matLib?.dispose();          // after all geometry modules
     this.atmosphere?.dispose();
     this.arenaRoot?.dispose();
     logger.log('[ArenaManager] Disposed');

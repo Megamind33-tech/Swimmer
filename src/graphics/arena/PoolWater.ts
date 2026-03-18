@@ -25,14 +25,14 @@ import { logger } from '../../utils';
 
 export class PoolWater {
   private waterMesh: BABYLON.Mesh | null = null;
-  private material:  BABYLON.StandardMaterial | null = null;
+  private material:  BABYLON.PBRMaterial | null = null;
 
   build(
     scene: BABYLON.Scene,
     config: IArenaConfig,
     qualityTier: 'LOW' | 'MEDIUM' | 'HIGH',
   ): BABYLON.Mesh {
-    // Higher subdivision = smoother wave geometry in Phase 2
+    // Higher subdivision = smoother wave geometry in Phase 4 (WaterMaterial)
     const subs = qualityTier === 'HIGH' ? 64 : qualityTier === 'MEDIUM' ? 32 : 16;
 
     this.waterMesh = BABYLON.MeshBuilder.CreateGround('poolWater', {
@@ -44,16 +44,21 @@ export class PoolWater {
     // Water surface level: y=0 is the top of the pool basin walls
     this.waterMesh.position.y = 0.02;
 
-    this.material = new BABYLON.StandardMaterial('waterMat', scene);
-    this.material.diffuseColor  = new BABYLON.Color3(0.0, 0.40, 0.80);
-    this.material.specularColor = new BABYLON.Color3(1.0, 1.0, 1.0);
-    this.material.specularPower = 128;
-    this.material.alpha         = 0.88;
-    // Phase 2: swap for WaterMaterial with reflection/refraction render targets
+    // Phase 3: PBRMaterial — physically-correct translucent water surface
+    // metallic=0 (water is dielectric), roughness=0.04 (near-mirror reflections),
+    // alpha=0.82 (see-through to pool floor), ALPHABLEND for correct sorting.
+    this.material = new BABYLON.PBRMaterial('waterMat', scene);
+    this.material.albedoColor          = new BABYLON.Color3(0.0, 0.40, 0.80);
+    this.material.metallic             = 0.0;
+    this.material.roughness            = 0.04;
+    this.material.alpha                = 0.82;
+    this.material.transparencyMode     = BABYLON.PBRMaterial.PBRMATERIAL_ALPHABLEND;
+    this.material.backFaceCulling      = false;
+    this.material.environmentIntensity = 0; // no HDR env texture in this project
 
     this.waterMesh.material = this.material;
 
-    logger.log('[PoolWater] Built');
+    logger.log('[PoolWater] Built (Phase 3 — PBRMaterial)');
     return this.waterMesh;
   }
 
@@ -67,7 +72,7 @@ export class PoolWater {
   }
 
   public setColor(color: BABYLON.Color3): void {
-    if (this.material) this.material.diffuseColor = color;
+    if (this.material) this.material.albedoColor = color;
   }
 
   public getMesh(): BABYLON.Mesh | null { return this.waterMesh; }

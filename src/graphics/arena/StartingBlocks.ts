@@ -26,6 +26,7 @@ import * as BABYLON from '@babylonjs/core';
 import { IArenaConfig } from '../../types';
 import { LaneSystem } from './LaneSystem';
 import { logger } from '../../utils';
+import { ArenaMaterialLibrary } from './ArenaMaterialLibrary';
 
 export class StartingBlocks {
   private root:   BABYLON.TransformNode | null = null;
@@ -34,26 +35,15 @@ export class StartingBlocks {
   // Lane-number textures kept for disposal
   private lanePlateTextures: BABYLON.DynamicTexture[] = [];
 
-  build(scene: BABYLON.Scene, config: IArenaConfig): BABYLON.TransformNode {
+  build(scene: BABYLON.Scene, config: IArenaConfig, matLib: ArenaMaterialLibrary): BABYLON.TransformNode {
     const { poolLength: L, laneCount: LC } = config;
 
     this.root = new BABYLON.TransformNode('StartingBlocks', scene);
 
-    // ── Shared materials ──────────────────────────────────────────────────
-    const pedestalMat = new BABYLON.StandardMaterial('startPedestalMat', scene);
-    pedestalMat.diffuseColor  = new BABYLON.Color3(0.18, 0.18, 0.20);
-    pedestalMat.specularColor = new BABYLON.Color3(0.10, 0.10, 0.10);
-
-    const platformMat = new BABYLON.StandardMaterial('startPlatformMat', scene);
-    platformMat.diffuseColor  = new BABYLON.Color3(1.00, 0.82, 0.00); // ISL yellow
-    platformMat.specularColor = new BABYLON.Color3(0.15, 0.15, 0.10);
-    platformMat.specularPower = 20;
-
-    // Stainless steel for grab handles and leg supports
-    const stainlessMat = new BABYLON.StandardMaterial('blockStainlessMat', scene);
-    stainlessMat.diffuseColor  = new BABYLON.Color3(0.72, 0.74, 0.76);
-    stainlessMat.specularColor = new BABYLON.Color3(0.85, 0.85, 0.85);
-    stainlessMat.specularPower = 96;
+    // ── Shared materials (from library) ───────────────────────────────────
+    const pedestalMat  = matLib.blockPedestal;
+    const platformMat  = matLib.blockPlatform;
+    const stainlessMat = matLib.stainless;
 
     // Blocks sit on the deck behind the south pool wall
     const blockZ = -L / 2 - 0.55;
