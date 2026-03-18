@@ -89,18 +89,20 @@ export class ArenaMaterialLibrary {
 
     // ── Pool basin ────────────────────────────────────────────────────────────
     this.poolFloor = this._pbr('poolFloor', scene, {
-      albedoTexture: tileTex,
-      albedoColor:   new BABYLON.Color3(1, 1, 1),
-      metallic:      0.00,
-      roughness:     0.10,
-      bumpTexture:   tileNorm,
+      albedoTexture:        tileTex,
+      albedoColor:          new BABYLON.Color3(1, 1, 1),
+      metallic:             0.00,
+      roughness:            0.10,
+      bumpTexture:          tileNorm,
+      environmentIntensity: 0.06, // glazed tile: subtle gloss under overhead lights
     });
     // uScale / vScale are applied by PoolStructure on the texture itself
 
     this.poolWall = this._pbr('poolWall', scene, {
-      albedoColor: new BABYLON.Color3(0.04, 0.32, 0.72), // OLYMPIC default
-      metallic:    0.00,
-      roughness:   0.18,
+      albedoColor:          new BABYLON.Color3(0.04, 0.32, 0.72), // OLYMPIC default
+      metallic:             0.00,
+      roughness:            0.18,
+      environmentIntensity: 0.04, // wet submerged tiles catch slight reflection
     });
 
     this.coping = this._pbr('coping', scene, {
@@ -130,9 +132,10 @@ export class ArenaMaterialLibrary {
     });
 
     this.stainless = this._pbr('stainless', scene, {
-      albedoColor: new BABYLON.Color3(0.72, 0.74, 0.76),
-      metallic:    0.88,
-      roughness:   0.22,
+      albedoColor:          new BABYLON.Color3(0.72, 0.74, 0.76),
+      metallic:             0.88,
+      roughness:            0.22,
+      environmentIntensity: 0.38, // brushed stainless — pool ladders, handles, anchors
     });
 
     // ── Pool deck ─────────────────────────────────────────────────────────────
@@ -144,9 +147,10 @@ export class ArenaMaterialLibrary {
     });
 
     this.deckWet = this._pbr('deckWet', scene, {
-      albedoColor: new BABYLON.Color3(0.66, 0.70, 0.74),
-      metallic:    0.00,
-      roughness:   0.42,
+      albedoColor:          new BABYLON.Color3(0.66, 0.70, 0.74),
+      metallic:             0.00,
+      roughness:            0.42,
+      environmentIntensity: 0.10, // wet concrete splash zone — visible sheen
     });
 
     this.drainGrate = this._pbr('drainGrate', scene, {
@@ -188,9 +192,10 @@ export class ArenaMaterialLibrary {
     });
 
     this.flagPole = this._pbr('flagPole', scene, {
-      albedoColor: new BABYLON.Color3(0.22, 0.22, 0.24),
-      metallic:    0.55,
-      roughness:   0.38,
+      albedoColor:          new BABYLON.Color3(0.22, 0.22, 0.24),
+      metallic:             0.55,
+      roughness:            0.38,
+      environmentIntensity: 0.22, // anodized aluminium pole
     });
 
     this.flagLine = this._pbr('flagLine', scene, {
@@ -226,9 +231,10 @@ export class ArenaMaterialLibrary {
     });
 
     this.column = this._pbr('column', scene, {
-      albedoColor: new BABYLON.Color3(0.70, 0.72, 0.75),
-      metallic:    0.15,
-      roughness:   0.62,
+      albedoColor:          new BABYLON.Color3(0.70, 0.72, 0.75),
+      metallic:             0.15,
+      roughness:            0.62,
+      environmentIntensity: 0.06, // slightly polished concrete column
     });
 
     this.bleacher = this._pbr('bleacher', scene, {
@@ -403,17 +409,31 @@ export class ArenaMaterialLibrary {
   // PBR factory helper
   // ─────────────────────────────────────────────────────────────────────────
 
+  /**
+   * After ArenaLighting.buildEnvironmentProbe() has captured the scene,
+   * call this with the resulting cube texture to activate scene-accurate IBL
+   * on all materials that have environmentIntensity > 0.
+   *
+   * Sets scene.environmentTexture — PBRMaterial picks this up automatically
+   * when environmentIntensity > 0 and no per-material reflectionTexture is set.
+   */
+  public applyEnvironmentTexture(scene: BABYLON.Scene, envTex: BABYLON.BaseTexture): void {
+    scene.environmentTexture = envTex;
+    logger.log('[ArenaMaterialLibrary] Environment texture applied');
+  }
+
   private _pbr(
     name:  string,
     scene: BABYLON.Scene,
     opts: {
-      albedoColor?:     BABYLON.Color3;
-      albedoTexture?:   BABYLON.BaseTexture | null;
-      emissiveColor?:   BABYLON.Color3;
-      metallic:         number;
-      roughness:        number;
-      bumpTexture?:     BABYLON.BaseTexture | null;
-      backFaceCulling?: boolean;
+      albedoColor?:         BABYLON.Color3;
+      albedoTexture?:       BABYLON.BaseTexture | null;
+      emissiveColor?:       BABYLON.Color3;
+      metallic:             number;
+      roughness:            number;
+      bumpTexture?:         BABYLON.BaseTexture | null;
+      backFaceCulling?:     boolean;
+      environmentIntensity?: number; // 0 = no IBL (default), >0 = picks up scene.environmentTexture
     },
   ): BABYLON.PBRMaterial {
     const mat = new BABYLON.PBRMaterial(name, scene);
@@ -423,11 +443,9 @@ export class ArenaMaterialLibrary {
     if (opts.emissiveColor) mat.emissiveColor  = opts.emissiveColor;
     if (opts.bumpTexture)   mat.bumpTexture    = opts.bumpTexture;
 
-    mat.metallic  = opts.metallic;
-    mat.roughness = opts.roughness;
-
-    // No HDR environment texture in this project — pure direct lighting
-    mat.environmentIntensity = 0;
+    mat.metallic             = opts.metallic;
+    mat.roughness            = opts.roughness;
+    mat.environmentIntensity = opts.environmentIntensity ?? 0;
 
     if (opts.backFaceCulling !== undefined) {
       mat.backFaceCulling = opts.backFaceCulling;

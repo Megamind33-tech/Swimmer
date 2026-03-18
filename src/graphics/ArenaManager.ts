@@ -149,10 +149,26 @@ export class ArenaManager {
     this.architecture = new ArenaArchitecture();
     this.architecture.build(scene, this.arenaConfig, this.matLib);
 
-    // ── 12. Water render targets ──────────────────────────────────────────
-    // Called after all geometry modules so scene.meshes is fully populated.
-    // No-op for LOW quality tier (PBRMaterial — no render targets).
+    // ── 12. Post-build scene configuration (needs full scene.meshes) ─────
+    //   a) Water render targets: reflection + refraction lists populated
     this.poolWater?.setupRenderTargets(scene);
+
+    //   b) Shadow casters + receivers: scan scene meshes by name pattern
+    this.lighting?.configureShadowsForScene(scene);
+
+    //   c) Environment probe: one-shot IBL cube capture for metallic surfaces.
+    //      Exclude water + caustic meshes to prevent render target feedback.
+    const waterMesh   = this.poolWater?.getMesh() ?? null;
+    const excludeMeshes: BABYLON.AbstractMesh[] = waterMesh ? [waterMesh] : [];
+    // Also exclude any mesh named 'causticOverlay'
+    scene.meshes
+      .filter(m => m.name === 'causticOverlay')
+      .forEach(m => excludeMeshes.push(m));
+
+    const envTex = this.lighting?.buildEnvironmentProbe(scene, excludeMeshes) ?? null;
+    if (envTex && this.matLib) {
+      this.matLib.applyEnvironmentTexture(scene, envTex);
+    }
 
     // ── 13. Static cameras ────────────────────────────────────────────────
     this.cameraSupport = new CameraSupport();
