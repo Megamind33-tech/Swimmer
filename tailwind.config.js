@@ -8,18 +8,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        // SWIM26 Material Design 3 Colors (Dark Theme)
-        "primary": "#0f62fe",
-        "primary-dim": "#4589ff",
-        "primary-fixed": "#78a9ff",
-        "primary-fixed-dim": "#4589ff",
-        "primary-container": "#d0e2ff",
+        // SWIM26 Design System Colors (Aquatic Dark Theme)
+        "primary": "#00E5FF",       // Neon aqua — race action, glow, active states
+        "primary-dim": "#00B2CC",
+        "primary-fixed": "#7AE8FF",
+        "primary-fixed-dim": "#38D6FF",
+        "primary-container": "#00354A",
 
-        "secondary": "#6f6f6f",
-        "secondary-dim": "#525252",
-        "secondary-fixed": "#e0e0e0",
-        "secondary-fixed-dim": "#c6c6c6",
-        "secondary-container": "#393939",
+        "secondary": "#D4A843",     // Gold — XP, rewards, achievements
+        "secondary-dim": "#A67C00",
+        "secondary-fixed": "#FFD76A",
+        "secondary-fixed-dim": "#F5C842",
+        "secondary-container": "#3A2A00",
 
         "tertiary": "#f9f9f9",
         "tertiary-dim": "#ebebeb",
@@ -39,6 +39,12 @@ export default {
         "surface-container": "#142238",
         "surface-container-high": "#1a2a42",
         "surface-container-highest": "#223552",
+        // Aliases matching design tokens (src/theme/tokens.ts surface palette)
+        "surface-base":    "#050B14",
+        "surface-low":     "#080F1C",
+        "surface-mid":     "#0A1628",
+        "surface-high":    "#111D2E",
+        "surface-highest": "#1B2838",
 
         "background": "#070d18",
         "on-background": "#f4f4f4",

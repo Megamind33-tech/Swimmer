@@ -1,21 +1,24 @@
 /**
- * Play Screen - Game Mode Selection with Broadcast Aesthetic
- * Glassmorphic cards with neon accents, biome textures, and ripple effects
+ * Play Screen — Game Mode Selection
+ * AAA sports-game broadcast aesthetic: large mode cards, neon accents,
+ * aqua/cyan color system, proper glassmorphism.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { getDifficultyColor, getDifficultyBadgeIcon } from '../../utils/difficultyUtils';
 
 interface GameModeCard {
   id: string;
   name: string;
+  tagline: string;
   description: string;
   icon: string;
   difficulty: 'EASY' | 'NORMAL' | 'HARD';
-  rewards: string;
+  rewards: { xp: number; coins: number };
   playerCount?: string;
-  accentColor: string; // Neon accent color class
-  biomeClass: string; // Biome texture class
+  accentRgb: string;   // RGB values for glow/border effects
+  gradientFrom: string;
+  gradientTo: string;
 }
 
 interface PlayScreenProps {
@@ -26,202 +29,395 @@ const GameModes: GameModeCard[] = [
   {
     id: 'quick-race',
     name: 'Quick Race',
-    description: 'Fast race setup with instant matches',
+    tagline: 'Instant Match',
+    description: 'Jump straight into a race. Auto-matched opponents, fast setup.',
     icon: 'play_arrow',
     difficulty: 'NORMAL',
-    rewards: '100 XP, 500 Coins',
-    playerCount: '4.2K playing',
-    accentColor: 'border-blue-400/60',
-    biomeClass: 'biome-quick-race',
+    rewards: { xp: 100, coins: 500 },
+    playerCount: '4.2K',
+    accentRgb: '0,229,255',
+    gradientFrom: 'rgba(0,229,255,0.12)',
+    gradientTo: 'rgba(0,100,140,0.06)',
   },
   {
     id: 'career-race',
     name: 'Career Race',
-    description: 'Continue your career progression',
+    tagline: 'Legacy Mode',
+    description: 'Advance through your swimming career. Contracts, sponsors, championships.',
     icon: 'emoji_events',
     difficulty: 'HARD',
-    rewards: '250 XP, 2000 Coins',
-    accentColor: 'border-purple-400/60',
-    biomeClass: 'biome-career-race',
+    rewards: { xp: 250, coins: 2000 },
+    accentRgb: '212,168,67',
+    gradientFrom: 'rgba(212,168,67,0.12)',
+    gradientTo: 'rgba(100,70,0,0.06)',
   },
   {
     id: 'ranked-match',
     name: 'Ranked Match',
-    description: 'Competitive multiplayer battles',
+    tagline: 'Competitive',
+    description: 'Fight for global rank. Every millisecond counts. Season leaderboards.',
     icon: 'leaderboard',
     difficulty: 'HARD',
-    rewards: '300 XP, 3000 Coins',
-    playerCount: '12.5K playing',
-    accentColor: 'border-red-400/60',
-    biomeClass: 'biome-ranked-match',
+    rewards: { xp: 300, coins: 3000 },
+    playerCount: '12.5K',
+    accentRgb: '239,68,68',
+    gradientFrom: 'rgba(239,68,68,0.12)',
+    gradientTo: 'rgba(100,0,0,0.06)',
   },
   {
     id: 'time-trial',
     name: 'Time Trial',
-    description: 'Solo challenge for best times',
-    icon: 'schedule',
+    tagline: 'Solo Sprint',
+    description: 'Race the clock. Beat your personal best and set world records.',
+    icon: 'timer',
     difficulty: 'NORMAL',
-    rewards: '150 XP, 1000 Coins',
-    accentColor: 'border-green-400/60',
-    biomeClass: 'biome-time-trial',
+    rewards: { xp: 150, coins: 1000 },
+    accentRgb: '34,197,94',
+    gradientFrom: 'rgba(34,197,94,0.12)',
+    gradientTo: 'rgba(0,60,20,0.06)',
   },
   {
     id: 'relay-mode',
     name: 'Relay Mode',
-    description: 'Team-based swimming relay',
+    tagline: 'Team Race',
+    description: 'Synchronise with your squad. Hand off the baton, dominate as a team.',
     icon: 'groups',
     difficulty: 'HARD',
-    rewards: '400 XP, 4000 Coins',
-    playerCount: '8.3K playing',
-    accentColor: 'border-cyan-400/60',
-    biomeClass: 'biome-relay-mode',
+    rewards: { xp: 400, coins: 4000 },
+    playerCount: '8.3K',
+    accentRgb: '168,85,247',
+    gradientFrom: 'rgba(168,85,247,0.12)',
+    gradientTo: 'rgba(60,0,100,0.06)',
   },
   {
     id: 'ghost-race',
     name: 'Ghost Race',
-    description: 'Race against your best times',
+    tagline: 'Time Warp',
+    description: 'Race a ghost of your past self. Track every split. Train smarter.',
     icon: 'history',
     difficulty: 'EASY',
-    rewards: '50 XP, 250 Coins',
-    accentColor: 'border-yellow-400/60',
-    biomeClass: 'biome-ghost-race',
+    rewards: { xp: 50, coins: 250 },
+    accentRgb: '148,163,184',
+    gradientFrom: 'rgba(148,163,184,0.10)',
+    gradientTo: 'rgba(30,41,59,0.06)',
   },
 ];
 
-
-const getIllustrationPattern = (modeId: string) => {
-  // Return SVG pattern data for each game mode
-  switch (modeId) {
-    case 'quick-race':
-      // Ripple circles pattern
-      return 'radial-gradient(circle at 50% 50%, rgba(0,255,255,0.08) 0%, rgba(0,255,255,0.04) 15%, transparent 30%), radial-gradient(circle at 70% 30%, rgba(0,255,255,0.06) 0%, transparent 25%)';
-    case 'career-race':
-      // Ascending ladder pattern
-      return 'repeating-linear-gradient(0deg, rgba(255,200,100,0.06) 0px, rgba(255,200,100,0.06) 20px, transparent 20px, transparent 40px), repeating-linear-gradient(90deg, rgba(255,200,100,0.04) 0px, rgba(255,200,100,0.04) 1px, transparent 1px, transparent 20px)';
-    case 'ranked-match':
-      // Crown/trophy pattern
-      return 'conic-gradient(from 0deg at 50% 50%, rgba(255,215,0,0.08) 0deg, rgba(255,215,0,0.04) 180deg, rgba(255,215,0,0.08) 360deg)';
-    case 'time-trial':
-      // Stopwatch pattern
-      return 'radial-gradient(circle at 50% 40%, rgba(0,255,255,0.08) 0%, rgba(0,255,255,0.02) 50%), radial-gradient(circle at 50% 60%, rgba(0,255,255,0.06) 0%, transparent 40%)';
-    case 'relay-mode':
-      // Converging arrows pattern
-      return 'linear-gradient(45deg, rgba(0,255,255,0.06) 0%, transparent 50%), linear-gradient(-45deg, rgba(0,255,255,0.06) 0%, transparent 50%)';
-    case 'ghost-race':
-      // Reflection/mirror pattern
-      return 'linear-gradient(0deg, transparent 40%, rgba(0,255,255,0.08) 45%, rgba(0,255,255,0.08) 55%, transparent 60%)';
-    default:
-      return 'rgba(0,255,255,0.05)';
-  }
+const DIFF_LABELS: Record<string, { label: string; color: string }> = {
+  EASY:   { label: 'Rookie',       color: 'rgba(34,197,94,0.9)' },
+  NORMAL: { label: 'Competitor',   color: 'rgba(0,229,255,0.9)' },
+  HARD:   { label: 'Elite',        color: 'rgba(239,68,68,0.9)' },
 };
 
 export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
-  const [ignitedCard, setIgnitedCard] = useState<string | null>(null);
+  const [activatingId, setActivatingId] = useState<string | null>(null);
 
-  const handleModeClick = (modeId: string) => {
-    setIgnitedCard(modeId);
+  const handleSelect = (modeId: string) => {
+    if (activatingId) return;
+    setActivatingId(modeId);
     setTimeout(() => {
-      setIgnitedCard(null);
+      setActivatingId(null);
       onModeSelect?.(modeId);
-    }, 400);
+    }, 380);
   };
 
   return (
-    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      {/* Cinematic Header */}
-      <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="h-[1px] w-12 bg-primary/40" />
-            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">Arena Selection</span>
-            <span className="h-[1px] w-12 bg-primary/40" />
-          </div>
-          
-          <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
-            Game Modes
-          </h1>
-          <p className="text-on-surface-variant text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-base">explore</span>
-            Select your discipline to begin the circuit
-          </p>
+    <div
+      className="hydro-page-shell flex flex-col w-full h-full overflow-y-auto"
+      style={{ background: 'linear-gradient(180deg, #050B14 0%, #080F1C 100%)' }}
+    >
+      {/* Ambient caustic blobs */}
+      <div className="caustic-blob caustic-blob-1" />
+      <div className="caustic-blob caustic-blob-2" />
+      <div className="caustic-blob caustic-blob-3" />
+
+      {/* ── Cinematic Header ─────────────────────────────────────────────── */}
+      <div
+        className="relative flex-shrink-0 px-6 pt-7 pb-6 overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(0,229,255,0.06) 0%, transparent 100%)',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+        }}
+      >
+        {/* Top accent line */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[2px]"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.6) 40%, rgba(0,229,255,0.6) 60%, transparent)' }}
+        />
+
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 mb-4">
+          <div
+            className="h-px flex-1 max-w-[32px]"
+            style={{ background: 'rgba(0,229,255,0.4)' }}
+          />
+          <span
+            className="text-[9px] font-black uppercase tracking-[0.45em]"
+            style={{ color: 'rgba(0,229,255,0.8)' }}
+          >
+            Arena Selection
+          </span>
+          <div
+            className="h-px flex-1 max-w-[32px]"
+            style={{ background: 'rgba(0,229,255,0.4)' }}
+          />
+        </div>
+
+        {/* Title */}
+        <h1
+          className="font-bebas uppercase leading-none mb-1"
+          style={{
+            fontSize: 'clamp(48px, 10vw, 72px)',
+            color: '#F3FBFF',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          Game{' '}
+          <span
+            className="text-glow"
+            style={{ color: '#00E5FF' }}
+          >
+            Modes
+          </span>
+        </h1>
+
+        {/* Subtitle */}
+        <p
+          className="text-xs font-bold uppercase tracking-[0.22em]"
+          style={{ color: 'rgba(255,255,255,0.45)' }}
+        >
+          Select your discipline to begin the circuit
+        </p>
+
+        {/* Live player count badge */}
+        <div
+          className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded"
+          style={{
+            background: 'rgba(0,229,255,0.08)',
+            border: '1px solid rgba(0,229,255,0.20)',
+          }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            style={{ background: '#00E5FF', boxShadow: '0 0 6px rgba(0,229,255,0.9)' }}
+          />
+          <span
+            className="text-[10px] font-black uppercase tracking-widest"
+            style={{ color: 'rgba(0,229,255,0.9)' }}
+          >
+            24.7K Swimmers Online
+          </span>
         </div>
       </div>
 
-      {/* Game Modes Grid */}
-      <div className="flex-1 p-6 max-[900px]:p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max overflow-y-auto pb-12">
-        {GameModes.map((mode) => {
-          const diffColor = getDifficultyColor(mode.difficulty);
+      {/* ── Mode Cards Grid ──────────────────────────────────────────────── */}
+      <div className="flex-1 px-4 py-5 grid grid-cols-1 gap-4 auto-rows-max pb-8"
+        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))' }}
+      >
+        {GameModes.map((mode, index) => {
+          const isActivating = activatingId === mode.id;
+          const diff = DIFF_LABELS[mode.difficulty];
 
           return (
             <button
               key={mode.id}
-              onClick={() => handleModeClick(mode.id)}
-              className={`group relative h-64 rounded-2xl overflow-hidden transition-all duration-500 hover:scale-[1.02] active:scale-95 glass-card border-white/5 hover:border-primary/40 ${ignitedCard === mode.id ? 'animate-pulse ring-4 ring-primary/40' : ''}`}
+              onClick={() => handleSelect(mode.id)}
+              disabled={!!activatingId}
+              className="group relative text-left overflow-hidden transition-all duration-300"
+              style={{
+                minHeight: '140px',
+                borderRadius: '12px',
+                background: `linear-gradient(135deg, ${mode.gradientFrom}, ${mode.gradientTo}), rgba(10,22,40,0.70)`,
+                border: isActivating
+                  ? `1px solid rgba(${mode.accentRgb},0.80)`
+                  : `1px solid rgba(${mode.accentRgb},0.22)`,
+                boxShadow: isActivating
+                  ? `0 0 24px rgba(${mode.accentRgb},0.35), 0 4px 32px rgba(0,0,0,0.60)`
+                  : '0 4px 24px rgba(0,0,0,0.50)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                transform: isActivating ? 'scale(0.975)' : undefined,
+              }}
             >
-              {/* Card Background Layer */}
-              <div className={`absolute inset-0 bg-surface-high/40 group-hover:bg-primary/5 transition-colors duration-500`} />
-              
-              {/* Biome Texture Logic replacement with stylized gradients */}
-              <div className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500">
-                <div 
-                  className="w-full h-full"
+              {/* Speed-line texture overlay */}
+              <div className="absolute inset-0 speed-lines opacity-30 pointer-events-none" />
+
+              {/* Hover glow sweep */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500"
+                style={{
+                  background: `radial-gradient(ellipse at 20% 50%, rgba(${mode.accentRgb},0.10) 0%, transparent 65%)`,
+                }}
+              />
+
+              {/* Left accent bar */}
+              <div
+                className="absolute left-0 top-0 bottom-0 w-[3px] transition-opacity duration-300"
+                style={{
+                  background: `linear-gradient(180deg, rgba(${mode.accentRgb},0.9) 0%, rgba(${mode.accentRgb},0.3) 100%)`,
+                  opacity: isActivating ? 1 : 0.5,
+                }}
+              />
+
+              {/* Card body */}
+              <div className="relative flex items-center gap-4 px-5 py-4 z-10">
+
+                {/* Icon */}
+                <div
+                  className="flex-shrink-0 flex items-center justify-center rounded-xl transition-all duration-300"
                   style={{
-                    background: getIllustrationPattern(mode.id),
-                    backgroundSize: '40px 40px',
+                    width: '52px',
+                    height: '52px',
+                    background: `rgba(${mode.accentRgb},0.12)`,
+                    border: `1px solid rgba(${mode.accentRgb},0.30)`,
+                    boxShadow: isActivating ? `0 0 16px rgba(${mode.accentRgb},0.40)` : undefined,
                   }}
-                />
-              </div>
-
-              {/* Speed lines */}
-              <div className="absolute inset-0 speed-lines opacity-10 group-hover:opacity-30 pointer-events-none" />
-
-              {/* Content Box */}
-              <div className="relative h-full flex flex-col p-6 z-10">
-                {/* Header Section */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="h-14 w-14 rounded-xl bg-surface-highest/60 border border-white/5 group-hover:border-primary/30 flex items-center justify-center transition-all duration-500 shadow-lg shadow-black/20">
-                    <span className="material-symbols-outlined text-3xl text-primary/80 group-hover:text-primary transition-colors text-glow">
-                      {mode.icon}
-                    </span>
-                  </div>
-                  
-                  <div className={`px-2 py-1 rounded border ${diffColor} bg-black/20 backdrop-blur-sm`}>
-                    <span className="text-[9px] font-black uppercase tracking-widest">{mode.difficulty}</span>
-                  </div>
+                >
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      fontSize: '26px',
+                      color: `rgba(${mode.accentRgb},1)`,
+                      filter: `drop-shadow(0 0 6px rgba(${mode.accentRgb},0.6))`,
+                    }}
+                  >
+                    {mode.icon}
+                  </span>
                 </div>
 
-                <div className="flex-1 text-left">
-                  <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface mb-1 group-hover:text-glow transition-all">
+                {/* Text block */}
+                <div className="flex-1 min-w-0">
+                  {/* Tagline + difficulty */}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className="text-[8px] font-black uppercase tracking-[0.35em]"
+                      style={{ color: `rgba(${mode.accentRgb},0.75)` }}
+                    >
+                      {mode.tagline}
+                    </span>
+                    <div
+                      className="h-px flex-1"
+                      style={{ background: `rgba(${mode.accentRgb},0.15)` }}
+                    />
+                    <span
+                      className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
+                      style={{
+                        color: diff.color,
+                        background: `rgba(${mode.accentRgb},0.10)`,
+                        border: `1px solid rgba(${mode.accentRgb},0.20)`,
+                      }}
+                    >
+                      {diff.label}
+                    </span>
+                  </div>
+
+                  {/* Mode name */}
+                  <h3
+                    className="font-bebas uppercase leading-none mb-1.5 group-hover:text-glow transition-all duration-300"
+                    style={{
+                      fontSize: 'clamp(22px, 4vw, 28px)',
+                      color: '#F3FBFF',
+                      letterSpacing: '0.01em',
+                    }}
+                  >
                     {mode.name}
                   </h3>
-                  <p className="text-xs font-bold text-on-surface-variant leading-relaxed max-w-[90%]">
+
+                  {/* Description */}
+                  <p
+                    className="text-[11px] leading-relaxed"
+                    style={{ color: 'rgba(255,255,255,0.50)', fontWeight: 600 }}
+                  >
                     {mode.description}
                   </p>
                 </div>
 
-                {/* Footer Stats - Broadcast Style */}
-                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-[8px] uppercase tracking-widest text-on-surface-variant font-bold mb-0.5">Potential Rewards</span>
-                    <span className="text-[10px] font-black italic slanted text-primary text-glow uppercase">{mode.rewards}</span>
-                  </div>
-                  
-                  {mode.playerCount && (
-                    <div className="text-right">
-                      <span className="text-[8px] uppercase tracking-widest text-on-surface-variant font-bold block mb-0.5">Active Swimmers</span>
-                      <div className="flex items-center gap-1.5 justify-end">
-                        <span className="w-1 h-1 rounded-full bg-primary animate-pulse shadow-[0_0_4px_rgba(129,236,255,1)]" />
-                        <span className="text-[10px] font-bold text-on-surface font-mono-data">{mode.playerCount.split(' ')[0]}</span>
-                      </div>
-                    </div>
-                  )}
+                {/* Chevron */}
+                <div
+                  className="flex-shrink-0 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    background: `rgba(${mode.accentRgb},0.12)`,
+                    border: `1px solid rgba(${mode.accentRgb},0.25)`,
+                    transform: isActivating ? 'translateX(4px)' : undefined,
+                  }}
+                >
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: '18px', color: `rgba(${mode.accentRgb},0.9)` }}
+                  >
+                    chevron_right
+                  </span>
                 </div>
               </div>
 
-              {/* Hover Glow Ripple */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-1000 -z-10" />
+              {/* Footer stats bar */}
+              <div
+                className="relative flex items-center gap-6 px-5 pb-4 z-10"
+              >
+                {/* Rewards */}
+                <div className="flex items-center gap-3">
+                  <div>
+                    <div
+                      className="text-[7px] font-black uppercase tracking-[0.35em] mb-0.5"
+                      style={{ color: 'rgba(255,255,255,0.35)' }}
+                    >
+                      Rewards
+                    </div>
+                    <div
+                      className="text-[10px] font-black italic slanted uppercase"
+                      style={{ color: '#D4A843', textShadow: '0 0 8px rgba(212,168,67,0.5)' }}
+                    >
+                      {mode.rewards.xp} XP · {mode.rewards.coins.toLocaleString()} Coins
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                {mode.playerCount && (
+                  <>
+                    <div
+                      className="h-6 w-px"
+                      style={{ background: 'rgba(255,255,255,0.08)' }}
+                    />
+                    <div>
+                      <div
+                        className="text-[7px] font-black uppercase tracking-[0.35em] mb-0.5"
+                        style={{ color: 'rgba(255,255,255,0.35)' }}
+                      >
+                        Live
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="w-1 h-1 rounded-full animate-pulse"
+                          style={{
+                            background: `rgba(${mode.accentRgb},1)`,
+                            boxShadow: `0 0 4px rgba(${mode.accentRgb},1)`,
+                          }}
+                        />
+                        <span
+                          className="text-[10px] font-black"
+                          style={{ color: 'rgba(255,255,255,0.80)', fontFamily: "'JetBrains Mono', monospace" }}
+                        >
+                          {mode.playerCount}
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Activating overlay flash */}
+              {isActivating && (
+                <div
+                  className="absolute inset-0 rounded-xl pointer-events-none"
+                  style={{
+                    background: `rgba(${mode.accentRgb},0.08)`,
+                    animation: 'pulse 0.38s ease-out',
+                  }}
+                />
+              )}
             </button>
           );
         })}
