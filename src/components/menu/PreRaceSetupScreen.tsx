@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { ChevronLeft } from 'lucide-react';
 
 interface PreRaceSetupScreenProps {
   mode?: string;
@@ -48,6 +49,17 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
         
         <div className="relative z-10 flex items-center justify-between gap-8 flex-wrap">
           <div>
+            {/* Back button */}
+            {onCancel && (
+              <button
+                onClick={onCancel}
+                className="flex items-center gap-1.5 mb-4 text-white/55 hover:text-white/85 transition-colors active:scale-95"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                <ChevronLeft size={14} />
+                <span className="text-[10px] font-black uppercase tracking-[0.25em]">Back to Modes</span>
+              </button>
+            )}
             <div className="flex items-center gap-3 mb-4">
               <span className="h-[1px] w-12 bg-primary/40" />
               <div className="flex items-center gap-2">

@@ -13,22 +13,19 @@
  *     race | career | training | rankings | style | store
  *   Settings: via TopUtilityBar gear icon (1 tap)
  *
+ * Back button: shown whenever the active tab is not 'race' or settings overlay
+ * is open. Tapping returns to the race/lobby tab.
+ *
  * AppShell does NOT own:
  *   - PlayScreen / PreRaceSetup / RaceScene / PauseMenu / RaceResultScreen
  *     (all game-flow screens live in GameShell)
  *
  * AppShell exposes onPlay so GameShell can trigger the race.
- *
- * Anti-patterns deliberately avoided:
- *   ✗ Full-page scroll
- *   ✗ <header>/<footer> web structure
- *   ✗ SaaS dashboard card grids
- *   ✗ Marketing hero sections
- *   ✗ Nested page trees requiring > 2 taps to reach a destination
  */
 
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { ChevronLeft } from 'lucide-react';
 
 // Lobby system (Phase 2)
 import { LobbyScreen }    from '../lobby/LobbyScreen';
@@ -74,6 +71,72 @@ function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) =>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Tab display labels (for back button context)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TAB_LABELS: Record<LobbyTab, string> = {
+  race:     'Lobby',
+  career:   'Career',
+  training: 'Training',
+  rankings: 'Rankings',
+  style:    'Customise',
+  store:    'Store',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Back button component
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface BackButtonProps {
+  label?: string;
+  onClick: () => void;
+}
+
+const BackButton: React.FC<BackButtonProps> = ({ label = 'Back', onClick }) => (
+  <motion.button
+    initial={{ opacity: 0, x: -10 }}
+    animate={{ opacity: 1, x: 0 }}
+    exit={{ opacity: 0, x: -10 }}
+    transition={{ duration: 0.18 }}
+    whileTap={{ scale: 0.90 }}
+    onClick={onClick}
+    aria-label={`Go back from ${label}`}
+    style={{
+      position:       'absolute',
+      top:            '54px',         /* just below TopUtilityBar (48px) + 6px gap */
+      left:           '10px',
+      zIndex:         68,
+      display:        'flex',
+      alignItems:     'center',
+      gap:            '4px',
+      padding:        '5px 11px 5px 8px',
+      borderRadius:   '10px',
+      background:     'rgba(4,20,33,0.85)',
+      border:         '1px solid rgba(56,214,255,0.20)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      cursor:         'pointer',
+      userSelect:     'none',
+      WebkitUserSelect: 'none',
+    }}
+  >
+    <ChevronLeft size={14} color="rgba(169,211,231,0.80)" />
+    <span
+      style={{
+        fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
+        fontWeight:    700,
+        fontSize:      '10px',
+        letterSpacing: '0.10em',
+        color:         'rgba(169,211,231,0.80)',
+        textTransform: 'uppercase',
+      }}
+    >
+      {label}
+    </span>
+  </motion.button>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // AppShell component
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -93,8 +156,13 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
     }
   };
 
+  const goToLobby     = () => handleTabChange('race');
   const openSettings  = () => setOverlayPage('settings');
   const closeOverlay  = () => setOverlayPage(null);
+
+  // Show back button when: not on the race tab OR settings overlay is open
+  const showBack = activeTab !== 'race' || overlayPage === 'settings';
+  const backLabel = overlayPage === 'settings' ? 'Settings' : TAB_LABELS[activeTab];
 
   return (
     <div
@@ -103,6 +171,17 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
     >
       {/* ── Persistent top bar ── */}
       <TopUtilityBar onSettings={openSettings} />
+
+      {/* ── Back button (shown when not on race tab or in settings) ── */}
+      <AnimatePresence>
+        {showBack && (
+          <BackButton
+            key="app-back"
+            label={overlayPage === 'settings' ? 'Lobby' : 'Lobby'}
+            onClick={overlayPage === 'settings' ? closeOverlay : goToLobby}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Main content area ── */}
       <AnimatePresence mode="wait">
