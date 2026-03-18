@@ -1,4 +1,5 @@
 /* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 /* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
 @import 'tailwindcss';
@@ -120,6 +121,17 @@ body {
   font-family: "Barlow Condensed", "Arial Narrow", Impact, system-ui, sans-serif;
 }
 
+/* Bebas Neue — impact display headings for lobby titles, scores, season branding */
+.font-bebas {
+  font-family: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+}
+
+/* Rajdhani — tabs, labels, telemetry, menu labels, HUD readouts */
+.font-rajdhani {
+  font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Mono data utility class — race times, splits, stats */
 .font-mono-data {
   font-family: "JetBrains Mono", "Fira Mono", "Courier New", monospace;
@@ -177,4 +189,96 @@ body {
 
 .animate-countdown {
   animation: countdown-pulse 0.9s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   AQUATIC LOBBY THEME — Phase 2 premium game lobby
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Aqua text glow — neon cyan, used on title "26" and active states */
+.text-glow-aqua {
+  text-shadow:
+    0 0  8px rgba(56, 214, 255, 0.70),
+    0 0 20px rgba(56, 214, 255, 0.40);
+}
+
+/* Aqua box glow — buttons, cards, active tabs */
+.glow-aqua {
+  box-shadow:
+    0 0 12px rgba(56, 214, 255, 0.40),
+    0 0 28px rgba(56, 214, 255, 0.18);
+}
+
+/* Gold text glow — rankings, rewards */
+.text-glow-gold-lobby {
+  text-shadow:
+    0 0  6px rgba(255, 215, 106, 0.65),
+    0 0 16px rgba(255, 215, 106, 0.30);
+}
+
+/* Caustic animated underwater light refraction */
+@keyframes caustic-drift {
+  0%   { transform: translate(0px,   0px)  scale(1.00); opacity: 0.55; }
+  20%  { transform: translate(18px, -12px) scale(1.08); opacity: 0.75; }
+  40%  { transform: translate(-8px,  20px) scale(0.92); opacity: 0.45; }
+  60%  { transform: translate(14px,  10px) scale(1.05); opacity: 0.65; }
+  80%  { transform: translate(-16px, -6px) scale(0.97); opacity: 0.50; }
+  100% { transform: translate(0px,   0px)  scale(1.00); opacity: 0.55; }
+}
+
+.caustic-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: caustic-drift linear infinite;
+}
+
+.caustic-blob-1 {
+  width: 340px;
+  height: 220px;
+  top: -60px;
+  left: 8%;
+  background: radial-gradient(ellipse, rgba(56, 214, 255, 0.07) 0%, transparent 68%);
+  animation-duration: 13s;
+  animation-delay: 0s;
+}
+
+.caustic-blob-2 {
+  width: 260px;
+  height: 320px;
+  top: 30%;
+  right: 18%;
+  background: radial-gradient(ellipse, rgba(122, 232, 255, 0.05) 0%, transparent 68%);
+  animation-duration: 19s;
+  animation-delay: -7s;
+}
+
+.caustic-blob-3 {
+  width: 280px;
+  height: 200px;
+  bottom: -40px;
+  left: 38%;
+  background: radial-gradient(ellipse, rgba(56, 214, 255, 0.06) 0%, transparent 68%);
+  animation-duration: 16s;
+  animation-delay: -4s;
+}
+
+/* Lobby panel glass surface */
+.lobby-glass {
+  background: rgba(4, 20, 33, 0.76);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 214, 255, 0.14);
+}
+
+/* Icon tab active indicator — aqua line at top of tab */
+.tab-indicator {
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: #38D6FF;
+  box-shadow: 0 0 10px rgba(56, 214, 255, 0.90), 0 0 20px rgba(56, 214, 255, 0.45);
 }

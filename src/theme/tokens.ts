@@ -232,6 +232,41 @@ export const zIndex = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// LOBBY THEME — Phase 2 aquatic game lobby palette
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Phase 2 premium lobby colors.
+ * These replace generic surface/text tokens in lobby-specific components.
+ * Rules:
+ *   - bgDeep  → deepest scene layer, vignette edges
+ *   - bgOcean → mid panels, cards
+ *   - bgPanel → glass overlays (semi-transparent)
+ *   - aqua    → primary action, active states, glow source
+ *   - cyanGlow → lighter glow highlight, XP bar fill end
+ */
+export const lobby = {
+  bgDeep:        '#041421',
+  bgOcean:       '#06263A',
+  bgPanel:       'rgba(4, 20, 33, 0.76)',
+  textPrimary:   '#F3FBFF',
+  textSecondary: '#A9D3E7',
+  aqua:          '#38D6FF',
+  cyanGlow:      '#7AE8FF',
+  warning:       '#FFC247',
+  danger:        '#FF5D73',
+  success:       '#37E28D',
+  gold:          '#FFD76A',
+
+  // Derived alpha variants
+  aquaGlow:      'rgba(56, 214, 255, 0.40)',
+  aquaSubtle:    'rgba(56, 214, 255, 0.10)',
+  aquaBorder:    'rgba(56, 214, 255, 0.20)',
+  panelBorder:   'rgba(56, 214, 255, 0.12)',
+  goldGlow:      'rgba(255, 215, 106, 0.35)',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // CSS CUSTOM PROPERTY INJECTION
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -284,4 +319,21 @@ export function injectCSSTokens(): void {
   root.style.setProperty('--z-hud',                  String(zIndex.hudBase));
   root.style.setProperty('--z-menu',                 String(zIndex.menu));
   root.style.setProperty('--z-landscape',            String(zIndex.landscape));
+
+  // Lobby theme (Phase 2)
+  root.style.setProperty('--lobby-bg-deep',          lobby.bgDeep);
+  root.style.setProperty('--lobby-bg-ocean',         lobby.bgOcean);
+  root.style.setProperty('--lobby-bg-panel',         lobby.bgPanel);
+  root.style.setProperty('--lobby-text-primary',     lobby.textPrimary);
+  root.style.setProperty('--lobby-text-secondary',   lobby.textSecondary);
+  root.style.setProperty('--lobby-aqua',             lobby.aqua);
+  root.style.setProperty('--lobby-cyan-glow',        lobby.cyanGlow);
+  root.style.setProperty('--lobby-warning',          lobby.warning);
+  root.style.setProperty('--lobby-danger',           lobby.danger);
+  root.style.setProperty('--lobby-success',          lobby.success);
+  root.style.setProperty('--lobby-gold',             lobby.gold);
+  root.style.setProperty('--lobby-aqua-glow',        lobby.aquaGlow);
+  root.style.setProperty('--lobby-aqua-subtle',      lobby.aquaSubtle);
+  root.style.setProperty('--lobby-aqua-border',      lobby.aquaBorder);
+  root.style.setProperty('--lobby-panel-border',     lobby.panelBorder);
 }

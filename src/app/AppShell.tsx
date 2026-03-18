@@ -1,126 +1,79 @@
 /**
- * AppShell — Non-race menu and lobby shell
+ * AppShell — Phase 2 premium game lobby shell
  *
- * Owns everything that is NOT the Babylon.js race scene:
- *   - Global navigation (TopBar, BottomNav)
- *   - All lobby/management pages (home, career, club, scouts, market, champs)
- *   - Utility pages (friends, inbox, settings, training, events, rewards, pass, bonus)
- *   - Background theming (locker-room backdrop)
+ * Entry experience is now a landscape game lobby, not a website.
+ *
+ * Layout contract:
+ *   TopUtilityBar  — 48px, absolute top   (profile, currencies, settings)
+ *   Content area   — fills between bars, no scroll, occupies absolute inset
+ *   IconTabBar     — 56px, absolute bottom (6 icon-first tabs)
+ *
+ * Navigation: flat — every main destination reachable in ≤ 2 taps.
+ *   Primary tabs (IconTabBar):
+ *     race | career | training | rankings | style | store
+ *   Settings: via TopUtilityBar gear icon (1 tap)
  *
  * AppShell does NOT own:
- *   - PlayScreen (game-mode picker) — game flow, lives in GameShell
- *   - PreRaceSetupScreen — game flow, lives in GameShell
- *   - RaceScene (Babylon canvas) — game flow, lives in GameShell
- *   - PauseMenu / RaceResultScreen — game flow, lives in GameShell
+ *   - PlayScreen / PreRaceSetup / RaceScene / PauseMenu / RaceResultScreen
+ *     (all game-flow screens live in GameShell)
  *
- * AppShell exposes onPlay so GameShell can trigger the race flow.
- *
- * Layout contract (landscape mobile):
- *   TopBar     — h-14, absolute top
- *   Content    — between TopBar and BottomNav, scrollable only within the content area
- *   BottomNav  — h-16, absolute bottom
- *   SideMenu   — absolute left, between TopBar and BottomNav (home screen only)
+ * AppShell exposes onPlay so GameShell can trigger the race.
  *
  * Anti-patterns deliberately avoided:
  *   ✗ Full-page scroll
  *   ✗ <header>/<footer> web structure
  *   ✗ SaaS dashboard card grids
  *   ✗ Marketing hero sections
+ *   ✗ Nested page trees requiring > 2 taps to reach a destination
  */
 
 import React, { useState } from 'react';
-import { AnimatePresence } from 'motion/react';
-import { TopBar } from '../components/TopBar';
-import { BottomNav } from '../components/BottomNav';
-import { BrowserToolkit } from '../components/BrowserToolkit';
-import { HomePage } from '../pages/HomePage';
-import { CareerMode } from '../pages/CareerMode';
-import { ClubManagement } from '../pages/ClubManagement';
-import { Scouts } from '../pages/Scouts';
-import { TransferMarket } from '../pages/TransferMarket';
-import { Championships } from '../pages/Championships';
+import { AnimatePresence, motion } from 'motion/react';
+
+// Lobby system (Phase 2)
+import { LobbyScreen }    from '../lobby/LobbyScreen';
+import { TopUtilityBar }  from '../lobby/TopUtilityBar';
+import { IconTabBar, type LobbyTab } from '../lobby/IconTabBar';
+
+// Page content
+import { CareerMode }     from '../pages/CareerMode';
+import { Championships }  from '../pages/Championships';
 import {
-  BonusMissionsPage,
-  EventsPage,
-  FriendsPage,
-  InboxPage,
-  RewardsPage,
-  SettingsPage,
-  StarPassPage,
   TrainingPage,
+  SettingsPage,
 } from '../pages/UtilityPages';
-import lockerRoomBackground from '../designs/locker_room_custom/screen.png';
+import { SwimmerScreen }  from '../components/menu/SwimmerScreen';
+import { StoreScreen }    from '../components/menu/StoreScreen';
+
+// Dev inspector
+import { BrowserToolkit } from '../components/BrowserToolkit';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type MainTab =
-  | 'home'
-  | 'career'
-  | 'club'
-  | 'scouts'
-  | 'market'
-  | 'champs';
-
-export type UtilityPage =
-  | 'friends'
-  | 'inbox'
-  | 'settings'
-  | 'training'
-  | 'events'
-  | 'rewards'
-  | 'pass'
-  | 'bonus';
+/** Settings is not a tab — it's accessed via the top utility bar. */
+type OverlayPage = 'settings' | null;
 
 interface AppShellProps {
-  /** Called when player taps PLAY — hands off to GameShell for race flow */
+  /** Called when player taps START RACE — hands off to GameShell */
   onPlay: () => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Page renderer
+// Tab → page map
 // ─────────────────────────────────────────────────────────────────────────────
 
-function usePage(onPlay: () => void) {
-  const [activeTab, setActiveTab] = useState<MainTab>('home');
-  const [utilityPage, setUtilityPage] = useState<UtilityPage | null>(null);
-
-  const openTab = (tab: string) => {
-    setUtilityPage(null);
-    setActiveTab(tab as MainTab);
-  };
-
-  const openUtility = (page: string) => setUtilityPage(page as UtilityPage);
-  const closeUtility = () => setUtilityPage(null);
-
-  const getPage = (): { key: string; node: React.ReactNode } => {
-    // Utility pages take priority over tab pages
-    if (utilityPage) {
-      switch (utilityPage) {
-        case 'friends':  return { key: 'friends',  node: <FriendsPage /> };
-        case 'inbox':    return { key: 'inbox',    node: <InboxPage /> };
-        case 'settings': return { key: 'settings', node: <SettingsPage /> };
-        case 'training': return { key: 'training', node: <TrainingPage /> };
-        case 'events':   return { key: 'events',   node: <EventsPage /> };
-        case 'rewards':  return { key: 'rewards',  node: <RewardsPage /> };
-        case 'pass':     return { key: 'pass',     node: <StarPassPage /> };
-        case 'bonus':    return { key: 'bonus',    node: <BonusMissionsPage /> };
-      }
-    }
-
-    switch (activeTab) {
-      case 'home':   return { key: 'home',   node: <HomePage onSideMenuSelect={openUtility} onPlay={onPlay} /> };
-      case 'career': return { key: 'career', node: <CareerMode /> };
-      case 'club':   return { key: 'club',   node: <ClubManagement /> };
-      case 'scouts': return { key: 'scouts', node: <Scouts /> };
-      case 'market': return { key: 'market', node: <TransferMarket /> };
-      case 'champs': return { key: 'champs', node: <Championships /> };
-      default:       return { key: 'home',   node: <HomePage onSideMenuSelect={openUtility} onPlay={onPlay} /> };
-    }
-  };
-
-  return { activeTab, openTab, utilityPage, openUtility, closeUtility, getPage };
+function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) => void): React.ReactNode {
+  switch (tab) {
+    case 'race':     return <LobbyScreen onStartRace={onPlay} onNavigate={onNavigate} />;
+    case 'career':   return <CareerMode />;
+    case 'training': return <TrainingPage />;
+    case 'rankings': return <Championships />;
+    case 'style':    return <SwimmerScreen />;
+    case 'store':    return <StoreScreen />;
+    default:         return <LobbyScreen onStartRace={onPlay} onNavigate={onNavigate} />;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -128,80 +81,91 @@ function usePage(onPlay: () => void) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
-  const {
-    activeTab,
-    openTab,
-    utilityPage,
-    openUtility,
-    closeUtility,
-    getPage,
-  } = usePage(onPlay);
+  const [activeTab,    setActiveTab]    = useState<LobbyTab>('race');
+  const [overlayPage,  setOverlayPage]  = useState<OverlayPage>(null);
 
-  const currentPage = getPage();
+  const handleTabChange = (tab: LobbyTab) => {
+    setOverlayPage(null);
+    setActiveTab(tab);
+  };
+
+  const handleNavigate = (dest: string) => {
+    // Allow LobbyScreen quick-access buttons to change tabs
+    if (['race','career','training','rankings','style','store'].includes(dest)) {
+      handleTabChange(dest as LobbyTab);
+    }
+  };
+
+  const openSettings  = () => setOverlayPage('settings');
+  const closeOverlay  = () => setOverlayPage(null);
 
   return (
-    <div className="w-full h-full relative overflow-hidden font-sans select-none">
-      {/*
-        Background layer
-        ─────────────────────────────────────────────────────────────────────
-        The locker-room background is a single image that covers the
-        entire shell.  It is NOT a scrollable page background — it is
-        fixed artwork that the UI sits on top of.
-      */}
-      <img
-        src={lockerRoomBackground}
-        alt=""
-        aria-hidden
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-      />
-      {/* Dark tint over the background */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: 'var(--color-overlay-dark, rgba(5,11,20,0.72))' }}
-      />
+    <div
+      className="w-full h-full relative overflow-hidden select-none"
+      style={{ background: '#041421' }}  /* lobbyBgDeep fallback */
+    >
+      {/* ── Persistent top bar ── */}
+      <TopUtilityBar onSettings={openSettings} />
 
-      {/*
-        TopBar — player profile, currencies, utility shortcuts
-        h-14 absolute top. Content area starts at top-14.
-      */}
-      <TopBar
-        onOpenFriends={() => openUtility('friends')}
-        onOpenInbox={() => openUtility('inbox')}
-        onOpenSettings={() => openUtility('settings')}
-      />
-
-      {/*
-        Page content area
-        Fills between TopBar (top-14) and BottomNav (bottom-16).
-        Each page component is responsible for NOT overflowing this area.
-        AnimatePresence handles crossfade between tab switches.
-      */}
+      {/* ── Main content area ── */}
       <AnimatePresence mode="wait">
-        <React.Fragment key={currentPage.key}>
-          {currentPage.node}
-        </React.Fragment>
+        <motion.div
+          key={overlayPage ?? activeTab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          style={{
+            position: 'absolute',
+            top:      '48px',
+            bottom:   '56px',
+            left:     0,
+            right:    0,
+            overflow: 'hidden',
+          }}
+        >
+          {overlayPage === 'settings' ? (
+            <SettingsPage />
+          ) : (
+            renderTab(activeTab, onPlay, handleNavigate)
+          )}
+        </motion.div>
       </AnimatePresence>
 
-      {/*
-        Development inspector — remove in production build
-        See FUTURE_WORK.md: "Remove BrowserToolkit from production build"
-      */}
+      {/* ── Settings back-tap close area (tap outside settings to dismiss) ── */}
+      {overlayPage === 'settings' && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={closeOverlay}
+          style={{
+            position:   'absolute',
+            top:        '48px',
+            right:      0,
+            bottom:     '56px',
+            width:      '32px',
+            background: 'transparent',
+            border:     'none',
+            cursor:     'pointer',
+            zIndex:     65,
+          }}
+          aria-label="Close settings"
+        />
+      )}
+
+      {/* ── Dev inspector ── */}
       <BrowserToolkit
         activeTab={activeTab}
-        utilityPage={utilityPage}
-        onOpenTab={openTab}
-        onOpenUtility={openUtility}
-        onCloseUtility={closeUtility}
+        utilityPage={overlayPage}
+        onOpenTab={handleTabChange}
+        onOpenUtility={(p) => p === 'settings' ? openSettings() : undefined}
+        onCloseUtility={closeOverlay}
       />
 
-      {/*
-        BottomNav — primary navigation rail
-        h-16 absolute bottom. Contains PLAY button (raised, green).
-      */}
-      <BottomNav
-        activeTab={activeTab}
-        onChange={openTab}
-        onPlay={onPlay}
+      {/* ── Persistent bottom tab bar ── */}
+      <IconTabBar
+        activeTab={overlayPage ? activeTab : activeTab}
+        onChange={handleTabChange}
       />
     </div>
   );
