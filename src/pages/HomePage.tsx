@@ -17,7 +17,7 @@ export function HomePage({ onSideMenuSelect }: HomePageProps) {
       <SideMenu onSelect={onSideMenuSelect} />
 
       <div className="absolute left-28 right-4 top-16 bottom-18 grid grid-cols-[minmax(0,1fr)_16rem] gap-3 overflow-hidden">
-        <div className="grid grid-rows-[minmax(0,1fr)_12rem] gap-3 min-h-0">
+        <div className="grid grid-rows-[minmax(0,1fr)_minmax(13rem,15rem)] gap-3 min-h-0">
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="relative rounded-2xl overflow-hidden border border-white/10 shadow-lg group cursor-pointer min-h-0">
             <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628] to-[#1B2838]" />
             <div className="absolute right-0 bottom-0 w-[42%] h-full pointer-events-none">
@@ -43,20 +43,33 @@ export function HomePage({ onSideMenuSelect }: HomePageProps) {
           </motion.div>
 
           <div className="grid grid-cols-[minmax(0,1fr)_15rem] gap-3 min-h-0">
-            <div className="bg-black/40 rounded-2xl p-4 border border-white/10 backdrop-blur-md min-h-0 overflow-hidden">
+            <div className="bg-black/40 rounded-2xl p-4 border border-white/10 backdrop-blur-md min-h-0 overflow-hidden flex flex-col">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-white font-black italic text-lg">ACTIVE EVENTS</h3>
                 <span className="text-[9px] text-white/50 font-bold tracking-[0.2em] uppercase">Live feed</span>
               </div>
-              <div className="grid grid-cols-3 gap-2 h-[calc(100%-1.75rem)]">
+              <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
                 {HOME_EVENTS.map((event, index) => (
-                  <motion.div key={event.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 + index * 0.08 }} className="rounded-xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-3 flex min-w-0 flex-col justify-between overflow-hidden">
-                    <div className="min-w-0">
-                      <div className="text-[9px] font-black tracking-[0.2em] uppercase text-[#D4A843] mb-1 truncate">{event.status}</div>
-                      <div className="text-white font-black text-sm leading-tight">{event.name}</div>
-                      <div className="text-white/60 text-[11px] mt-2 leading-snug">{event.reward}</div>
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 + index * 0.08 }}
+                    className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-4 flex min-w-0 flex-col justify-between overflow-hidden"
+                  >
+                    <div className="space-y-3 min-w-0">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-[9px] font-black tracking-[0.2em] uppercase text-[#D4A843] truncate">{event.status}</div>
+                        <div className="flex items-center gap-1.5 text-white/70 text-[11px] font-bold shrink-0"><TimerIcon size={12} className="text-[#D4A843]" />{event.time}</div>
+                      </div>
+                      <div className="text-white font-black text-base leading-tight max-w-[16rem]">{event.name}</div>
+                      <div className="text-white/65 text-[12px] leading-relaxed max-w-[18rem]">{event.reward}</div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-white/70 text-[11px] font-bold mt-3"><TimerIcon size={12} className="text-[#D4A843] shrink-0" />{event.time}</div>
+                    <div className="mt-4">
+                      <button className="rounded-lg border border-white/15 bg-white/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white hover:bg-white/12 transition-colors whitespace-nowrap">
+                        View Event
+                      </button>
+                    </div>
                   </motion.div>
                 ))}
               </div>

@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'motion/react'
 import { ACHIEVEMENTS, CAREER_TRACK, HOME_EVENTS } from '../utils/gameData'
 import { ProgressBar } from '../components/ProgressBar'
-import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon } from 'lucide-react'
+import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerIcon } from 'lucide-react'
 
 export function CareerMode() {
   return (
@@ -50,13 +50,20 @@ export function CareerMode() {
           <div className="flex flex-col gap-4 min-w-0">
             <div className="bg-black/40 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
               <h3 className="text-white font-bold text-base mb-3 flex items-center gap-2"><TrophyIcon size={16} className="text-[#D4A843]" /> FEATURED EVENTS</h3>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {HOME_EVENTS.map((event) => (
-                  <div key={event.id} className="rounded-xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-3 min-w-0 overflow-hidden">
-                    <div className="text-[9px] font-black uppercase tracking-[0.2em] text-[#D4A843] mb-2 truncate">{event.status}</div>
-                    <div className="text-white font-bold text-sm leading-tight">{event.name}</div>
-                    <div className="text-white/60 text-[11px] mt-2 leading-snug">{event.reward}</div>
-                    <div className="text-white/70 text-[11px] mt-3">{event.time}</div>
+                  <div key={event.id} className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-4 min-w-0 overflow-hidden flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-[9px] font-black uppercase tracking-[0.2em] text-[#D4A843] truncate">{event.status}</div>
+                        <div className="flex items-center gap-1 text-white/70 text-[11px] font-bold shrink-0"><TimerIcon size={12} className="text-[#D4A843]" />{event.time}</div>
+                      </div>
+                      <div className="text-white font-bold text-base leading-tight max-w-[18rem]">{event.name}</div>
+                      <div className="text-white/60 text-[12px] leading-relaxed max-w-[18rem]">{event.reward}</div>
+                    </div>
+                    <button className="mt-4 self-start rounded-lg border border-white/15 bg-white/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white hover:bg-white/12 transition-colors whitespace-nowrap">
+                      Enter Race
+                    </button>
                   </div>
                 ))}
               </div>
