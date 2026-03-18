@@ -55,6 +55,8 @@ export class ArenaManager {
   // Quality settings
   private qualityTier: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
   private isMobile: boolean = false;
+  // Frame-skip for low-end mode: 0 = every frame, 1 = every other frame
+  private frameSkipInterval: number = 0;
 
   // Arena configuration
   private arenaConfig: IArenaConfig = {
@@ -587,6 +589,12 @@ export class ArenaManager {
       const deltaTime = currentTime - lastFrameTime;
       lastFrameTime = currentTime;
 
+      // Frame-skip for low-end mode: skip odd frames when frameSkipInterval = 1
+      if (this.frameSkipInterval > 0 && frameCount % (this.frameSkipInterval + 1) !== 0) {
+        this.renderLoopId = requestAnimationFrame(renderLoop);
+        return;
+      }
+
       if (this.scene) {
         // Update water animation (simple)
         if (this.waterMesh && frameCount % 2 === 0) {
@@ -747,6 +755,46 @@ export class ArenaManager {
 
   public getQualityTier(): 'LOW' | 'MEDIUM' | 'HIGH' {
     return this.qualityTier;
+  }
+
+  /**
+   * Apply a quality preset at runtime (Phase 6 adaptive quality).
+   *
+   * high   — full resolution, all effects on
+   * medium — default; hardware scaling 1.0
+   * low    — half resolution via hardware scaling, frame-skip every other frame,
+   *           shadows and particles disabled
+   */
+  public setQualityPreset(preset: 'high' | 'medium' | 'low'): void {
+    if (!this.engine || !this.scene) return;
+
+    switch (preset) {
+      case 'high':
+        this.qualityTier = 'HIGH';
+        this.engine.setHardwareScalingLevel(1);
+        this.frameSkipInterval = 0;
+        this.scene.shadowsEnabled   = true;
+        this.scene.particlesEnabled = true;
+        break;
+
+      case 'medium':
+        this.qualityTier = 'MEDIUM';
+        this.engine.setHardwareScalingLevel(1);
+        this.frameSkipInterval = 0;
+        this.scene.shadowsEnabled   = true;
+        this.scene.particlesEnabled = true;
+        break;
+
+      case 'low':
+        this.qualityTier = 'LOW';
+        this.engine.setHardwareScalingLevel(2); // halve resolution — biggest mobile GPU win
+        this.frameSkipInterval = 1;             // render every other frame (~30fps)
+        this.scene.shadowsEnabled   = false;
+        this.scene.particlesEnabled = false;
+        break;
+    }
+
+    logger.log(`[ArenaManager] Quality preset set to: ${preset}`);
   }
 
   public isRenderingActive(): boolean {

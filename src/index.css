@@ -1,6 +1,325 @@
 /* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 /* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
 @import 'tailwindcss';
 
 /* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE RESET — game-appropriate defaults
+   ───────────────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;           /* No page scroll — this is a game */
+  overscroll-behavior: none;  /* Prevent pull-to-refresh on mobile */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  touch-action: pan-x pan-y; /* Allow scrollable sub-regions; canvas overrides to none */
+  background: #050B14;        /* Fallback while JS loads */
+}
+
+/* Prevent iOS bounce scroll from revealing white behind game */
+body {
+  position: fixed;
+  width: 100%;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   These are the fallback defaults.  injectCSSTokens() in main.tsx writes the
+   live values from src/theme/tokens.ts at boot.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Colors */
+  --color-primary:        #00E5FF;
+  --color-primary-dim:    #00B2CC;
+  --color-primary-glow:   rgba(0, 229, 255, 0.25);
+  --color-gold:           #D4A843;
+  --color-gold-glow:      rgba(212, 168, 67, 0.35);
+  --color-danger:         #EF4444;
+  --color-action:         #0D7C66;
+  --color-action-dark:    #065A46;
+  --color-surface-base:   #050B14;
+  --color-surface-mid:    #0A1628;
+  --color-surface-high:   #111D2E;
+  --color-surface-highest:#1B2838;
+  --color-text-primary:   #FFFFFF;
+  --color-text-secondary: rgba(255, 255, 255, 0.70);
+  --color-text-muted:     rgba(255, 255, 255, 0.45);
+  --color-border-subtle:  rgba(255, 255, 255, 0.08);
+  --color-border-soft:    rgba(255, 255, 255, 0.15);
+  --color-overlay-dark:   rgba(5, 11, 20, 0.72);
+
+  /* HUD sizing */
+  --hud-top-bar-height:     52px;
+  --hud-stamina-ring-size:  80px;
+  --hud-stroke-zone-height: 96px;
+  --hud-ticker-height:      20px;
+
+  /* Controls */
+  --control-min-tap:        44px;
+  --control-btn-lg:         56px;
+  --control-nav-tab:        56px;
+  --control-play-btn-width: 64px;
+
+  /* Shadows */
+  --shadow-glow-primary:  0 0 12px rgba(0, 229, 255, 0.45);
+  --shadow-glow-gold:     0 0 12px rgba(212, 168, 67, 0.50);
+  --shadow-card:          0 4px 24px rgba(0, 0, 0, 0.40);
+
+  /* Z-index */
+  --z-hud:        50;
+  --z-menu:       70;
+  --z-landscape:  90;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   LANDSCAPE ENFORCEMENT
+   Hides everything except the landscape guard when in portrait.
+   The guard JS handles the actual overlay — this is a CSS safety net.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@media (orientation: portrait) {
+  /* Allow the landscape guard overlay to display; blur the content behind */
+  #root > * > *:not([data-landscape-guard]) {
+    pointer-events: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TYPOGRAPHY BASE
+   Font stack applied to all text in the game.
+   Specific overrides come from component-level styles or Tailwind classes.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headline utility class — italic black condensed */
+.font-headline {
+  font-family: "Barlow Condensed", "Arial Narrow", Impact, system-ui, sans-serif;
+}
+
+/* Bebas Neue — impact display headings for lobby titles, scores, season branding */
+.font-bebas {
+  font-family: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+}
+
+/* Rajdhani — tabs, labels, telemetry, menu labels, HUD readouts */
+.font-rajdhani {
+  font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mono data utility class — race times, splits, stats */
+.font-mono-data {
+  font-family: "JetBrains Mono", "Fira Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GAME-SPECIFIC UTILITIES
+   Only add classes here that cannot be expressed in Tailwind.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Neon glow on text — used sparingly on race-critical readouts */
+.text-glow-primary {
+  text-shadow:
+    0 0  6px var(--color-primary-glow),
+    0 0 14px var(--color-primary-glow);
+}
+
+.text-glow-gold {
+  text-shadow:
+    0 0  6px var(--color-gold-glow),
+    0 0 14px var(--color-gold-glow);
+}
+
+/* Stamina bar transition — smooth drain animation */
+.stamina-bar {
+  transition: width 0.3s ease, stroke-dashoffset 0.3s ease;
+}
+
+/* Touch-zone tap highlight replacement */
+.tap-highlight {
+  transition: background-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.tap-highlight:active {
+  background-color: rgba(0, 229, 255, 0.15);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+/* Ticker scroll animation (used in RaceScene ticker strip) */
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker-scroll 18s linear infinite;
+}
+
+/* Race countdown pulse */
+@keyframes countdown-pulse {
+  0%, 100% { opacity: 1;    transform: scale(1);    }
+  50%       { opacity: 0.75; transform: scale(1.05); }
+}
+
+.animate-countdown {
+  animation: countdown-pulse 0.9s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   AQUATIC LOBBY THEME — Phase 2 premium game lobby
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Aqua text glow — neon cyan, used on title "26" and active states */
+.text-glow-aqua {
+  text-shadow:
+    0 0  8px rgba(56, 214, 255, 0.70),
+    0 0 20px rgba(56, 214, 255, 0.40);
+}
+
+/* Aqua box glow — buttons, cards, active tabs */
+.glow-aqua {
+  box-shadow:
+    0 0 12px rgba(56, 214, 255, 0.40),
+    0 0 28px rgba(56, 214, 255, 0.18);
+}
+
+/* Gold text glow — rankings, rewards */
+.text-glow-gold-lobby {
+  text-shadow:
+    0 0  6px rgba(255, 215, 106, 0.65),
+    0 0 16px rgba(255, 215, 106, 0.30);
+}
+
+/* Caustic animated underwater light refraction */
+@keyframes caustic-drift {
+  0%   { transform: translate(0px,   0px)  scale(1.00); opacity: 0.55; }
+  20%  { transform: translate(18px, -12px) scale(1.08); opacity: 0.75; }
+  40%  { transform: translate(-8px,  20px) scale(0.92); opacity: 0.45; }
+  60%  { transform: translate(14px,  10px) scale(1.05); opacity: 0.65; }
+  80%  { transform: translate(-16px, -6px) scale(0.97); opacity: 0.50; }
+  100% { transform: translate(0px,   0px)  scale(1.00); opacity: 0.55; }
+}
+
+.caustic-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: caustic-drift linear infinite;
+}
+
+.caustic-blob-1 {
+  width: 340px;
+  height: 220px;
+  top: -60px;
+  left: 8%;
+  background: radial-gradient(ellipse, rgba(56, 214, 255, 0.07) 0%, transparent 68%);
+  animation-duration: 13s;
+  animation-delay: 0s;
+}
+
+.caustic-blob-2 {
+  width: 260px;
+  height: 320px;
+  top: 30%;
+  right: 18%;
+  background: radial-gradient(ellipse, rgba(122, 232, 255, 0.05) 0%, transparent 68%);
+  animation-duration: 19s;
+  animation-delay: -7s;
+}
+
+.caustic-blob-3 {
+  width: 280px;
+  height: 200px;
+  bottom: -40px;
+  left: 38%;
+  background: radial-gradient(ellipse, rgba(56, 214, 255, 0.06) 0%, transparent 68%);
+  animation-duration: 16s;
+  animation-delay: -4s;
+}
+
+/* Lobby panel glass surface */
+.lobby-glass {
+  background: rgba(4, 20, 33, 0.76);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 214, 255, 0.14);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PERFORMANCE MODE OVERRIDES (Phase 6)
+   Applied via data-perf-mode attribute on <html> by optimizationHelpers.ts
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* reduced: disable backdrop-filter and box-shadow (biggest mobile GPU win) */
+[data-perf-mode="reduced"] .lobby-glass,
+[data-perf-mode="reduced"] [style*="backdropFilter"],
+[data-perf-mode="reduced"] [style*="backdrop-filter"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-perf-mode="reduced"] .caustic-blob {
+  display: none;
+}
+
+/* low: all of reduced + stop all caustic animations + strip Framer Motion transitions */
+[data-perf-mode="low"] .lobby-glass,
+[data-perf-mode="low"] [style*="backdropFilter"],
+[data-perf-mode="low"] [style*="backdrop-filter"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+[data-perf-mode="low"] .caustic-blob {
+  display: none;
+}
+
+[data-perf-mode="low"] * {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* reduced-motion: honour user preference by killing countdown/ticker anims */
+[data-reduced-motion="true"] .animate-ticker,
+[data-reduced-motion="true"] .animate-countdown,
+[data-reduced-motion="true"] .caustic-blob {
+  animation: none !important;
+}
+
+/* Icon tab active indicator — aqua line at top of tab */
+.tab-indicator {
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: #38D6FF;
+  box-shadow: 0 0 10px rgba(56, 214, 255, 0.90), 0 0 20px rgba(56, 214, 255, 0.45);
+}
