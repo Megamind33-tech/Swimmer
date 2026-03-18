@@ -1,40 +1,44 @@
 /**
- * HUDRoot — Phase 4 race HUD root component
+ * HUDRoot — Phase 7 swimming-specific race HUD root component
  *
- * Assembles all HUD widgets into the five ergonomic zones:
+ * Five ergonomic zones with full swimming competition identity:
  *
- *   TOP-LEFT    swimmer state: StaminaBar · OxygenBar · RhythmMeter
- *   TOP-CENTER  telemetry:     RaceTimerPanel (timer + position + lap + heat)
- *   TOP-RIGHT   navigation:    LaneRadar · PauseButton
+ *   TOP-LEFT    swimmer state:  StaminaBar · OxygenBar · RhythmMeter
+ *   TOP-CENTER  telemetry:     RaceTimerPanel (broadcast-style: event · lane · timer · pos · gap · lap)
+ *   TOP-RIGHT   navigation:    LaneRadar (numbered, with initials) · PauseButton
  *   MID-RIGHT   camera:        CameraToggleButton
- *   CENTER      transient:     ContextPromptBanner (only ephemeral zone)
+ *   CENTER      transient:     ContextPromptBanner (turn/start/advance/PB prompts)
+ *                              TurnIndicator (wall proximity — appears when within 15m)
+ *   BOTTOM-CENTER transient:   SplitFlash (fires on 25/50/75% checkpoints)
  *   BOTTOM      controls:      VirtualJoystick | StaminaRing | ActionCluster
- *                              (order flips with handedness)
  *
- * Phase 4 additions:
- *   - Accepts ControlsPreset: joystickSize, buttonSize, handedness, hudScale
- *   - hudScale applied via CSS transform on bottom zone
- *   - handedness='left': joystick BL, buttons BR (default)
- *     handedness='right': buttons BL, joystick BR (right-hand layout)
- *   - Camera toggle button mid-right (always reachable)
- *   - All interactive zones use useGestureLock via useTouchControls
+ * Phase 7 additions:
+ *   - stroke prop → computes eventName ("100M FREESTYLE")
+ *   - gapToAheadM computed from lane data → passed to RaceTimerPanel
+ *   - TurnIndicator mounted in center zone (below ContextPromptBanner)
+ *   - SplitFlash mounted above controls zone
+ *   - rhythm passed to useContextPrompts (enables CLEAN_TURN vs EARLY_TURN)
+ *   - LaneRadar updated: lane numbers + swimmer initials
  */
 
 import React, { useMemo } from 'react';
 import { motion }                from 'motion/react';
 import { Camera }                from 'lucide-react';
 import { RaceTimerPanelMemo as RaceTimerPanel } from './widgets/RaceTimerPanel';
-import { StaminaBarMemo    as StaminaBar }     from './widgets/StaminaBar';
-import { OxygenBarMemo     as OxygenBar }      from './widgets/OxygenBar';
-import { RhythmMeterMemo   as RhythmMeter }    from './widgets/RhythmMeter';
-import { LaneRadarMemo     as LaneRadar }      from './widgets/LaneRadar';
-import { PauseButtonMemo   as PauseButton }    from './widgets/PauseButton';
+import { StaminaBarMemo    as StaminaBar }      from './widgets/StaminaBar';
+import { OxygenBarMemo     as OxygenBar }       from './widgets/OxygenBar';
+import { RhythmMeterMemo   as RhythmMeter }     from './widgets/RhythmMeter';
+import { LaneRadarMemo     as LaneRadar }       from './widgets/LaneRadar';
+import { PauseButtonMemo   as PauseButton }     from './widgets/PauseButton';
 import { ContextPromptBanner, useContextPrompts } from './widgets/ContextPromptBanner';
+import { TurnIndicatorMemo as TurnIndicator }   from './widgets/TurnIndicator';
+import { SplitFlash }                           from './widgets/SplitFlash';
+import type { SplitFlashData }                  from './widgets/SplitFlash';
 import { VirtualJoystick, StaminaRing, ActionCluster } from './widgets/StrokeControls';
-import { HUD_PANEL, HUD_COLOR, HUD_FONT } from './hudTokens';
-import { staminaPulseAnimate }   from '../feedback/motionVariants';
-import type { ControlsPreset }   from '../input/inputTypes';
-import type { UseTouchControlsResult } from '../input/useTouchControls';
+import { HUD_PANEL, HUD_COLOR, HUD_FONT }       from './hudTokens';
+import { staminaPulseAnimate }                  from '../feedback/motionVariants';
+import type { ControlsPreset }                  from '../input/inputTypes';
+import type { UseTouchControlsResult }          from '../input/useTouchControls';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -43,20 +47,26 @@ import type { UseTouchControlsResult } from '../input/useTouchControls';
 export interface HUDRootProps {
   /* Telemetry */
   elapsedMs:      number;
-  position:       number;       // 1-8
+  position:       number;       // 1–8
   distanceM:      number;
   totalDistanceM: number;
   lapNumber:      number;
   totalLaps:      number;
-  heat:           string;
+  heat:           string;       // e.g. "HEAT 2"
+
+  /* Swimming identity (Phase 7) */
+  stroke:         string;       // "FREESTYLE", "BACKSTROKE", "BUTTERFLY", etc.
 
   /* Swimmer state */
-  stamina:  number;             // 0-100
-  oxygen:   number;             // 0-100
-  rhythm:   number;             // 0-100
+  stamina:  number;             // 0–100
+  oxygen:   number;             // 0–100
+  rhythm:   number;             // 0–100
 
   /* Lane info */
-  playerLane: number;           // 1-8
+  playerLane: number;           // 1–8
+
+  /* Split flash (Phase 7) */
+  activeSplit?: SplitFlashData | null;
 
   /* Controls — Phase 4 */
   controls:  UseTouchControlsResult;
@@ -67,6 +77,23 @@ export interface HUDRootProps {
 
   /* Toggle */
   visible?: boolean;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Stroke abbreviation map
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STROKE_ABBR: Record<string, string> = {
+  FREESTYLE:    'FREESTYLE',
+  BACKSTROKE:   'BACK',
+  BREASTSTROKE: 'BREAST',
+  BUTTERFLY:    'FLY',
+  MEDLEY:       'IM',
+};
+
+function getEventName(stroke: string, totalDistanceM: number): string {
+  const abbr = STROKE_ABBR[stroke.toUpperCase()] ?? stroke.toUpperCase().slice(0, 4);
+  return `${totalDistanceM}M ${abbr}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -84,10 +111,10 @@ function buildLaneData(
   const laneOffsets = [0.02, -0.03, 0.01, -0.01, 0.04, -0.02, 0.03, -0.04];
 
   return Array.from({ length: 8 }, (_, i) => {
-    const lane    = i + 1;
+    const lane     = i + 1;
     const isPlayer = lane === playerLane;
-    const offset  = laneOffsets[i] ?? 0;
-    const wave    = Math.sin(t * 0.4 + i * 0.7) * 0.015;
+    const offset   = laneOffsets[i] ?? 0;
+    const wave     = Math.sin(t * 0.4 + i * 0.7) * 0.015;
     return {
       lane,
       progress: isPlayer
@@ -263,28 +290,49 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
   lapNumber,
   totalLaps,
   heat,
+  stroke,
   stamina,
   oxygen,
   rhythm,
   playerLane,
+  activeSplit,
   controls,
   preset,
   onPause,
   visible = true,
 }) => {
-  const progress       = Math.min(1, distanceM / Math.max(1, totalDistanceM));
-  const urgent         = progress >= 0.82;           // final ~18% triggers urgency pulse
-  const criticalStamina = stamina < 25;              // drives state-cluster opacity throb
-  const laneData       = useMemo(
+  const progress        = Math.min(1, distanceM / Math.max(1, totalDistanceM));
+  const urgent          = progress >= 0.82;
+  const criticalStamina = stamina < 25;
+
+  const laneData = useMemo(
     () => buildLaneData(elapsedMs, distanceM, totalDistanceM, playerLane),
     [elapsedMs, distanceM, totalDistanceM, playerLane],
   );
-  const activePrompt   = useContextPrompts(elapsedMs, position, distanceM, totalDistanceM, stamina);
+
+  // Gap to swimmer directly ahead (metres)
+  const gapToAheadM = useMemo(() => {
+    const sorted    = [...laneData].sort((a, b) => b.progress - a.progress);
+    const playerIdx = sorted.findIndex(l => l.isPlayer);
+    if (playerIdx <= 0) return 0; // leading
+    const ahead = sorted[playerIdx - 1].progress;
+    const self  = sorted[playerIdx].progress;
+    return Math.max(0, (ahead - self) * totalDistanceM);
+  }, [laneData, totalDistanceM]);
+
+  // Broadcast event name
+  const eventName = useMemo(
+    () => getEventName(stroke, totalDistanceM),
+    [stroke, totalDistanceM],
+  );
+
+  // Context prompts — now receives `rhythm` for CLEAN_TURN vs EARLY_TURN
+  const activePrompt = useContextPrompts(
+    elapsedMs, position, distanceM, totalDistanceM, stamina, rhythm,
+  );
 
   if (!visible) return null;
 
-  // Handedness: 'right' = joystick BL, buttons BR (default ergonomics)
-  //             'left'  = buttons BL, joystick BR (left-hand joystick)
   const joystickLeft = preset.handedness === 'right';
 
   const joystickEl = (
@@ -347,12 +395,12 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
             borderColor:    criticalStamina ? 'rgba(255,93,115,0.30)' : undefined,
           }}
         >
-          <StaminaBar value={stamina} />
-          <OxygenBar  value={oxygen}  />
-          <RhythmMeter value={rhythm} />
+          <StaminaBar  value={stamina} />
+          <OxygenBar   value={oxygen}  />
+          <RhythmMeter value={rhythm}  />
         </motion.div>
 
-        {/* TOP-CENTER: Race telemetry */}
+        {/* TOP-CENTER: Broadcast race telemetry */}
         <div
           style={{
             flex:           1,
@@ -365,7 +413,10 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
             position={position}
             lapNumber={lapNumber}
             totalLaps={totalLaps}
+            eventName={eventName}
             heat={heat}
+            lane={playerLane}
+            gapToAheadM={gapToAheadM}
             urgent={urgent}
           />
         </div>
@@ -408,9 +459,30 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
       </div>
 
       {/* ════════════════════════════════════════════════════════════
-          CENTER ZONE — transient prompts only
+          CENTER ZONE — transient prompts + turn indicator
+          Both stacked vertically; pointer-events off
           ════════════════════════════════════════════════════════════ */}
+      {/* Context event prompts (existing — upper center) */}
       <ContextPromptBanner prompt={activePrompt} />
+
+      {/* Turn wall indicator (lower center — appears when within 15m of wall) */}
+      <div
+        style={{
+          position:      'absolute',
+          top:           '42%',
+          left:          '50%',
+          transform:     'translateX(-50%)',
+          pointerEvents: 'none',
+          zIndex:        59,
+        }}
+      >
+        <TurnIndicator distanceM={distanceM} totalDistanceM={totalDistanceM} />
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════
+          SPLIT FLASH — above controls zone, fires on checkpoints
+          ════════════════════════════════════════════════════════════ */}
+      <SplitFlash split={activeSplit ?? null} />
 
       {/* ════════════════════════════════════════════════════════════
           BOTTOM ZONE — controls (respects handedness + hudScale)
@@ -427,7 +499,6 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
           justifyContent: 'space-between',
           padding:        '0 8px 8px',
           pointerEvents:  'auto',
-          // hudScale applied here — scales controls without touching top HUD
           transform:      `scale(${preset.hudScale})`,
           transformOrigin:'bottom center',
         }}

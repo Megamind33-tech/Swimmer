@@ -1,18 +1,10 @@
 /**
- * RaceScene — Babylon.js arena canvas + Phase 5 feedback + overlays
+ * RaceScene — Babylon.js arena canvas + swimming race HUD
  *
- * Phase 5 additions over Phase 4:
- *   - useFeedback: countdown beeps, finish impact, haptic warning on low stamina
- *   - Split tracking: records timestamps at 25%/50%/75% of race distance
- *   - PB detection: compares final time against localStorage best per distance+stroke
- *   - PauseOverlay: in-scene pause menu (resume, restart, settings, exit)
- *   - ResultsOverlay: premium results screen with animated placement reveal
- *   - Stamina warning: triggerWarningHaptic when crossing 25% threshold once
- *
- * Phase 6 additions:
- *   - useRaceState: sim ref (60fps) + throttled display state (30Hz timer, 15Hz cosmetics)
- *   - rAF loop mutates sim.current, calls commitDisplay() — no individual setState calls
- *   - prewarmCriticalAssets() called before race start
+ * Phase 5: feedback controller (beeps, haptics, overlays)
+ * Phase 6: useRaceState (sim ref + throttled display state)
+ * Phase 7: swimming identity — standings, splits, turn tracking,
+ *           split flash, proper event naming, lane assignment
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -20,7 +12,8 @@ import { AnimatePresence }               from 'motion/react';
 import { ArenaManager }                  from '../graphics/ArenaManager';
 import { HUDRoot, CountdownOverlay }     from '../hud/HUDRoot';
 import { PauseOverlay }                  from '../hud/overlays/PauseOverlay';
-import { ResultsOverlay, type ResultsData, type SplitEntry } from '../hud/overlays/ResultsOverlay';
+import { ResultsOverlay, type ResultsData, type SplitEntry, type StandingEntry } from '../hud/overlays/ResultsOverlay';
+import type { SplitFlashData }           from '../hud/widgets/SplitFlash';
 import { useTouchControls }              from '../input/useTouchControls';
 import { loadPreset }                    from '../input/controlsSettings';
 import { destroyInputManager }           from '../input/InputManager';
@@ -51,10 +44,10 @@ export interface RaceResult {
 
 interface RaceSceneProps {
   config:         RaceConfig;
-  onPause:        () => void;   // external signal (kept for AppShell compat)
+  onPause:        () => void;
   onRaceComplete: (result: RaceResult) => void;
-  onRestart?:     () => void;   // return to pre-race setup
-  onExitToLobby?: () => void;   // return to main lobby
+  onRestart?:     () => void;
+  onExitToLobby?: () => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -95,6 +88,61 @@ function checkAndStorePB(distanceStr: string, stroke: string, elapsedMs: number)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Standings generator
+// ─────────────────────────────────────────────────────────────────────────────
+
+const AI_NAMES = ['TAYLOR', 'CHEN', 'MÜLLER', 'NAKAMURA', 'SMITH', 'JONES', 'COSTA', 'PARK'];
+
+/**
+ * Generates final standings for all 8 lanes.
+ * Player is placed at their actual position; AI gap times are randomized.
+ */
+function generateFinalStandings(
+  playerTimeMs:   number,
+  playerPosition: number,
+  playerLane:     number,
+): StandingEntry[] {
+  // Assign other lanes (randomized) to the 7 AI swimmers
+  const otherLanes = [1, 2, 3, 4, 5, 6, 7, 8].filter(l => l !== playerLane);
+  for (let i = otherLanes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [otherLanes[i], otherLanes[j]] = [otherLanes[j], otherLanes[i]];
+  }
+
+  const entries: StandingEntry[] = [];
+  let aiLaneIdx = 0;
+
+  for (let pos = 1; pos <= 8; pos++) {
+    const isPlayer = pos === playerPosition;
+    const lane     = isPlayer ? playerLane : otherLanes[aiLaneIdx++];
+
+    // Time: player is exact; AI gaps scale with position difference
+    let timeMs: number;
+    if (isPlayer) {
+      timeMs = playerTimeMs;
+    } else if (pos < playerPosition) {
+      // Swimmer ahead: gap grows with how far ahead they are
+      const gap = (playerPosition - pos) * (420 + Math.random() * 780);
+      timeMs = playerTimeMs - gap;
+    } else {
+      // Swimmer behind
+      const gap = (pos - playerPosition) * (420 + Math.random() * 780);
+      timeMs = playerTimeMs + gap;
+    }
+
+    entries.push({
+      position: pos,
+      lane,
+      name:     isPlayer ? 'YOU' : AI_NAMES[(lane - 1) % AI_NAMES.length],
+      time:     formatFinalTime(Math.max(0, timeMs)),
+      isPlayer,
+    });
+  }
+
+  return entries;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RaceScene
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -111,43 +159,53 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
   const startTimeRef = useRef<number>(0);
 
   const totalDistanceM = parseInt(config.distance.replace('M', ''), 10) || 100;
+  const playerLane     = 4;  // center lane — could come from pre-race selection
 
-  // Load presets
-  const preset      = loadPreset();
-  const perfPreset  = loadPerformancePreset();
-  const feedback    = useFeedback(preset);
+  // Presets
+  const preset     = loadPreset();
+  const perfPreset = loadPerformancePreset();
+  const feedback   = useFeedback(preset);
 
-  // Phase 6: throttled sim state (replaces 6 individual useState calls)
+  // Phase 6: throttled race state
   const { sim, timerDisplay, cosmeticDisplay, commitDisplay, resetState } = useRaceState(perfPreset);
 
-  // ── Race phase state (these stay as useState — infrequent transitions) ──
+  // ── Race phase state ─────────────────────────────────────────────────────
   const [raceStarted,  setRaceStarted]  = useState(false);
   const [isPaused,     setIsPaused]     = useState(false);
   const [raceFinished, setRaceFinished] = useState(false);
   const [resultsData,  setResultsData]  = useState<ResultsData | null>(null);
   const [countdown,    setCountdown]    = useState(3);
 
-  // Pause guard ref (avoids stale closure in rAF)
-  const pausedRef = useRef(false);
+  // ── Split flash state ────────────────────────────────────────────────────
+  const [activeSplit,    setActiveSplit]    = useState<SplitFlashData | null>(null);
+  const splitFlashTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Low-stamina warning — fires haptic once when crossing 25% threshold
-  const warnedRef = useRef(false);
+  // Pause ref
+  const pausedRef  = useRef(false);
 
-  // ── Split tracking ───────────────────────────────────────────────────────
+  // Low-stamina warning — one-shot haptic at <25%
+  const warnedRef  = useRef(false);
+
+  // ── Split checkpoints ────────────────────────────────────────────────────
   interface SplitCheckpoint { pct: number; label: string; firedAt: number | null }
   const splitsRef = useRef<SplitCheckpoint[]>([
-    { pct: 0.25, label: `${Math.round(totalDistanceM * 0.25)}m`, firedAt: null },
-    { pct: 0.50, label: `${Math.round(totalDistanceM * 0.50)}m`, firedAt: null },
-    { pct: 0.75, label: `${Math.round(totalDistanceM * 0.75)}m`, firedAt: null },
+    { pct: 0.25, label: `${Math.round(totalDistanceM * 0.25)}M`, firedAt: null },
+    { pct: 0.50, label: `${Math.round(totalDistanceM * 0.50)}M`, firedAt: null },
+    { pct: 0.75, label: `${Math.round(totalDistanceM * 0.75)}M`, firedAt: null },
   ]);
 
-  // ── Touch controls (Phase 4) ─────────────────────────────────────────────
+  // ── Heat name ────────────────────────────────────────────────────────────
+  // Stable per race session
+  const heatRef  = useRef(`HEAT ${Math.floor(Math.random() * 3) + 1}`);
+  const heat     = heatRef.current;
+
+  // ── Touch controls ───────────────────────────────────────────────────────
   const controls = useTouchControls({
     preset,
     onPause: () => handlePause(),
   });
 
-  // ── Stroke callbacks — mutate sim.current directly ───────────────────────
+  // ── Stroke callbacks — mutate sim.current ─────────────────────────────
   const handleStrokeLeft = useCallback(() => {
     sim.current.stamina = Math.min(100, sim.current.stamina + 0.4);
     sim.current.oxygen  = Math.min(100, sim.current.oxygen  + 0.6);
@@ -181,12 +239,11 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
     setIsPaused(true);
     pausedRef.current = true;
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
-    onPause(); // also signal AppShell (compat)
+    onPause();
   }, [raceFinished, onPause]);
 
   const handleResume = useCallback(() => {
     if (!raceStarted || raceFinished) return;
-    // Shift startTime forward by pause duration so elapsed stays accurate
     startTimeRef.current = performance.now() - sim.current.elapsed;
     setIsPaused(false);
     pausedRef.current = false;
@@ -210,6 +267,7 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
     return () => {
       destroyInputManager();
       controls.gestureLock.clear();
+      if (splitFlashTimer.current) clearTimeout(splitFlashTimer.current);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -235,17 +293,15 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Countdown with audio beeps + asset prewarm ───────────────────────────
+  // ── Countdown + prewarm ───────────────────────────────────────────────────
   useEffect(() => {
-    // Prewarm audio, fonts, and compositor before race starts
     prewarmCriticalAssets().catch(() => { /* non-critical */ });
-
-    feedback.playCountdownBeep(false); // beep on mount (3)
+    feedback.playCountdownBeep(false);
     const t1 = setTimeout(() => { setCountdown(2); feedback.playCountdownBeep(false); }, 1000);
     const t2 = setTimeout(() => { setCountdown(1); feedback.playCountdownBeep(false); }, 2000);
     const t3 = setTimeout(() => {
       setCountdown(0);
-      feedback.playCountdownBeep(true); // GO! sound
+      feedback.playCountdownBeep(true);
       feedback.triggerMediumHaptic();
       startTimeRef.current = performance.now();
       setRaceStarted(true);
@@ -268,13 +324,11 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
       const now     = performance.now();
       const elapsed = now - startTimeRef.current;
 
-      // ── Mutate sim ref (no React re-renders) ──────────────────────────
       sim.current.elapsed = elapsed;
 
+      // Stamina drain + low-stamina haptic
       const nextStamina = Math.max(0, sim.current.stamina - STAMINA_DRAIN);
       sim.current.stamina = nextStamina;
-
-      // One-shot haptic warning at 25% stamina
       if (nextStamina < 25 && !warnedRef.current) {
         warnedRef.current = true;
         feedback.triggerWarningHaptic();
@@ -283,15 +337,26 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
       sim.current.oxygen = Math.max(0, sim.current.oxygen - OXYGEN_DRAIN);
       sim.current.rhythm = Math.min(100, Math.max(0, 65 + 20 * Math.sin(elapsed / 4_500)));
 
+      // Distance update
       const speed   = SPEED_BASE * (0.65 + 0.35 * (sim.current.stamina / 100));
       const newDist = Math.min(totalDistanceM, sim.current.distance + speed * 16);
       sim.current.distance = newDist;
 
-      // Record split times
+      // Split checkpoints — fire flash + record time
       const progress = newDist / totalDistanceM;
       for (const split of splitsRef.current) {
         if (split.firedAt === null && progress >= split.pct) {
           split.firedAt = elapsed;
+
+          // Trigger split flash (visible for 3s)
+          if (splitFlashTimer.current) clearTimeout(splitFlashTimer.current);
+          const flashData: SplitFlashData = {
+            id:    `${split.label}_${Math.round(elapsed)}`,
+            label: split.label,
+            time:  formatRaceTime(elapsed),
+          };
+          setActiveSplit(flashData);
+          splitFlashTimer.current = setTimeout(() => setActiveSplit(null), 3000);
         }
       }
 
@@ -300,7 +365,7 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
         sim.current.position = Math.max(1, sim.current.position - 1);
       }
 
-      // ── Push sim → throttled React display state ──────────────────────
+      // Push to throttled React display state
       commitDisplay();
 
       // ── Race finish ───────────────────────────────────────────────────
@@ -308,19 +373,25 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
         if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
         setRaceFinished(true);
 
-        const isPB   = checkAndStorePB(config.distance, config.stroke, elapsed);
+        const isPB = checkAndStorePB(config.distance, config.stroke, elapsed);
         const splits: SplitEntry[] = splitsRef.current
           .filter((s) => s.firedAt !== null)
           .map((s) => ({ label: s.label, time: formatRaceTime(s.firedAt!) }));
 
-        const rank   = sim.current.position;
+        const rank       = sim.current.position;
+        const standings  = generateFinalStandings(elapsed, rank, playerLane);
+        const eventName  = `${totalDistanceM}M ${config.stroke.toUpperCase()}`;
+
         const result: ResultsData = {
           rank,
-          time:   formatFinalTime(elapsed),
-          xp:     rank === 1 ? 400 : rank <= 3 ? 250 : 100,
-          coins:  rank === 1 ? 3000 : rank <= 3 ? 1500 : 500,
+          time:      formatFinalTime(elapsed),
+          xp:        rank === 1 ? 400 : rank <= 3 ? 250 : 100,
+          coins:     rank === 1 ? 3000 : rank <= 3 ? 1500 : 500,
           isPB,
           splits,
+          eventName,
+          heat,
+          standings,
         };
         setResultsData(result);
 
@@ -342,11 +413,9 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [raceStarted, raceFinished]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Derived values (from throttled display state) ────────────────────────
-  const totalLaps  = Math.max(1, totalDistanceM / 100);
-  const lapNumber  = Math.min(totalLaps, Math.floor((timerDisplay.distanceM / totalDistanceM) * totalLaps) + 1);
-  const heat       = config.stroke === 'FREESTYLE' ? 'QUICK RACE' : `${config.stroke} HEAT`;
-  const playerLane = 4;
+  // ── Derived values ───────────────────────────────────────────────────────
+  const totalLaps = Math.max(1, totalDistanceM / 100);
+  const lapNumber = Math.min(totalLaps, Math.floor((timerDisplay.distanceM / totalDistanceM) * totalLaps) + 1);
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
@@ -361,7 +430,7 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
       {/* Countdown */}
       {!raceStarted && <CountdownOverlay value={countdown} />}
 
-      {/* HUD — fed from throttled display state (30Hz timer, 15Hz cosmetics) */}
+      {/* HUD — throttled display state (30Hz timer, 15Hz cosmetics) */}
       {raceStarted && !raceFinished && (
         <HUDRoot
           elapsedMs={timerDisplay.elapsedMs}
@@ -371,10 +440,12 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
           lapNumber={lapNumber}
           totalLaps={totalLaps}
           heat={heat}
+          stroke={config.stroke}
           stamina={cosmeticDisplay.stamina}
           oxygen={cosmeticDisplay.oxygen}
           rhythm={cosmeticDisplay.rhythm}
           playerLane={playerLane}
+          activeSplit={activeSplit}
           controls={controls}
           preset={preset}
           onPause={handlePause}
@@ -400,7 +471,12 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
             key="results"
             data={resultsData}
             onReplay={handleRestart}
-            onContinue={() => onRaceComplete({ rank: resultsData.rank, time: resultsData.time, xp: resultsData.xp, coins: resultsData.coins })}
+            onContinue={() => onRaceComplete({
+              rank:   resultsData.rank,
+              time:   resultsData.time,
+              xp:     resultsData.xp,
+              coins:  resultsData.coins,
+            })}
             onLobby={handleExitToLobby}
           />
         )}

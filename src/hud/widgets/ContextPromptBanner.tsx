@@ -4,12 +4,14 @@
  * Renders one prompt at a time in the center of the race view.
  * Prompts auto-dismiss after 2.4s.  New prompts cancel the current one.
  *
- * Prompt types and their visual identity:
- *   PERFECT_START  — gold  ⚡  "PERFECT START"
- *   GOOD_TURN      — aqua  ↩  "GOOD TURN"
- *   FINAL_PUSH     — amber 🔥 "FINAL PUSH"
- *   NEW_PB         — green 🏆 "NEW PERSONAL BEST"
- *   PHOTO_FINISH   — red   📸 "PHOTO FINISH!"
+ * Phase 7 prompt types and visual identity:
+ *   PERFECT_START  — gold  ⚡  "PERFECT START"    elapsed 2.5–4s
+ *   CLEAN_TURN     — green ↩  "CLEAN TURN"       good wall hit (rhythm > 55)
+ *   EARLY_TURN     — amber ⚠  "EARLY TURN"       poor timing (rhythm ≤ 55)
+ *   FINAL_25M      — red   🏊  "FINAL 25M"        last 25m of race
+ *   NEW_PB         — green 🏆  "NEW PERSONAL BEST"
+ *   LANE_ADVANCE   — gold  ⬆  "LANE ADVANCE"     position improved
+ *   PHOTO_FINISH   — red   📸  "PHOTO FINISH!"    top-2 in final metres
  *
  * Architecture:
  *   - Component receives the currently active PromptEvent | null
@@ -31,9 +33,11 @@ import { HUD_COLOR, HUD_FONT } from '../hudTokens';
 
 export type PromptType =
   | 'PERFECT_START'
-  | 'GOOD_TURN'
-  | 'FINAL_PUSH'
+  | 'CLEAN_TURN'
+  | 'EARLY_TURN'
+  | 'FINAL_25M'
   | 'NEW_PB'
+  | 'LANE_ADVANCE'
   | 'PHOTO_FINISH';
 
 export interface PromptEvent {
@@ -58,28 +62,39 @@ interface PromptConfig {
 const PROMPT_CONFIG: Record<PromptType, PromptConfig> = {
   PERFECT_START: {
     label:    'PERFECT START',
+    subLabel: 'MAXIMUM MOMENTUM',
     icon:     '⚡',
     color:    HUD_COLOR.gold,
     glow:     HUD_COLOR.goldGlow,
     bg:       'rgba(255,215,106,0.10)',
     border:   'rgba(255,215,106,0.35)',
   },
-  GOOD_TURN: {
-    label:    'GOOD TURN',
+  CLEAN_TURN: {
+    label:    'CLEAN TURN',
+    subLabel: 'GOOD MOMENTUM',
     icon:     '↩',
-    color:    HUD_COLOR.aqua,
-    glow:     HUD_COLOR.aquaGlow,
-    bg:       'rgba(56,214,255,0.08)',
-    border:   'rgba(56,214,255,0.30)',
+    color:    HUD_COLOR.success,
+    glow:     HUD_COLOR.successGlow,
+    bg:       'rgba(55,226,141,0.08)',
+    border:   'rgba(55,226,141,0.30)',
   },
-  FINAL_PUSH: {
-    label:    'FINAL PUSH',
-    subLabel: 'GIVE IT EVERYTHING',
-    icon:     '🔥',
+  EARLY_TURN: {
+    label:    'EARLY TURN',
+    subLabel: 'ADJUST TIMING',
+    icon:     '⚠',
     color:    HUD_COLOR.warning,
     glow:     HUD_COLOR.warningGlow,
-    bg:       'rgba(255,194,71,0.10)',
-    border:   'rgba(255,194,71,0.35)',
+    bg:       'rgba(255,194,71,0.08)',
+    border:   'rgba(255,194,71,0.30)',
+  },
+  FINAL_25M: {
+    label:    'FINAL 25M',
+    subLabel: 'EVERYTHING NOW',
+    icon:     '🏊',
+    color:    HUD_COLOR.danger,
+    glow:     HUD_COLOR.dangerGlow,
+    bg:       'rgba(255,93,115,0.12)',
+    border:   'rgba(255,93,115,0.40)',
   },
   NEW_PB: {
     label:    'NEW PERSONAL BEST',
@@ -88,6 +103,15 @@ const PROMPT_CONFIG: Record<PromptType, PromptConfig> = {
     glow:     HUD_COLOR.successGlow,
     bg:       'rgba(55,226,141,0.10)',
     border:   'rgba(55,226,141,0.35)',
+  },
+  LANE_ADVANCE: {
+    label:    'LANE ADVANCE',
+    subLabel: 'MOVING UP',
+    icon:     '⬆',
+    color:    HUD_COLOR.gold,
+    glow:     HUD_COLOR.goldGlow,
+    bg:       'rgba(255,215,106,0.10)',
+    border:   'rgba(255,215,106,0.35)',
   },
   PHOTO_FINISH: {
     label:    'PHOTO FINISH',
@@ -194,18 +218,22 @@ export const ContextPromptBanner: React.FC<ContextPromptBannerProps> = ({ prompt
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 const PROMPT_DURATION_MS = 2400;
+const POOL_LENGTH_M      = 50;   // Olympic pool lap distance
 
 /**
- * useContextPrompts — race event prompt detector
+ * useContextPrompts — swimming race event detector
  *
- * Performance fix (Phase 6):
- *   Previously this hook had a useEffect with [elapsedMs, distanceM, ...] deps,
- *   causing effect cleanup+setup on every React render (30fps after throttling).
- *   Now it uses a latestRef pattern — a stable setInterval polls the latest
- *   race values at 4Hz (every 250ms), which is more than sufficient for
- *   prompt detection that only needs to trigger once per race event.
+ * Performance: uses latestRef pattern + stable 4Hz setInterval.
+ * Only `fire` (stable useCallback) is in the effect deps.
  *
- *   Result: ~120 effect setups/sec → 4 interval ticks/sec (97% reduction).
+ * Phase 7 events:
+ *   PERFECT_START  — strong start window (elapsed 2.5–4s)
+ *   CLEAN_TURN     — good wall hit (rhythm > 55 at each 50m wall)
+ *   EARLY_TURN     — poor wall timing (rhythm ≤ 55 at each 50m wall)
+ *   FINAL_25M      — within last 25m of the race
+ *   NEW_PB         — in 1st place after 5s elapsed
+ *   LANE_ADVANCE   — position number improved since last poll
+ *   PHOTO_FINISH   — top 2, within last 3% of race
  */
 export function useContextPrompts(
   elapsedMs:      number,
@@ -213,14 +241,17 @@ export function useContextPrompts(
   distanceM:      number,
   totalDistanceM: number,
   stamina:        number,
+  rhythm:         number,
 ) {
   const [activePrompt, setActivePrompt] = useState<PromptEvent | null>(null);
-  const firedRef   = useRef<Set<string>>(new Set());
-  const timerRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const firedRef       = useRef<Set<string>>(new Set());
+  const timerRef       = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastWallsRef   = useRef<number>(0);     // walls crossed so far
+  const lastPositionRef = useRef<number>(position); // for lane advance detection
 
   // Keep the latest race values accessible without re-creating the interval
-  const latestRef = useRef({ elapsedMs, position, distanceM, totalDistanceM, stamina });
-  latestRef.current = { elapsedMs, position, distanceM, totalDistanceM, stamina };
+  const latestRef = useRef({ elapsedMs, position, distanceM, totalDistanceM, stamina, rhythm });
+  latestRef.current = { elapsedMs, position, distanceM, totalDistanceM, stamina, rhythm };
 
   const fire = useCallback((type: PromptType) => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -229,28 +260,75 @@ export function useContextPrompts(
     timerRef.current = setTimeout(() => setActivePrompt(null), PROMPT_DURATION_MS);
   }, []);
 
-  // Poll at 4Hz — decoupled from render frequency entirely
+  // Poll at 4Hz — decoupled from render frequency
   useEffect(() => {
     const id = setInterval(() => {
-      const { elapsedMs, position, distanceM, totalDistanceM } = latestRef.current;
+      const { elapsedMs, position, distanceM, totalDistanceM, rhythm } = latestRef.current;
       const progress = totalDistanceM > 0 ? distanceM / totalDistanceM : 0;
       const fired    = firedRef.current;
 
+      // ── PERFECT START (2.5–4s window) ──────────────────────────────────
       if (elapsedMs > 2500 && elapsedMs < 4000 && !fired.has('start')) {
-        fired.add('start'); fire('PERFECT_START');
+        fired.add('start');
+        fire('PERFECT_START');
       }
-      if (progress > 0.48 && progress < 0.52 && !fired.has('turn')) {
-        fired.add('turn'); fire('GOOD_TURN');
+
+      // ── TURN DETECTION (every POOL_LENGTH_M wall, excluding finish) ────
+      // Count how many pool-length walls the swimmer has crossed.
+      const wallsCrossed = Math.floor(distanceM / POOL_LENGTH_M);
+      if (wallsCrossed > lastWallsRef.current) {
+        // Check each new wall crossed this tick (normally just 1)
+        for (let w = lastWallsRef.current + 1; w <= wallsCrossed; w++) {
+          const wallDistM = w * POOL_LENGTH_M;
+          // Don't fire a turn prompt for the finish line
+          if (wallDistM < totalDistanceM) {
+            const key = `turn_${w}`;
+            if (!fired.has(key)) {
+              fired.add(key);
+              // Rhythm > 55 = CLEAN_TURN, otherwise EARLY_TURN
+              if (rhythm > 55) {
+                fire('CLEAN_TURN');
+              } else {
+                fire('EARLY_TURN');
+              }
+            }
+          }
+        }
+        lastWallsRef.current = wallsCrossed;
       }
-      if (progress > 0.85 && !fired.has('final')) {
-        fired.add('final'); fire('FINAL_PUSH');
+
+      // ── FINAL 25M ─────────────────────────────────────────────────────
+      const final25Progress = totalDistanceM > 0
+        ? Math.max(0, (totalDistanceM - 25) / totalDistanceM)
+        : 0.75;
+      if (progress >= final25Progress && !fired.has('final25m')) {
+        fired.add('final25m');
+        fire('FINAL_25M');
       }
+
+      // ── PHOTO FINISH (top 2, final 3%) ─────────────────────────────────
       if (progress > 0.97 && position <= 2 && !fired.has('photo')) {
-        fired.add('photo'); fire('PHOTO_FINISH');
+        fired.add('photo');
+        fire('PHOTO_FINISH');
       }
+
+      // ── NEW PB (in 1st after 5s) ────────────────────────────────────────
       if (position === 1 && elapsedMs > 5000 && !fired.has('pb')) {
-        fired.add('pb'); fire('NEW_PB');
+        fired.add('pb');
+        fire('NEW_PB');
       }
+
+      // ── LANE ADVANCE (position improved) ───────────────────────────────
+      const lastPos = lastPositionRef.current;
+      if (position < lastPos && elapsedMs > 4000) {
+        const key = `advance_${position}`;
+        if (!fired.has(key)) {
+          fired.add(key);
+          fire('LANE_ADVANCE');
+        }
+      }
+      lastPositionRef.current = position;
+
     }, 250); // 4Hz poll
 
     return () => {

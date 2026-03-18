@@ -1,30 +1,43 @@
 /**
- * LaneRadar — compact 8-lane minimap for the top-right zone
+ * LaneRadar — compact lane-board for the top-right zone (Phase 7)
  *
- * Shows all 8 lanes as thin horizontal tracks. Each track has a dot
- * that represents the swimmer's progress along the pool (left = start, right = finish).
+ * Shows all 8 lanes as horizontal tracks with lane numbers and
+ * swimmer position dots. Reads instantly as a swimming race minimap.
  *
- * Player dot: bright aqua, larger, glowing
- * AI dots:    muted white/gray, small
+ * Lane numbers (1–8) on the left column make the layout unmistakably aquatic.
+ * Player lane is highlighted with aqua track + larger glowing dot.
+ * AI lanes show dimly with small dots.
  *
- * The player's lane row is subtly highlighted with an aqua left-edge stripe.
- *
- * Layout: 84px × 52px compact panel
+ * Layout: 100px × 58px
  */
 
 import React from 'react';
 import { HUD_PANEL, HUD_COLOR, HUD_FONT } from '../hudTokens';
 
-interface LaneData {
-  lane:     number;   // 1-8
-  progress: number;   // 0.0 – 1.0
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface LaneData {
+  lane:     number;   // 1–8
+  progress: number;   // 0.0–1.0
   isPlayer: boolean;
 }
 
 interface LaneRadarProps {
-  lanes:       LaneData[];
-  playerLane:  number;
+  lanes:      LaneData[];
+  playerLane: number;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fake AI swimmer initials — consistent per lane number
+// ─────────────────────────────────────────────────────────────────────────────
+
+const LANE_INITIALS = ['T', 'C', 'M', 'S', 'J', 'P', 'K', 'R'];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LaneRadar
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const LaneRadar: React.FC<LaneRadarProps> = ({ lanes, playerLane }) => {
   const sorted = [...lanes].sort((a, b) => a.lane - b.lane);
@@ -33,94 +46,128 @@ export const LaneRadar: React.FC<LaneRadarProps> = ({ lanes, playerLane }) => {
     <div
       style={{
         ...HUD_PANEL,
-        width:   '84px',
-        padding: '5px 7px 4px',
+        width:      '100px',
+        padding:    '5px 6px 4px 5px',
         userSelect: 'none',
         WebkitUserSelect: 'none',
       }}
     >
-      {/* Lane tracks */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5px' }}>
+      {/* Lanes */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         {sorted.map((lane) => {
-          const isPlayer = lane.isPlayer || lane.lane === playerLane;
+          const isPlayer       = lane.isPlayer || lane.lane === playerLane;
           const clampedProgress = Math.min(0.96, Math.max(0.02, lane.progress));
+          const initial        = isPlayer ? '●' : (LANE_INITIALS[(lane.lane - 1) % 8] ?? '·');
 
           return (
-            <div
-              key={lane.lane}
-              style={{
-                position:   'relative',
-                height:     '4px',
-                borderRadius: '2px',
-                background: isPlayer
-                  ? 'rgba(56, 214, 255, 0.10)'
-                  : 'rgba(255, 255, 255, 0.04)',
-                overflow: 'visible',
-              }}
-            >
-              {/* Player lane left edge stripe */}
-              {isPlayer && (
+            <div key={lane.lane} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              {/* Lane number */}
+              <span
+                style={{
+                  fontFamily:    HUD_FONT.label,
+                  fontWeight:    700,
+                  fontSize:      '7px',
+                  lineHeight:    1,
+                  width:         '8px',
+                  textAlign:     'center',
+                  flexShrink:    0,
+                  color:         isPlayer
+                    ? HUD_COLOR.gold
+                    : 'rgba(169,211,231,0.30)',
+                  letterSpacing: '0',
+                  textShadow:    isPlayer ? `0 0 6px ${HUD_COLOR.goldGlow}` : 'none',
+                }}
+              >
+                {lane.lane}
+              </span>
+
+              {/* Track row */}
+              <div
+                style={{
+                  position:     'relative',
+                  flex:         1,
+                  height:       '5px',
+                  borderRadius: '2px',
+                  background:   isPlayer
+                    ? 'rgba(56,214,255,0.12)'
+                    : 'rgba(255,255,255,0.04)',
+                  overflow:     'visible',
+                }}
+              >
+                {/* Player lane left accent */}
+                {isPlayer && (
+                  <div
+                    style={{
+                      position:     'absolute',
+                      left:         '-3px',
+                      top:          0,
+                      width:        '2px',
+                      height:       '100%',
+                      background:   HUD_COLOR.aqua,
+                      borderRadius: '1px',
+                      boxShadow:    `0 0 4px ${HUD_COLOR.aquaGlow}`,
+                    }}
+                  />
+                )}
+
+                {/* Swimmer dot */}
                 <div
                   style={{
-                    position:   'absolute',
-                    left:       '-4px',
-                    top:        '0',
-                    width:      '2px',
-                    height:     '100%',
-                    background: HUD_COLOR.aqua,
-                    borderRadius: '1px',
-                    boxShadow:  `0 0 4px ${HUD_COLOR.aquaGlow}`,
+                    position:     'absolute',
+                    top:          '50%',
+                    left:         `${clampedProgress * 100}%`,
+                    transform:    'translate(-50%, -50%)',
+                    width:        isPlayer ? '7px' : '4px',
+                    height:       isPlayer ? '7px' : '4px',
+                    borderRadius: '50%',
+                    background:   isPlayer
+                      ? HUD_COLOR.aqua
+                      : 'rgba(255,255,255,0.38)',
+                    boxShadow:    isPlayer ? `0 0 7px ${HUD_COLOR.aquaGlow}` : 'none',
+                    transition:   'left 0.2s linear',
+                    zIndex:       2,
                   }}
                 />
-              )}
+              </div>
 
-              {/* Track inner line */}
-              <div
+              {/* Swimmer initial */}
+              <span
                 style={{
-                  position:   'absolute',
-                  inset:      '1.5px 2px',
-                  borderRadius: '1px',
-                  background: isPlayer
-                    ? 'rgba(56, 214, 255, 0.06)'
-                    : 'rgba(255, 255, 255, 0.03)',
+                  fontFamily:  HUD_FONT.label,
+                  fontWeight:  700,
+                  fontSize:    '7px',
+                  lineHeight:  1,
+                  width:       '7px',
+                  textAlign:   'center',
+                  flexShrink:  0,
+                  color:       isPlayer
+                    ? HUD_COLOR.aqua
+                    : 'rgba(169,211,231,0.22)',
+                  letterSpacing: '0',
                 }}
-              />
-
-              {/* Swimmer dot */}
-              <div
-                style={{
-                  position:    'absolute',
-                  top:         '50%',
-                  left:        `${clampedProgress * 100}%`,
-                  transform:   'translate(-50%, -50%)',
-                  width:       isPlayer ? '6px' : '4px',
-                  height:      isPlayer ? '6px' : '4px',
-                  borderRadius: '50%',
-                  background:  isPlayer ? HUD_COLOR.aqua : 'rgba(255,255,255,0.40)',
-                  boxShadow:   isPlayer ? `0 0 6px ${HUD_COLOR.aquaGlow}` : 'none',
-                  transition:  'left 0.2s linear',
-                  zIndex:      2,
-                }}
-              />
+              >
+                {initial}
+              </span>
             </div>
           );
         })}
       </div>
 
-      {/* Footer label */}
+      {/* Footer — LANES label */}
       <div
         style={{
           fontFamily:    HUD_FONT.label,
           fontWeight:    700,
-          fontSize:      '7px',
-          letterSpacing: '0.10em',
+          fontSize:      '6px',
+          letterSpacing: '0.12em',
           color:         HUD_COLOR.textMuted,
           textTransform: 'uppercase',
           textAlign:     'center',
           marginTop:     '3px',
+          opacity:       0.6,
         }}
       >
-        LANE {playerLane} · RADAR
+        LANES 1–8
       </div>
     </div>
   );
