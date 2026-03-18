@@ -9,12 +9,15 @@ interface PreRaceSetupScreenProps {
   mode?: string;
   onConfirmRace?: () => void;
   onCancel?: () => void;
+  /** Called whenever the user changes distance/stroke/venue so parent can track config */
+  onConfigChange?: (partial: { distance?: string; stroke?: string; venue?: string }) => void;
 }
 
 export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   mode = 'Quick Race',
   onConfirmRace,
   onCancel,
+  onConfigChange,
 }) => {
   const [selectedDistance, setSelectedDistance] = useState('100M');
   const [selectedStroke, setSelectedStroke] = useState('FREESTYLE');
@@ -88,7 +91,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                    {distances.map((dist) => (
                      <button
                        key={dist}
-                       onClick={() => setSelectedDistance(dist)}
+                       onClick={() => { setSelectedDistance(dist); onConfigChange?.({ distance: dist }); }}
                        className={`h-16 rounded-2xl font-headline font-black italic slanted uppercase text-[13px] tracking-widest transition-all duration-500 border overflow-hidden relative group ${
                          selectedDistance === dist
                            ? 'bg-primary/20 border-primary/40 text-primary text-glow'
@@ -114,7 +117,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                    {strokes.map((stroke) => (
                      <button
                        key={stroke}
-                       onClick={() => setSelectedStroke(stroke)}
+                       onClick={() => { setSelectedStroke(stroke); onConfigChange?.({ stroke }); }}
                        className={`h-16 rounded-2xl font-headline font-black italic slanted uppercase text-[11px] tracking-widest transition-all duration-500 border overflow-hidden relative group ${
                          selectedStroke === stroke
                            ? 'bg-primary/20 border-primary/40 text-primary text-glow'
@@ -140,7 +143,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                    {venues.map((venue) => (
                      <button
                        key={venue.id}
-                       onClick={() => setSelectedVenue(venue.id)}
+                       onClick={() => { setSelectedVenue(venue.id); onConfigChange?.({ venue: venue.id }); }}
                        className={`group/venue p-6 rounded-3xl border transition-all duration-500 text-left relative overflow-hidden ${
                          selectedVenue === venue.id
                            ? 'bg-primary/20 border-primary/40 shadow-[0_0_20px_rgba(129,236,255,0.1)]'

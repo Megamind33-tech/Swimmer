@@ -7,9 +7,10 @@ import { ChevronRightIcon, ShieldIcon, TimerIcon, TrophyIcon } from 'lucide-reac
 
 interface HomePageProps {
   onSideMenuSelect: (id: string) => void
+  onPlay?: () => void
 }
 
-export function HomePage({ onSideMenuSelect }: HomePageProps) {
+export function HomePage({ onSideMenuSelect, onPlay }: HomePageProps) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full relative overflow-hidden">
       <div className="absolute inset-0 bg-[#0A1628]/70" />
@@ -32,7 +33,7 @@ export function HomePage({ onSideMenuSelect }: HomePageProps) {
                 <h2 className="text-3xl font-black text-white italic tracking-tight drop-shadow-lg mb-2">SWIM26 <span className="text-[#D4A843]">SEASON 4</span></h2>
                 <p className="text-white/80 text-sm font-medium mb-4 leading-snug">Compete in live championships, improve your squad, and push your club toward the global finals.</p>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-white text-black font-black px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg transition-shadow text-sm whitespace-nowrap">GO NOW <ChevronRightIcon size={16} /></motion.button>
+                  <motion.button onClick={onPlay} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="bg-white text-black font-black px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg transition-shadow text-sm whitespace-nowrap">GO NOW <ChevronRightIcon size={16} /></motion.button>
                   <div className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 backdrop-blur-sm min-w-[88px]">
                     <div className="text-[9px] text-white/60 font-bold tracking-[0.2em] uppercase">Club OVR</div>
                     <div className="text-xl font-black text-[#D4A843]">{USER_DATA.clubOvr}</div>
@@ -133,7 +134,7 @@ export function HomePage({ onSideMenuSelect }: HomePageProps) {
               <ShieldIcon size={24} className="text-white/20 shrink-0" />
             </motion.div>
 
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-[#0D7C66] to-[#065A46] rounded-xl p-3 flex flex-col justify-center cursor-pointer relative overflow-hidden shadow-md min-w-0">
+            <motion.div onClick={onPlay} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} className="bg-gradient-to-br from-[#0D7C66] to-[#065A46] rounded-xl p-3 flex flex-col justify-center cursor-pointer relative overflow-hidden shadow-md min-w-0 active:brightness-125">
               <div className="absolute right-0 bottom-0 w-12 h-12 bg-white/10 rounded-full blur-xl" />
               <h3 className="text-white font-black italic text-lg relative z-10">PLAY</h3>
               <div className="text-white/80 font-bold text-[10px] relative z-10 truncate">QUICK MATCH</div>
