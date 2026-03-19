@@ -91,8 +91,13 @@ const TIME_CONFIGS: Record<TimeOfDay, TimeConfig> = {
 // ── Shadow-caster and receiver name patterns ──────────────────────────────────
 // Meshes whose names START WITH any of these strings get shadow treatment.
 // Conservative list — only meshes that have meaningful silhouettes.
-const SHADOW_CASTER_PREFIXES  = ['pedestal_', 'platform_', 'leg_', 'handle_', 'column'];
-const SHADOW_RECEIVER_PREFIXES = ['poolFloor', 'deckSlab', 'wetZone'];
+//
+// Corrected in Phase 6: names must match what the builder actually creates —
+//   StartingBlocks: blockPedestal0, blockPlatform0, legFront0, legBack0
+//   ArenaArchitecture columns: col1_0, col-1_0
+//   PoolDeck wet zones: wetN, wetS, wetE, wetW  (not 'wetZone')
+const SHADOW_CASTER_PREFIXES  = ['blockPedestal', 'blockPlatform', 'legFront', 'legBack', 'col'];
+const SHADOW_RECEIVER_PREFIXES = ['poolFloor', 'deckSlab', 'wet'];
 
 export class ArenaLighting {
   private hemiLight:         BABYLON.HemisphericLight | null = null;

@@ -145,9 +145,9 @@ export class ArenaManager {
     this.startingBlocks = new StartingBlocks();
     this.startingBlocks.build(scene, this.arenaConfig, this.matLib);
 
-    // ── 11. Arena architecture (walls, bleachers, scoreboard) ─────────────
+    // ── 11. Arena architecture (walls, bleachers, trusses, branding) ─────
     this.architecture = new ArenaArchitecture();
-    this.architecture.build(scene, this.arenaConfig, this.matLib);
+    this.architecture.build(scene, this.arenaConfig, this.matLib, qt);
 
     // ── 12. Post-build scene configuration (needs full scene.meshes) ─────
     //   a) Water render targets: reflection + refraction lists populated

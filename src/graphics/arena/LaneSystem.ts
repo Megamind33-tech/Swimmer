@@ -120,7 +120,10 @@ export class LaneSystem {
     // Phase 2: backstroke warning flag installations at both ends
     this._buildBackstrokeFlags(scene, config, matLib);
 
-    logger.log('[LaneSystem] Built (Phase 2)');
+    // Phase 6: 15 m turn-marker buoys on every lane rope
+    this._build15mMarkers(scene, config);
+
+    logger.log('[LaneSystem] Built Phase 6');
     return this.root;
   }
 
@@ -204,6 +207,46 @@ export class LaneSystem {
         pennant.material = matLib.pennant[pi % matLib.pennant.length];
         pennant.parent   = this.root;
         this.meshes.push(pennant);
+      }
+    }
+  }
+
+  // ─── Phase 6: 15 m turn markers ──────────────────────────────────────────
+
+  /**
+   * World Aquatics SW 6.4 requires a distinctive mark at 15 m from each end
+   * wall on every lane rope — used by backstroke swimmers to judge when to
+   * begin their surfacing sequence after a turn or start.
+   *
+   * Implemented as a larger yellow/white disc on every rope at
+   * Z = ±(L/2 − 15), clearly distinct from the standard float discs.
+   */
+  private _build15mMarkers(scene: BABYLON.Scene, config: IArenaConfig): void {
+    const { poolLength: L, poolWidth: W, laneCount: LC } = config;
+    const laneWidth = W / LC;
+
+    // Yellow material for 15 m markers — brighter than standard floats
+    const markerMat = new BABYLON.StandardMaterial('marker15m', scene);
+    markerMat.diffuseColor  = new BABYLON.Color3(1.0, 0.88, 0.05);
+    markerMat.emissiveColor = new BABYLON.Color3(0.3, 0.26, 0.01);
+
+    const markerZs = [-(L / 2 - 15),  L / 2 - 15];
+
+    for (let i = 1; i < LC; i++) {
+      const ropeX = -W / 2 + i * laneWidth;
+
+      for (const mz of markerZs) {
+        // Larger disc — visually distinct from standard 0.14 m rope floats
+        const marker = BABYLON.MeshBuilder.CreateCylinder(`marker15m_${i}_${mz.toFixed(0)}`, {
+          diameter:     0.22,
+          height:       0.10,
+          tessellation: 10,
+        }, scene);
+        marker.rotation.z = Math.PI / 2;
+        marker.position   = new BABYLON.Vector3(ropeX, 0.05, mz);
+        marker.material   = markerMat;
+        marker.parent     = this.root;
+        this.meshes.push(marker);
       }
     }
   }

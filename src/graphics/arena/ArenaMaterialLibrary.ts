@@ -1,19 +1,6 @@
 /**
- * ArenaMaterialLibrary  —  Phase 3
- * Central PBR material factory for the entire arena.
- *
- * All arena sub-systems (PoolStructure, PoolDeck, LaneSystem, StartingBlocks,
- * ArenaArchitecture) receive a reference to a shared ArenaMaterialLibrary
- * instance and use materials from it instead of creating their own.
- *
- * Benefits:
- *   - Fewer GPU material state switches (shared materials = fewer draw calls)
- *   - Single place to tune physical values (metallic / roughness)
- *   - Theme colour changes handled here via applyTheme()
- *   - LOD-aware: LOW quality tier skips bump-texture creation
- *
- * Material naming follows the arena sub-system that primarily uses each one,
- * but cross-module sharing (e.g. `stainless`) is intentional.
+ * ArenaMaterialLibrary  —  Phase 6 update
+ * Added arenaSteel and arenaGlass materials for Phase 6 architectural additions.
  */
 
 import * as BABYLON from '@babylonjs/core';
@@ -62,6 +49,10 @@ export class ArenaMaterialLibrary {
   public column!:       BABYLON.PBRMaterial;
   public bleacher!:     BABYLON.PBRMaterial;
   public seat!:         BABYLON.PBRMaterial;
+
+  // ── Phase 6 additions ──────────────────────────────────────────────────────
+  public arenaSteel!:   BABYLON.PBRMaterial; // dark structural steel (trusses, rigs)
+  public arenaGlass!:   BABYLON.PBRMaterial; // tinted clerestory glazing
 
   // ── Internal ───────────────────────────────────────────────────────────────
   private _allMaterials: BABYLON.PBRMaterial[] = [];
@@ -249,6 +240,28 @@ export class ArenaMaterialLibrary {
       roughness:   0.60,
     });
 
+    // ── Phase 6: structural steel + glazing ───────────────────────────────────
+    // arenaSteel: painted structural steel for roof trusses and light rigs.
+    // Visible overhead — dark charcoal with slight metallic sheen.
+    this.arenaSteel = this._pbr('arenaSteel', scene, {
+      albedoColor:          new BABYLON.Color3(0.20, 0.22, 0.24),
+      metallic:             0.18,
+      roughness:            0.58,
+      environmentIntensity: 0.05,
+    });
+
+    // arenaGlass: dark tinted glazing for clerestory window bands.
+    // Semi-transparent, cool blue-grey — suggests natural light entry.
+    this.arenaGlass = this._pbr('arenaGlass', scene, {
+      albedoColor:          new BABYLON.Color3(0.18, 0.26, 0.42),
+      metallic:             0.0,
+      roughness:            0.05,
+      backFaceCulling:      false,
+    });
+    // Transparency applied after construction (PBR supports it)
+    this.arenaGlass.alpha            = 0.40;
+    this.arenaGlass.transparencyMode = BABYLON.PBRMaterial.PBRMATERIAL_ALPHABLEND;
+
     logger.log(`[ArenaMaterialLibrary] Built (quality: ${qualityTier}, bump: ${useBump})`);
   }
 
@@ -261,6 +274,20 @@ export class ArenaMaterialLibrary {
     if (this.poolWall) {
       this.poolWall.albedoColor = color;
     }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Environment probe
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * After ArenaLighting.buildEnvironmentProbe() has captured the scene,
+   * call this with the resulting cube texture to activate scene-accurate IBL
+   * on all materials that have environmentIntensity > 0.
+   */
+  public applyEnvironmentTexture(scene: BABYLON.Scene, envTex: BABYLON.BaseTexture): void {
+    scene.environmentTexture = envTex;
+    logger.log('[ArenaMaterialLibrary] Environment texture applied');
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -297,9 +324,6 @@ export class ArenaMaterialLibrary {
 
   /**
    * 128×128 normal map for ceramic tile.
-   * Neutral tangent-space normal = RGB(128,128,255).
-   * Grout edges deviate ±28 in R (X normal) and G (Y normal) to simulate
-   * the concave grout bevel that creates micro-shadow at tile edges.
    */
   private _makeTileNormalTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
     const S   = 128;
@@ -308,21 +332,16 @@ export class ArenaMaterialLibrary {
 
     const imageData = ctx.createImageData(S, S);
     const d = imageData.data;
-    const GROUT = 4; // px matching albedo border
+    const GROUT = 4;
 
     for (let y = 0; y < S; y++) {
       for (let x = 0; x < S; x++) {
         const idx = (y * S + x) * 4;
-        // Default: flat surface — normal pointing straight up
         let nx = 128, ny = 128, nz = 255;
 
-        // Left grout edge → normal tilts right (+X)
         if (x < GROUT)           nx = 128 + Math.round(28 * (1 - x / GROUT));
-        // Right grout edge → normal tilts left (-X)
         if (x >= S - GROUT)      nx = 128 - Math.round(28 * (1 - (S - 1 - x) / GROUT));
-        // Top grout edge → normal tilts down (+Y)
         if (y < GROUT)           ny = 128 + Math.round(28 * (1 - y / GROUT));
-        // Bottom grout edge → normal tilts up (-Y)
         if (y >= S - GROUT)      ny = 128 - Math.round(28 * (1 - (S - 1 - y) / GROUT));
 
         d[idx]     = nx;
@@ -338,9 +357,7 @@ export class ArenaMaterialLibrary {
   }
 
   /**
-   * 128×128 normal map for concrete surfaces (deck, walls, columns).
-   * Smooth noise height field → finite-difference normal.
-   * Uses a deterministic hash so output is stable across builds.
+   * 128×128 normal map for concrete surfaces.
    */
   private _makeConcreteNormalTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
     const S   = 128;
@@ -350,15 +367,13 @@ export class ArenaMaterialLibrary {
     const imageData = ctx.createImageData(S, S);
     const d = imageData.data;
 
-    // Sample a height field using smooth bilinear noise
     const height = (x: number, y: number): number => {
-      const fx = x / S * 8; // 8 noise cells across texture
+      const fx = x / S * 8;
       const fy = y / S * 8;
       const ix = Math.floor(fx);
       const iy = Math.floor(fy);
       const tx = fx - ix;
       const ty = fy - iy;
-      // Smoothstep interpolation
       const sx = tx * tx * (3 - 2 * tx);
       const sy = ty * ty * (3 - 2 * ty);
       const h00 = this._hash(ix,     iy);
@@ -372,7 +387,7 @@ export class ArenaMaterialLibrary {
     };
 
     const STEP = 1;
-    const STRENGTH = 40; // normal deviation amplitude
+    const STRENGTH = 40;
 
     for (let y = 0; y < S; y++) {
       for (let x = 0; x < S; x++) {
@@ -381,7 +396,6 @@ export class ArenaMaterialLibrary {
         const hU = height(x, y - STEP);
         const hD = height(x, y + STEP);
 
-        // Finite-difference gradient → encode as normal
         const nx = Math.round(128 + (hL - hR) * STRENGTH);
         const ny = Math.round(128 + (hU - hD) * STRENGTH);
         const nz = 255;
@@ -399,7 +413,6 @@ export class ArenaMaterialLibrary {
     return tex;
   }
 
-  /** Deterministic hash for a 2D integer grid point → [0, 1]. */
   private _hash(ix: number, iy: number): number {
     const s = Math.sin(ix * 12.9898 + iy * 78.233) * 43758.5453;
     return s - Math.floor(s);
@@ -409,31 +422,18 @@ export class ArenaMaterialLibrary {
   // PBR factory helper
   // ─────────────────────────────────────────────────────────────────────────
 
-  /**
-   * After ArenaLighting.buildEnvironmentProbe() has captured the scene,
-   * call this with the resulting cube texture to activate scene-accurate IBL
-   * on all materials that have environmentIntensity > 0.
-   *
-   * Sets scene.environmentTexture — PBRMaterial picks this up automatically
-   * when environmentIntensity > 0 and no per-material reflectionTexture is set.
-   */
-  public applyEnvironmentTexture(scene: BABYLON.Scene, envTex: BABYLON.BaseTexture): void {
-    scene.environmentTexture = envTex;
-    logger.log('[ArenaMaterialLibrary] Environment texture applied');
-  }
-
   private _pbr(
     name:  string,
     scene: BABYLON.Scene,
     opts: {
-      albedoColor?:         BABYLON.Color3;
-      albedoTexture?:       BABYLON.BaseTexture | null;
-      emissiveColor?:       BABYLON.Color3;
-      metallic:             number;
-      roughness:            number;
-      bumpTexture?:         BABYLON.BaseTexture | null;
-      backFaceCulling?:     boolean;
-      environmentIntensity?: number; // 0 = no IBL (default), >0 = picks up scene.environmentTexture
+      albedoColor?:          BABYLON.Color3;
+      albedoTexture?:        BABYLON.BaseTexture | null;
+      emissiveColor?:        BABYLON.Color3;
+      metallic:              number;
+      roughness:             number;
+      bumpTexture?:          BABYLON.BaseTexture | null;
+      backFaceCulling?:      boolean;
+      environmentIntensity?: number;
     },
   ): BABYLON.PBRMaterial {
     const mat = new BABYLON.PBRMaterial(name, scene);

@@ -155,9 +155,32 @@ export class StartingBlocks {
       plate.material = plateMat;
       plate.parent   = this.root;
       this.meshes.push(plate);
+
+      // ── Deck lane-number marking (Phase 6) ──────────────────────────
+      // A large painted circle/number on the deck surface directly behind
+      // each block — visible from top-down and aerial cameras, matching
+      // what you see on competition pool decks at major events.
+      const deckNumTex = this._makeDeckLaneTexture(scene, lane + 1);
+      this.lanePlateTextures.push(deckNumTex);
+
+      const deckNumMat = new BABYLON.StandardMaterial(`deckLaneMat${lane}`, scene);
+      deckNumMat.emissiveTexture = deckNumTex;
+      deckNumMat.emissiveColor   = new BABYLON.Color3(1, 1, 1);
+      deckNumMat.backFaceCulling = false;
+
+      // Flat panel lying on the deck, behind the block (toward south wall)
+      const deckMark = BABYLON.MeshBuilder.CreateBox(`deckLaneMark${lane}`, {
+        width:  1.80,
+        height: 0.008, // essentially flat
+        depth:  1.20,
+      }, scene);
+      deckMark.position = new BABYLON.Vector3(laneX, 0.005, blockZ - 1.10);
+      deckMark.material = deckNumMat;
+      deckMark.parent   = this.root;
+      this.meshes.push(deckMark);
     }
 
-    logger.log('[StartingBlocks] Built (Phase 2)');
+    logger.log('[StartingBlocks] Built Phase 6');
     return this.root;
   }
 
@@ -188,6 +211,42 @@ export class StartingBlocks {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(String(laneNum), 64, 50);
+
+    tex.update();
+    return tex;
+  }
+
+  /**
+   * Large deck lane-number marking — bold circle with lane number, white on
+   * dark blue.  Sized for visibility from top-down and aerial cameras.
+   */
+  private _makeDeckLaneTexture(scene: BABYLON.Scene, laneNum: number): BABYLON.DynamicTexture {
+    const S   = 256;
+    const tex = new BABYLON.DynamicTexture(`deckLaneTex_${laneNum}`, { width: S, height: S }, scene, false);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    // Transparent base
+    ctx.clearRect(0, 0, S, S);
+
+    // Dark circle background
+    ctx.fillStyle = '#041830';
+    ctx.beginPath();
+    ctx.arc(S / 2, S / 2, S * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White ring
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth   = S * 0.04;
+    ctx.beginPath();
+    ctx.arc(S / 2, S / 2, S * 0.42, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Lane number
+    ctx.fillStyle    = '#ffffff';
+    ctx.font         = `bold ${S * 0.52}px Arial, sans-serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(laneNum), S / 2, S / 2 + S * 0.04);
 
     tex.update();
     return tex;
