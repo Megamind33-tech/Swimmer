@@ -1,7 +1,7 @@
 /**
  * IconTabBar — Game HUD bottom navigation
  *
- * Layout: Left 3 tabs | Centre RACE button (raised) | Right 3 tabs
+ * Layout: Left 4 tabs | Centre RACE button (raised) | Right 4 tabs
  * Aesthetic: broadcast sports, deep gradient, gold active glow
  * Matches BottomNav design language used across the game.
  */
@@ -42,11 +42,13 @@ const LEFT_TABS: TabDef[] = [
   { id: 'career',   icon: Medal,         label: 'CAREER'  },
   { id: 'club',     icon: Shield,        label: 'CLUB'    },
   { id: 'scouts',   icon: Search,        label: 'SCOUTS', badge: 'NEW' },
+  { id: 'training', icon: Target,        label: 'TRAIN'   },
 ];
 
 const RIGHT_TABS: TabDef[] = [
   { id: 'market',   icon: ShoppingCart,  label: 'MARKET'  },
   { id: 'rankings', icon: Trophy,        label: 'RANK'    },
+  { id: 'style',    icon: Shirt,         label: 'STYLE'   },
   { id: 'store',    icon: ShoppingBag,   label: 'STORE'   },
 ];
 
@@ -108,7 +110,7 @@ function NavTab({
       {/* Icon */}
       <div style={{ position: 'relative' }}>
         <Icon
-          size={18}
+          size={15}
           style={{
             color:  isActive ? '#ffffff' : 'rgba(255,255,255,0.40)',
             filter: isActive ? 'drop-shadow(0 0 6px rgba(212,168,67,0.80))' : 'none',
@@ -170,8 +172,8 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
         display:              'flex',
         alignItems:           'center',
         justifyContent:       'center',
-        paddingInline:        '10px',
-        gap:                  '6px',
+        paddingInline:        '6px',
+        gap:                  '4px',
       }}
     >
       {/* Scanline HUD accent */}
@@ -185,8 +187,8 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
         pointerEvents: 'none',
       }} />
 
-      {/* Left 3 tabs */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', height: '48px' }}>
+      {/* Left 4 tabs */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px', height: '46px' }}>
         {LEFT_TABS.map(tab => (
           <NavTab key={tab.id} tab={tab} isActive={activeTab === tab.id} onChange={onChange} />
         ))}
@@ -244,8 +246,8 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
         }} />
       </motion.button>
 
-      {/* Right 3 tabs */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', height: '48px' }}>
+      {/* Right 4 tabs */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px', height: '46px' }}>
         {RIGHT_TABS.map(tab => (
           <NavTab key={tab.id} tab={tab} isActive={activeTab === tab.id} onChange={onChange} />
         ))}
