@@ -1,14 +1,17 @@
-/**
- * Home Screen - Game-Focused Broadcast Aesthetic
- * Championship display with glassmorphic cards and neon accents
- */
-
-import React, { useState, useRef } from 'react';
+import React, { useMemo, useState } from 'react';
 import { IPlayerSwimmer } from '../../types';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 import p2pQuickMatchImage from '../../designs/doh9161_copy.width_800.jpg/screen.png';
 import { FeatureCardMedia } from '../ui/MediaPrimitives';
 import { GameIcon } from '../../ui/GameIcon';
+import {
+  swim26Boundary,
+  swim26Color,
+  swim26Layout,
+  swim26Size,
+  swim26Space,
+  swim26Type,
+} from '../../theme/swim26DesignSystem';
 
 interface HomeScreenProps {
   player?: IPlayerSwimmer;
@@ -19,124 +22,399 @@ interface HomeScreenProps {
 
 type HomeSubPage = 'QUICK_RACE' | 'CAREER' | 'SOCIAL' | null;
 
+interface HomeFeature {
+  id: Exclude<HomeSubPage, null>;
+  eyebrow: string;
+  title: string;
+  description: string;
+  buttonLabel: string;
+  badge: string;
+  icon: string;
+  accent: string;
+  border: string;
+  badgeBackground: string;
+  image: string;
+  focalPoint: string;
+}
+
+const shellPanel: React.CSSProperties = {
+  borderRadius: swim26Boundary.radius.lg,
+  border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+  background: swim26Color.surface.secondary,
+  boxShadow: swim26Boundary.elevation.level1,
+};
+
+const subPanelStyle: React.CSSProperties = {
+  borderRadius: swim26Boundary.radius.md,
+  border: `${swim26Boundary.border.thin}px solid rgba(255,255,255,0.08)`,
+  background: 'rgba(255,255,255,0.03)',
+};
+
+const primaryButtonStyle: React.CSSProperties = {
+  minWidth: swim26Size.buttons.cta.minWidth,
+  minHeight: swim26Size.buttons.cta.height,
+  borderRadius: swim26Boundary.radius.md,
+  border: `${swim26Boundary.border.thin}px solid ${swim26Color.accent.primary}`,
+  background: swim26Color.accent.primary,
+  color: '#06202A',
+  fontSize: swim26Type.buttonLabel.fontSize,
+  fontWeight: swim26Type.buttonLabel.fontWeight,
+  letterSpacing: swim26Type.buttonLabel.letterSpacing,
+  boxShadow: swim26Boundary.elevation.level2,
+};
+
+const secondaryButtonStyle: React.CSSProperties = {
+  minWidth: swim26Size.buttons.standard.minWidth,
+  minHeight: swim26Size.buttons.standard.height,
+  borderRadius: swim26Boundary.radius.md,
+  border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+  background: 'rgba(255,255,255,0.04)',
+  color: swim26Color.text.primary,
+  fontSize: swim26Type.buttonLabel.fontSize,
+  fontWeight: swim26Type.buttonLabel.fontWeight,
+  letterSpacing: '0.02em',
+};
+
+const features: HomeFeature[] = [
+  {
+    id: 'QUICK_RACE',
+    eyebrow: 'LIVE COMPETITION',
+    title: 'Quick Race',
+    description: 'Instant matchmaking, lane-ready telemetry, and direct launch into ranked sessions.',
+    buttonLabel: 'Start Race',
+    badge: 'Competitive',
+    icon: '⚡',
+    accent: swim26Color.accent.primary,
+    border: 'rgba(74, 201, 214, 0.26)',
+    badgeBackground: 'rgba(74, 201, 214, 0.16)',
+    image: p2pQuickMatchImage,
+    focalPoint: '50% 45%',
+  },
+  {
+    id: 'CAREER',
+    eyebrow: 'SEASON PROGRESSION',
+    title: 'Career',
+    description: 'Track contracts, sponsor objectives, and your route toward elite division placement.',
+    buttonLabel: 'Open Career',
+    badge: 'Achievements',
+    icon: '🏆',
+    accent: swim26Color.featured.premium,
+    border: 'rgba(214, 180, 90, 0.28)',
+    badgeBackground: 'rgba(214, 180, 90, 0.16)',
+    image: miaPhiriAthleteImage,
+    focalPoint: '50% 22%',
+  },
+  {
+    id: 'SOCIAL',
+    eyebrow: 'CLUB OPERATIONS',
+    title: 'Social Hub',
+    description: 'Manage club chat, rivalry alerts, and team requests without leaving the command deck.',
+    buttonLabel: 'Open Social',
+    badge: '+12 Online',
+    icon: '✦',
+    accent: swim26Color.accent.secondary,
+    border: 'rgba(30, 143, 163, 0.26)',
+    badgeBackground: 'rgba(30, 143, 163, 0.18)',
+    image: p2pQuickMatchImage,
+    focalPoint: '50% 52%',
+  },
+];
+
+const subPageContent: Record<Exclude<HomeSubPage, null>, {
+  eyebrow: string;
+  title: string;
+  description: string;
+  bullets: string[];
+  primaryLabel: string;
+  accent: string;
+}> = {
+  QUICK_RACE: {
+    eyebrow: 'RACE OPS',
+    title: 'Quick Race Command',
+    description: 'Queue setup, opponent matching, and live launch controls all stay inside one pre-race action frame.',
+    bullets: ['Sprint Queue', 'Time Trial Entry', 'Relay Warmup Slot'],
+    primaryLabel: 'Launch Quick Race',
+    accent: swim26Color.accent.primary,
+  },
+  CAREER: {
+    eyebrow: 'SEASON PATH',
+    title: 'Career Command',
+    description: 'Milestone tracking, rank projection, sponsor targets, and season pacing stay aligned inside one progression surface.',
+    bullets: ['Season Milestones', 'Sponsor Targets', 'Coach Notes', 'Rank Projection'],
+    primaryLabel: 'Continue Career',
+    accent: swim26Color.featured.premium,
+  },
+  SOCIAL: {
+    eyebrow: 'COMMUNITY OPS',
+    title: 'Social Hub',
+    description: 'Friends online, rival alerts, and club comms live in one feed-first panel so the social layer feels operational, not decorative.',
+    bullets: ['Squad Chat', 'Rival Alerts', 'Club Requests'],
+    primaryLabel: 'Open Social Hub',
+    accent: swim26Color.accent.secondary,
+  },
+};
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({
-  player,
   onPlayClick,
   onCareerClick,
   onSocialClick,
 }) => {
   const [activeSubPage, setActiveSubPage] = useState<HomeSubPage>(null);
 
-  const openSubPage = (subPage: Exclude<HomeSubPage, null>) => setActiveSubPage(subPage);
+  const activeFeature = useMemo(
+    () => features.find((feature) => feature.id === activeSubPage) ?? null,
+    [activeSubPage],
+  );
 
-  const renderSubPage = () => {
-    if (!activeSubPage) return null;
-
-    if (activeSubPage === 'QUICK_RACE') {
-      return (
-        <div className="rounded-2xl border border-primary/20 bg-surface/60 p-8 space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="font-headline text-3xl font-black italic uppercase text-primary text-glow">Quick Race Ops</h3>
-            <button onClick={() => setActiveSubPage(null)} className="hydro-cta hydro-cta-neutral max-w-40">Back</button>
-          </div>
-          <p className="text-on-surface-variant font-bold uppercase tracking-[0.15em] text-xs">Queue setup, matchmaking telemetry and race launch controls.</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {['Sprint Queue', 'Time Trial', 'Relay Warmup'].map((item) => (
-              <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-black italic uppercase">{item}</div>
-            ))}
-          </div>
-          <button onClick={onPlayClick} className="hydro-cta hydro-cta-primary max-w-sm">Launch Quick Race</button>
-        </div>
-      );
-    }
-
-    if (activeSubPage === 'CAREER') {
-      return (
-        <div className="rounded-2xl border border-secondary/30 bg-surface/60 p-8 space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="font-headline text-3xl font-black italic uppercase text-secondary gold-glow">Career Command</h3>
-            <button onClick={() => setActiveSubPage(null)} className="hydro-cta hydro-cta-neutral max-w-40">Back</button>
-          </div>
-          <p className="text-on-surface-variant font-bold uppercase tracking-[0.15em] text-xs">Milestone tracking, contract objectives and season progression.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {['Season Milestones', 'Sponsor Targets', 'Coach Notes', 'Rank Projection'].map((item) => (
-              <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-black italic uppercase">{item}</div>
-            ))}
-          </div>
-          <button onClick={onCareerClick} className="hydro-cta hydro-cta-gold max-w-sm">Open Career Screen</button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="rounded-2xl border border-blue-300/30 bg-surface/60 p-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="font-headline text-3xl font-black italic uppercase text-blue-300">Social Hub</h3>
-          <button onClick={() => setActiveSubPage(null)} className="hydro-cta hydro-cta-neutral max-w-40">Back</button>
-        </div>
-        <p className="text-on-surface-variant font-bold uppercase tracking-[0.15em] text-xs">Friends online, rival challenges and club communication feed.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {['Squad Chat', 'Rival Alerts', 'Club Requests'].map((item) => (
-            <div key={item} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm font-black italic uppercase">{item}</div>
-          ))}
-        </div>
-        <button onClick={onSocialClick} className="hydro-cta hydro-cta-neutral max-w-sm">Open Social Screen</button>
-      </div>
-    );
+  const handlePrimaryAction = () => {
+    if (activeSubPage === 'QUICK_RACE') onPlayClick?.();
+    if (activeSubPage === 'CAREER') onCareerClick?.();
+    if (activeSubPage === 'SOCIAL') onSocialClick?.();
   };
 
   return (
-    <div className="home-main-content hydro-page-shell flex-1 relative w-full h-full overflow-y-auto font-body">
-      <div className="hydro-home-shell p-4 md:p-6">
-        <section className="hydro-home-hero mb-5">
-          <h2 className="text-4xl md:text-5xl font-black italic uppercase leading-none tracking-tight text-on-surface">
-            Race <span className="text-primary">Command</span>
-          </h2>
-          <div className="h-1 w-24 bg-primary mt-4 skew-slanted" />
+    <div
+      style={{
+        height: '100%',
+        color: swim26Color.text.primary,
+        background: `radial-gradient(circle at 18% 16%, rgba(74, 201, 214, 0.10), transparent 22%), radial-gradient(circle at 78% 18%, rgba(214, 180, 90, 0.10), transparent 18%), linear-gradient(180deg, rgba(9, 21, 30, 0.78) 0%, rgba(7, 19, 28, 0.82) 100%)`,
+        overflowY: 'auto',
+      }}
+    >
+      <div
+        style={{
+          padding: `${swim26Layout.safe.top}px ${swim26Layout.safe.right}px ${swim26Layout.safe.bottom}px`,
+          display: 'grid',
+          gap: swim26Space.md,
+          minHeight: '100%',
+          boxSizing: 'border-box',
+        }}
+      >
+        <section
+          style={{
+            ...shellPanel,
+            padding: swim26Space.lg,
+            display: 'grid',
+            gap: swim26Space.md,
+            background: 'linear-gradient(180deg, rgba(20, 38, 54, 0.94) 0%, rgba(13, 27, 39, 0.94) 100%)',
+          }}
+        >
+          <div style={{ display: 'grid', gap: 6 }}>
+            <div style={{ fontSize: swim26Type.metadata.fontSize, fontWeight: 700, color: swim26Color.accent.primary, letterSpacing: '0.08em' }}>
+              HOME COMMAND DECK
+            </div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: swim26Type.displayHeading.fontSize,
+                lineHeight: `${swim26Type.displayHeading.lineHeight}px`,
+                fontWeight: swim26Type.displayHeading.fontWeight,
+                letterSpacing: swim26Type.displayHeading.letterSpacing,
+              }}
+            >
+              Race, progress, and club control in one premium shell
+            </h1>
+            <div style={{ maxWidth: 720, fontSize: swim26Type.cardTitle.fontSize, lineHeight: '22px', color: swim26Color.text.secondary }}>
+              The home surface now follows the same containment logic as League, Exchange, Store, and overlays: one priority hero band, one secondary action rail, and one clear action hierarchy.
+            </div>
+          </div>
+
+          {activeFeature ? (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'minmax(0, 1.1fr) minmax(320px, 0.9fr)',
+                gap: swim26Space.md,
+                alignItems: 'stretch',
+              }}
+            >
+              <div style={{ ...subPanelStyle, overflow: 'hidden', position: 'relative', minHeight: 280 }}>
+                <FeatureCardMedia
+                  src={activeFeature.image}
+                  alt={activeFeature.title}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  overlayClassName="absolute inset-0"
+                  focalPoint={activeFeature.focalPoint}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(7, 19, 28, 0.18) 0%, rgba(7, 19, 28, 0.52) 32%, rgba(7, 19, 28, 0.92) 100%)',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    height: '100%',
+                    padding: swim26Space.lg,
+                    display: 'grid',
+                    alignContent: 'end',
+                    gap: swim26Space.sm,
+                  }}
+                >
+                  <span
+                    style={{
+                      height: swim26Size.badge.height,
+                      padding: `0 ${swim26Space.sm}px`,
+                      borderRadius: swim26Boundary.radius.pill,
+                      background: activeFeature.badgeBackground,
+                      border: `${swim26Boundary.border.thin}px solid ${activeFeature.border}`,
+                      color: activeFeature.accent,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      fontSize: 10,
+                      fontWeight: 800,
+                      justifySelf: 'start',
+                    }}
+                  >
+                    {activeFeature.badge}
+                  </span>
+                  <div style={{ fontSize: 18, lineHeight: '20px', color: activeFeature.accent, fontWeight: 700 }}>{activeFeature.eyebrow}</div>
+                  <div style={{ fontSize: 34, lineHeight: '38px', fontWeight: 800 }}>{activeFeature.title}</div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  ...subPanelStyle,
+                  padding: swim26Space.lg,
+                  display: 'grid',
+                  gridTemplateRows: 'auto 1fr auto',
+                  gap: swim26Space.md,
+                  minHeight: 280,
+                }}
+              >
+                <div style={{ display: 'grid', gap: 8 }}>
+                  <div style={{ fontSize: swim26Type.metadata.fontSize, color: subPageContent[activeSubPage].accent, fontWeight: 700, letterSpacing: '0.08em' }}>
+                    {subPageContent[activeSubPage].eyebrow}
+                  </div>
+                  <div style={{ fontSize: 28, lineHeight: '32px', fontWeight: 800 }}>
+                    {subPageContent[activeSubPage].title}
+                  </div>
+                  <div style={{ fontSize: 14, lineHeight: '20px', color: swim26Color.text.secondary }}>
+                    {subPageContent[activeSubPage].description}
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: swim26Space.sm, alignContent: 'start' }}>
+                  {subPageContent[activeSubPage].bullets.map((item) => (
+                    <div key={item} style={{ ...subPanelStyle, padding: swim26Space.md, minHeight: 76, display: 'grid', alignContent: 'center', fontSize: 13, lineHeight: '18px', fontWeight: 700 }}>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', gap: swim26Space.sm, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                  <button onClick={() => setActiveSubPage(null)} style={secondaryButtonStyle}>
+                    Back
+                  </button>
+                  <button onClick={handlePrimaryAction} style={{ ...primaryButtonStyle, background: subPageContent[activeSubPage].accent, borderColor: subPageContent[activeSubPage].accent }}>
+                    {subPageContent[activeSubPage].primaryLabel}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: swim26Space.md,
+              }}
+            >
+              {features.map((feature) => (
+                <article
+                  key={feature.id}
+                  onClick={() => setActiveSubPage(feature.id)}
+                  style={{
+                    ...subPanelStyle,
+                    overflow: 'hidden',
+                    padding: 0,
+                    minHeight: 320,
+                    position: 'relative',
+                    textAlign: 'left',
+                    display: 'grid',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <FeatureCardMedia
+                    src={feature.image}
+                    alt={feature.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    overlayClassName="absolute inset-0"
+                    focalPoint={feature.focalPoint}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: `linear-gradient(180deg, rgba(7, 19, 28, 0.14) 0%, rgba(7, 19, 28, 0.42) 34%, rgba(7, 19, 28, 0.92) 100%)`,
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'relative',
+                      zIndex: 1,
+                      height: '100%',
+                      padding: swim26Space.lg,
+                      display: 'grid',
+                      alignContent: 'space-between',
+                      gap: swim26Space.md,
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: swim26Space.sm }}>
+                      <span
+                        style={{
+                          height: swim26Size.badge.height,
+                          padding: `0 ${swim26Space.sm}px`,
+                          borderRadius: swim26Boundary.radius.pill,
+                          background: feature.badgeBackground,
+                          border: `${swim26Boundary.border.thin}px solid ${feature.border}`,
+                          color: feature.accent,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          fontSize: 10,
+                          fontWeight: 800,
+                        }}
+                      >
+                        {feature.badge}
+                      </span>
+                      <span style={{ fontSize: 28, lineHeight: 1, color: feature.accent }}>{feature.icon}</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gap: swim26Space.sm }}>
+                      <div style={{ fontSize: swim26Type.metadata.fontSize, color: feature.accent, fontWeight: 700, letterSpacing: '0.08em' }}>
+                        {feature.eyebrow}
+                      </div>
+                      <div style={{ fontSize: 28, lineHeight: '30px', fontWeight: 800 }}>{feature.title}</div>
+                      <div style={{ fontSize: 14, lineHeight: '20px', color: swim26Color.text.secondary }}>{feature.description}</div>
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setActiveSubPage(feature.id);
+                        }}
+                        style={{
+                          ...primaryButtonStyle,
+                          minWidth: swim26Size.buttons.standard.minWidth,
+                          minHeight: swim26Size.buttons.standard.height,
+                          justifySelf: 'start',
+                          background: `${feature.accent}22`,
+                          borderColor: feature.border,
+                          color: feature.accent,
+                          boxShadow: swim26Boundary.elevation.level1,
+                        }}
+                      >
+                        {feature.buttonLabel}
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
-
-        {activeSubPage ? (
-          renderSubPage()
-        ) : (
-          <section className="hydro-home-cards">
-            <article className="hydro-feature-card hydro-feature-primary" onClick={() => openSubPage('QUICK_RACE')}>
-              <FeatureCardMedia src={p2pQuickMatchImage} alt="Quick race" className="hydro-feature-image" overlayClassName="hydro-feature-overlay" focalPoint="50% 45%" />
-              <div className="hydro-feature-content">
-                <span className="hydro-badge bg-primary text-background">Competitive</span>
-                <h3>Quick Race</h3>
-                <p>Instant matchmaking &amp; global tracking.</p>
-                <button onClick={(e) => { e.stopPropagation(); openSubPage('QUICK_RACE'); }} className="hydro-cta hydro-cta-primary">
-                  Start
-                </button>
-              </div>
-              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="hydro-feature-icon text-primary">⚡</span>
-            </article>
-
-            <article className="hydro-feature-card hydro-feature-gold" onClick={() => openSubPage('CAREER')}>
-              <FeatureCardMedia src={miaPhiriAthleteImage} alt="Career mode" className="hydro-feature-image" overlayClassName="hydro-feature-overlay hydro-feature-overlay-gold" focalPoint="50% 22%" />
-              <div className="hydro-feature-content">
-                <span className="hydro-badge bg-secondary text-background">Achievements</span>
-                <h3>Career</h3>
-                <p>Pro path, trophies &amp; season goals.</p>
-                <button onClick={(e) => { e.stopPropagation(); openSubPage('CAREER'); }} className="hydro-cta hydro-cta-gold">
-                  Continue
-                </button>
-              </div>
-              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="hydro-feature-icon text-secondary">🏆</span>
-            </article>
-
-            <article className="hydro-feature-card hydro-feature-neutral" onClick={() => openSubPage('SOCIAL')}>
-              <FeatureCardMedia src={p2pQuickMatchImage} alt="Social club" className="hydro-feature-image" overlayClassName="hydro-feature-overlay hydro-feature-overlay-neutral" focalPoint="50% 52%" />
-              <div className="hydro-feature-content">
-                <span className="hydro-badge bg-blue-500/30 text-blue-300 border border-blue-400/30">+12 Online</span>
-                <h3>Chat</h3>
-                <p>Squad chat, rivals &amp; club feed.</p>
-                <button onClick={(e) => { e.stopPropagation(); openSubPage('SOCIAL'); }} className="hydro-cta hydro-cta-neutral">Open</button>
-              </div>
-              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="hydro-feature-icon text-blue-300">⊕</span>
-            </article>
-          </section>
-        )}
       </div>
     </div>
   );
@@ -149,8 +427,6 @@ interface HomeRightPanelProps {
 
 export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
   const [completedObjectives, setCompletedObjectives] = useState<Set<number>>(new Set([2]));
-  const [splashingObjective, setSplashingObjective] = useState<number | null>(null);
-  const splashRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   const dailyObjectives = [
     { id: 1, name: 'Complete 2 sprint races', progress: 1, total: 2, icon: 'play_arrow' },
@@ -160,134 +436,137 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
   ];
 
   const activeEvents = [
-    { name: 'World Sprint Cup', time: '05:14:22', timeMs: 514220, urgency: 'normal' as const },
-    { name: 'Butterfly Challenge', time: '2d 14h', timeMs: null, urgency: 'normal' as const },
+    { name: 'World Sprint Cup', time: '05:14:22', tag: 'LIVE' },
+    { name: 'Butterfly Challenge', time: '2D 14H', tag: 'EVENT' },
   ];
 
-  const isComplete = (obj: typeof dailyObjectives[0]) => obj.progress >= obj.total;
   const progressPercent = (progress: number, total: number) => Math.min((progress / total) * 100, 100);
 
-  const getIconColorClass = (obj: typeof dailyObjectives[0]) => {
-    if (completedObjectives.has(obj.id)) {
-      return 'icon-progress-complete';
-    } else if (obj.progress > 0) {
-      return 'icon-progress-active';
-    }
-    return 'icon-progress-grey';
-  };
-
-  const handleObjectiveClick = (obj: typeof dailyObjectives[0]) => {
-    if (isComplete(obj) && !completedObjectives.has(obj.id)) {
-      setSplashingObjective(obj.id);
-      setCompletedObjectives((prev) => new Set([...prev, obj.id]));
-      setTimeout(() => setSplashingObjective(null), 600);
-    }
-  };
-
   return (
-    <div className="space-y-4 safe-zone">
-      {/* Daily Objectives - Hydro Pane */}
-      <div className="glass-panel p-6 rounded-2xl group hover:border-primary/40 transition-all duration-300">
-        <h3 className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-5 text-glow">
-          Daily Objectives
-        </h3>
-        <div className="space-y-3">
-          {dailyObjectives.map((obj) => {
-            const isCompleted = completedObjectives.has(obj.id);
-            const fillPercent = progressPercent(obj.progress, obj.total);
-
+    <div style={{ display: 'grid', gap: swim26Space.md }}>
+      <div
+        style={{
+          ...shellPanel,
+          padding: swim26Space.lg,
+          display: 'grid',
+          gap: swim26Space.md,
+          background: 'linear-gradient(180deg, rgba(20, 38, 54, 0.94) 0%, rgba(13, 27, 39, 0.94) 100%)',
+        }}
+      >
+        <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.accent.primary, fontWeight: 700, letterSpacing: '0.08em' }}>
+          DAILY OBJECTIVES
+        </div>
+        <div style={{ display: 'grid', gap: swim26Space.sm }}>
+          {dailyObjectives.map((objective) => {
+            const isCompleted = completedObjectives.has(objective.id) || objective.progress >= objective.total;
+            const fillPercent = progressPercent(objective.progress, objective.total);
             return (
-              <div
-                key={obj.id}
-                ref={(el) => {
-                  if (el) splashRefs.current[obj.id] = el;
+              <button
+                key={objective.id}
+                onClick={() => {
+                  if (objective.progress >= objective.total) {
+                    setCompletedObjectives((previous) => new Set(previous).add(objective.id));
+                  }
                 }}
-                onClick={() => handleObjectiveClick(obj)}
-                className={`relative flex items-center justify-between p-3.5 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${
-                  isCompleted
-                    ? 'bg-secondary/10 border-secondary/30 hover:border-secondary/50'
-                    : 'bg-white/5 border-white/5 hover:border-primary/30 hover:bg-white/10'
-                }`}
+                style={{
+                  ...subPanelStyle,
+                  padding: swim26Space.md,
+                  display: 'grid',
+                  gridTemplateColumns: '44px minmax(0, 1fr) 72px',
+                  gap: swim26Space.sm,
+                  alignItems: 'center',
+                  background: isCompleted ? 'rgba(214, 180, 90, 0.08)' : 'rgba(255,255,255,0.03)',
+                  borderColor: isCompleted ? 'rgba(214, 180, 90, 0.24)' : 'rgba(255,255,255,0.08)',
+                  textAlign: 'left',
+                }}
               >
-                {/* Icon with Glass Look */}
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="relative h-10 w-10 rounded-lg bg-surface-highest/50 flex items-center justify-center border border-white/5 group-hover:border-primary/20 transition-all">
-                    <GameIcon
-                      name={obj.icon}
-                      size={24}
-                      className={`shrink-0 transition-all duration-300 ${
-                        isCompleted ? 'text-secondary gold-glow' : 'text-primary/70 group-hover:text-primary'
-                      }`}
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: swim26Boundary.radius.sm,
+                    background: isCompleted ? 'rgba(214, 180, 90, 0.14)' : 'rgba(74, 201, 214, 0.10)',
+                    border: `${swim26Boundary.border.thin}px solid ${isCompleted ? 'rgba(214, 180, 90, 0.28)' : 'rgba(74, 201, 214, 0.24)'}`,
+                    display: 'grid',
+                    placeItems: 'center',
+                  }}
+                >
+                  <GameIcon name={objective.icon} size={20} className={isCompleted ? 'text-secondary' : 'text-primary'} />
+                </div>
+
+                <div style={{ minWidth: 0, display: 'grid', gap: 4 }}>
+                  <div style={{ fontSize: 13, lineHeight: '18px', fontWeight: 700 }}>{objective.name}</div>
+                  <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary }}>
+                    {isCompleted ? 'Reward ready' : `${objective.progress} / ${objective.total} complete`}
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gap: 6 }}>
+                  <div style={{ height: 6, borderRadius: 999, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                    <div
+                      style={{
+                        width: `${fillPercent}%`,
+                        height: '100%',
+                        borderRadius: 999,
+                        background: isCompleted ? swim26Color.featured.premium : swim26Color.accent.primary,
+                      }}
                     />
                   </div>
-
-                  <div className="flex flex-col">
-                    <span
-                      className={`text-sm font-bold truncate transition-colors duration-300 ${
-                        isCompleted ? 'text-secondary/90' : 'text-on-surface'
-                      }`}
-                    >
-                      {obj.name}
-                    </span>
-                    <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
-                      {isCompleted ? 'Objective Complete' : `${obj.progress} / ${obj.total} Progress`}
-                    </span>
+                  <div style={{ fontSize: 10, color: isCompleted ? swim26Color.featured.premium : swim26Color.text.secondary, fontWeight: 700, textAlign: 'right' }}>
+                    {isCompleted ? 'CLAIM' : `${Math.round(fillPercent)}%`}
                   </div>
                 </div>
-
-                {/* Progress Indicator */}
-                <div className="relative h-1.5 w-16 rounded-full bg-white/5 border border-white/5 overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-700 ${
-                      isCompleted ? 'bg-secondary shadow-[0_0_10px_rgba(255,215,9,0.5)]' : 'bg-primary shadow-[0_0_10px_rgba(129,236,255,0.5)]'
-                    }`}
-                    style={{ width: `${fillPercent}%` }}
-                  />
-                </div>
-              </div>
+              </button>
             );
           })}
         </div>
       </div>
 
-      {/* Active Events - Floating Cards */}
-      <div className="glass-panel p-6 rounded-2xl group hover:border-primary/40 transition-all duration-300 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full translate-x-16 -translate-y-16" />
-        
-        <h3 className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-5 text-glow">
-          Active Events
-        </h3>
-        <div className="space-y-4">
-          {activeEvents.map((event, idx) => (
+      <div style={{ ...shellPanel, padding: swim26Space.lg, display: 'grid', gap: swim26Space.md }}>
+        <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.featured.premium, fontWeight: 700, letterSpacing: '0.08em' }}>
+          ACTIVE EVENTS
+        </div>
+        <div style={{ display: 'grid', gap: swim26Space.sm }}>
+          {activeEvents.map((event) => (
             <div
-              key={idx}
-              className="relative p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all duration-300 group/card overflow-hidden"
+              key={event.name}
+              style={{
+                ...subPanelStyle,
+                padding: swim26Space.md,
+                display: 'grid',
+                gap: 6,
+              }}
             >
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-bold text-on-surface group-hover/card:text-primary transition-colors">{event.name}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="h-1 w-8 bg-primary/30 rounded-full" />
-                    <span className="text-[9px] uppercase tracking-widest text-on-surface-variant font-black">Season Series</span>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col items-end">
-                  <div className="text-primary font-headline font-bold italic slanted text-glow">
-                    {event.time}
-                  </div>
-                  <div className="text-[8px] uppercase tracking-tighter text-on-surface-variant font-bold">Ends In</div>
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: swim26Space.sm, alignItems: 'center' }}>
+                <div style={{ fontSize: 14, lineHeight: '18px', fontWeight: 700 }}>{event.name}</div>
+                <span
+                  style={{
+                    height: swim26Size.badge.height,
+                    padding: `0 ${swim26Space.sm}px`,
+                    borderRadius: swim26Boundary.radius.pill,
+                    background: event.tag === 'LIVE' ? 'rgba(240, 106, 95, 0.16)' : 'rgba(74, 201, 214, 0.12)',
+                    color: event.tag === 'LIVE' ? swim26Color.feedback.alert : swim26Color.accent.primary,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: 10,
+                    fontWeight: 800,
+                  }}
+                >
+                  {event.tag}
+                </span>
               </div>
-
-              {/* Hover Glow Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-transparent -translate-x-full group-hover/card:translate-x-full transition-transform duration-1000" />
+              <div style={{ fontSize: swim26Type.numeric.fontSize, lineHeight: `${swim26Type.numeric.lineHeight}px`, fontWeight: swim26Type.numeric.fontWeight, color: swim26Color.accent.primary }}>
+                {event.time}
+              </div>
+              <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary }}>
+                Countdown chips, event containment, and supporting text now follow the same hierarchy used in League and Championship hubs.
+              </div>
             </div>
           ))}
         </div>
       </div>
-      </div>
-    );
+    </div>
+  );
 };
 
 export default HomeScreen;
