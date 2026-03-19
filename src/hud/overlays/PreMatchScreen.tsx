@@ -245,21 +245,21 @@ const SwimmerCard: React.FC<{ swimmer: SwimmerEntry; index: number }> = ({ swimm
       initial={{ opacity: 0, y: 20, scale: 0.94 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.32, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      className="card-highlight"
       style={{
-        position:       'relative',
-        borderRadius:   '14px',
-        background:     isPlayer
-          ? `linear-gradient(135deg, rgba(56,214,255,0.12) 0%, rgba(4,20,33,0.90) 100%)`
-          : C.panel,
-        border:         isPlayer
+        position:    'relative',
+        borderRadius:'14px',
+        background:  isPlayer
+          ? `linear-gradient(135deg, rgba(56,214,255,0.12) 0%, var(--color-bg-card) 100%)`
+          : 'var(--color-bg-panel)',
+        border:      isPlayer
           ? `1.5px solid rgba(56,214,255,0.50)`
           : `1px solid ${C.border}`,
-        boxShadow:      isPlayer
-          ? `0 0 20px rgba(56,214,255,0.18), 0 4px 24px rgba(0,0,0,0.50)`
-          : '0 2px 12px rgba(0,0,0,0.40)',
-        backdropFilter: 'blur(10px)',
-        overflow:       'hidden',
-        padding:        '10px 12px 10px',
+        boxShadow:   isPlayer
+          ? `0 0 24px rgba(56,214,255,0.20), 0 4px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)`
+          : `0 2px 12px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03)`,
+        overflow:    'hidden',
+        padding:     '10px 12px 10px',
       }}
     >
       {/* Top accent stripe */}
@@ -517,12 +517,16 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
           zIndex:          120,
           display:         'flex',
           flexDirection:   'column',
-          background:      `radial-gradient(ellipse at 30% 40%, #062b42 0%, #041421 65%)`,
+          background:      'var(--color-bg-deep)',
           overflow:        'hidden',
         }}
       >
-        {/* ── CAUSTIC BG BLOBS ── */}
-        <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', opacity: 0.35 }}>
+        {/* Noise + ambient underwater light */}
+        <div className="screen-noise" aria-hidden />
+        <div className="screen-ambient" aria-hidden />
+
+        {/* Caustic blobs — reduce opacity slightly */}
+        <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', opacity: 0.28 }}>
           <div className="caustic-blob caustic-blob-1" />
           <div className="caustic-blob caustic-blob-2" />
         </div>

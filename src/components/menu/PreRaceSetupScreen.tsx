@@ -84,7 +84,8 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   const handleConfirm = () => {
     if (isStarting) return;
     setIsStarting(true);
-    setTimeout(() => onConfirmRace?.(), 300);
+    // 850ms: scanlines animation plays for ~800ms before transitioning
+    setTimeout(() => onConfirmRace?.(), 850);
   };
 
   // ── Shared button factory (distance / stroke) ──────────────────────────
@@ -126,10 +127,17 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
         width: '100%',
         height: '100%',
         overflow: 'hidden',
-        background: 'linear-gradient(180deg, #050B14 0%, #080F1C 100%)',
+        background: 'var(--color-bg-deep)',
         position: 'relative',
       }}
     >
+      {/* Noise grain + underwater ambient */}
+      <div className="screen-noise" aria-hidden />
+      <div className="screen-ambient" aria-hidden />
+
+      {/* Scanlines launch effect — visible for 850ms while isStarting is true */}
+      {isStarting && <div className="scanlines-launch" aria-hidden />}
+
       {/* ── HEADER — 48px ────────────────────────────────────────────────── */}
       <header
         style={{
@@ -525,13 +533,13 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                       }}
                     >
                       <div
+                        className="stat-bar-fill"
                         style={{
                           height: '100%',
                           width: `${(stat.val / stat.max) * 100}%`,
                           background: stat.color,
                           borderRadius: '2px',
                           boxShadow: `0 0 8px ${stat.color}`,
-                          transition: 'width 0.8s ease',
                         }}
                       />
                     </div>

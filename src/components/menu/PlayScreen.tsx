@@ -189,10 +189,14 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
         width: '100%',
         height: '100%',
         overflow: 'hidden',
-        background: 'linear-gradient(180deg, #050B14 0%, #080F1C 100%)',
+        background: 'var(--color-bg-deep)',
         position: 'relative',
       }}
     >
+      {/* Noise grain + underwater ambient light */}
+      <div className="screen-noise" aria-hidden />
+      <div className="screen-ambient" aria-hidden />
+
       {/* Ambient blobs */}
       <div className="caustic-blob caustic-blob-1" />
       <div className="caustic-blob caustic-blob-2" />
@@ -263,14 +267,14 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
             }}
           >
             <span
-              className="animate-pulse"
+              className="live-pulse"
               style={{
                 display: 'inline-block',
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
                 background: '#00d4ff',
-                boxShadow: '0 0 6px rgba(0,212,255,0.9)',
+                color: '#00d4ff',
                 flexShrink: 0,
               }}
             />
@@ -326,7 +330,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
             return (
               <button
                 key={mode.id}
-                className="swim26-mode-card"
+                className="swim26-mode-card game-card card-highlight"
                 onClick={() => handleSelect(mode.id)}
                 onMouseEnter={() => { if (!isTouch) setHoveredId(mode.id); }}
                 onMouseLeave={() => { setHoveredId(null); setPressedId(null); }}
@@ -341,16 +345,16 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                   overflow: 'hidden',
                   borderRadius: '12px',
                   minHeight: cardMinHeight,
-                  background: `linear-gradient(135deg, ${mode.gradientFrom}, ${mode.gradientTo}), rgba(10,22,40,0.72)`,
-                  border: `${isHovered || isActivating ? '2px' : '1px'} solid rgba(${mode.accentRgb},${borderOpacity})`,
-                  boxShadow,
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
+                  background: `linear-gradient(135deg, ${mode.gradientFrom}, ${mode.gradientTo}), var(--color-bg-card)`,
+                  border: `1px solid rgba(${mode.accentRgb},${borderOpacity})`,
+                  /* Mode-specific hover glow at 20% opacity, inset top-light */
+                  boxShadow: isHovered || isActivating
+                    ? `0 0 24px rgba(${mode.accentRgb},0.20), 0 4px 16px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,255,255,0.055)`
+                    : `0 4px 20px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.035)`,
                   transform,
-                  transition: 'all 0.15s ease',
+                  transition: 'box-shadow 0.15s ease, transform 0.15s ease',
                   cursor: activatingId ? 'default' : 'pointer',
                   padding: 0,
-                  /* Ensure minimum 44px tap target height */
                   minWidth: '44px',
                 }}
               >
@@ -443,19 +447,8 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
 
                     {/* Tier badge */}
                     <span
-                      style={{
-                        flexShrink: 0,
-                        fontSize: '7px',
-                        fontWeight: 900,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.12em',
-                        color: tier.text,
-                        background: tier.bg,
-                        border: `1px solid ${tier.border}`,
-                        borderRadius: '999px',
-                        padding: '2px 6px',
-                        whiteSpace: 'nowrap',
-                      }}
+                      className={`tier-badge tier-badge-${mode.tier.toLowerCase()}`}
+                      style={{ flexShrink: 0, fontSize: '9px' }}
                     >
                       {mode.tier}
                     </span>
@@ -490,18 +483,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                         {mode.category}
                       </span>
                       <span
-                        style={{
-                          fontSize: '8px',
-                          fontWeight: 900,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.15em',
-                          color: tier.text,
-                          background: tier.bg,
-                          border: `1px solid ${tier.border}`,
-                          borderRadius: '999px',
-                          padding: '2px 8px',
-                          whiteSpace: 'nowrap',
-                        }}
+                        className={`tier-badge tier-badge-${mode.tier.toLowerCase()}`}
                       >
                         {mode.tier}
                       </span>
@@ -626,14 +608,14 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                               <span
-                                className="animate-pulse"
+                                className="live-pulse"
                                 style={{
                                   display: 'inline-block',
                                   width: '5px',
                                   height: '5px',
                                   borderRadius: '50%',
                                   background: '#10b981',
-                                  boxShadow: '0 0 4px rgba(16,185,129,0.9)',
+                                  color: '#10b981',
                                   flexShrink: 0,
                                 }}
                               />
