@@ -1,5 +1,5 @@
 /* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 /* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
 @import 'tailwindcss';
@@ -19,8 +19,8 @@
 html,
 body,
 #root {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   margin: 0;
   padding: 0;
   overflow: hidden;           /* No page scroll — this is a game */
@@ -28,7 +28,13 @@ body,
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
   touch-action: pan-x pan-y; /* Allow scrollable sub-regions; canvas overrides to none */
-  background: #050B14;        /* Fallback while JS loads */
+  background: #0a0e1a;        /* Deep navy game base */
+}
+
+/* Ensure all direct screen children fill the full viewport */
+#root > * {
+  position: absolute;
+  inset: 0;
 }
 
 /* Prevent iOS bounce scroll from revealing white behind game */
@@ -64,6 +70,17 @@ body {
   --color-border-soft:    rgba(255, 255, 255, 0.15);
   --color-overlay-dark:   rgba(5, 11, 20, 0.72);
 
+  /* ── "Deep Ocean Tactical" design language tokens ──────────────────────── */
+  --color-bg-deep:        #080d1a;
+  --color-bg-panel:       #0d1929;
+  --color-bg-card:        #111e30;
+  --color-accent-cyan:    #00d4ff;
+  --color-accent-teal:    #0891b2;
+  --color-accent-amber:   #f59e0b;
+  --color-accent-green:   #10b981;
+  --color-accent-red:     #ef4444;
+  --color-accent-purple:  #8b5cf6;
+
   /* HUD sizing */
   --hud-top-bar-height:     52px;
   --hud-stamina-ring-size:  80px;
@@ -85,19 +102,65 @@ body {
   --z-hud:        50;
   --z-menu:       70;
   --z-landscape:  90;
+
+  /* ── Typography — font families ─────────────────────────────────────── */
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body:    'Barlow', sans-serif;
+
+  /* ── Typography — type scale ─────────────────────────────────────────── */
+  --text-xs:   10px;   /* tracked labels */
+  --text-sm:   12px;   /* metadata */
+  --text-base: 14px;   /* body */
+  --text-md:   16px;   /* UI labels */
+  --text-lg:   20px;   /* card descriptions */
+  --text-xl:   24px;   /* card titles mobile */
+  --text-2xl:  32px;   /* card titles desktop */
+  --text-3xl:  48px;   /* screen headings */
+
+  /* ── Typography — letter spacing ─────────────────────────────────────── */
+  --tracking-tight: 0;
+  --tracking-game:  0.08em;  /* UI labels */
+  --tracking-wide:  0.15em;  /* section headers */
+  --tracking-ultra: 0.25em;  /* mode badges */
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   LANDSCAPE ENFORCEMENT
-   Hides everything except the landscape guard when in portrait.
-   The guard JS handles the actual overlay — this is a CSS safety net.
+   PORTRAIT / LANDSCAPE — no CSS enforcement.
+   Portrait mode is fully supported; the LandscapeGuard component handles
+   the optional rotate-device overlay for the Babylon race canvas when needed.
    ───────────────────────────────────────────────────────────────────────────── */
 
-@media (orientation: portrait) {
-  /* Allow the landscape guard overlay to display; blur the content behind */
-  #root > * > *:not([data-landscape-guard]) {
-    pointer-events: none;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   GLOBAL MOBILE / TOUCH RULES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Remove tap flash on every interactive element */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* disable 300ms double-tap delay */
+}
+
+/* GPU layer hint for all animating buttons/cards (avoids paint jank on mobile) */
+button,
+[role="button"] {
+  will-change: transform;
+}
+
+/* Hard no-horizontal-scroll in every sub-container */
+html,
+body,
+#root {
+  overflow-x: hidden;
+}
+
+/* Loading spinner used in PreRaceSetupScreen CTA */
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -107,7 +170,7 @@ body {
    ───────────────────────────────────────────────────────────────────────────── */
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-body), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: var(--color-text-primary);
@@ -118,7 +181,12 @@ body {
 
 /* Headline utility class — italic black condensed */
 .font-headline {
-  font-family: "Barlow Condensed", "Arial Narrow", Impact, system-ui, sans-serif;
+  font-family: var(--font-display), "Arial Narrow", Impact, system-ui, sans-serif;
+}
+
+/* Body utility class */
+.font-body {
+  font-family: var(--font-body), "Inter", system-ui, sans-serif;
 }
 
 /* Bebas Neue — impact display headings for lobby titles, scores, season branding */
@@ -657,4 +725,357 @@ body {
 
 .safe-zone {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GAME SCREEN LAYOUT
+   All screens fill the full viewport with absolute positioning.
+   Internal overflow goes in a constrained inner div, not the screen root.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Game screen root — fills viewport, no scroll */
+.game-screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #0a0e1a;
+}
+
+/* Safe-area wrapper — apply to the content div inside each screen */
+.screen-safe-area {
+  padding-top:    env(safe-area-inset-top,    0px);
+  padding-right:  env(safe-area-inset-right,  0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left:   env(safe-area-inset-left,   0px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SWIM26 RESPONSIVE UTILITIES
+   Screen-specific media-query overrides used across PlayScreen, PreRaceSetup,
+   PreMatchScreen and RaceGameplayHUD.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── PlayScreen mode cards ────────────────────────────────────────────────── */
+
+/* Suppress hover lift on true touch devices (no pointer hover capability) */
+@media (hover: none) {
+  .swim26-mode-card {
+    transform: none !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.50) !important;
+  }
+}
+
+/* Portrait phone: 1-column grid, compressed cards */
+@media (max-width: 480px) {
+  .swim26-mode-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Compact card — 80px target handled in JS via useMediaQuery */
+  .swim26-mode-card {
+    min-height: 0 !important;
+  }
+}
+
+/* Landscape phone: 2-column grid, reduced gap */
+@media (max-width: 896px) and (orientation: landscape) {
+  .swim26-mode-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* ── PreRaceSetupScreen param buttons ─────────────────────────────────────── */
+
+/* Portrait phones: distance grid drops from 3 → 2 columns */
+@media (max-width: 480px) {
+  .swim26-param-grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ── PreMatchScreen swimmer grid ──────────────────────────────────────────── */
+
+/* Default (desktop / tablet / landscape): 4 × 2 */
+.swim26-lineup-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows:    repeat(2, 1fr);
+  gap: 8px;
+  flex: 1;
+  overflow: hidden;
+  padding: 10px 12px 6px;
+}
+
+/* Portrait phone: 2 × 4 */
+@media (max-width: 480px) {
+  .swim26-lineup-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows:    repeat(4, 1fr);
+  }
+}
+
+/* ── RaceGameplayHUD ──────────────────────────────────────────────────────── */
+
+/* Portrait phone: compress the bottom stroke-control panels */
+@media (max-width: 480px) {
+  .swim26-stroke-zone {
+    height: 120px !important;
+  }
+
+  .swim26-stroke-btn {
+    width: 72px !important;
+  }
+
+  .swim26-controls-gap {
+    gap: 4px !important;
+  }
+
+  /* Hide the race-progress centre bar on very narrow screens */
+  .swim26-race-progress {
+    display: none !important;
+  }
+
+  /* Shrink user-status chip */
+  .swim26-user-status {
+    display: none !important;
+  }
+}
+
+/* Landscape phone: modest size reduction */
+@media (max-width: 896px) and (orientation: landscape) {
+  .swim26-stroke-zone {
+    height: 140px !important;
+  }
+
+  .swim26-stroke-btn {
+    width: 100px !important;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   PREMIUM VISUAL POLISH — "Deep Ocean Tactical" design language
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Screen entry animation ──────────────────────────────────────────────── */
+
+@keyframes screenEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.screen-enter {
+  animation: screenEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Staggered card entrance ─────────────────────────────────────────────── */
+/*
+  Apply .game-card to each card element.
+  Stagger up to 6 cards at 40ms intervals.
+*/
+
+.game-card {
+  animation: screenEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.game-card:nth-child(1) { animation-delay:   0ms; }
+.game-card:nth-child(2) { animation-delay:  40ms; }
+.game-card:nth-child(3) { animation-delay:  80ms; }
+.game-card:nth-child(4) { animation-delay: 120ms; }
+.game-card:nth-child(5) { animation-delay: 160ms; }
+.game-card:nth-child(6) { animation-delay: 200ms; }
+
+/* ── Live player pulse ───────────────────────────────────────────────────── */
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1;    box-shadow: 0 0 4px currentColor; }
+  50%       { opacity: 0.35; box-shadow: none;                 }
+}
+
+.live-pulse {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* ── Phase-transition fade overlay (applied via JS className toggle) ─────── */
+
+@keyframes phaseFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes phaseFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.phase-fade-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: var(--color-bg-deep);
+  pointer-events: none;
+  animation: phaseFadeIn 0.16s ease-out forwards;
+}
+
+/* ── Button press feel (all primary CTAs) ────────────────────────────────── */
+/* Already handled via will-change:transform + inline transform state in React.
+   Provide a CSS fallback for :active that doesn't interfere with React state. */
+.hydro-cta:active,
+.swim26-mode-card:active {
+  transition: transform 0.08s ease !important;
+}
+
+/* ── Tier badge standardised styles ─────────────────────────────────────── */
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tier-badge-elite {
+  background: rgba(239, 68,  68,  0.15);
+  color:       #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.30);
+}
+
+.tier-badge-competitor {
+  background: rgba(0, 212, 255, 0.12);
+  color:       #00d4ff;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+}
+
+.tier-badge-rookie {
+  background: rgba(16, 185, 129, 0.12);
+  color:       #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+/* ── Biometric stat bar — animate from 0 on screen entry ────────────────── */
+
+@keyframes statBarFill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.stat-bar-fill {
+  transform-origin: left center;
+  animation: statBarFill 0.6s ease-out 0.2s both;
+}
+
+/* ── Scanlines launch effect (race initiation) ───────────────────────────── */
+
+@keyframes scanlinesScroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 80px; }
+}
+
+@keyframes scanlinesFade {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.scanlines-launch {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  /* Horizontal scanlines */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent          0px,
+      transparent          3px,
+      rgba(0, 212, 255, 0.035) 3px,
+      rgba(0, 212, 255, 0.035) 4px
+    );
+  background-size: 100% 80px;
+  animation:
+    scanlinesScroll 0.35s linear infinite,
+    scanlinesFade   0.85s ease-out forwards;
+}
+
+/* Vignette pulse over the scanlines for a "lock-in" feel */
+.scanlines-launch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%,
+    rgba(0, 212, 255, 0.08) 0%,
+    rgba(0, 212, 255, 0.03) 40%,
+    transparent 70%
+  );
+}
+
+/* ── Screen ambient light (subtle underwater radial) ─────────────────────── */
+
+.screen-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 22% 48%,
+    rgba(0, 80, 140, 0.18) 0%,
+    rgba(0, 40, 80, 0.08) 40%,
+    transparent 65%
+  );
+}
+
+/* ── Noise texture overlay (anti-flat-black grain) ───────────────────────── */
+
+.screen-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* SVG fractal-noise filter rendered as a data-URI at 3% opacity */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.80' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 250px 250px;
+  opacity: 1;
+  mix-blend-mode: screen;
+}
+
+/* ── Card inner-edge highlight (simulates top-light source) ──────────────── */
+
+.card-highlight {
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ── Header bar — 52px glass top bar for game screens ───────────────────── */
+
+.game-header {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(8, 13, 26, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.game-header-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-accent-cyan);
 }

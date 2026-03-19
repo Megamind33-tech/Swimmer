@@ -1,116 +1,155 @@
 /**
- * Play Screen — Game Mode Selection
- * AAA sports-game broadcast aesthetic: large mode cards, neon accents,
- * aqua/cyan color system, proper glassmorphism.
+ * Play Screen — Game Mode Selection  (SWIM26 rebuild)
+ *
+ * Mobile responsiveness:
+ *   - Portrait phone (≤480px): 1-column grid, cards 80px tall,
+ *     condensed layout: [Icon] [Title] [Rewards] in one row
+ *   - Landscape phone (≤896px landscape): 2-column grid, cards 110px,
+ *     full description visible
+ *   - Tablet / desktop: auto-fit 3-column grid, cards 160px, full layout
+ *   - Touch devices: hover states suppressed via (hover: none) + isTouch flag
  */
 
-import React, { useState } from 'react';
-import { getDifficultyColor, getDifficultyBadgeIcon } from '../../utils/difficultyUtils';
+import React, { useEffect, useState } from 'react';
+
+// ─── Responsive hook ──────────────────────────────────────────────────────────
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState<boolean>(
+    () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false),
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [query]);
+  return matches;
+}
+
+// ─── Data ────────────────────────────────────────────────────────────────────
 
 interface GameModeCard {
   id: string;
   name: string;
-  tagline: string;
+  category: string;
   description: string;
   icon: string;
-  difficulty: 'EASY' | 'NORMAL' | 'HARD';
+  tier: 'ROOKIE' | 'COMPETITOR' | 'ELITE';
   rewards: { xp: number; coins: number };
   playerCount?: string;
-  accentRgb: string;   // RGB values for glow/border effects
+  accent: string;
+  accentRgb: string;
   gradientFrom: string;
   gradientTo: string;
 }
+
+const TIER_COLORS: Record<string, { text: string; bg: string; border: string }> = {
+  ROOKIE:     { text: '#10b981', bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.30)' },
+  COMPETITOR: { text: '#00d4ff', bg: 'rgba(0,212,255,0.12)',   border: 'rgba(0,212,255,0.30)'  },
+  ELITE:      { text: '#ef4444', bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.30)'  },
+};
+
+const MODES: GameModeCard[] = [
+  {
+    id: 'quick-race',
+    name: 'Quick Race',
+    category: 'Instant Match',
+    description: 'Jump straight into a race. Auto-matched opponents, fast setup.',
+    icon: '⚡',
+    tier: 'COMPETITOR',
+    rewards: { xp: 100, coins: 500 },
+    playerCount: '4.2K',
+    accent: '#00d4ff',
+    accentRgb: '0,212,255',
+    gradientFrom: 'rgba(0,212,255,0.13)',
+    gradientTo: 'rgba(0,60,80,0.15)',
+  },
+  {
+    id: 'career-race',
+    name: 'Career Race',
+    category: 'Legacy Mode',
+    description: 'Advance through your swimming career. Contracts, sponsors, championships.',
+    icon: '🏊',
+    tier: 'ELITE',
+    rewards: { xp: 250, coins: 2000 },
+    accent: '#f59e0b',
+    accentRgb: '245,158,11',
+    gradientFrom: 'rgba(245,158,11,0.13)',
+    gradientTo: 'rgba(100,60,0,0.15)',
+  },
+  {
+    id: 'ranked-match',
+    name: 'Ranked Match',
+    category: 'Competitive',
+    description: 'Fight for global rank. Every millisecond counts. Season leaderboards.',
+    icon: '🏆',
+    tier: 'ELITE',
+    rewards: { xp: 300, coins: 3000 },
+    playerCount: '12.5K',
+    accent: '#ef4444',
+    accentRgb: '239,68,68',
+    gradientFrom: 'rgba(239,68,68,0.13)',
+    gradientTo: 'rgba(100,0,0,0.15)',
+  },
+  {
+    id: 'time-trial',
+    name: 'Time Trial',
+    category: 'Solo Sprint',
+    description: 'Race the clock. Beat your personal best and set world records.',
+    icon: '⏱',
+    tier: 'ROOKIE',
+    rewards: { xp: 150, coins: 1000 },
+    accent: '#10b981',
+    accentRgb: '16,185,129',
+    gradientFrom: 'rgba(16,185,129,0.13)',
+    gradientTo: 'rgba(0,50,30,0.15)',
+  },
+  {
+    id: 'relay-mode',
+    name: 'Relay Mode',
+    category: 'Team Race',
+    description: 'Synchronise with your squad. Hand off the baton, dominate as a team.',
+    icon: '👥',
+    tier: 'COMPETITOR',
+    rewards: { xp: 400, coins: 4000 },
+    playerCount: '8.3K',
+    accent: '#8b5cf6',
+    accentRgb: '139,92,246',
+    gradientFrom: 'rgba(139,92,246,0.13)',
+    gradientTo: 'rgba(60,0,100,0.15)',
+  },
+  {
+    id: 'ghost-race',
+    name: 'Ghost Race',
+    category: 'Time Warp',
+    description: 'Race a ghost of your past self. Track every split. Train smarter.',
+    icon: '👻',
+    tier: 'ROOKIE',
+    rewards: { xp: 50, coins: 250 },
+    accent: '#e2e8f0',
+    accentRgb: '226,232,240',
+    gradientFrom: 'rgba(226,232,240,0.08)',
+    gradientTo: 'rgba(15,23,42,0.20)',
+  },
+];
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 interface PlayScreenProps {
   onModeSelect?: (modeId: string) => void;
 }
 
-const GameModes: GameModeCard[] = [
-  {
-    id: 'quick-race',
-    name: 'Quick Race',
-    tagline: 'Instant Match',
-    description: 'Jump straight into a race. Auto-matched opponents, fast setup.',
-    icon: 'play_arrow',
-    difficulty: 'NORMAL',
-    rewards: { xp: 100, coins: 500 },
-    playerCount: '4.2K',
-    accentRgb: '0,229,255',
-    gradientFrom: 'rgba(0,229,255,0.12)',
-    gradientTo: 'rgba(0,100,140,0.06)',
-  },
-  {
-    id: 'career-race',
-    name: 'Career Race',
-    tagline: 'Legacy Mode',
-    description: 'Advance through your swimming career. Contracts, sponsors, championships.',
-    icon: 'emoji_events',
-    difficulty: 'HARD',
-    rewards: { xp: 250, coins: 2000 },
-    accentRgb: '212,168,67',
-    gradientFrom: 'rgba(212,168,67,0.12)',
-    gradientTo: 'rgba(100,70,0,0.06)',
-  },
-  {
-    id: 'ranked-match',
-    name: 'Ranked Match',
-    tagline: 'Competitive',
-    description: 'Fight for global rank. Every millisecond counts. Season leaderboards.',
-    icon: 'leaderboard',
-    difficulty: 'HARD',
-    rewards: { xp: 300, coins: 3000 },
-    playerCount: '12.5K',
-    accentRgb: '239,68,68',
-    gradientFrom: 'rgba(239,68,68,0.12)',
-    gradientTo: 'rgba(100,0,0,0.06)',
-  },
-  {
-    id: 'time-trial',
-    name: 'Time Trial',
-    tagline: 'Solo Sprint',
-    description: 'Race the clock. Beat your personal best and set world records.',
-    icon: 'timer',
-    difficulty: 'NORMAL',
-    rewards: { xp: 150, coins: 1000 },
-    accentRgb: '34,197,94',
-    gradientFrom: 'rgba(34,197,94,0.12)',
-    gradientTo: 'rgba(0,60,20,0.06)',
-  },
-  {
-    id: 'relay-mode',
-    name: 'Relay Mode',
-    tagline: 'Team Race',
-    description: 'Synchronise with your squad. Hand off the baton, dominate as a team.',
-    icon: 'groups',
-    difficulty: 'HARD',
-    rewards: { xp: 400, coins: 4000 },
-    playerCount: '8.3K',
-    accentRgb: '168,85,247',
-    gradientFrom: 'rgba(168,85,247,0.12)',
-    gradientTo: 'rgba(60,0,100,0.06)',
-  },
-  {
-    id: 'ghost-race',
-    name: 'Ghost Race',
-    tagline: 'Time Warp',
-    description: 'Race a ghost of your past self. Track every split. Train smarter.',
-    icon: 'history',
-    difficulty: 'EASY',
-    rewards: { xp: 50, coins: 250 },
-    accentRgb: '148,163,184',
-    gradientFrom: 'rgba(148,163,184,0.10)',
-    gradientTo: 'rgba(30,41,59,0.06)',
-  },
-];
-
-const DIFF_LABELS: Record<string, { label: string; color: string }> = {
-  EASY:   { label: 'Rookie',       color: 'rgba(34,197,94,0.9)' },
-  NORMAL: { label: 'Competitor',   color: 'rgba(0,229,255,0.9)' },
-  HARD:   { label: 'Elite',        color: 'rgba(239,68,68,0.9)' },
-};
-
 export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
+  const [hoveredId,    setHoveredId]    = useState<string | null>(null);
+  const [pressedId,    setPressedId]    = useState<string | null>(null);
   const [activatingId, setActivatingId] = useState<string | null>(null);
+
+  // Responsive breakpoints
+  const isMobilePortrait  = useMediaQuery('(max-width: 480px)');
+  const isMobileLandscape = useMediaQuery('(max-width: 896px) and (orientation: landscape)');
+  // On touch-only devices, suppress hover lift so cards don't stick in hover state
+  const isTouch = useMediaQuery('(hover: none)');
 
   const handleSelect = (modeId: string) => {
     if (activatingId) return;
@@ -118,309 +157,524 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
     setTimeout(() => {
       setActivatingId(null);
       onModeSelect?.(modeId);
-    }, 380);
+    }, 320);
   };
+
+  // Derived grid geometry
+  const gridCols = isMobilePortrait
+    ? '1fr'
+    : isMobileLandscape
+      ? 'repeat(2, 1fr)'
+      : 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))';
+
+  const gridGap = isMobilePortrait || isMobileLandscape ? '8px' : '12px';
+
+  const cardMinHeight = isMobilePortrait
+    ? '80px'
+    : isMobileLandscape
+      ? '110px'
+      : '160px';
+
+  const cardPadding = isMobilePortrait
+    ? '0 8px 0 12px'
+    : isMobileLandscape
+      ? '10px 12px 10px 16px'
+      : '16px 16px 12px 20px';
 
   return (
     <div
-      className="hydro-page-shell flex flex-col w-full h-full overflow-y-auto"
-      style={{ background: 'linear-gradient(180deg, #050B14 0%, #080F1C 100%)' }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        background: 'var(--color-bg-deep)',
+        position: 'relative',
+      }}
     >
-      {/* Ambient caustic blobs */}
+      {/* Noise grain + underwater ambient light */}
+      <div className="screen-noise" aria-hidden />
+      <div className="screen-ambient" aria-hidden />
+
+      {/* Ambient blobs */}
       <div className="caustic-blob caustic-blob-1" />
       <div className="caustic-blob caustic-blob-2" />
       <div className="caustic-blob caustic-blob-3" />
 
-      {/* ── Cinematic Header ─────────────────────────────────────────────── */}
-      <div
-        className="relative flex-shrink-0 px-6 pt-7 pb-6 overflow-hidden"
+      {/* ── Header ───────────────────────────────────────────────────────── */}
+      <header
         style={{
-          background: 'linear-gradient(180deg, rgba(0,229,255,0.06) 0%, transparent 100%)',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          flexShrink: 0,
+          position: 'relative',
+          padding: isMobilePortrait ? '12px 16px 10px' : '20px 24px 16px',
+          background: 'linear-gradient(180deg, rgba(0,212,255,0.07) 0%, transparent 100%)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        {/* Top accent line */}
         <div
-          className="absolute top-0 left-0 right-0 h-[2px]"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.6) 40%, rgba(0,229,255,0.6) 60%, transparent)' }}
+          style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0,
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.65) 40%, rgba(0,212,255,0.65) 60%, transparent)',
+          }}
         />
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-4">
-          <div
-            className="h-px flex-1 max-w-[32px]"
-            style={{ background: 'rgba(0,229,255,0.4)' }}
-          />
-          <span
-            className="text-[9px] font-black uppercase tracking-[0.45em]"
-            style={{ color: 'rgba(0,229,255,0.8)' }}
-          >
-            Arena Selection
-          </span>
-          <div
-            className="h-px flex-1 max-w-[32px]"
-            style={{ background: 'rgba(0,229,255,0.4)' }}
-          />
-        </div>
-
-        {/* Title */}
-        <h1
-          className="font-bebas uppercase leading-none mb-1"
-          style={{
-            fontSize: 'clamp(48px, 10vw, 72px)',
-            color: '#F3FBFF',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          Game{' '}
-          <span
-            className="text-glow"
-            style={{ color: '#00E5FF' }}
-          >
-            Modes
-          </span>
-        </h1>
-
-        {/* Subtitle */}
-        <p
-          className="text-xs font-bold uppercase tracking-[0.22em]"
-          style={{ color: 'rgba(255,255,255,0.45)' }}
-        >
-          Select your discipline to begin the circuit
-        </p>
-
-        {/* Live player count badge */}
-        <div
-          className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded"
-          style={{
-            background: 'rgba(0,229,255,0.08)',
-            border: '1px solid rgba(0,229,255,0.20)',
-          }}
-        >
-          <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ background: '#00E5FF', boxShadow: '0 0 6px rgba(0,229,255,0.9)' }}
-          />
-          <span
-            className="text-[10px] font-black uppercase tracking-widest"
-            style={{ color: 'rgba(0,229,255,0.9)' }}
-          >
-            24.7K Swimmers Online
-          </span>
-        </div>
-      </div>
-
-      {/* ── Mode Cards Grid ──────────────────────────────────────────────── */}
-      <div className="flex-1 px-4 py-5 grid grid-cols-1 gap-4 auto-rows-max pb-8"
-        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))' }}
-      >
-        {GameModes.map((mode, index) => {
-          const isActivating = activatingId === mode.id;
-          const diff = DIFF_LABELS[mode.difficulty];
-
-          return (
-            <button
-              key={mode.id}
-              onClick={() => handleSelect(mode.id)}
-              disabled={!!activatingId}
-              className="group relative text-left overflow-hidden transition-all duration-300"
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px' }}>
+          <div>
+            <div
               style={{
-                minHeight: '140px',
-                borderRadius: '12px',
-                background: `linear-gradient(135deg, ${mode.gradientFrom}, ${mode.gradientTo}), rgba(10,22,40,0.70)`,
-                border: isActivating
-                  ? `1px solid rgba(${mode.accentRgb},0.80)`
-                  : `1px solid rgba(${mode.accentRgb},0.22)`,
-                boxShadow: isActivating
-                  ? `0 0 24px rgba(${mode.accentRgb},0.35), 0 4px 32px rgba(0,0,0,0.60)`
-                  : '0 4px 24px rgba(0,0,0,0.50)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                transform: isActivating ? 'scale(0.975)' : undefined,
+                fontSize: '9px',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.45em',
+                color: 'rgba(0,212,255,0.75)',
+                marginBottom: '2px',
               }}
             >
-              {/* Speed-line texture overlay */}
-              <div className="absolute inset-0 speed-lines opacity-30 pointer-events-none" />
+              Arena Selection
+            </div>
+            <h1
+              className="font-bebas"
+              style={{
+                fontSize: isMobilePortrait ? '32px' : 'clamp(36px, 8vw, 60px)',
+                lineHeight: 1,
+                color: '#F3FBFF',
+                letterSpacing: '-0.01em',
+                margin: 0,
+              }}
+            >
+              Game{' '}
+              <span className="text-glow" style={{ color: '#00d4ff' }}>
+                Modes
+              </span>
+            </h1>
+          </div>
 
-              {/* Hover glow sweep */}
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500"
+          {/* Live badge */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '5px 8px',
+              borderRadius: '6px',
+              background: 'rgba(0,212,255,0.08)',
+              border: '1px solid rgba(0,212,255,0.22)',
+              flexShrink: 0,
+              marginBottom: '2px',
+            }}
+          >
+            <span
+              className="live-pulse"
+              style={{
+                display: 'inline-block',
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: '#00d4ff',
+                color: '#00d4ff',
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: '9px',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                color: 'rgba(0,212,255,0.9)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {isMobilePortrait ? '24.7K' : '24.7K Online'}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Scrollable grid ───────────────────────────────────────────────── */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: isMobilePortrait ? '10px' : '16px',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(0,212,255,0.25) transparent',
+        }}
+      >
+        <div
+          className="swim26-mode-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: gridCols,
+            gap: gridGap,
+          }}
+        >
+          {MODES.map((mode) => {
+            const isHovered    = !isTouch && hoveredId    === mode.id;
+            const isPressed    = pressedId    === mode.id;
+            const isActivating = activatingId === mode.id;
+            const tier         = TIER_COLORS[mode.tier];
+
+            let transform = 'translateY(0) scale(1)';
+            if (isPressed || isActivating) transform = 'scale(0.97)';
+            else if (isHovered)            transform = 'translateY(-2px)';
+
+            const borderOpacity = isHovered || isActivating ? 0.80 : 0.28;
+            const boxShadow = isHovered || isActivating
+              ? `0 8px 32px rgba(${mode.accentRgb},0.30), 0 4px 16px rgba(0,0,0,0.60)`
+              : '0 4px 20px rgba(0,0,0,0.50)';
+
+            return (
+              <button
+                key={mode.id}
+                className="swim26-mode-card game-card card-highlight"
+                onClick={() => handleSelect(mode.id)}
+                onMouseEnter={() => { if (!isTouch) setHoveredId(mode.id); }}
+                onMouseLeave={() => { setHoveredId(null); setPressedId(null); }}
+                onMouseDown={() => setPressedId(mode.id)}
+                onMouseUp={() => setPressedId(null)}
+                onTouchStart={() => setPressedId(mode.id)}
+                onTouchEnd={() => setPressedId(null)}
+                disabled={!!activatingId}
                 style={{
-                  background: `radial-gradient(ellipse at 20% 50%, rgba(${mode.accentRgb},0.10) 0%, transparent 65%)`,
+                  position: 'relative',
+                  textAlign: 'left',
+                  overflow: 'hidden',
+                  borderRadius: '12px',
+                  minHeight: cardMinHeight,
+                  background: `linear-gradient(135deg, ${mode.gradientFrom}, ${mode.gradientTo}), var(--color-bg-card)`,
+                  border: `1px solid rgba(${mode.accentRgb},${borderOpacity})`,
+                  /* Mode-specific hover glow at 20% opacity, inset top-light */
+                  boxShadow: isHovered || isActivating
+                    ? `0 0 24px rgba(${mode.accentRgb},0.20), 0 4px 16px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,255,255,0.055)`
+                    : `0 4px 20px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.035)`,
+                  transform,
+                  transition: 'box-shadow 0.15s ease, transform 0.15s ease',
+                  cursor: activatingId ? 'default' : 'pointer',
+                  padding: 0,
+                  minWidth: '44px',
                 }}
-              />
-
-              {/* Left accent bar */}
-              <div
-                className="absolute left-0 top-0 bottom-0 w-[3px] transition-opacity duration-300"
-                style={{
-                  background: `linear-gradient(180deg, rgba(${mode.accentRgb},0.9) 0%, rgba(${mode.accentRgb},0.3) 100%)`,
-                  opacity: isActivating ? 1 : 0.5,
-                }}
-              />
-
-              {/* Card body */}
-              <div className="relative flex items-center gap-4 px-5 py-4 z-10">
-
-                {/* Icon */}
-                <div
-                  className="flex-shrink-0 flex items-center justify-center rounded-xl transition-all duration-300"
-                  style={{
-                    width: '52px',
-                    height: '52px',
-                    background: `rgba(${mode.accentRgb},0.12)`,
-                    border: `1px solid rgba(${mode.accentRgb},0.30)`,
-                    boxShadow: isActivating ? `0 0 16px rgba(${mode.accentRgb},0.40)` : undefined,
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{
-                      fontSize: '26px',
-                      color: `rgba(${mode.accentRgb},1)`,
-                      filter: `drop-shadow(0 0 6px rgba(${mode.accentRgb},0.6))`,
-                    }}
-                  >
-                    {mode.icon}
-                  </span>
-                </div>
-
-                {/* Text block */}
-                <div className="flex-1 min-w-0">
-                  {/* Tagline + difficulty */}
-                  <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className="text-[8px] font-black uppercase tracking-[0.35em]"
-                      style={{ color: `rgba(${mode.accentRgb},0.75)` }}
-                    >
-                      {mode.tagline}
-                    </span>
-                    <div
-                      className="h-px flex-1"
-                      style={{ background: `rgba(${mode.accentRgb},0.15)` }}
-                    />
-                    <span
-                      className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
-                      style={{
-                        color: diff.color,
-                        background: `rgba(${mode.accentRgb},0.10)`,
-                        border: `1px solid rgba(${mode.accentRgb},0.20)`,
-                      }}
-                    >
-                      {diff.label}
-                    </span>
-                  </div>
-
-                  {/* Mode name */}
-                  <h3
-                    className="font-bebas uppercase leading-none mb-1.5 group-hover:text-glow transition-all duration-300"
-                    style={{
-                      fontSize: 'clamp(22px, 4vw, 28px)',
-                      color: '#F3FBFF',
-                      letterSpacing: '0.01em',
-                    }}
-                  >
-                    {mode.name}
-                  </h3>
-
-                  {/* Description */}
-                  <p
-                    className="text-[11px] leading-relaxed"
-                    style={{ color: 'rgba(255,255,255,0.50)', fontWeight: 600 }}
-                  >
-                    {mode.description}
-                  </p>
-                </div>
-
-                {/* Chevron */}
-                <div
-                  className="flex-shrink-0 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    background: `rgba(${mode.accentRgb},0.12)`,
-                    border: `1px solid rgba(${mode.accentRgb},0.25)`,
-                    transform: isActivating ? 'translateX(4px)' : undefined,
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: '18px', color: `rgba(${mode.accentRgb},0.9)` }}
-                  >
-                    chevron_right
-                  </span>
-                </div>
-              </div>
-
-              {/* Footer stats bar */}
-              <div
-                className="relative flex items-center gap-6 px-5 pb-4 z-10"
               >
-                {/* Rewards */}
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div
-                      className="text-[7px] font-black uppercase tracking-[0.35em] mb-0.5"
-                      style={{ color: 'rgba(255,255,255,0.35)' }}
-                    >
-                      Rewards
-                    </div>
-                    <div
-                      className="text-[10px] font-black italic slanted uppercase"
-                      style={{ color: '#D4A843', textShadow: '0 0 8px rgba(212,168,67,0.5)' }}
-                    >
-                      {mode.rewards.xp} XP · {mode.rewards.coins.toLocaleString()} Coins
-                    </div>
-                  </div>
-                </div>
-
-                {/* Divider */}
-                {mode.playerCount && (
-                  <>
-                    <div
-                      className="h-6 w-px"
-                      style={{ background: 'rgba(255,255,255,0.08)' }}
-                    />
-                    <div>
-                      <div
-                        className="text-[7px] font-black uppercase tracking-[0.35em] mb-0.5"
-                        style={{ color: 'rgba(255,255,255,0.35)' }}
-                      >
-                        Live
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className="w-1 h-1 rounded-full animate-pulse"
-                          style={{
-                            background: `rgba(${mode.accentRgb},1)`,
-                            boxShadow: `0 0 4px rgba(${mode.accentRgb},1)`,
-                          }}
-                        />
-                        <span
-                          className="text-[10px] font-black"
-                          style={{ color: 'rgba(255,255,255,0.80)', fontFamily: "'JetBrains Mono', monospace" }}
-                        >
-                          {mode.playerCount}
-                        </span>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Activating overlay flash */}
-              {isActivating && (
+                {/* Speed-line overlay */}
                 <div
-                  className="absolute inset-0 rounded-xl pointer-events-none"
+                  className="speed-lines"
+                  style={{ position: 'absolute', inset: 0, opacity: 0.25, pointerEvents: 'none' }}
+                />
+
+                {/* Left accent bar */}
+                <div
                   style={{
-                    background: `rgba(${mode.accentRgb},0.08)`,
-                    animation: 'pulse 0.38s ease-out',
+                    position: 'absolute',
+                    left: 0, top: 0, bottom: 0,
+                    width: '4px',
+                    background: `linear-gradient(180deg, rgba(${mode.accentRgb},0.95) 0%, rgba(${mode.accentRgb},0.35) 100%)`,
+                    borderRadius: '12px 0 0 12px',
                   }}
                 />
-              )}
-            </button>
-          );
-        })}
+
+                {/* ── PORTRAIT COMPACT LAYOUT: [Icon] [Title] [Rewards] one row ── */}
+                {isMobilePortrait ? (
+                  <div
+                    style={{
+                      position: 'relative',
+                      zIndex: 1,
+                      padding: '0 12px 0 16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      minHeight: '80px',
+                    }}
+                  >
+                    {/* Icon */}
+                    <span
+                      style={{
+                        fontSize: '22px',
+                        lineHeight: 1,
+                        flexShrink: 0,
+                        filter: `drop-shadow(0 0 6px rgba(${mode.accentRgb},0.50))`,
+                      }}
+                    >
+                      {mode.icon}
+                    </span>
+
+                    {/* Title */}
+                    <h3
+                      className="font-bebas"
+                      style={{
+                        margin: 0,
+                        fontSize: '20px',
+                        lineHeight: 1,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.02em',
+                        color: '#F3FBFF',
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {mode.name}
+                    </h3>
+
+                    {/* Rewards — compact */}
+                    <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                      <div
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 900,
+                          color: '#f59e0b',
+                          whiteSpace: 'nowrap',
+                          textShadow: '0 0 8px rgba(245,158,11,0.5)',
+                        }}
+                      >
+                        {mode.rewards.xp} XP
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          color: 'rgba(255,255,255,0.40)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {mode.rewards.coins.toLocaleString()} cr
+                      </div>
+                    </div>
+
+                    {/* Tier badge */}
+                    <span
+                      className={`tier-badge tier-badge-${mode.tier.toLowerCase()}`}
+                      style={{ flexShrink: 0, fontSize: '9px' }}
+                    >
+                      {mode.tier}
+                    </span>
+                  </div>
+                ) : (
+                  /* ── FULL CARD LAYOUT (landscape / tablet / desktop) ── */
+                  <div
+                    style={{
+                      position: 'relative',
+                      zIndex: 1,
+                      padding: cardPadding,
+                    }}
+                  >
+                    {/* Top row: category + tier */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: isMobileLandscape ? '6px' : '10px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.35em',
+                          color: `rgba(${mode.accentRgb},0.65)`,
+                        }}
+                      >
+                        {mode.category}
+                      </span>
+                      <span
+                        className={`tier-badge tier-badge-${mode.tier.toLowerCase()}`}
+                      >
+                        {mode.tier}
+                      </span>
+                    </div>
+
+                    {/* Icon + Title */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: isMobileLandscape ? '4px' : '8px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: isMobileLandscape ? '36px' : '44px',
+                          height: isMobileLandscape ? '36px' : '44px',
+                          borderRadius: '10px',
+                          background: `rgba(${mode.accentRgb},0.12)`,
+                          border: `1px solid rgba(${mode.accentRgb},0.28)`,
+                          fontSize: isMobileLandscape ? '18px' : '22px',
+                          lineHeight: 1,
+                        }}
+                      >
+                        {mode.icon}
+                      </div>
+
+                      <h3
+                        className="font-bebas"
+                        style={{
+                          margin: 0,
+                          fontSize: isMobileLandscape ? '18px' : 'clamp(18px, 3.5vw, 24px)',
+                          lineHeight: 1,
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.02em',
+                          color: '#F3FBFF',
+                          textShadow: isHovered ? `0 0 12px rgba(${mode.accentRgb},0.50)` : undefined,
+                          transition: 'text-shadow 0.15s ease',
+                        }}
+                      >
+                        {mode.name}
+                      </h3>
+                    </div>
+
+                    {/* Description — hidden on landscape mobile to save height */}
+                    {!isMobileLandscape && (
+                      <p
+                        style={{
+                          margin: '0 0 12px',
+                          fontSize: '13px',
+                          lineHeight: '1.4',
+                          color: 'rgba(255,255,255,0.72)',
+                          fontWeight: 500,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {mode.description}
+                      </p>
+                    )}
+
+                    {/* Rewards + live players */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div>
+                        <div
+                          style={{
+                            fontSize: '7px',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.35em',
+                            color: 'rgba(255,255,255,0.32)',
+                            marginBottom: '2px',
+                          }}
+                        >
+                          Rewards
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 900,
+                            fontStyle: 'italic',
+                            textTransform: 'uppercase',
+                            color: '#f59e0b',
+                            textShadow: '0 0 8px rgba(245,158,11,0.5)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {mode.rewards.xp} XP · {mode.rewards.coins.toLocaleString()} Coins
+                        </div>
+                      </div>
+
+                      {mode.playerCount && !isMobileLandscape && (
+                        <>
+                          <div
+                            style={{
+                              width: '1px',
+                              height: '24px',
+                              background: 'rgba(255,255,255,0.08)',
+                              flexShrink: 0,
+                            }}
+                          />
+                          <div>
+                            <div
+                              style={{
+                                fontSize: '7px',
+                                fontWeight: 900,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.35em',
+                                color: 'rgba(255,255,255,0.32)',
+                                marginBottom: '2px',
+                              }}
+                            >
+                              Live
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                              <span
+                                className="live-pulse"
+                                style={{
+                                  display: 'inline-block',
+                                  width: '5px',
+                                  height: '5px',
+                                  borderRadius: '50%',
+                                  background: '#10b981',
+                                  color: '#10b981',
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <span
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: 900,
+                                  color: 'rgba(255,255,255,0.82)',
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                }}
+                              >
+                                {mode.playerCount}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Chevron — desktop hover only */}
+                      {isHovered && (
+                        <div
+                          style={{
+                            marginLeft: 'auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '7px',
+                            background: `rgba(${mode.accentRgb},0.10)`,
+                            border: `1px solid rgba(${mode.accentRgb},0.22)`,
+                            color: `rgba(${mode.accentRgb},0.9)`,
+                            fontSize: '16px',
+                            lineHeight: 1,
+                          }}
+                        >
+                          ›
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Activating flash */}
+                {isActivating && (
+                  <div
+                    style={{
+                      position: 'absolute', inset: 0,
+                      borderRadius: '12px',
+                      background: `rgba(${mode.accentRgb},0.10)`,
+                      animation: 'pulse 0.32s ease-out',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

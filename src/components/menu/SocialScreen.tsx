@@ -164,7 +164,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                          <div className={`h-12 w-12 rounded-2xl border flex items-center justify-center relative z-10 ${
                            friend.online ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'
                          }`}>
-                           <span className={`material-symbols-outlined ${friend.online ? 'text-primary' : 'text-on-surface-variant opacity-60'}`}>person</span>
+                           <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className={friend.online ? 'text-primary' : 'text-on-surface-variant opacity-60'}>👤</span>
                          </div>
                       </div>
                       <div>
@@ -209,7 +209,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                    <div className="flex-1 space-y-6 relative z-10 w-full">
                       <div className="flex items-center gap-4">
                         <div className="h-16 w-16 rounded-[24px] bg-secondary/20 border border-secondary/40 flex items-center justify-center">
-                           <span className="material-symbols-outlined text-4xl text-secondary gold-glow">bolt</span>
+                           <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-secondary gold-glow">⚡</span>
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
@@ -239,7 +239,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                       <button className="w-full md:w-64 h-20 rounded-[28px] bg-secondary border border-white/20 shadow-[0_0_40px_rgba(255,215,9,0.3)] hover:shadow-[0_0_60px_rgba(255,215,9,0.5)] active:scale-95 transition-all duration-500 font-headline text-2xl font-black italic slanted uppercase text-surface flex items-center justify-center gap-4 group/btn relative overflow-hidden">
                          <div className="absolute inset-x-0 bottom-0 h-1 bg-white/40 shadow-[0_0_20px_rgba(255,255,255,1)]" />
                          Engage Rival
-                         <span className="material-symbols-outlined text-3xl group-hover/btn:translate-x-2 transition-transform">swords</span>
+                         <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="group-hover/btn:translate-x-2 transition-transform">⚔</span>
                       </button>
                    </div>
                 </div>
@@ -284,8 +284,8 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                          <div className={`h-12 w-12 rounded-2xl border flex items-center justify-center ${
                            entry.rank === 4 ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'
                          }`}>
-                            <span className={`material-symbols-outlined ${entry.rank === 4 ? 'text-primary text-glow' : 'text-on-surface-variant opacity-40'}`}>
-                               {entry.rank === 1 ? 'workspace_premium' : 'person'}
+                            <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className={entry.rank === 4 ? 'text-primary text-glow' : 'text-on-surface-variant opacity-40'}>
+                               {entry.rank === 1 ? '🏆' : '👤'}
                             </span>
                          </div>
                          <div>
@@ -322,7 +322,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                   <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,1)]" />
                   <span className="text-[10px] font-black text-on-surface-variant uppercase tracking-[0.4em]">Secure Channel: Global Matrix</span>
                </div>
-               <span className="material-symbols-outlined text-on-surface-variant opacity-40">enhanced_encryption</span>
+               <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-on-surface-variant opacity-40">🔐</span>
             </div>
 
             <div className="flex-1 p-8 overflow-y-auto space-y-6 scrollbar-hide">
@@ -348,7 +348,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                 className="w-full h-16 bg-white/[0.03] border border-white/10 rounded-2xl px-6 font-headline font-black italic slanted uppercase text-[14px] text-on-surface placeholder:text-on-surface-variant/30 focus:outline-none focus:border-primary/40 focus:bg-primary/5 transition-all text-glow"
               />
               <button className="absolute right-12 top-11 text-primary hover:text-glow transition-all">
-                 <span className="material-symbols-outlined text-3xl">send</span>
+                 <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}}>➤</span>
               </button>
             </div>
           </div>
@@ -360,7 +360,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-40 pointer-events-none" />
                 
                 <div className="h-24 w-24 rounded-[32px] bg-white/5 border border-white/10 flex items-center justify-center mb-8">
-                   <span className="material-symbols-outlined text-6xl text-on-surface-variant opacity-40 animate-pulse">ghost</span>
+                   <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-on-surface-variant opacity-40 animate-pulse">👻</span>
                 </div>
                 
                 <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">Simulated Entities</h3>
@@ -368,7 +368,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
                 
                 <button className="h-20 px-12 rounded-[28px] bg-primary border border-white/20 shadow-[0_0_40px_rgba(129,236,255,0.2)] hover:shadow-[0_0_60px_rgba(129,236,255,0.4)] transition-all duration-500 font-headline text-xl font-black italic slanted uppercase text-surface flex items-center justify-center gap-4 group/ghost">
                    Browse Ghost Archives
-                   <span className="material-symbols-outlined text-3xl group-hover/ghost:translate-x-2 transition-transform">cloud_download</span>
+                   <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="group-hover/ghost:translate-x-2 transition-transform">⬇</span>
                 </button>
              </div>
           </div>
@@ -389,7 +389,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
             <div className="flex items-center gap-3 mb-4">
               <span className="h-[1px] w-12 bg-primary/40" />
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-sm animate-pulse">hub</span>
+                <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-primary animate-pulse">⊕</span>
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Global Athlete Network Active</span>
               </div>
             </div>
@@ -429,7 +429,7 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
               <div className={`h-8 w-8 rounded-xl flex items-center justify-center border transition-all ${
                 activeTab === tab.id ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/10'
               }`}>
-                 <span className="material-symbols-outlined text-xl italic">{tab.id === 'FRIENDS' ? 'people' : tab.id === 'RIVALS' ? 'bolt' : tab.id === 'LEADERBOARDS' ? 'leaderboard' : tab.id === 'CHAT' ? 'forum' : 'ghost'}</span>
+                 <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="italic">{tab.id === 'FRIENDS' ? '👥' : tab.id === 'RIVALS' ? '⚡' : tab.id === 'LEADERBOARDS' ? '📊' : tab.id === 'CHAT' ? '💬' : '👻'}</span>
               </div>
               {tab.label}
               {tab.count > 0 && (

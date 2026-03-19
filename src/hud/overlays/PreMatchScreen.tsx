@@ -23,6 +23,21 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, ChevronLeft } from 'lucide-react';
 
+// ─── Responsive hook ──────────────────────────────────────────────────────────
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState<boolean>(
+    () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false),
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [query]);
+  return matches;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
@@ -230,21 +245,21 @@ const SwimmerCard: React.FC<{ swimmer: SwimmerEntry; index: number }> = ({ swimm
       initial={{ opacity: 0, y: 20, scale: 0.94 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.32, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      className="card-highlight"
       style={{
-        position:       'relative',
-        borderRadius:   '14px',
-        background:     isPlayer
-          ? `linear-gradient(135deg, rgba(56,214,255,0.12) 0%, rgba(4,20,33,0.90) 100%)`
-          : C.panel,
-        border:         isPlayer
+        position:    'relative',
+        borderRadius:'14px',
+        background:  isPlayer
+          ? `linear-gradient(135deg, rgba(56,214,255,0.12) 0%, var(--color-bg-card) 100%)`
+          : 'var(--color-bg-panel)',
+        border:      isPlayer
           ? `1.5px solid rgba(56,214,255,0.50)`
           : `1px solid ${C.border}`,
-        boxShadow:      isPlayer
-          ? `0 0 20px rgba(56,214,255,0.18), 0 4px 24px rgba(0,0,0,0.50)`
-          : '0 2px 12px rgba(0,0,0,0.40)',
-        backdropFilter: 'blur(10px)',
-        overflow:       'hidden',
-        padding:        '10px 12px 10px',
+        boxShadow:   isPlayer
+          ? `0 0 24px rgba(56,214,255,0.20), 0 4px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)`
+          : `0 2px 12px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03)`,
+        overflow:    'hidden',
+        padding:     '10px 12px 10px',
       }}
     >
       {/* Top accent stripe */}
@@ -462,6 +477,9 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startRef    = useRef(Date.now());
 
+  // Portrait phones: 2-column × 4-row grid; landscape/tablet: 4-column × 2-row
+  const isMobilePortrait = useMediaQuery('(max-width: 480px)');
+
   useEffect(() => {
     startRef.current = Date.now();
     intervalRef.current = setInterval(() => {
@@ -499,12 +517,16 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
           zIndex:          120,
           display:         'flex',
           flexDirection:   'column',
-          background:      `radial-gradient(ellipse at 30% 40%, #062b42 0%, #041421 65%)`,
+          background:      'var(--color-bg-deep)',
           overflow:        'hidden',
         }}
       >
-        {/* ── CAUSTIC BG BLOBS ── */}
-        <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', opacity: 0.35 }}>
+        {/* Noise + ambient underwater light */}
+        <div className="screen-noise" aria-hidden />
+        <div className="screen-ambient" aria-hidden />
+
+        {/* Caustic blobs — reduce opacity slightly */}
+        <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', opacity: 0.28 }}>
           <div className="caustic-blob caustic-blob-1" />
           <div className="caustic-blob caustic-blob-2" />
         </div>
@@ -578,10 +600,13 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
             <div
               style={{
                 fontFamily:    C.fontImpact,
-                fontSize:      '26px',
+                fontSize:      'clamp(16px, 4vw, 26px)',
                 lineHeight:    1,
                 color:         C.textPrimary,
                 letterSpacing: '0.04em',
+                overflow:      'hidden',
+                textOverflow:  'ellipsis',
+                whiteSpace:    'nowrap',
               }}
             >
               {eventName}
@@ -593,15 +618,15 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
         </motion.div>
 
         {/* ── SWIMMER GRID ── */}
+        {/*
+          Portrait phones (≤480px): 2 × 4 grid — narrower cards, still readable
+          Landscape / tablet / desktop: 4 × 2 grid — original broadcast layout
+        */}
         <div
+          className="swim26-lineup-grid"
           style={{
-            flex:       1,
-            overflow:   'hidden',
-            padding:    '10px 12px 6px',
-            display:    'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gridTemplateRows:    'repeat(2, 1fr)',
-            gap:        '8px',
+            gridTemplateColumns: isMobilePortrait ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+            gridTemplateRows:    isMobilePortrait ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
           }}
         >
           {ROSTER.map((swimmer, i) => (
@@ -686,8 +711,9 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
             onClick={handleSkip}
             style={{
               flexShrink:     0,
-              height:         '40px',
-              padding:        '0 20px',
+              height:         '44px',   /* minimum touch target */
+              minWidth:       '44px',
+              padding:        '0 16px',
               borderRadius:   '12px',
               display:        'flex',
               alignItems:     'center',
@@ -696,6 +722,7 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
               background:     `linear-gradient(135deg, ${C.aqua}, #7AE8FF)`,
               border:         'none',
               boxShadow:      `0 0 18px rgba(56,214,255,0.45)`,
+              whiteSpace:     'nowrap',
             }}
           >
             <Play size={14} fill="#041421" color="#041421" />

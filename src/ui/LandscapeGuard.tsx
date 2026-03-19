@@ -53,6 +53,20 @@ function useIsLandscape(): boolean {
   return isLandscape;
 }
 
+/** True when the viewport is a mobile device (max-width: 768px). */
+function useIsMobile(): boolean {
+  const check = () => window.innerWidth <= 768;
+  const [isMobile, setIsMobile] = useState<boolean>(check);
+
+  useEffect(() => {
+    const handler = () => setIsMobile(check());
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  return isMobile;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // LandscapeGuard
 // ─────────────────────────────────────────────────────────────────────────────
@@ -71,15 +85,20 @@ export const LandscapeGuard: React.FC<LandscapeGuardProps> = ({
   disabled = false,
 }) => {
   const isLandscape = useIsLandscape();
-  const showOverlay = !disabled && !isLandscape;
+  const isMobile    = useIsMobile();
+  // Only show the rotate prompt on mobile devices in portrait orientation
+  const showOverlay = !disabled && isMobile && !isLandscape;
 
   return (
-    <div className="w-screen h-screen overflow-hidden">
+    <div
+      data-landscape-guard
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}
+    >
       {/* Game content — always mounted */}
       <div
         style={{
-          width: '100%',
-          height: '100%',
+          position: 'absolute',
+          inset: 0,
           pointerEvents: showOverlay ? 'none' : 'auto',
           // Slight blur when overlay is active to hint the content is locked
           filter: showOverlay ? 'blur(3px) brightness(0.4)' : 'none',

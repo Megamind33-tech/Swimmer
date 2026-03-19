@@ -4,6 +4,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { GameIcon } from '../../ui/GameIcon';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 import staffManagementReferenceImage from '../../designs/staff_management_mentors/screen.png';
 import clubBackdropImage from '../../designs/custom_backgrounds/1UtKXnTbZwj4daOsDHH1HLUgmCfvf81V9.jpg';
@@ -267,7 +268,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               {/* Owner Path */}
               <div className="group/path relative p-10 rounded-[48px] border border-primary/20 bg-primary/5 hover:border-primary/60 transition-all duration-700 flex flex-col items-center text-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-0 group-hover/path:opacity-100 transition-opacity" />
-                <span className="material-symbols-outlined text-7xl text-primary text-glow mb-8 group-hover/path:scale-110 transition-transform duration-700">water_drop</span>
+                <span style={{fontSize:'70px', lineHeight:1, display:'inline-block'}} className="text-primary text-glow mb-8 group-hover/path:scale-110 transition-transform duration-700">💧</span>
                 
                 <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface mb-2">Dynasty Founder</h3>
                 <p className="text-on-surface-variant text-sm mb-10 leading-relaxed max-w-xs uppercase font-bold tracking-tight italic">Build an empire from zero. Full creative control. Total organizational responsibility.</p>
@@ -282,7 +283,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                   <div className="absolute inset-0 bg-primary blur-xl opacity-20 group-hover/btn:opacity-40 transition-all" />
                   <div className="relative h-16 bg-primary border border-primary/50 text-surface font-headline font-black italic slanted uppercase text-sm tracking-widest rounded-2xl flex items-center justify-center gap-3 group-hover/btn:bg-white transition-colors">
                     Initialize Protocol
-                    <span className="material-symbols-outlined text-sm">rocket_launch</span>
+                    <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}}>🚀</span>
                   </div>
                 </button>
               </div>
@@ -290,7 +291,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               {/* Hired Path */}
               <div className="group/path relative p-10 rounded-[48px] border border-secondary/20 bg-secondary/5 hover:border-secondary/60 transition-all duration-700 flex flex-col items-center text-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-secondary/10 to-transparent opacity-0 group-hover/path:opacity-100 transition-opacity" />
-                <span className="material-symbols-outlined text-7xl text-secondary gold-glow mb-8 group-hover/path:scale-110 transition-transform duration-700">badge</span>
+                <span style={{fontSize:'70px', lineHeight:1, display:'inline-block'}} className="text-secondary gold-glow mb-8 group-hover/path:scale-110 transition-transform duration-700">🏅</span>
                 
                 <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface mb-2">Professional Agent</h3>
                 <p className="text-on-surface-variant text-sm mb-10 leading-relaxed max-w-xs uppercase font-bold tracking-tight italic">Join established organizations. Meet corporate objectives. Climb the global ladder.</p>
@@ -311,7 +312,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                   <div className="absolute inset-0 bg-secondary blur-xl opacity-20 group-hover/btn:opacity-40 transition-all" />
                   <div className="relative h-16 bg-secondary border border-secondary/50 text-surface font-headline font-black italic slanted uppercase text-sm tracking-widest rounded-2xl flex items-center justify-center gap-3 group-hover/btn:bg-white transition-colors">
                     Join Selection
-                    <span className="material-symbols-outlined text-sm">search</span>
+                    <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}}>🔍</span>
                   </div>
                 </button>
               </div>
@@ -398,7 +399,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               <div className="absolute inset-0 bg-primary blur-2xl opacity-10 group-hover/confirm:opacity-40 transition-all duration-700" />
               <div className="relative h-20 bg-primary/10 border-2 border-primary/40 hover:border-primary hover:bg-primary/20 rounded-[28px] flex items-center justify-center gap-4 transition-all duration-300">
                 <span className="font-headline text-2xl font-black italic slanted uppercase text-primary text-glow">Finalize Dynasty Credentials</span>
-                <span className="material-symbols-outlined text-primary text-2xl">check_circle</span>
+                <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary">✓</span>
               </div>
             </button>
           </div>
@@ -418,7 +419,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                 <div key={op.title} className="group/op relative p-8 rounded-[32px] border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/40 transition-all duration-500 overflow-hidden">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover/op:bg-primary group-hover/op:text-surface transition-all">
-                      <span className="material-symbols-outlined text-xl">{op.icon}</span>
+                      <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="text-primary">⚙</span>
                     </div>
                     <h4 className="font-headline text-base font-black italic slanted uppercase text-on-surface">{op.title}</h4>
                   </div>
@@ -430,7 +431,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
             {managerMode === 'OWNER' && (
               <div className="p-10 rounded-[40px] border border-red-500/20 bg-red-500/5 space-y-6">
                 <div className="flex items-center gap-4 text-red-400">
-                  <span className="material-symbols-outlined text-3xl animate-pulse">warning</span>
+                  <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="animate-pulse">⚠</span>
                   <div>
                     <h3 className="font-headline text-xl font-black italic slanted uppercase">Liquidate Assets</h3>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-red-300 opacity-60">High-risk organizational termination protocol</p>
@@ -623,7 +624,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               {detailedSponsorOffers.map((s) => (
                 <div key={s.name} className="group/offer relative p-8 rounded-[40px] border border-white/5 bg-white/5 hover:border-secondary/40 transition-all duration-500 overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-5 group-hover/offer:opacity-10 transition-opacity">
-                    <span className="material-symbols-outlined text-[120px] text-secondary">verified</span>
+                    <span style={{fontSize:'120px', lineHeight:1, display:'inline-block'}} className="text-secondary">✓</span>
                   </div>
                   
                   <div className="relative z-10">
@@ -809,7 +810,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               <div className="p-10 rounded-[40px] border border-emerald-500/20 bg-emerald-500/5 space-y-8">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-emerald-400">trending_up</span>
+                    <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-emerald-400">↗</span>
                   </div>
                   <h4 className="font-headline text-xl font-black italic slanted uppercase text-emerald-400 text-glow">Yield Channels</h4>
                 </div>
@@ -830,7 +831,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               <div className="p-10 rounded-[40px] border border-red-500/20 bg-red-500/5 space-y-8">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-2xl bg-red-500/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-red-400">trending_down</span>
+                    <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-red-400">↘</span>
                   </div>
                   <h4 className="font-headline text-xl font-black italic slanted uppercase text-red-400 text-glow">Operational Cost</h4>
                 </div>
@@ -870,7 +871,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               <div className="relative z-10 flex items-center justify-between gap-12 flex-wrap">
                 <div className="flex items-center gap-8">
                   <div className="h-24 w-24 rounded-[32px] bg-primary/20 border border-primary/40 flex items-center justify-center shadow-[0_0_30px_rgba(129,236,255,0.2)] group-hover/identity:scale-105 transition-transform duration-500">
-                    <span className="material-symbols-outlined text-5xl text-primary text-glow">water_drop</span>
+                    <span style={{fontSize:'48px', lineHeight:1, display:'inline-block'}} className="text-primary text-glow">💧</span>
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-2">
@@ -901,13 +902,13 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                   className="group/route relative text-left p-8 rounded-[32px] border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/40 transition-all duration-500 overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 p-8 opacity-0 group-hover/route:opacity-5 transition-opacity duration-500">
-                    <span className="material-symbols-outlined text-[100px] text-primary">{route.icon}</span>
+                    <span style={{fontSize:'100px', lineHeight:1, display:'inline-block'}} className="text-primary">⚙</span>
                   </div>
                   
                   <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover/route:bg-primary/30 group-hover/route:border-primary/50 transition-all">
-                        <span className="material-symbols-outlined text-primary text-xl">{route.icon}</span>
+                        <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="text-primary">⚙</span>
                       </div>
                     </div>
                     <h3 className="font-headline text-xl font-black italic slanted uppercase text-on-surface mb-2 group-hover/route:text-glow transition-all">{route.title}</h3>
@@ -915,7 +916,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                     
                     <div className="mt-8 flex items-center gap-2 opacity-0 -translate-x-4 group-hover/route:opacity-100 group-hover/route:translate-x-0 transition-all duration-500">
                       <span className="text-[10px] font-black text-primary uppercase tracking-widest">Access Protocol</span>
-                      <span className="material-symbols-outlined text-primary text-sm">arrow_forward</span>
+                      <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-primary">→</span>
                     </div>
                   </div>
                 </button>
@@ -937,7 +938,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                 <div key={f.name} className="group/fac relative p-6 rounded-3xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/40 transition-all duration-500 overflow-hidden">
                   <div className="flex items-center gap-5">
                     <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover/fac:bg-primary/30 transition-all">
-                      <span className="material-symbols-outlined text-primary text-2xl">{f.icon}</span>
+                      <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary">⚙</span>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -1007,7 +1008,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                       <div className="text-xs font-black italic slanted uppercase text-on-surface">{member?.name}</div>
                       <div className="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">{member?.specialty} Strategy Matrix</div>
                     </div>
-                    <span className="material-symbols-outlined text-on-surface-variant opacity-0 group-hover/leg:opacity-100 transition-opacity">drag_indicator</span>
+                    <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-on-surface-variant opacity-0 group-hover/leg:opacity-100 transition-opacity">⠿</span>
                   </div>
                 );
               })}
@@ -1107,7 +1108,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
               onClick={() => setActiveSubPage(null)}
               className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-3 group"
             >
-              <span className="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+              <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="group-hover:-translate-x-1 transition-transform">←</span>
               <span className="font-headline font-black italic slanted uppercase text-[10px] tracking-widest">Return to Hub</span>
             </button>
           )}
@@ -1131,7 +1132,7 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                   }`}
                 >
                   <div className="flex items-center gap-2 relative z-10">
-                    <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+                    <GameIcon name={tab.icon} size={18} />
                     {tab.label}
                   </div>
                   {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />}

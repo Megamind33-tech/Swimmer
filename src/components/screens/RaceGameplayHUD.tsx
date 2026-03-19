@@ -21,7 +21,7 @@ export const RaceGameplayHUD: React.FC = () => {
           {/* Split Timer & Rank */}
           <div className="glass-panel p-4 flex flex-col gap-1 -skew-x-12 border-l-4 border-primary" style={{background: 'rgba(38, 38, 38, 0.6)', backdropFilter: 'blur(20px)'}}>
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>timer</span>
+              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-secondary">⏱</span>
               <span className="font-headline italic text-2xl tracking-tighter">00:24.82</span>
             </div>
             <div className="flex items-center justify-between">
@@ -55,7 +55,7 @@ export const RaceGameplayHUD: React.FC = () => {
                 <p className="font-headline italic text-xl">LVL 99</p>
               </div>
               <div className="h-10 w-10 bg-primary-container flex items-center justify-center -skew-x-12">
-                <span className="material-symbols-outlined text-on-primary-container">person</span>
+                <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-on-primary-container">👤</span>
               </div>
             </div>
           </div>
@@ -77,7 +77,7 @@ export const RaceGameplayHUD: React.FC = () => {
           {/* Left: Stroke Control (Rhythm Area) */}
           <div className="h-full w-48 glass-panel border-t-4 border-primary/30 flex flex-col items-center justify-center group active:bg-primary/20 transition-colors" style={{background: 'rgba(38, 38, 38, 0.6)', backdropFilter: 'blur(20px)'}}>
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <span className="material-symbols-outlined text-6xl text-primary">touch_app</span>
+              <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-primary">☝</span>
             </div>
             <p className="font-label text-[10px] tracking-[0.3em] text-primary mb-2">LEFT STROKE</p>
             <div className="w-12 h-1 bg-primary/20 overflow-hidden">
@@ -116,7 +116,7 @@ export const RaceGameplayHUD: React.FC = () => {
           {/* Right: Stroke Control (Rhythm Area) */}
           <div className="h-full w-48 glass-panel border-t-4 border-secondary/30 flex flex-col items-center justify-center group active:bg-secondary/20 transition-colors" style={{background: 'rgba(38, 38, 38, 0.6)', backdropFilter: 'blur(20px)'}}>
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <span className="material-symbols-outlined text-6xl text-secondary">touch_app</span>
+              <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-secondary">☝</span>
             </div>
             <p className="font-label text-[10px] tracking-[0.3em] text-secondary mb-2">RIGHT STROKE</p>
             <div className="w-12 h-1 bg-secondary/20 overflow-hidden">

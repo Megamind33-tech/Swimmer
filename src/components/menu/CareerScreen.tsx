@@ -117,7 +117,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
             Career Journey
           </h1>
           <p className="text-on-surface-variant text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-base">analytics</span>
+            <span style={{fontSize:'16px', lineHeight:1, display:'inline-block'}} className="text-primary">📊</span>
             Track your ascension through the world rankings
           </p>
         </div>
@@ -140,7 +140,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
           {/* Sponsors & Partners Panel */}
           <div className="glass-panel p-6 rounded-2xl group border-white/5 hover:border-primary/30 transition-all duration-500 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="material-symbols-outlined text-6xl text-primary">handshake</span>
+              <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-primary">🤝</span>
             </div>
             
             <h2 className="font-headline text-xl font-black italic slanted uppercase text-primary mb-6 text-glow">
@@ -201,9 +201,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
                           <span className="text-sm font-bold text-on-surface group-hover/row:text-primary transition-colors">{game.name}</span>
                           <span className="text-[9px] font-bold text-on-surface-variant">{game.mode}</span>
                         </div>
-                        <span className="material-symbols-outlined text-primary opacity-0 group-hover/row:opacity-100 transition-all translate-x-2 group-hover/row:translate-x-0">
-                          chevron_right
-                        </span>
+                        <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary opacity-0 group-hover/row:opacity-100 transition-all translate-x-2 group-hover/row:translate-x-0">›</span>
                       </button>
                     ))}
                   </div>
@@ -308,10 +306,8 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
                     <div className={`h-12 w-12 rounded-xl border flex items-center justify-center transition-all duration-500 ${
                       isExpanded ? 'bg-primary/20 border-primary/40' : 'bg-surface-high border-white/5'
                     }`}>
-                      <span className={`material-symbols-outlined text-2xl ${
-                        isCompleted ? 'text-secondary gold-glow' : isCurrent ? 'text-primary' : 'text-on-surface-variant'
-                      }`}>
-                        {isCompleted ? 'stars' : isCurrent ? 'swimming' : 'lock'}
+                      <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className={isCompleted ? 'text-secondary gold-glow' : isCurrent ? 'text-primary' : 'text-on-surface-variant'}>
+                        {isCompleted ? '✦' : isCurrent ? '🏊' : '🔒'}
                       </span>
                     </div>
                     
@@ -331,9 +327,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
                       <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest block mb-0.5">Progression</span>
                       <span className="text-xs font-bold text-on-surface">5/10 Events</span>
                     </div>
-                    <span className={`material-symbols-outlined transition-transform duration-500 text-primary ${isExpanded ? 'rotate-180' : ''}`}>
-                      expand_more
-                    </span>
+                    <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className={`transition-transform duration-500 text-primary ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
                   </div>
                 </button>
 
@@ -360,8 +354,8 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
                           <div className={`h-10 w-10 rounded-lg flex items-center justify-center border transition-all ${
                             event.status === 'CURRENT' ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/5'
                           }`}>
-                            <span className="material-symbols-outlined text-xl">
-                              {event.status === 'CURRENT' ? 'play_arrow' : event.status === 'COMPLETED' ? 'check' : 'lock'}
+                            <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}}>
+                              {event.status === 'CURRENT' ? '▶' : event.status === 'COMPLETED' ? '✓' : '🔒'}
                             </span>
                           </div>
                           

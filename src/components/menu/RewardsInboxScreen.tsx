@@ -139,7 +139,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
               <div className="relative group p-1 rounded-[48px] bg-gradient-to-br from-primary/20 to-transparent overflow-hidden">
                 <div className="p-16 rounded-[44px] bg-surface flex flex-col items-center justify-center text-center">
                   <div className="h-24 w-24 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-8">
-                    <span className="material-symbols-outlined text-5xl text-primary animate-pulse">done_all</span>
+                    <span style={{fontSize:'48px', lineHeight:1, display:'inline-block'}} className="text-primary animate-pulse">✓</span>
                   </div>
                   <h3 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">Terminal Clear</h3>
                   <p className="text-[11px] font-black uppercase tracking-[0.4em] text-on-surface-variant opacity-60">All biometric rewards synchronized</p>
@@ -209,7 +209,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
                         >
                            <div className="absolute inset-x-0 bottom-0 h-1 bg-white/40 shadow-[0_0_20px_rgba(255,255,255,1)]" />
                            Claim Dossier
-                           <span className="material-symbols-outlined text-3xl group-hover/btn:translate-x-2 transition-transform">download</span>
+                           <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="group-hover/btn:translate-x-2 transition-transform">⬇</span>
                         </button>
                      </div>
                   </div>
@@ -219,7 +219,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
                   onClick={onClaimAll}
                   className="w-full h-24 rounded-[32px] bg-white/5 border border-white/10 hover:border-primary/40 transition-all duration-500 font-headline text-2xl font-black italic slanted uppercase text-on-surface-variant hover:text-primary flex items-center justify-center gap-6 group/all"
                 >
-                  <span className="material-symbols-outlined text-4xl group-hover/all:rotate-180 transition-transform duration-700">sync</span>
+                  <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="group-hover/all:rotate-180 transition-transform duration-700">↺</span>
                   Batch Claim Operations
                   <span className="h-[2px] w-24 bg-white/10 group-hover:bg-primary/40 transition-colors" />
                 </button>
@@ -245,7 +245,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
                   <p className="text-[10px] font-black text-on-surface-variant uppercase tracking-tight opacity-80">{message.description}</p>
                 </div>
                 <div className="h-12 w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover/msg:bg-primary/20 group-hover/msg:border-primary/40 transition-all">
-                  <span className="material-symbols-outlined text-on-surface-variant group-hover/msg:text-primary">arrow_forward</span>
+                  <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-on-surface-variant group-hover/msg:text-primary">→</span>
                 </div>
               </div>
             ))}
@@ -276,7 +276,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
                     </div>
                     <div className="text-right">
                        <span className="font-headline text-lg font-black italic slanted text-primary text-glow">{entry.reward}</span>
-                       <span className="material-symbols-outlined text-emerald-400 text-sm ml-4 align-middle">verified</span>
+                       <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-emerald-400 ml-4 align-middle">✓</span>
                     </div>
                   </div>
                 ))}
@@ -304,7 +304,7 @@ export const RewardsInboxScreen: React.FC<RewardsInboxScreenProps> = ({ onClaimA
             <div className="flex items-center gap-3 mb-4">
               <span className="h-[1px] w-12 bg-primary/40" />
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-sm animate-pulse">move_to_inbox</span>
+                <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-primary animate-pulse">📥</span>
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Terminal Recognition In-Progress</span>
               </div>
             </div>

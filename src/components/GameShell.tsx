@@ -1,30 +1,20 @@
 /**
  * GameShell — Top-level game-flow coordinator
  *
- * Manages which "shell" is visible at any moment:
+ * Phase transitions:
+ *   All navigateTo() calls trigger a 160ms dark-screen fade before switching
+ *   the active phase.  Each phase container gets a key={phase} so React
+ *   remounts it, which re-triggers the .screen-enter CSS animation on entry.
  *
- *   AppShell (menu phase)
- *     All non-race screens: home, career, club, scouts, market,
- *     champs, and all utility pages.  Babylon.js is NOT active here.
- *
- *   Game-flow phases (race pipeline)
- *     mode-select  → PlayScreen (full-screen, no BottomNav)
- *     pre-race     → PreRaceSetupScreen (full-screen)
- *     racing       → RaceScene (Babylon canvas + DOM HUD)
- *     paused       → RaceScene still mounted + PauseMenu overlay
- *     results      → RaceResultScreen (full-screen, no canvas)
- *
- * The Babylon.js canvas is only created during 'racing' and 'paused' phases.
- * Destroying and recreating the WebGL context for each race is acceptable
- * at this stage; see FUTURE_WORK.md for persistent-canvas optimisation.
- *
- * Folder role:
- *   src/app/AppShell.tsx  — menu UI logic
- *   src/components/GameShell.tsx  — race flow state machine (this file)
- *   src/components/RaceScene.tsx  — Babylon canvas + HUD
+ * Screens:
+ *   menu          → AppShell (lobby/management UI)
+ *   mode-select   → PlayScreen (choose race mode)
+ *   pre-race      → PreRaceSetupScreen (configure the race)
+ *   pre-match     → PreMatchScreen (13s lineup reveal)
+ *   racing        → RaceScene (Babylon canvas + HUD)
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { AppShell } from '../app/AppShell';
 import { PlayScreen } from './menu/PlayScreen';
@@ -51,7 +41,6 @@ type GamePhase =
 interface OverlayShellProps {
   children: React.ReactNode;
   backgroundOpacity?: number;
-  /** Whether to show the locker-room background */
   showBackground?: boolean;
 }
 
@@ -60,18 +49,29 @@ const OverlayShell: React.FC<OverlayShellProps> = ({
   backgroundOpacity = 0.2,
   showBackground = true,
 }) => (
-  <div className="w-full h-full relative overflow-hidden bg-[#050B14]">
+  <div
+    className="overflow-hidden"
+    style={{ position: 'absolute', inset: 0, background: 'var(--color-bg-deep)' }}
+  >
+    {/* Noise texture — prevents flat-black "web app" look */}
+    <div className="screen-noise" aria-hidden />
+
+    {/* Underwater ambient light — single subtle radial per screen */}
+    <div className="screen-ambient" aria-hidden />
+
     {showBackground && (
       <img
         src={lockerRoomBackground}
         alt=""
         aria-hidden
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ opacity: backgroundOpacity }}
+        style={{ opacity: backgroundOpacity, mixBlendMode: 'luminosity' }}
       />
     )}
-    <div className="absolute inset-0 bg-[#050B14]/80 pointer-events-none" />
-    <div className="relative z-10 h-full overflow-y-auto">
+    <div className="absolute inset-0 pointer-events-none" style={{ background: 'rgba(5,11,20,0.78)' }} />
+
+    {/* Content */}
+    <div className="relative z-10 h-full overflow-y-auto screen-safe-area">
       {children}
     </div>
   </div>
@@ -82,108 +82,141 @@ const OverlayShell: React.FC<OverlayShellProps> = ({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function GameShell() {
-  const [phase, setPhase] = useState<GamePhase>('menu');
+  const [phase,        setPhase]        = useState<GamePhase>('menu');
   const [selectedMode, setSelectedMode] = useState<string>('quick-race');
-  const [raceConfig, setRaceConfig] = useState<RaceConfig>({
+  const [raceConfig,   setRaceConfig]   = useState<RaceConfig>({
     distance: '100M',
-    stroke: 'FREESTYLE',
-    venue: 'olympic',
+    stroke:   'FREESTYLE',
+    venue:    'olympic',
   });
   const [raceResult, setRaceResult] = useState<RaceResult | null>(null);
 
+  // ── Phase-transition fade ────────────────────────────────────────────────
+  // A 160ms dark overlay fades in before each phase switch, then out again
+  // as the new screen enters with its .screen-enter animation.
+
+  const [fading, setFading] = useState(false);
+
+  const navigateTo = useCallback((nextPhase: GamePhase) => {
+    setFading(true);
+    setTimeout(() => {
+      setPhase(nextPhase);
+      // Let React flush the new phase, then remove the fade cover so the
+      // new screen's screen-enter animation is visible.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => setFading(false)),
+      );
+    }, 160);
+  }, []);
+
   // ── Transitions ─────────────────────────────────────────────────────────
 
-  const enterModeSelect = () => setPhase('mode-select');
+  const enterModeSelect  = () => navigateTo('mode-select');
+  const onCancelPreRace  = () => navigateTo('mode-select');
+  const onConfirmRace    = () => navigateTo('pre-match');
+  const onExitToLobby    = () => { setRaceResult(null); navigateTo('menu'); };
+  const onRestart        = () => { setRaceResult(null); navigateTo('pre-race'); };
+  const onPause          = () => { /* RaceScene handles pause internally */ };
 
   const onModeSelected = (modeId: string) => {
     setSelectedMode(modeId);
-    setPhase('pre-race');
+    navigateTo('pre-race');
   };
-
-  const onConfirmRace = () => setPhase('pre-match');
 
   const onConfigChange = (partial: Partial<RaceConfig>) =>
     setRaceConfig((prev) => ({ ...prev, ...partial }));
 
-  const onCancelPreRace = () => setPhase('mode-select');
-
-  const onPause       = () => { /* RaceScene handles pause internally */ };
-  const onExitToLobby = () => { setRaceResult(null); setPhase('menu'); };
-  const onRestart     = () => { setRaceResult(null); setPhase('pre-race'); };
-
   const onRaceComplete = (result: RaceResult) => {
     setRaceResult(result);
-    // Phase 5: ResultsOverlay is shown inside RaceScene.
-    // GameShell remains in 'racing' phase so the canvas stays mounted.
-    // The overlay's "Continue" / "Lobby" buttons call onExitToLobby / onRestart.
+    // ResultsOverlay shown inside RaceScene — stays in 'racing' phase
   };
 
-  // ── Mode-select ──────────────────────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────────────────
 
-  if (phase === 'mode-select') {
+  const renderPhase = () => {
+    if (phase === 'mode-select') {
+      return (
+        <OverlayShell key="mode-select" backgroundOpacity={0.28}>
+          {/* Back to menu */}
+          <button
+            onClick={() => navigateTo('menu')}
+            className="absolute top-4 left-4 z-50 flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 text-xs font-bold uppercase tracking-wider active:scale-95 transition-all"
+            style={{
+              background: 'rgba(8,13,26,0.80)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(8px)',
+              minHeight: '44px',
+            }}
+          >
+            <ChevronLeft size={14} />
+            Lobby
+          </button>
+          <div className="screen-enter h-full">
+            <PlayScreen onModeSelect={onModeSelected} />
+          </div>
+        </OverlayShell>
+      );
+    }
+
+    if (phase === 'pre-race') {
+      const modeName = selectedMode
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+      return (
+        <OverlayShell key="pre-race" backgroundOpacity={0.18}>
+          <div className="screen-enter h-full">
+            <PreRaceSetupScreen
+              mode={modeName}
+              onConfirmRace={onConfirmRace}
+              onCancel={onCancelPreRace}
+              onConfigChange={onConfigChange}
+            />
+          </div>
+        </OverlayShell>
+      );
+    }
+
+    if (phase === 'pre-match') {
+      return (
+        <div key="pre-match" className="screen-enter" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          <PreMatchScreen
+            eventName={`${raceConfig.distance} ${raceConfig.stroke}`}
+            heat="HEAT 1"
+            onStart={() => navigateTo('racing')}
+            onBack={() => navigateTo('pre-race')}
+          />
+        </div>
+      );
+    }
+
+    if (phase === 'racing') {
+      return (
+        <div key="racing" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          <RaceScene
+            config={raceConfig}
+            onPause={onPause}
+            onRaceComplete={onRaceComplete}
+            onRestart={onRestart}
+            onExitToLobby={onExitToLobby}
+          />
+        </div>
+      );
+    }
+
+    // Default: menu
     return (
-      <OverlayShell backgroundOpacity={0.3}>
-        {/* Back to menu */}
-        <button
-          onClick={() => setPhase('menu')}
-          className="absolute top-4 left-4 z-50 flex items-center gap-2 bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-white/70 text-xs font-bold uppercase tracking-wider backdrop-blur-sm hover:bg-black/70 active:scale-95 transition-all"
-        >
-          <ChevronLeft size={14} />
-          Lobby
-        </button>
-        <PlayScreen onModeSelect={onModeSelected} />
-      </OverlayShell>
+      <div key="menu" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+        <AppShell onPlay={enterModeSelect} />
+      </div>
     );
-  }
+  };
 
-  // ── Pre-race setup ───────────────────────────────────────────────────────
+  return (
+    <>
+      {renderPhase()}
 
-  if (phase === 'pre-race') {
-    const modeName = selectedMode
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
-
-    return (
-      <OverlayShell backgroundOpacity={0.2}>
-        <PreRaceSetupScreen
-          mode={modeName}
-          onConfirmRace={onConfirmRace}
-          onCancel={onCancelPreRace}
-          onConfigChange={onConfigChange}
-        />
-      </OverlayShell>
-    );
-  }
-
-  // ── Pre-match lineup reveal (13-second countdown) ────────────────────────
-
-  if (phase === 'pre-match') {
-    const eventName = `${raceConfig.distance} ${raceConfig.stroke}`;
-    return (
-      <PreMatchScreen
-        eventName={eventName}
-        heat="HEAT 1"
-        onStart={() => setPhase('racing')}
-        onBack={() => setPhase('pre-race')}
-      />
-    );
-  }
-
-  // ── Racing (pause + results handled by RaceScene internally) ─────────────
-
-  if (phase === 'racing') {
-    return (
-      <RaceScene
-        config={raceConfig}
-        onPause={onPause}
-        onRaceComplete={onRaceComplete}
-        onRestart={onRestart}
-        onExitToLobby={onExitToLobby}
-      />
-    );
-  }
-
-  // ── Default: menu (AppShell) ─────────────────────────────────────────────
-
-  return <AppShell onPlay={enterModeSelect} />;
+      {/* Full-screen dark fade — shows between phase transitions */}
+      {fading && <div className="phase-fade-cover" aria-hidden />}
+    </>
+  );
 }

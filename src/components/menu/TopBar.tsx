@@ -50,9 +50,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <div className="top-hud-logo flex items-center gap-3 group cursor-pointer transition-all duration-500 hover:scale-105 active:scale-95">
           <div className="relative">
              <div className="absolute inset-0 bg-primary/20 blur-xl animate-pulse" />
-             <span className="material-symbols-outlined text-primary text-4xl text-glow relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>
-               waves
-             </span>
+             <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-primary text-glow relative z-10">〜</span>
           </div>
           <h1 className="font-headline font-black text-4xl tracking-tighter uppercase italic slanted text-glow text-on-surface">
              SWIM<span className="text-primary italic">26</span>
@@ -104,7 +102,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         <div className="top-hud-currencies flex items-center gap-3">
            {/* Electric Gold Pod */}
            <div className="px-6 py-3 rounded-[28px] bg-secondary/5 border border-secondary/20 flex items-center gap-4 hover:border-secondary/50 hover:bg-secondary/10 transition-all duration-500 cursor-pointer shadow-[0_0_20px_rgba(255,215,9,0.05)]">
-              <span className="material-symbols-outlined text-secondary text-2xl gold-glow" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-secondary gold-glow">◈</span>
               <div>
                  <div className="text-[8px] font-black text-secondary/60 uppercase tracking-widest leading-none mb-1">Credits</div>
                  <div className="font-headline text-xl font-black italic slanted text-secondary gold-glow">{softCurrency.toLocaleString()}</div>
@@ -113,7 +111,7 @@ export const TopBar: React.FC<TopBarProps> = ({
 
            {/* Pulse SP Pod */}
            <div className="px-6 py-3 rounded-[28px] bg-primary/5 border border-primary/20 flex items-center gap-4 hover:border-primary/50 hover:bg-primary/10 transition-all duration-500 cursor-pointer shadow-[0_0_20px_rgba(129,236,255,0.05)]">
-              <span className="material-symbols-outlined text-primary text-2xl text-glow" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary text-glow">✦</span>
               <div>
                  <div className="text-[8px] font-black text-primary/60 uppercase tracking-widest leading-none mb-1">Pulse SP</div>
                  <div className="font-headline text-xl font-black italic slanted text-primary text-glow">{premiumCurrency}</div>
@@ -136,8 +134,8 @@ export const TopBar: React.FC<TopBarProps> = ({
                onClick={btn.onClick}
                className="h-12 w-12 rounded-full hover:bg-white/5 transition-all duration-300 relative group"
              >
-                <span className={`material-symbols-outlined text-2xl text-on-surface-variant group-hover:text-primary transition-all ${btn.icon === 'settings' ? 'group-hover:rotate-90' : ''}`}>
-                  {btn.icon}
+                <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className={`text-on-surface-variant group-hover:text-primary transition-all ${btn.icon === 'settings' ? 'group-hover:rotate-90' : ''}`}>
+                  {btn.icon === 'notifications' ? '🔔' : btn.icon === 'mail' ? '✉' : '⚙'}
                 </span>
                 {btn.count ? (
                   <span className="absolute top-2 right-2 h-4 w-4 rounded-full bg-error border-2 border-surface text-[8px] font-black text-white flex items-center justify-center animate-bounce">

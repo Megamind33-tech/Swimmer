@@ -72,7 +72,7 @@ export const SocialClubScreen: React.FC = () => {
       {/* TopAppBar */}
       <header className="h-16 flex items-center justify-between px-6 bg-surface-container border-b border-outline-variant/20 sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-primary text-3xl" style={{fontVariationSettings: "'FILL' 1"}}>waves</span>
+          <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="text-primary">〜</span>
           <h1 className="font-headline font-bold text-2xl tracking-tighter uppercase italic text-glow">SWIM26</h1>
         </div>
         <div className="bg-surface-container-highest px-4 py-1 flex items-center gap-4">
@@ -90,7 +90,7 @@ export const SocialClubScreen: React.FC = () => {
             </div>
             <div className="relative z-10">
               <div className="w-32 h-32 bg-primary flex items-center justify-center mb-4 transform -skew-x-12 border-4 border-on-primary">
-                <span className="material-symbols-outlined text-on-primary text-6xl" style={{fontVariationSettings: "'FILL' 1"}}>military_tech</span>
+                <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-on-primary">🏅</span>
               </div>
               <h2 className="font-headline text-4xl font-black italic uppercase -skew-x-6">Team SWIM</h2>
               <p className="font-label text-primary text-sm tracking-[0.2em] font-bold mt-2">ELITE DIVISION | RANK #12</p>
@@ -126,7 +126,7 @@ export const SocialClubScreen: React.FC = () => {
                     <p className="font-headline font-bold text-sm tracking-tight italic">{member.name}</p>
                     <p className="text-[10px] text-on-surface-variant uppercase">{member.offline ? 'Offline' : `Lvl ${member.level}`} • {member.specialty}</p>
                   </div>
-                  <span className="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">send</span>
+                  <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity">➤</span>
                 </div>
               ))}
             </div>
@@ -146,7 +146,7 @@ export const SocialClubScreen: React.FC = () => {
             {/* Chat Header */}
             <div className="relative z-10 flex items-center justify-between p-6 border-b border-outline-variant/30">
               <div className="flex items-center gap-4">
-                <span className="material-symbols-outlined text-primary">groups</span>
+                <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary">👥</span>
                 <div>
                   <h2 className="font-headline text-xl font-bold italic uppercase tracking-tight">Global Hub</h2>
                   <p className="text-[10px] text-on-surface-variant font-bold tracking-widest">2,842 PLAYERS ACTIVE IN CHAT</p>
@@ -154,10 +154,10 @@ export const SocialClubScreen: React.FC = () => {
               </div>
               <div className="flex gap-2">
                 <button className="w-10 h-10 flex items-center justify-center bg-surface-container-highest hover:bg-primary hover:text-on-primary transition-colors">
-                  <span className="material-symbols-outlined text-sm">filter_list</span>
+                  <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}}>≡</span>
                 </button>
                 <button className="w-10 h-10 flex items-center justify-center bg-surface-container-highest hover:bg-primary hover:text-on-primary transition-colors">
-                  <span className="material-symbols-outlined text-sm">settings</span>
+                  <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}}>⚙</span>
                 </button>
               </div>
             </div>
@@ -206,7 +206,7 @@ export const SocialClubScreen: React.FC = () => {
               <div className="flex items-center gap-4 bg-surface-container-lowest p-1">
                 <input className="flex-1 bg-transparent border-none focus:ring-0 font-label text-sm uppercase placeholder:text-on-surface-variant/50 px-4" placeholder="TRANSMIT MESSAGE TO SECTOR 26..." type="text" />
                 <button className="bg-primary text-on-primary w-12 h-12 flex items-center justify-center hover:bg-primary-container transition-all">
-                  <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>send</span>
+                  <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>➤</span>
                 </button>
               </div>
             </div>
@@ -216,7 +216,7 @@ export const SocialClubScreen: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-surface-container-high slanted-right h-24 flex items-center px-8 group hover:bg-surface-container-highest transition-colors cursor-pointer border-r-4 border-primary/40">
               <div className="flex items-center gap-6">
-                <span className="material-symbols-outlined text-4xl text-primary-fixed" style={{fontVariationSettings: "'FILL' 1"}}>emoji_events</span>
+                <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-primary-fixed">🏆</span>
                 <div>
                   <p className="font-headline text-2xl font-black italic uppercase">League Rank</p>
                   <p className="text-xs font-bold tracking-[0.4em] text-primary">#142 GLOBAL</p>
@@ -229,7 +229,7 @@ export const SocialClubScreen: React.FC = () => {
                   <p className="font-headline text-2xl font-black italic uppercase">Social Feed</p>
                   <p className="text-xs font-bold tracking-[0.4em] text-secondary">24 NEW NOTIFICATIONS</p>
                 </div>
-                <span className="material-symbols-outlined text-4xl text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>notifications_active</span>
+                <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-secondary">🔔</span>
               </div>
             </div>
           </div>
@@ -239,19 +239,19 @@ export const SocialClubScreen: React.FC = () => {
       {/* BottomNavBar */}
       <nav className="h-20 bg-surface-container border-t border-outline-variant/20 flex items-center justify-around px-2 sticky bottom-0 z-50">
         <a className="flex flex-col items-center gap-1 w-full text-on-surface-variant hover:text-primary transition-colors" href="#">
-          <span className="material-symbols-outlined">home</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>⌂</span>
           <span className="font-label text-[10px] font-bold uppercase tracking-widest">Home</span>
         </a>
         <a className="flex flex-col items-center gap-1 w-full text-on-surface-variant hover:text-primary transition-colors" href="#">
-          <span className="material-symbols-outlined">sports_score</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>🏅</span>
           <span className="font-label text-[10px] font-bold uppercase tracking-widest">Career</span>
         </a>
         <a className="flex flex-col items-center gap-1 w-full text-primary border-t-2 border-primary pt-1" href="#">
-          <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>groups</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>👥</span>
           <span className="font-label text-[10px] font-bold uppercase tracking-widest">Social</span>
         </a>
         <a className="flex flex-col items-center gap-1 w-full text-on-surface-variant hover:text-primary transition-colors" href="#">
-          <span className="material-symbols-outlined">military_tech</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>🏅</span>
           <span className="font-label text-[10px] font-bold uppercase tracking-widest">Rewards</span>
         </a>
       </nav>

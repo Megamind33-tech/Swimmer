@@ -1,12 +1,10 @@
 /**
  * App — root component
  *
- * Wraps the entire application in LandscapeGuard so portrait-mode devices
- * see the rotate overlay before any game content is interactive.
- *
- * GameShell sits inside the guard — it is always mounted (the Babylon canvas
- * only activates when a race starts, so there is no wasted WebGL context
- * in portrait mode either).
+ * All screens (lobby, mode-select, pre-race, pre-match, race) are responsive
+ * and fully interactive in both portrait and landscape on all target devices.
+ * LandscapeGuard is disabled: portrait is no longer blocked at the CSS or JS
+ * level so menus and the race scene can adapt to any orientation.
  */
 
 import React from 'react';
@@ -15,7 +13,7 @@ import { LandscapeGuard } from './ui/LandscapeGuard';
 
 export function App() {
   return (
-    <LandscapeGuard>
+    <LandscapeGuard disabled>
       <GameShell />
     </LandscapeGuard>
   );
