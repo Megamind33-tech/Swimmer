@@ -33,8 +33,12 @@ import { TopUtilityBar }  from '../lobby/TopUtilityBar';
 import { IconTabBar, type LobbyTab } from '../lobby/IconTabBar';
 
 // Page content
-import { CareerMode }     from '../pages/CareerMode';
-import { Championships }  from '../pages/Championships';
+import { CareerMode }       from '../pages/CareerMode';
+import { Championships }    from '../pages/Championships';
+import { Rankings }         from '../pages/Rankings';
+import { ClubManagement }   from '../pages/ClubManagement';
+import { TransferMarket }   from '../pages/TransferMarket';
+import { Scouts }           from '../pages/Scouts';
 import {
   TrainingPage,
   SettingsPage,
@@ -62,8 +66,11 @@ function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) =>
   switch (tab) {
     case 'race':     return <LobbyScreen onStartRace={onPlay} onNavigate={onNavigate} />;
     case 'career':   return <CareerMode />;
+    case 'club':     return <ClubManagement />;
+    case 'scouts':   return <Scouts />;
+    case 'market':   return <TransferMarket />;
+    case 'rankings': return <Rankings />;
     case 'training': return <TrainingPage />;
-    case 'rankings': return <Championships />;
     case 'style':    return <SwimmerScreen />;
     case 'store':    return <StoreScreen />;
     default:         return <LobbyScreen onStartRace={onPlay} onNavigate={onNavigate} />;
@@ -77,8 +84,11 @@ function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) =>
 const TAB_LABELS: Record<LobbyTab, string> = {
   race:     'Lobby',
   career:   'Career',
-  training: 'Training',
+  club:     'Club',
+  scouts:   'Scouts',
+  market:   'Market',
   rankings: 'Rankings',
+  training: 'Training',
   style:    'Customise',
   store:    'Store',
 };
@@ -151,7 +161,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
 
   const handleNavigate = (dest: string) => {
     // Allow LobbyScreen quick-access buttons to change tabs
-    if (['race','career','training','rankings','style','store'].includes(dest)) {
+    if (['race','career','club','scouts','market','rankings','training','style','store'].includes(dest)) {
       handleTabChange(dest as LobbyTab);
     }
   };
@@ -194,7 +204,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           style={{
             position: 'absolute',
             top:      '48px',
-            bottom:   '56px',
+            bottom:   '60px',
             left:     0,
             right:    0,
             overflow: 'hidden',
@@ -218,7 +228,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             position:   'absolute',
             top:        '48px',
             right:      0,
-            bottom:     '56px',
+            bottom:     '60px',
             width:      '32px',
             background: 'transparent',
             border:     'none',
