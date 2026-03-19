@@ -1,18 +1,45 @@
 /**
- * Pre-Race Setup Screen - Race configuration
- * Swimmer selection, event setup, opponents, rewards, confirmation
+ * Pre-Race Setup Screen — Biometric Check / Parameter Selection
+ *
+ * Layout spec (SWIM26 rebuild):
+ *   [HEADER — 48px, flex-shrink 0]
+ *   [CONTENT — flex-1, flex-row on desktop / flex-col on mobile, overflow hidden]
+ *     LEFT  (flex 1.4) — param selection, internally scrollable
+ *     RIGHT (flex 1)   — biometric card, not scrollable
+ *   [FOOTER — 64px desktop / 128px mobile, flex-shrink 0]
+ *
+ * Mobile stacking: RIGHT panel moves to top as 80px horizontal strip.
+ * The outer div is height:100% + overflow:hidden so nothing escapes OverlayShell.
  */
 
 import React, { useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
+
+// ─── Types & data ────────────────────────────────────────────────────────────
 
 interface PreRaceSetupScreenProps {
   mode?: string;
   onConfirmRace?: () => void;
   onCancel?: () => void;
-  /** Called whenever the user changes distance/stroke/venue so parent can track config */
   onConfigChange?: (partial: { distance?: string; stroke?: string; venue?: string }) => void;
 }
+
+// Maps the Title-Case mode name GameShell passes to the PlayScreen accent colour
+const MODE_ACCENT: Record<string, { hex: string; rgb: string }> = {
+  'Quick Race':   { hex: '#00d4ff', rgb: '0,212,255'   },
+  'Career Race':  { hex: '#f59e0b', rgb: '245,158,11'  },
+  'Ranked Match': { hex: '#ef4444', rgb: '239,68,68'   },
+  'Time Trial':   { hex: '#10b981', rgb: '16,185,129'  },
+  'Relay Mode':   { hex: '#8b5cf6', rgb: '139,92,246'  },
+  'Ghost Race':   { hex: '#e2e8f0', rgb: '226,232,240' },
+};
+
+const STATS = [
+  { label: 'Kinetic Drive',    val: 18, max: 20, color: '#00d4ff' },
+  { label: 'Fluid Efficiency', val: 17, max: 20, color: '#10b981' },
+  { label: 'Power Matrix',     val: 19, max: 20, color: '#8b5cf6' },
+];
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   mode = 'Quick Race',
@@ -21,285 +48,790 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   onConfigChange,
 }) => {
   const [selectedDistance, setSelectedDistance] = useState('100M');
-  const [selectedStroke, setSelectedStroke] = useState('FREESTYLE');
-  const [selectedVenue, setSelectedVenue] = useState('olympic');
-  const [isStarting, setIsStarting] = useState(false);
+  const [selectedStroke,   setSelectedStroke]   = useState('FREESTYLE');
+  const [selectedVenue,    setSelectedVenue]    = useState('olympic');
+  const [isStarting,       setIsStarting]       = useState(false);
 
   const distances = ['50M', '100M', '200M', '400M', '800M', '1500M'];
-  const strokes = ['FREESTYLE', 'BUTTERFLY', 'BREASTSTROKE', 'BACKSTROKE', 'IM'];
-  const venues = [
-    { id: 'olympic', name: 'Olympic Arena', weather: 'Clear' },
-    { id: 'training', name: 'Training Facility', weather: 'Indoor' },
-    { id: 'championship', name: 'Championship Pool', weather: 'Clear' },
-    { id: 'neon', name: 'Neon District', weather: 'Night' },
+  const strokes   = ['FREESTYLE', 'BUTTERFLY', 'BREASTSTROKE', 'BACKSTROKE', 'IM'];
+  const venues    = [
+    { id: 'olympic',      name: 'Olympic Arena',     weather: 'Clear'  },
+    { id: 'training',     name: 'Training Facility', weather: 'Indoor' },
+    { id: 'championship', name: 'Championship Pool', weather: 'Clear'  },
+    { id: 'neon',         name: 'Neon District',     weather: 'Night'  },
   ];
 
-  const opponents = [
-    { name: 'Kaito M.', rank: '#45', specialty: 'Freestyler' },
-    { name: 'Luna S.', rank: '#123', specialty: 'Distance' },
-    { name: 'Alex J.', rank: '#89', specialty: 'Technician' },
-    { name: 'Mira P.', rank: '#234', specialty: 'Sprinter' },
-  ];
+  const accent = MODE_ACCENT[mode] ?? MODE_ACCENT['Quick Race'];
 
+  const handleConfirm = () => {
+    if (isStarting) return;
+    setIsStarting(true);
+    setTimeout(() => onConfirmRace?.(), 300);
+  };
+
+  // ── Shared button factory (distance / stroke) ──────────────────────────
+  const paramBtn = (
+    label: string,
+    isSelected: boolean,
+    onClick: () => void,
+  ) => (
+    <button
+      key={label}
+      onClick={onClick}
+      style={{
+        height: '44px',
+        borderRadius: '8px',
+        fontFamily: "'Barlow Condensed', sans-serif",
+        fontWeight: 700,
+        fontSize: '15px',
+        letterSpacing: '2px',
+        textTransform: 'uppercase' as const,
+        border: isSelected ? 'none' : '1px solid rgba(255,255,255,0.15)',
+        background: isSelected
+          ? accent.hex
+          : 'rgba(255,255,255,0.05)',
+        color: isSelected ? '#000' : 'rgba(255,255,255,0.70)',
+        cursor: 'pointer',
+        transition: 'all 0.12s ease',
+      }}
+    >
+      {label}
+    </button>
+  );
+
+  // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      {/* Cinematic Header */}
-      <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
-        <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
-        
-        <div className="relative z-10 flex items-center justify-between gap-8 flex-wrap">
-          <div>
-            {/* Back button */}
-            {onCancel && (
-              <button
-                onClick={onCancel}
-                className="flex items-center gap-1.5 mb-4 text-white/55 hover:text-white/85 transition-colors active:scale-95"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-              >
-                <ChevronLeft size={14} />
-                <span className="text-[10px] font-black uppercase tracking-[0.25em]">Back to Modes</span>
-              </button>
-            )}
-            <div className="flex items-center gap-3 mb-4">
-              <span className="h-[1px] w-12 bg-primary/40" />
-              <div className="flex items-center gap-2">
-                <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-primary animate-pulse">📡</span>
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Pre-Flight Biometric Check In-Progress</span>
-              </div>
-            </div>
-            
-            <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow">
-              {mode} Terminal
-            </h1>
-          </div>
-          
-          <div className="flex items-center gap-8 p-6 rounded-[32px] bg-white/5 border border-white/10 backdrop-blur-3xl">
-             <div className="text-center group cursor-pointer">
-               <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-1 block group-hover:text-primary transition-colors">Sector</span>
-               <span className="font-headline text-2xl font-black italic slanted text-primary text-glow">Circuit A-1</span>
-             </div>
-             <div className="h-10 w-[1px] bg-white/10" />
-             <div className="text-center group cursor-pointer">
-                <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest mb-1 block group-hover:text-secondary transition-colors">Stability</span>
-                <span className="font-headline text-2xl font-black italic slanted text-secondary gold-glow text-glow">Nominal</span>
-             </div>
-          </div>
-        </div>
-      </div>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        background: 'linear-gradient(180deg, #050B14 0%, #080F1C 100%)',
+        position: 'relative',
+      }}
+    >
+      {/* ── HEADER — 48px ────────────────────────────────────────────────── */}
+      <header
+        style={{
+          flexShrink: 0,
+          height: '48px',
+          display: 'flex',
+          alignItems: 'center',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          background: 'rgba(5,11,20,0.90)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          gap: '0',
+          position: 'relative',
+          zIndex: 10,
+        }}
+      >
+        {/* Top accent line */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0,
+            height: '2px',
+            background: `linear-gradient(90deg, transparent, rgba(${accent.rgb},0.65) 40%, rgba(${accent.rgb},0.65) 60%, transparent)`,
+          }}
+        />
 
-      <div className="hydro-page-content p-10 max-w-7xl mx-auto w-full space-y-10 pb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Configuration (7 cols) */}
-          <div className="lg:col-span-7 space-y-8">
-            
-            {/* Distance Grid */}
-            <div className="p-1 rounded-[40px] bg-gradient-to-br from-white/10 to-transparent">
-              <div className="p-8 rounded-[36px] bg-surface">
-                 <div className="flex items-center gap-3 mb-6">
-                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Parameter 01</span>
-                    <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Engagement Range</h3>
-                 </div>
-                 <div className="grid grid-cols-3 gap-3">
-                   {distances.map((dist) => (
-                     <button
-                       key={dist}
-                       onClick={() => { setSelectedDistance(dist); onConfigChange?.({ distance: dist }); }}
-                       className={`h-16 rounded-2xl font-headline font-black italic slanted uppercase text-[13px] tracking-widest transition-all duration-500 border overflow-hidden relative group ${
-                         selectedDistance === dist
-                           ? 'bg-primary/20 border-primary/40 text-primary text-glow'
-                           : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20'
-                       }`}
-                     >
-                       {dist}
-                       <div className={`absolute inset-x-0 bottom-0 h-[2px] bg-primary transition-transform duration-500 origin-left ${selectedDistance === dist ? 'scale-x-100' : 'scale-x-0'}`} />
-                     </button>
-                   ))}
-                 </div>
-              </div>
-            </div>
+        {/* ← Back button */}
+        <button
+          onClick={onCancel}
+          style={{
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '0 14px',
+            height: '100%',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'rgba(255,255,255,0.50)',
+            fontSize: '10px',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '0.2em',
+            whiteSpace: 'nowrap',
+            transition: 'color 0.12s ease',
+            borderRight: '1px solid rgba(255,255,255,0.06)',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.85)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.50)')}
+        >
+          <span style={{ fontSize: '14px', lineHeight: 1 }}>‹</span>
+          <span className="hidden sm:inline">Back to Modes</span>
+        </button>
 
-            {/* Stroke Grid */}
-            <div className="p-1 rounded-[40px] bg-gradient-to-br from-white/10 to-transparent">
-              <div className="p-8 rounded-[36px] bg-surface">
-                 <div className="flex items-center gap-3 mb-6">
-                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Parameter 02</span>
-                    <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Kinetic Pattern</h3>
-                 </div>
-                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                   {strokes.map((stroke) => (
-                     <button
-                       key={stroke}
-                       onClick={() => { setSelectedStroke(stroke); onConfigChange?.({ stroke }); }}
-                       className={`h-16 rounded-2xl font-headline font-black italic slanted uppercase text-[11px] tracking-widest transition-all duration-500 border overflow-hidden relative group ${
-                         selectedStroke === stroke
-                           ? 'bg-primary/20 border-primary/40 text-primary text-glow'
-                           : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/20'
-                       }`}
-                     >
-                       {stroke}
-                       <div className={`absolute inset-x-0 bottom-0 h-[2px] bg-primary transition-transform duration-500 origin-left ${selectedStroke === stroke ? 'scale-x-100' : 'scale-x-0'}`} />
-                     </button>
-                   ))}
-                 </div>
-              </div>
-            </div>
-
-            {/* Venue Selection */}
-            <div className="p-1 rounded-[40px] bg-gradient-to-br from-white/10 to-transparent">
-              <div className="p-8 rounded-[36px] bg-surface">
-                 <div className="flex items-center gap-3 mb-6">
-                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Parameter 03</span>
-                    <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface text-glow">Vector Coordinates</h3>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                   {venues.map((venue) => (
-                     <button
-                       key={venue.id}
-                       onClick={() => { setSelectedVenue(venue.id); onConfigChange?.({ venue: venue.id }); }}
-                       className={`group/venue p-6 rounded-3xl border transition-all duration-500 text-left relative overflow-hidden ${
-                         selectedVenue === venue.id
-                           ? 'bg-primary/20 border-primary/40 shadow-[0_0_20px_rgba(129,236,255,0.1)]'
-                           : 'bg-white/[0.03] border-white/5 hover:bg-white/10 hover:border-white/20'
-                       }`}
-                     >
-                       {selectedVenue === venue.id && <div className="absolute inset-x-0 bottom-0 h-[2px] bg-primary shadow-[0_0_10px_rgba(129,236,255,1)]" />}
-                       <div className={`text-[9px] font-black uppercase tracking-widest mb-1 ${selectedVenue === venue.id ? 'text-primary' : 'text-on-surface-variant opacity-40'}`}>
-                          0{venues.indexOf(venue) + 1} / Location
-                       </div>
-                       <div className="font-headline text-xl font-black italic slanted uppercase text-on-surface group-hover/venue:text-glow transition-all">{venue.name}</div>
-                       <div className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant opacity-60 mt-1">Met: {venue.weather}</div>
-                     </button>
-                   ))}
-                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Telemetry & Opponent (5 cols) */}
-          <div className="lg:col-span-5 space-y-8">
-            {/* Swimmer Telemetry */}
-            <div className="group/telemetry relative p-1 rounded-[40px] bg-gradient-to-br from-primary/40 via-white/5 to-transparent">
-               <div className="p-10 rounded-[36px] bg-surface relative overflow-hidden">
-                  <div className="absolute -right-20 -top-20 h-48 w-48 bg-primary/10 blur-3xl" />
-                  
-                  <div className="flex items-center gap-6 mb-10 relative z-10">
-                     <div className="relative">
-                        <div className="absolute inset-0 bg-primary/20 blur-2xl animate-pulse" />
-                        <div className="h-20 w-20 rounded-[28px] bg-primary/20 border border-primary/40 flex items-center justify-center relative z-10">
-                           <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-primary text-glow">◉</span>
-                        </div>
-                     </div>
-                     <div>
-                        <div className="text-[9px] font-black text-primary uppercase tracking-[0.4em] mb-1">Elite Operator</div>
-                        <h4 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow">M. Phiri</h4>
-                     </div>
-                  </div>
-
-                  <div className="space-y-6 relative z-10">
-                    {[
-                      { label: 'Kinetic Drive', val: 18, max: 20 },
-                      { label: 'Fluid Efficiency', val: 17, max: 20 },
-                      { label: 'Power Matrix', val: 19, max: 20 }
-                    ].map((stat, i) => (
-                      <div key={i} className="space-y-2">
-                        <div className="flex justify-between items-end">
-                           <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-60">{stat.label}</span>
-                           <span className="font-headline text-lg font-black italic slanted text-primary text-glow">{stat.val} / {stat.max}</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                           <div 
-                             className="h-full bg-primary shadow-[0_0_10px_rgba(129,236,255,1)] transition-all duration-1000" 
-                             style={{ width: `${(stat.val / stat.max) * 100}%` }} 
-                           />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-               </div>
-            </div>
-
-            {/* Target Acquisition (Opponents) */}
-            <div className="p-1 rounded-[40px] bg-white/10">
-               <div className="p-10 rounded-[36px] bg-surface relative overflow-hidden">
-                  <div className="flex items-center gap-3 mb-8">
-                    <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em]">Scan Level 4</span>
-                    <h3 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface gold-glow group-hover:text-glow transition-all">Opponent Data</h3>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {opponents.map((opp, idx) => (
-                      <div key={idx} className="group/opp p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-between">
-                         <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 rounded-xl bg-secondary/10 border border-secondary/20 flex items-center justify-center font-headline text-secondary font-black italic slanted">
-                               {opp.name.charAt(0)}
-                            </div>
-                            <div>
-                               <div className="font-headline text-base font-black italic slanted uppercase text-on-surface group-hover/opp:text-glow transition-all">{opp.name}</div>
-                               <div className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-40">{opp.specialty}</div>
-                            </div>
-                         </div>
-                         <div className="font-headline text-lg font-black italic slanted text-secondary gold-glow opacity-80 group-hover/opp:opacity-100 transition-opacity">
-                            {opp.rank}
-                         </div>
-                      </div>
-                    ))}
-                  </div>
-               </div>
-            </div>
-
-            {/* Reward Forecast */}
-            <div className="p-10 rounded-[40px] bg-gradient-to-r from-secondary/20 to-transparent border border-secondary/10">
-               <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-1 block italic">Reward Forecast</span>
-                    <div className="font-headline text-3xl font-black italic slanted text-secondary gold-glow">800 XP + 2.5K CR</div>
-                  </div>
-                  <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-secondary animate-bounce">◈</span>
-               </div>
-            </div>
-          </div>
+        {/* Centre — radar label */}
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            overflow: 'hidden',
+          }}
+        >
+          <span style={{ fontSize: '11px', lineHeight: 1, flexShrink: 0 }}>📡</span>
+          <span
+            className="hidden sm:inline"
+            style={{
+              fontSize: '9px',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '0.30em',
+              color: `rgba(${accent.rgb},0.80)`,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            Pre-Flight Biometric Check In-Progress
+          </span>
+          <span
+            className="sm:hidden"
+            style={{
+              fontSize: '9px',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '0.20em',
+              color: `rgba(${accent.rgb},0.80)`,
+            }}
+          >
+            {mode}
+          </span>
         </div>
 
-        {/* Global Action Terminal */}
-        <div className="fixed bottom-0 left-0 right-0 p-8 bg-surface/80 backdrop-blur-3xl border-t border-white/5 z-50">
-           <div className="max-w-7xl mx-auto flex gap-6">
-              <button
-                onClick={onCancel}
-                disabled={isStarting}
-                className="flex-[1] h-20 rounded-[28px] border-2 border-white/10 hover:border-white/40 font-headline text-2xl font-black italic slanted uppercase text-on-surface-variant hover:text-on-surface transition-all duration-500 flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50"
-              >
-                <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}}>✕</span>
-                Abort
-              </button>
-              
-              <button
-                onClick={() => {
-                   setIsStarting(true);
-                   setTimeout(() => onConfirmRace?.(), 300);
+        {/* Right — SECTOR / STABILITY tabs */}
+        <div
+          style={{
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            height: '100%',
+            borderLeft: '1px solid rgba(255,255,255,0.06)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 14px',
+              height: '100%',
+              borderRight: '1px solid rgba(255,255,255,0.06)',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: '1px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '7px',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.25em',
+                color: 'rgba(255,255,255,0.38)',
+              }}
+            >
+              Sector
+            </span>
+            <span
+              className="font-bebas"
+              style={{
+                fontSize: '14px',
+                lineHeight: 1,
+                color: accent.hex,
+                filter: `drop-shadow(0 0 4px rgba(${accent.rgb},0.7))`,
+              }}
+            >
+              Circuit A-1
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 14px',
+              height: '100%',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: '1px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '7px',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.25em',
+                color: 'rgba(255,255,255,0.38)',
+              }}
+            >
+              Stability
+            </span>
+            <span
+              className="font-bebas"
+              style={{
+                fontSize: '14px',
+                lineHeight: 1,
+                color: '#f59e0b',
+                filter: 'drop-shadow(0 0 4px rgba(245,158,11,0.7))',
+              }}
+            >
+              Nominal
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* ── CONTENT AREA — fills remaining height ────────────────────────── */}
+      {/*
+        Desktop (md+):   flex-row  — LEFT (flex 1.4) | RIGHT (flex 1)
+        Mobile:          flex-col  — RIGHT (80px strip, order-first) | LEFT (flex-1 scroll)
+      */}
+      <div
+        className="flex-1 flex flex-col md:flex-row overflow-hidden"
+      >
+
+        {/* ── RIGHT PANEL — Biometric card ──────────────────────────────── */}
+        {/*
+          Mobile: order-first, height 80px, horizontal strip
+          Desktop: order-last, flex 1, full-height card
+        */}
+        <div
+          className="order-first md:order-last md:overflow-hidden"
+          style={{ flexShrink: 0 }}
+        >
+          {/* ─ Mobile strip (hidden on md+) ─ */}
+          <div
+            className="flex md:hidden items-center gap-3 px-4"
+            style={{
+              height: '80px',
+              background: '#0d1929',
+              borderBottom: '1px solid rgba(0,212,255,0.18)',
+            }}
+          >
+            {/* Avatar */}
+            <div
+              style={{
+                flexShrink: 0,
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                border: `2px solid ${accent.hex}`,
+                background: `rgba(${accent.rgb},0.12)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px',
+                lineHeight: 1,
+                boxShadow: `0 0 12px rgba(${accent.rgb},0.35)`,
+              }}
+            >
+              MP
+            </div>
+            {/* Name + label */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 900,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.35em',
+                  color: `rgba(${accent.rgb},0.80)`,
+                  marginBottom: '2px',
                 }}
-                disabled={isStarting}
-                className="flex-[3] relative h-20 rounded-[28px] bg-primary border-2 border-white/20 shadow-[0_0_40px_rgba(129,236,255,0.3)] hover:shadow-[0_0_60px_rgba(129,236,255,0.5)] active:scale-[0.98] transition-all duration-500 font-headline text-3xl font-black italic slanted uppercase text-surface flex items-center justify-center gap-6 group overflow-hidden disabled:opacity-50"
               >
-                 <div className="absolute inset-x-0 bottom-0 h-2 bg-white/40 shadow-[0_0_20px_rgba(255,255,255,1)]" />
-                 
-                 {isStarting ? (
-                   <div className="flex items-center gap-6 animate-pulse">
-                      <span>Synchronizing...</span>
-                      <div className="h-8 w-8 rounded-full border-4 border-surface/30 border-t-surface animate-spin" />
-                   </div>
-                 ) : (
-                   <div className="flex items-center gap-6 group-hover:tracking-widest transition-all duration-700">
-                      <span>Initiate Kinetic Run</span>
-                      <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="group-hover:translate-x-3 transition-transform duration-700">🚀</span>
-                   </div>
-                 )}
-                 
-                 {/* Laser Scan Effect */}
-                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              </button>
-           </div>
+                Elite Operator
+              </div>
+              <div
+                className="font-bebas"
+                style={{
+                  fontSize: '22px',
+                  lineHeight: 1,
+                  color: '#F3FBFF',
+                  textTransform: 'uppercase',
+                }}
+              >
+                M. Phiri
+              </div>
+            </div>
+            {/* Quick stat */}
+            <div style={{ flexShrink: 0, textAlign: 'right' }}>
+              <div style={{ fontSize: '8px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.35)', marginBottom: '2px' }}>Kinetic Drive</div>
+              <div className="font-bebas" style={{ fontSize: '20px', lineHeight: 1, color: accent.hex }}>18 / 20</div>
+            </div>
+          </div>
+
+          {/* ─ Desktop full biometric card (hidden on mobile) ─ */}
+          <div
+            className="hidden md:flex flex-col h-full"
+            style={{
+              flex: '1 0 0',
+              width: '280px',
+              minWidth: '240px',
+              maxWidth: '340px',
+              borderLeft: '1px solid rgba(255,255,255,0.06)',
+              overflowY: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                margin: '16px',
+                flex: 1,
+                borderRadius: '12px',
+                background: '#0d1929',
+                border: '1px solid rgba(0,212,255,0.20)',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Avatar + name */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: '-4px',
+                      borderRadius: '50%',
+                      background: `rgba(${accent.rgb},0.15)`,
+                      filter: 'blur(8px)',
+                    }}
+                  />
+                  <div
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '50%',
+                      border: `2px solid ${accent.hex}`,
+                      background: `rgba(${accent.rgb},0.12)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '20px',
+                      fontWeight: 900,
+                      color: accent.hex,
+                      letterSpacing: '1px',
+                      position: 'relative',
+                      boxShadow: `0 0 16px rgba(${accent.rgb},0.40)`,
+                    }}
+                  >
+                    MP
+                  </div>
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.40em',
+                      color: accent.hex,
+                      marginBottom: '3px',
+                    }}
+                  >
+                    Elite Operator
+                  </div>
+                  <div
+                    className="font-bebas"
+                    style={{
+                      fontSize: '28px',
+                      lineHeight: 1,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      color: '#F3FBFF',
+                    }}
+                  >
+                    M. Phiri
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+
+              {/* Stat rows */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+                {STATS.map((stat) => (
+                  <div key={stat.label}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        justifyContent: 'space-between',
+                        marginBottom: '6px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.20em',
+                          color: 'rgba(255,255,255,0.45)',
+                        }}
+                      >
+                        {stat.label}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '20px',
+                          fontWeight: 700,
+                          color: '#F3FBFF',
+                          lineHeight: 1,
+                          fontVariantNumeric: 'tabular-nums',
+                        }}
+                      >
+                        {stat.val}
+                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>
+                          {' '}/ {stat.max}
+                        </span>
+                      </span>
+                    </div>
+                    {/* Progress bar */}
+                    <div
+                      style={{
+                        height: '4px',
+                        borderRadius: '2px',
+                        background: 'rgba(255,255,255,0.07)',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${(stat.val / stat.max) * 100}%`,
+                          background: stat.color,
+                          borderRadius: '2px',
+                          boxShadow: `0 0 8px ${stat.color}`,
+                          transition: 'width 0.8s ease',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Reward forecast */}
+              <div
+                style={{
+                  padding: '12px',
+                  borderRadius: '8px',
+                  background: 'rgba(245,158,11,0.08)',
+                  border: '1px solid rgba(245,158,11,0.18)',
+                }}
+              >
+                <div style={{ fontSize: '8px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.30em', color: 'rgba(245,158,11,0.70)', marginBottom: '3px' }}>
+                  Reward Forecast
+                </div>
+                <div
+                  className="font-bebas"
+                  style={{ fontSize: '18px', color: '#f59e0b', lineHeight: 1, filter: 'drop-shadow(0 0 6px rgba(245,158,11,0.5))' }}
+                >
+                  800 XP + 2.5K Coins
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── LEFT PANEL — Parameter selection (scrollable) ──────────────── */}
+        <div
+          className="flex-1 overflow-y-auto"
+          style={{
+            padding: '16px',
+            scrollbarWidth: 'thin',
+            scrollbarColor: `rgba(${accent.rgb},0.25) transparent`,
+          }}
+        >
+          {/* PARAMETER 01 — Engagement Range (distance) */}
+          <section style={{ marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <span
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 900,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.35em',
+                  color: `rgba(${accent.rgb},0.75)`,
+                }}
+              >
+                Parameter 01
+              </span>
+              <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.06)' }} />
+              <span
+                className="font-bebas"
+                style={{ fontSize: '18px', color: '#F3FBFF', textTransform: 'uppercase', lineHeight: 1 }}
+              >
+                Engagement Range
+              </span>
+            </div>
+            <div
+              className="grid gap-2"
+              style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
+            >
+              {distances.map((dist) =>
+                paramBtn(dist, selectedDistance === dist, () => {
+                  setSelectedDistance(dist);
+                  onConfigChange?.({ distance: dist });
+                }),
+              )}
+            </div>
+          </section>
+
+          {/* PARAMETER 02 — Kinetic Pattern (stroke) */}
+          <section style={{ marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <span
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 900,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.35em',
+                  color: `rgba(${accent.rgb},0.75)`,
+                }}
+              >
+                Parameter 02
+              </span>
+              <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.06)' }} />
+              <span
+                className="font-bebas"
+                style={{ fontSize: '18px', color: '#F3FBFF', textTransform: 'uppercase', lineHeight: 1 }}
+              >
+                Kinetic Pattern
+              </span>
+            </div>
+            <div
+              className="grid gap-2"
+              style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}
+            >
+              {strokes.map((stroke) =>
+                paramBtn(stroke, selectedStroke === stroke, () => {
+                  setSelectedStroke(stroke);
+                  onConfigChange?.({ stroke });
+                }),
+              )}
+            </div>
+          </section>
+
+          {/* PARAMETER 03 — Vector Coordinates (venue) */}
+          <section style={{ marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <span
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 900,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.35em',
+                  color: `rgba(${accent.rgb},0.75)`,
+                }}
+              >
+                Parameter 03
+              </span>
+              <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.06)' }} />
+              <span
+                className="font-bebas"
+                style={{ fontSize: '18px', color: '#F3FBFF', textTransform: 'uppercase', lineHeight: 1 }}
+              >
+                Vector Coordinates
+              </span>
+            </div>
+            <div
+              className="grid gap-2"
+              style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}
+            >
+              {venues.map((venue) => (
+                <button
+                  key={venue.id}
+                  onClick={() => {
+                    setSelectedVenue(venue.id);
+                    onConfigChange?.({ venue: venue.id });
+                  }}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    border: selectedVenue === venue.id
+                      ? `1px solid rgba(${accent.rgb},0.55)`
+                      : '1px solid rgba(255,255,255,0.10)',
+                    background: selectedVenue === venue.id
+                      ? `rgba(${accent.rgb},0.10)`
+                      : 'rgba(255,255,255,0.03)',
+                    transition: 'all 0.12s ease',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {selectedVenue === venue.id && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: 0, top: 0, bottom: 0,
+                        width: '3px',
+                        background: accent.hex,
+                        borderRadius: '8px 0 0 8px',
+                      }}
+                    />
+                  )}
+                  <div
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.25em',
+                      color: selectedVenue === venue.id ? `rgba(${accent.rgb},0.75)` : 'rgba(255,255,255,0.30)',
+                      marginBottom: '2px',
+                    }}
+                  >
+                    {venue.weather}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 700,
+                      fontSize: '14px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      color: selectedVenue === venue.id ? '#F3FBFF' : 'rgba(255,255,255,0.60)',
+                    }}
+                  >
+                    {venue.name}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
+
+      {/* ── FOOTER CTA BAR ────────────────────────────────────────────────── */}
+      {/*
+        Desktop:  height 64px, flex-row, ABORT left (flex 0.4), INITIATE right (flex 0.6)
+        Mobile:   height 128px, flex-col, both full-width
+      */}
+      <footer
+        className="flex-shrink-0 flex flex-col sm:flex-row items-stretch gap-2 px-3"
+        style={{
+          background: 'rgba(0,0,0,0.60)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          /* 128px on mobile (two buttons × ~56px + gap + padding), 64px on desktop */
+          padding: '10px 12px',
+        }}
+      >
+        {/* CLOSE / ABORT — outline, red on hover */}
+        <button
+          onClick={onCancel}
+          disabled={isStarting}
+          className="sm:flex-none"
+          style={{
+            height: '44px',
+            minWidth: '120px',
+            borderRadius: '8px',
+            background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.18)',
+            color: 'rgba(255,255,255,0.55)',
+            fontSize: '11px',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '0.25em',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'all 0.12s ease',
+            whiteSpace: 'nowrap',
+            opacity: isStarting ? 0.4 : 1,
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.color = '#ef4444';
+            e.currentTarget.style.borderColor = 'rgba(239,68,68,0.50)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)';
+          }}
+        >
+          <span style={{ fontSize: '13px', lineHeight: 1 }}>✕</span>
+          Close / Abort
+        </button>
+
+        {/* INITIATE KINETIC RUN — primary CTA */}
+        <button
+          onClick={handleConfirm}
+          disabled={isStarting}
+          className="flex-1"
+          style={{
+            height: '44px',
+            borderRadius: '8px',
+            background: isStarting ? `rgba(${accent.rgb},0.60)` : accent.hex,
+            border: 'none',
+            color: '#000',
+            fontSize: '13px',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '0.20em',
+            cursor: isStarting ? 'default' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.12s ease',
+            whiteSpace: 'nowrap',
+            boxShadow: isStarting
+              ? 'none'
+              : `0 0 24px rgba(${accent.rgb},0.45), 0 4px 12px rgba(0,0,0,0.40)`,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Laser-scan shimmer */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent)',
+              transform: 'translateX(-100%)',
+              animation: isStarting ? 'none' : undefined,
+              transition: 'transform 1s ease',
+            }}
+            className="group-hover:translate-x-full"
+          />
+
+          {isStarting ? (
+            <>
+              <span>Synchronizing…</span>
+              <div
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '50%',
+                  border: '2px solid rgba(0,0,0,0.30)',
+                  borderTopColor: '#000',
+                  animation: 'spin 0.7s linear infinite',
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <span>Initiate Kinetic Run</span>
+              <span style={{ fontSize: '16px', lineHeight: 1 }}>🚀</span>
+            </>
+          )}
+        </button>
+      </footer>
     </div>
   );
 };
