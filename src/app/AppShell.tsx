@@ -204,7 +204,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           style={{
             position: 'absolute',
             top:      '48px',
-            bottom:   '56px',
+            bottom:   '60px',
             left:     0,
             right:    0,
             overflow: 'hidden',
@@ -228,7 +228,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             position:   'absolute',
             top:        '48px',
             right:      0,
-            bottom:     '56px',
+            bottom:     '60px',
             width:      '32px',
             background: 'transparent',
             border:     'none',
