@@ -1,79 +1,93 @@
 /**
- * SWIMMER GAME - ArenaManager
- * Babylon.js 3D scene management
+ * ArenaManager  (orchestrator — Phase 1 refactor)
+ * ─────────────────────────────────────────────────────────────────────────────
+ * This class is the single public entry-point used by RaceScene.tsx and the
+ * rest of the game.  Its job is now to *coordinate* the modular sub-systems
+ * rather than contain all the geometry and logic itself.
  *
- * Responsibilities:
- * - Scene initialization and setup
- * - Venue theming (5 themes with color/lighting variations)
- * - Camera perspectives (4 views)
- * - Lighting and time-of-day system
- * - Water material and caustics
- * - Scoreboard rendering
- * - Performance optimization (LOD, render targets)
+ * Sub-systems (all in src/graphics/arena/):
+ *   ArenaRoot                — Engine + Scene + render loop
+ *   PerformanceQualityManager— Device tier detection + runtime preset switching
+ *   ArenaAtmosphere          — Clear colour, fog, pool theme palette
+ *   PoolStructure            — Basin floor, walls, coping edge
+ *   PoolWater                — Water surface mesh + future WaterMaterial hook
+ *   PoolDeck                 — Wet-area concrete surround
+ *   LaneSystem               — Lane ropes, float discs, FINA colours
+ *   StartingBlocks           — Per-lane starting block assemblies
+ *   ArenaArchitecture        — Walls, ceiling, stepped bleachers, columns
+ *   ArenaLighting            — Ambient + key + flood lights + shadows
+ *   CameraSupport            — 4 static ArcRotateCameras (DEFAULT/AERIAL/etc.)
+ *   BroadcastCamera          — 20-shot broadcast camera system (unchanged)
+ *
+ * PUBLIC API is backward-compatible with the original ArenaManager so all
+ * existing call-sites (RaceScene.tsx, BroadcastCamera.ts, GameManager.ts)
+ * continue to work without modification.
  */
 
 import * as BABYLON from '@babylonjs/core';
 import {
   IArenaConfig,
-  ICameraConfig,
-  ILightingConfig,
-  PoolTheme,
   CameraView,
+  PoolTheme,
   TimeOfDay,
   RaceState,
   ISwimmerRaceState,
 } from '../types';
-import { logger, isMobileDevice, getDeviceQualityTier } from '../utils';
+import { logger, isMobileDevice } from '../utils';
 import { BroadcastCamera } from './BroadcastCamera';
 
+// Arena sub-systems
+import { ArenaRoot }                 from './arena/ArenaRoot';
+import { PerformanceQualityManager } from './arena/PerformanceQualityManager';
+import { ArenaAtmosphere }           from './arena/ArenaAtmosphere';
+import { ArenaMaterialLibrary }      from './arena/ArenaMaterialLibrary';
+import { PoolStructure }             from './arena/PoolStructure';
+import { PoolWater }                 from './arena/PoolWater';
+import { PoolDeck }                  from './arena/PoolDeck';
+import { LaneSystem }                from './arena/LaneSystem';
+import { StartingBlocks }            from './arena/StartingBlocks';
+import { ArenaArchitecture }         from './arena/ArenaArchitecture';
+import { ArenaLighting }             from './arena/ArenaLighting';
+import { CameraSupport }             from './arena/CameraSupport';
+import { UnderwaterEffects }         from './arena/UnderwaterEffects';
+import { ArenaPostProcess }          from './arena/ArenaPostProcess';
+import { ArenaOptimizer }            from './arena/ArenaOptimizer';
+
 export class ArenaManager {
-  private scene: BABYLON.Scene | null = null;
-  private engine: BABYLON.Engine | null = null;
+  // ── Infrastructure ──────────────────────────────────────────────────────
   private canvas: HTMLCanvasElement | null = null;
 
-  // Mesh references
-  private poolMesh: BABYLON.Mesh | null = null;
-  private waterMesh: BABYLON.Mesh | null = null;
-  private arenaMesh: BABYLON.TransformNode | null = null;
-  private scoreboard: BABYLON.Mesh | null = null;
-  private startingBlocks: BABYLON.AbstractMesh[] = [];
+  // ── Sub-systems (set during initialize) ─────────────────────────────────
+  private arenaRoot:      ArenaRoot                  | null = null;
+  private qualityMgr:     PerformanceQualityManager  | null = null;
+  private atmosphere:     ArenaAtmosphere             | null = null;
+  private matLib:         ArenaMaterialLibrary        | null = null;
+  private poolStructure:  PoolStructure               | null = null;
+  private poolWater:      PoolWater                   | null = null;
+  private poolDeck:       PoolDeck                    | null = null;
+  private laneSystem:     LaneSystem                  | null = null;
+  private startingBlocks: StartingBlocks              | null = null;
+  private architecture:   ArenaArchitecture           | null = null;
+  private lighting:       ArenaLighting               | null = null;
+  private cameraSupport:  CameraSupport               | null = null;
+  private broadcastCamera: BroadcastCamera            | null = null;
+  private underwaterFX:   UnderwaterEffects           | null = null;
+  private postProcess:    ArenaPostProcess            | null = null;
 
-  // Camera references
-  private cameras: Map<CameraView, BABYLON.ArcRotateCamera> = new Map();
-  private currentCamera: BABYLON.ArcRotateCamera | null = null;
-  private broadcastCamera: BroadcastCamera | null = null;
-  private isBroadcastMode: boolean = false;
+  private isBroadcastMode = false;
 
-  // Lighting
-  private lights: BABYLON.Light[] = [];
-  private glowyLights: BABYLON.Light[] = [];
-
-  // Materials
-  private waterMaterial: BABYLON.Material | null = null;
-  private poolMaterial: BABYLON.Material | null = null;
-
-  // Quality settings
-  private qualityTier: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
-  private isMobile: boolean = false;
-  // Frame-skip for low-end mode: 0 = every frame, 1 = every other frame
-  private frameSkipInterval: number = 0;
-
-  // Arena configuration
+  // ── Arena configuration (matches original defaults) ──────────────────────
   private arenaConfig: IArenaConfig = {
-    theme: 'OLYMPIC',
-    timeOfDay: 'AFTERNOON',
-    poolLength: 50,
-    poolWidth: 25,
-    laneCount: 8,
+    theme:       'OLYMPIC',
+    timeOfDay:   'AFTERNOON',
+    poolLength:  50,
+    poolWidth:   25,
+    laneCount:   8,
     arenaHeight: 45,
   };
 
-  // Rendering state
-  private isRendering: boolean = false;
-  private renderLoopId: number | null = null;
-
+  // ────────────────────────────────────────────────────────────────────────
   constructor(canvasElement: HTMLCanvasElement | string) {
-    // Get canvas element
     if (typeof canvasElement === 'string') {
       this.canvas = document.getElementById(canvasElement) as HTMLCanvasElement;
     } else {
@@ -81,724 +95,311 @@ export class ArenaManager {
     }
 
     if (!this.canvas) {
-      throw new Error('Canvas element not found');
+      throw new Error('[ArenaManager] Canvas element not found');
     }
 
-    // Detect device capabilities
-    this.isMobile = isMobileDevice();
-    this.qualityTier = getDeviceQualityTier();
-
-    logger.log(`ArenaManager initialized (${this.qualityTier} quality, mobile: ${this.isMobile})`);
+    logger.log(
+      `[ArenaManager] Created (mobile: ${isMobileDevice()})`,
+    );
   }
 
   // ============================================================================
   // INITIALIZATION
   // ============================================================================
 
-  /**
-   * Initialize Babylon.js engine and scene
-   */
   public async initialize(): Promise<void> {
-    if (!this.canvas) {
-      throw new Error('Canvas not available');
+    if (!this.canvas) throw new Error('[ArenaManager] Canvas not available');
+
+    // ── 1. Quality detection ──────────────────────────────────────────────
+    this.qualityMgr = new PerformanceQualityManager();
+    const qt = this.qualityMgr.getQualityTier();
+
+    // ── 2. Engine + Scene ─────────────────────────────────────────────────
+    this.arenaRoot = new ArenaRoot(this.canvas, qt);
+    const scene    = this.arenaRoot.getScene();
+
+    // ── 3. Atmosphere (clear colour + fog) ───────────────────────────────
+    this.atmosphere = new ArenaAtmosphere();
+    this.atmosphere.build(scene, this.arenaConfig, qt);
+
+    // ── 4. Material library (PBR materials + procedural textures) ────────
+    this.matLib = new ArenaMaterialLibrary();
+    this.matLib.build(scene, this.arenaConfig, qt);
+
+    // ── 5. Lighting (before geometry so shadow casters can be registered) ─
+    this.lighting = new ArenaLighting();
+    this.lighting.build(scene, this.arenaConfig, qt);
+
+    // ── 6. Pool structure ─────────────────────────────────────────────────
+    this.poolStructure = new PoolStructure();
+    this.poolStructure.build(scene, this.arenaConfig, this.matLib);
+
+    // ── 7. Water surface ──────────────────────────────────────────────────
+    this.poolWater = new PoolWater();
+    this.poolWater.build(scene, this.arenaConfig, qt);
+
+    // ── 8. Deck ───────────────────────────────────────────────────────────
+    this.poolDeck = new PoolDeck();
+    this.poolDeck.build(scene, this.arenaConfig, this.matLib);
+
+    // ── 9. Lane system ────────────────────────────────────────────────────
+    this.laneSystem = new LaneSystem();
+    this.laneSystem.build(scene, this.arenaConfig, this.matLib);
+
+    // ── 10. Starting blocks ───────────────────────────────────────────────
+    this.startingBlocks = new StartingBlocks();
+    this.startingBlocks.build(scene, this.arenaConfig, this.matLib);
+
+    // ── 11. Arena architecture (walls, bleachers, trusses, branding) ─────
+    this.architecture = new ArenaArchitecture();
+    this.architecture.build(scene, this.arenaConfig, this.matLib, qt);
+
+    // ── 12. Post-build scene configuration (needs full scene.meshes) ─────
+    //   a) Water render targets: reflection + refraction lists populated
+    this.poolWater?.setupRenderTargets(scene);
+
+    //   b) Shadow casters + receivers: scan scene meshes by name pattern
+    this.lighting?.configureShadowsForScene(scene);
+
+    //   c) Environment probe: one-shot IBL cube capture for metallic surfaces.
+    //      Exclude water + caustic meshes to prevent render target feedback.
+    const waterMesh   = this.poolWater?.getMesh() ?? null;
+    const excludeMeshes: BABYLON.AbstractMesh[] = waterMesh ? [waterMesh] : [];
+    // Also exclude any mesh named 'causticOverlay'
+    scene.meshes
+      .filter(m => m.name === 'causticOverlay')
+      .forEach(m => excludeMeshes.push(m));
+
+    const envTex = this.lighting?.buildEnvironmentProbe(scene, excludeMeshes) ?? null;
+    if (envTex && this.matLib) {
+      this.matLib.applyEnvironmentTexture(scene, envTex);
     }
 
-    // Create engine
-    this.engine = new BABYLON.Engine(this.canvas, true, {
-      antialias: this.qualityTier === 'HIGH',
-      adaptToDeviceRatio: true,
-      preserveDrawingBuffer: false,
-    });
+    //   d) Underwater volume effects: depth fog transition + caustic depth light
+    //      + bubble particles. Snapshot above-water state as baseline for lerp.
+    this.underwaterFX = new UnderwaterEffects();
+    this.underwaterFX.build(scene, this.arenaConfig, qt);
+    this.underwaterFX.syncAboveWaterState(scene);
 
-    // Create scene
-    this.scene = new BABYLON.Scene(this.engine);
-    this.scene.clearColor = new BABYLON.Color4(0.1, 0.1, 0.15, 1);
-    // Note: collisionsEnabled and physicsEnabled are not valid Scene properties
-    // Physics is managed through the physics engine, not scene-level flags
+    //   e) Static scene optimization — freeze transforms, pickability, and
+    //      (LOW only) merge high-count detail mesh groups.
+    //      Run AFTER all geometry + post-build passes so scene.meshes is final.
+    ArenaOptimizer.optimize(scene, qt);
 
-    // Setup environment
-    await this.createArena();
-    this.createLighting();
-    this.createCameras();
-    this.createWater();
-    this.createScoreboard();
+    // ── 13. Static cameras ────────────────────────────────────────────────
+    this.cameraSupport = new CameraSupport();
+    this.cameraSupport.build(scene, this.canvas, this.arenaConfig);
 
-    // Apply initial theme
-    this.setTheme(this.arenaConfig.theme);
+    // ── 14. Post-processing pipeline ─────────────────────────────────────
+    // Built AFTER cameras so all camera instances can be attached.
+    // imageProcessing (contrast/exposure) applies globally; FXAA and bloom
+    // attach per-camera through the DefaultRenderingPipeline.
+    this.postProcess = new ArenaPostProcess();
+    this.postProcess.build(scene, this.cameraSupport.getCameras(), qt);
 
-    // Initialize broadcast camera (but don't activate it yet)
-    if (this.canvas) {
-      this.broadcastCamera = new BroadcastCamera(this.scene, this.canvas);
-      this.broadcastCamera.initialize();
-    }
+    // ── 15. Broadcast camera (dormant until enableBroadcastMode) ─────────
+    this.broadcastCamera = new BroadcastCamera(scene, this.canvas);
+    this.broadcastCamera.initialize();
 
-    // Start render loop
-    this.startRenderLoop();
+    // ── 16. Apply initial theme ───────────────────────────────────────────
+    this._applyThemeInternal(this.arenaConfig.theme);
 
-    logger.log('ArenaManager initialized successfully');
-  }
+    // ── 17. Freeze static PBR materials ──────────────────────────────────
+    // Must run AFTER _applyThemeInternal() has set poolWall.albedoColor so the
+    // correct theme colour is baked into the frozen material state.
+    this.matLib?.freezeStaticMaterials();
 
-  /**
-   * Create the main swimming pool arena
-   */
-  private async createArena(): Promise<void> {
-    if (!this.scene) return;
+    // ── 18. Register water update in render loop ─────────────────────────
+    this.arenaRoot.onRender((dt) => {
+      this.poolWater?.update(dt);
 
-    this.arenaMesh = new BABYLON.TransformNode('arena', this.scene);
-
-    // Pool - 50m x 25m x 3m deep
-    const poolMesh = BABYLON.MeshBuilder.CreateBox(
-      'pool',
-      {
-        width: this.arenaConfig.poolWidth,
-        height: 3,
-        depth: this.arenaConfig.poolLength,
-      },
-      this.scene
-    );
-    poolMesh.position.y = -1.5;
-    poolMesh.parent = this.arenaMesh;
-    this.poolMesh = poolMesh;
-
-    // Pool material
-    const poolMaterial = new BABYLON.StandardMaterial('poolMaterial', this.scene);
-    (poolMaterial as any).diffuseColor = new BABYLON.Color3(0.0, 0.3, 0.7);
-    poolMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
-    poolMaterial.specularPower = 32;
-    poolMesh.material = poolMaterial;
-    this.poolMaterial = poolMaterial;
-
-    // Pool walls
-    const wallThickness = 0.3;
-    const walls = [
-      // North wall
-      BABYLON.MeshBuilder.CreateBox(
-        'wallN',
-        { width: this.arenaConfig.poolWidth, height: 3, depth: wallThickness },
-        this.scene
-      ),
-      // South wall
-      BABYLON.MeshBuilder.CreateBox(
-        'wallS',
-        { width: this.arenaConfig.poolWidth, height: 3, depth: wallThickness },
-        this.scene
-      ),
-      // East wall
-      BABYLON.MeshBuilder.CreateBox(
-        'wallE',
-        { width: wallThickness, height: 3, depth: this.arenaConfig.poolLength },
-        this.scene
-      ),
-      // West wall
-      BABYLON.MeshBuilder.CreateBox(
-        'wallW',
-        { width: wallThickness, height: 3, depth: this.arenaConfig.poolLength },
-        this.scene
-      ),
-    ];
-
-    walls[0].position = new BABYLON.Vector3(0, -1.5, this.arenaConfig.poolLength / 2);
-    walls[1].position = new BABYLON.Vector3(0, -1.5, -this.arenaConfig.poolLength / 2);
-    walls[2].position = new BABYLON.Vector3(this.arenaConfig.poolWidth / 2, -1.5, 0);
-    walls[3].position = new BABYLON.Vector3(-this.arenaConfig.poolWidth / 2, -1.5, 0);
-
-    walls.forEach((wall) => {
-      wall.material = poolMaterial;
-      wall.parent = this.arenaMesh;
-    });
-
-    // Arena building (hall)
-    const hallMesh = BABYLON.MeshBuilder.CreateBox(
-      'hall',
-      {
-        width: 100,
-        height: this.arenaConfig.arenaHeight,
-        depth: 140,
-      },
-      this.scene
-    );
-    hallMesh.position.y = this.arenaConfig.arenaHeight / 2 - 2;
-    hallMesh.isVisible = false; // Use as invisible container
-    hallMesh.parent = this.arenaMesh;
-
-    // Deck around pool
-    const deckMaterial = new BABYLON.StandardMaterial('deckMaterial', this.scene);
-    (deckMaterial as any).diffuseColor = new BABYLON.Color3(0.85, 0.85, 0.85);
-    deckMaterial.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-
-    const deck = BABYLON.MeshBuilder.CreateGround(
-      'deck',
-      { width: 80, height: 100, subdivisions: 2 },
-      this.scene
-    );
-    deck.position.y = 0;
-    deck.material = deckMaterial;
-    deck.parent = this.arenaMesh;
-
-    // Add lane divider ropes (realistic competition pool feature)
-    for (let lane = 1; lane < this.arenaConfig.laneCount; lane++) {
-      const ropePosX = -this.arenaConfig.poolWidth / 2 + (lane * this.arenaConfig.poolWidth) / this.arenaConfig.laneCount;
-      const rope = BABYLON.MeshBuilder.CreateTube(
-        `laneRope${lane}`,
-        {
-          path: [
-            new BABYLON.Vector3(ropePosX, 0.05, -this.arenaConfig.poolLength / 2),
-            new BABYLON.Vector3(ropePosX, 0.05, this.arenaConfig.poolLength / 2),
-          ],
-          radius: 0.03,
-          updatable: false,
-        },
-        this.scene
-      );
-      const ropeMat = new BABYLON.StandardMaterial(`ropeMat${lane}`, this.scene);
-      // Alternate colors for visibility
-      if (lane % 2 === 0) {
-        (ropeMat as any).diffuseColor = new BABYLON.Color3(1, 0, 0); // Red
-      } else {
-        (ropeMat as any).diffuseColor = new BABYLON.Color3(1, 1, 1); // White
+      // Underwater volume: transition fog/clearColor based on active camera Y
+      if (this.underwaterFX && this.arenaRoot) {
+        const cam  = this.arenaRoot.getScene().activeCamera;
+        const camY = cam ? (cam as BABYLON.ArcRotateCamera).position.y : 10;
+        this.underwaterFX.update(this.arenaRoot.getScene(), camY, dt);
       }
-      rope.material = ropeMat;
-      rope.parent = this.arenaMesh;
-    }
 
-    // Starting blocks (8 lanes)
-    for (let lane = 0; lane < this.arenaConfig.laneCount; lane++) {
-      const blockX = -this.arenaConfig.poolWidth / 2 + (lane * this.arenaConfig.poolWidth) / (this.arenaConfig.laneCount - 1);
-      const blockMaterial = new BABYLON.StandardMaterial(`blockMat${lane}`, this.scene);
-      (blockMaterial as any).diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-
-      const block = BABYLON.MeshBuilder.CreateBox(
-        `startBlock${lane}`,
-        { width: 0.8, height: 0.8, depth: 0.6 },
-        this.scene
-      );
-      block.position = new BABYLON.Vector3(blockX, 0.4, -this.arenaConfig.poolLength / 2 - 1);
-      block.material = blockMaterial;
-      block.parent = this.arenaMesh;
-      this.startingBlocks.push(block);
-    }
-
-    // Add spectator bleachers on both sides
-    this.createBleachers();
-
-    logger.log('Arena created');
-  }
-
-  /**
-   * Create spectator seating (bleachers) for realistic competition pool
-   */
-  private createBleachers(): void {
-    if (!this.scene || !this.arenaMesh) return;
-
-    const bleacherMaterial = new BABYLON.StandardMaterial('bleacherMat', this.scene);
-    (bleacherMaterial as any).diffuseColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-    bleacherMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-
-    // Side bleachers (left and right of pool)
-    const sidePositions = [
-      { x: -this.arenaConfig.poolWidth / 2 - 12, side: 'left' },
-      { x: this.arenaConfig.poolWidth / 2 + 12, side: 'right' },
-    ];
-
-    sidePositions.forEach((pos) => {
-      // Create rows of bleacher seats
-      for (let row = 0; row < 8; row++) {
-        const rowHeight = row * 0.5 + 1;
-        const rowLength = this.arenaConfig.poolLength + 10;
-
-        const bleacher = BABYLON.MeshBuilder.CreateBox(
-          `bleacher_${pos.side}_${row}`,
-          { width: 1.5, height: 0.3, depth: rowLength },
-          this.scene
-        );
-        bleacher.position = new BABYLON.Vector3(pos.x, rowHeight, 0);
-        bleacher.material = bleacherMaterial;
-        bleacher.parent = this.arenaMesh;
+      if (this.isBroadcastMode && this.broadcastCamera) {
+        this.broadcastCamera.update(dt);
       }
     });
 
-    // End bleachers (north and south of pool)
-    const endPositions = [
-      { z: -this.arenaConfig.poolLength / 2 - 10, side: 'north' },
-      { z: this.arenaConfig.poolLength / 2 + 10, side: 'south' },
-    ];
+    // ── 19. Start render loop ────────────────────────────────────────────
+    this.arenaRoot.setFrameSkipInterval(this.qualityMgr.getFrameSkipInterval());
+    this.arenaRoot.startRenderLoop();
 
-    endPositions.forEach((pos) => {
-      for (let row = 0; row < 6; row++) {
-        const rowHeight = row * 0.5 + 1;
-
-        const bleacher = BABYLON.MeshBuilder.CreateBox(
-          `bleacher_${pos.side}_${row}`,
-          { width: this.arenaConfig.poolWidth + 25, height: 0.3, depth: 1.5 },
-          this.scene
-        );
-        bleacher.position = new BABYLON.Vector3(0, rowHeight, pos.z);
-        bleacher.material = bleacherMaterial;
-        bleacher.parent = this.arenaMesh;
-      }
-    });
-
-    logger.log('Bleachers created for realistic spectator seating');
+    logger.log('[ArenaManager] Initialized successfully');
   }
 
-  /**
-   * Create lighting system
-   */
-  private createLighting(): void {
-    if (!this.scene) return;
+  // ============================================================================
+  // THEME & LIGHTING
+  // ============================================================================
 
-    // Hemispheric light (ambient)
-    const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 1, 0), this.scene);
-    hemiLight.intensity = 0.7;
-    hemiLight.specular = new BABYLON.Color3(1, 0.9, 0.7);
-    this.lights.push(hemiLight);
-
-    // Point light for intensity
-    const pointLight = new BABYLON.PointLight('pointLight', new BABYLON.Vector3(0, 30, 0), this.scene);
-    pointLight.range = 100;
-    pointLight.intensity = 0.6;
-    this.lights.push(pointLight);
-
-    // Fog (subtle)
-    this.scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
-    this.scene.fogColor = BABYLON.Color3.FromHexString('#1a1a1f');
-    this.scene.fogDensity = 0.005;
-
-    logger.log('Lighting created');
-  }
-
-  /**
-   * Create camera views
-   */
-  private createCameras(): void {
-    if (!this.scene || !this.canvas) return;
-
-    const views: Array<[CameraView, BABYLON.Vector3, BABYLON.Vector3]> = [
-      ['DEFAULT', new BABYLON.Vector3(0, 20, -40), new BABYLON.Vector3(0, 5, 0)],
-      ['AERIAL', new BABYLON.Vector3(0, 60, 0), new BABYLON.Vector3(0, 0, 0)],
-      ['STARTING_BLOCK', new BABYLON.Vector3(0, 3, -30), new BABYLON.Vector3(0, 0, -10)],
-      ['RACING', new BABYLON.Vector3(0, 10, -20), new BABYLON.Vector3(0, 5, 0)],
-    ];
-
-    views.forEach(([name, position, target]) => {
-      const camera = new BABYLON.ArcRotateCamera(
-        `camera_${name}`,
-        Math.PI,
-        Math.PI / 2.5,
-        60,
-        target,
-        this.scene!
-      );
-
-      camera.attachControl(this.canvas!, true);
-      camera.wheelPrecision = 20;
-      // Use correct ArcRotateCamera sensitivity property names
-      camera.angularSensibilityX = 1000;
-      camera.angularSensibilityY = 1000;
-      camera.inertia = 0.7;
-      camera.lowerRadiusLimit = 10;
-      camera.upperRadiusLimit = 100;
-
-      this.cameras.set(name, camera);
-    });
-
-    // Set default camera
-    this.setCamera('DEFAULT');
-  }
-
-  /**
-   * Set active camera view
-   */
-  public setCamera(view: CameraView): void {
-    if (!this.scene) return;
-
-    const camera = this.cameras.get(view);
-    if (!camera) {
-      logger.warn('Camera view not found:', view);
-      return;
-    }
-
-    this.scene.activeCamera = camera;
-    this.currentCamera = camera;
-    logger.log('Camera set to:', view);
-  }
-
-  /**
-   * Create water material
-   */
-  private createWater(): void {
-    if (!this.scene || !this.poolMesh) return;
-
-    // Water plane
-    const waterPlane = BABYLON.MeshBuilder.CreateGround(
-      'water',
-      {
-        width: this.arenaConfig.poolWidth,
-        height: this.arenaConfig.poolLength,
-        subdivisions: this.qualityTier === 'HIGH' ? 64 : 32,
-      },
-      this.scene
-    );
-    waterPlane.position.y = 0.1;
-
-    // Water material
-    const waterMaterial = new BABYLON.StandardMaterial('waterMaterial', this.scene);
-    (waterMaterial as any).diffuseColor = new BABYLON.Color3(0.0, 0.4, 0.8);
-    waterMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
-    waterMaterial.specularPower = 64;
-    waterMaterial.alpha = 0.9;
-
-    waterPlane.material = waterMaterial;
-    this.waterMesh = waterPlane;
-    this.waterMaterial = waterMaterial;
-
-    logger.log('Water created');
-  }
-
-  /**
-   * Create scoreboard display
-   */
-  private createScoreboard(): void {
-    if (!this.scene) return;
-
-    const scoreboard = BABYLON.MeshBuilder.CreateBox(
-      'scoreboard',
-      { width: 24, height: 12, depth: 1 },
-      this.scene
-    );
-
-    scoreboard.position = new BABYLON.Vector3(0, 15, this.arenaConfig.poolLength / 2 + 5);
-
-    // Scoreboard material with dynamic texture
-    const dynamicTexture = new BABYLON.DynamicTexture('scoreboardTexture', 1024, this.scene);
-    const ctx = dynamicTexture.getContext() as any as CanvasRenderingContext2D;
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, 1024, 512);
-
-    dynamicTexture.update();
-
-    const scoreboardMaterial = new BABYLON.StandardMaterial('scoreboardMaterial', this.scene);
-    scoreboardMaterial.emissiveTexture = dynamicTexture;
-    scoreboardMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
-
-    scoreboard.material = scoreboardMaterial;
-    this.scoreboard = scoreboard;
-
-    logger.log('Scoreboard created');
-  }
-
-  /**
-   * Update scoreboard display
-   */
-  public updateScoreboard(leaderboard: Array<{ rank: number; name: string; time: number }>): void {
-    if (!this.scoreboard || !this.scoreboard.material) return;
-
-    const material = this.scoreboard.material as BABYLON.StandardMaterial;
-    const texture = material.emissiveTexture as BABYLON.DynamicTexture;
-
-    if (!texture) return;
-
-    const ctx = texture.getContext() as any as CanvasRenderingContext2D;
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, 1024, 512);
-
-    // Draw leaderboard
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 48px Arial';
-    ctx.textAlign = 'left';
-
-    leaderboard.slice(0, 3).forEach((entry, index) => {
-      const y = 80 + index * 120;
-      const color = ['#FFD700', '#C0C0C0', '#CD7F32'][index]; // Gold, Silver, Bronze
-
-      ctx.fillStyle = color;
-      ctx.fillText(`${entry.rank}. ${entry.name}`, 50, y);
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '36px Arial';
-      ctx.fillText(entry.time.toFixed(2) + 's', 50, y + 60);
-    });
-
-    texture.update();
-  }
-
-  /**
-   * Set theme (color scheme)
-   */
   public setTheme(theme: PoolTheme): void {
     this.arenaConfig.theme = theme;
-
-    if (!this.poolMaterial) return;
-
-    const themes: Record<PoolTheme, BABYLON.Color3> = {
-      OLYMPIC: new BABYLON.Color3(0.0, 0.3, 0.7),
-      CHAMPIONSHIP: new BABYLON.Color3(0.1, 0.2, 0.5),
-      NEON: new BABYLON.Color3(0.0, 1.0, 1.0),
-      SUNSET: new BABYLON.Color3(1.0, 0.5, 0.0),
-      CUSTOM: new BABYLON.Color3(0.5, 0.5, 0.5),
-    };
-
-    if (this.poolMaterial) {
-      (this.poolMaterial as any).diffuseColor = themes[theme];
-    }
-
-    logger.log('Theme set to:', theme);
+    this._applyThemeInternal(theme);
   }
 
-  /**
-   * Set time of day (lighting variation)
-   */
+  private _applyThemeInternal(theme: PoolTheme): void {
+    if (!this.atmosphere || !this.arenaRoot) return;
+
+    const scene      = this.arenaRoot.getScene();
+    const waterColor = this.atmosphere.applyTheme(scene, theme);
+
+    this.poolWater?.setColor(waterColor);
+    this.matLib?.applyTheme(theme);
+    this.poolStructure?.setPoolColor(waterColor); // no-op in Phase 3; kept for safety
+
+    // Resync above-water fog baseline so UnderwaterEffects restores correctly
+    this.underwaterFX?.syncAboveWaterState(scene);
+  }
+
   public setTimeOfDay(time: TimeOfDay): void {
     this.arenaConfig.timeOfDay = time;
-
-    if (this.lights.length === 0) return;
-
-    const lightConfigs: Record<TimeOfDay, { color: BABYLON.Color3; intensity: number }> = {
-      MORNING: { color: new BABYLON.Color3(1, 0.9, 0.7), intensity: 0.8 },
-      AFTERNOON: { color: new BABYLON.Color3(1, 1, 1), intensity: 1.0 },
-      EVENING: { color: new BABYLON.Color3(1, 0.5, 0.3), intensity: 0.6 },
-      NIGHT: { color: new BABYLON.Color3(0.2, 0.2, 0.5), intensity: 0.2 },
-    };
-
-    const config = lightConfigs[time];
-    if (this.lights[0] instanceof BABYLON.HemisphericLight) {
-      this.lights[0].specular = config.color;
-    }
-    this.lights[0].intensity = config.intensity;
-
-    logger.log('Time of day set to:', time);
+    this.lighting?.applyTimeOfDay(time);
   }
 
   // ============================================================================
-  // RENDERING
+  // CAMERAS
   // ============================================================================
 
-  /**
-   * Start render loop
-   */
-  private startRenderLoop(): void {
-    if (!this.engine) return;
-
-    this.isRendering = true;
-    let frameCount = 0;
-    let lastFrameTime = performance.now();
-
-    const renderLoop = () => {
-      frameCount++;
-      const currentTime = performance.now();
-      const deltaTime = currentTime - lastFrameTime;
-      lastFrameTime = currentTime;
-
-      // Frame-skip for low-end mode: skip odd frames when frameSkipInterval = 1
-      if (this.frameSkipInterval > 0 && frameCount % (this.frameSkipInterval + 1) !== 0) {
-        this.renderLoopId = requestAnimationFrame(renderLoop);
-        return;
-      }
-
-      if (this.scene) {
-        // Update water animation (simple)
-        if (this.waterMesh && frameCount % 2 === 0) {
-          this.waterMesh.rotation.z += 0.001;
-        }
-
-        // Update broadcast camera if active
-        if (this.isBroadcastMode && this.broadcastCamera) {
-          this.broadcastCamera.update(deltaTime);
-        }
-
-        this.scene.render();
-      }
-
-      this.renderLoopId = requestAnimationFrame(renderLoop);
-    };
-
-    renderLoop();
-    logger.log('Render loop started');
-  }
-
-  /**
-   * Stop render loop
-   */
-  public stopRenderLoop(): void {
-    if (this.renderLoopId !== null) {
-      cancelAnimationFrame(this.renderLoopId);
-      this.isRendering = false;
-      this.renderLoopId = null;
-      logger.log('Render loop stopped');
-    }
-  }
-
-  /**
-   * Resize canvas when window resizes
-   */
-  public resize(): void {
-    if (this.engine) {
-      this.engine.resize();
-    }
+  public setCamera(view: CameraView): void {
+    if (!this.cameraSupport || !this.arenaRoot || !this.canvas) return;
+    this.cameraSupport.setCamera(view, this.arenaRoot.getScene(), this.canvas);
   }
 
   // ============================================================================
-  // BROADCAST CAMERA CONTROL
+  // SCOREBOARD
   // ============================================================================
 
-  /**
-   * Enable broadcast camera mode (for races)
-   */
-  public enableBroadcastMode(): void {
-    if (!this.broadcastCamera || !this.scene) return;
-
-    this.isBroadcastMode = true;
-    this.scene.activeCamera = this.broadcastCamera['currentCamera'];
-    logger.log('Broadcast camera mode enabled');
-  }
-
-  /**
-   * Disable broadcast camera mode (return to manual control)
-   */
-  public disableBroadcastMode(): void {
-    if (!this.scene) return;
-
-    this.isBroadcastMode = false;
-    this.scene.activeCamera = this.currentCamera;
-    logger.log('Broadcast camera mode disabled');
-  }
-
-  /**
-   * Update broadcast camera with race state
-   */
-  public updateBroadcastCameraRace(
-    raceState: RaceState,
-    playerSwimmer?: ISwimmerRaceState
+  public updateScoreboard(
+    leaderboard: Array<{ rank: number; name: string; time: number }>,
   ): void {
-    if (!this.broadcastCamera) return;
-
-    this.broadcastCamera.onRaceStateChange(raceState, playerSwimmer);
+    this.architecture?.updateScoreboard(leaderboard);
   }
 
-  /**
-   * Notify broadcast camera of race progress
-   */
+  // ============================================================================
+  // BROADCAST CAMERA
+  // ============================================================================
+
+  public enableBroadcastMode(): void {
+    if (!this.broadcastCamera || !this.arenaRoot) return;
+    this.isBroadcastMode = true;
+    // Let the broadcast camera set scene.activeCamera on next update tick
+    logger.log('[ArenaManager] Broadcast mode enabled');
+  }
+
+  public disableBroadcastMode(): void {
+    if (!this.arenaRoot || !this.cameraSupport || !this.canvas) return;
+    this.isBroadcastMode = false;
+    // Restore the static camera that was active before broadcast
+    this.cameraSupport.setCamera(
+      this.cameraSupport.getCurrentView(),
+      this.arenaRoot.getScene(),
+      this.canvas,
+    );
+    logger.log('[ArenaManager] Broadcast mode disabled');
+  }
+
+  public updateBroadcastCameraRace(
+    raceState:      RaceState,
+    playerSwimmer?: ISwimmerRaceState,
+  ): void {
+    this.broadcastCamera?.onRaceStateChange(raceState, playerSwimmer);
+  }
+
   public notifyBroadcastCameraProgress(data: {
     leader: string;
     leaderPosition: number;
     time: number;
   }): void {
-    if (!this.broadcastCamera) return;
-
-    this.broadcastCamera.onRaceProgress(data);
+    this.broadcastCamera?.onRaceProgress(data);
   }
 
-  /**
-   * Notify broadcast camera of swimmer finish
-   */
   public notifyBroadcastCameraFinish(data: {
     name: string;
     rank: number;
     time: number;
   }): void {
-    if (!this.broadcastCamera) return;
-
-    this.broadcastCamera.onSwimmerFinished(data);
+    this.broadcastCamera?.onSwimmerFinished(data);
   }
 
-  /**
-   * Get broadcast camera instance
-   */
   public getBroadcastCamera(): BroadcastCamera | null {
     return this.broadcastCamera;
   }
 
   // ============================================================================
-  // CLEANUP
+  // QUALITY PRESET (runtime)
   // ============================================================================
 
-  /**
-   * Dispose of all resources
-   */
-  public dispose(): void {
-    this.stopRenderLoop();
+  public setQualityPreset(preset: 'high' | 'medium' | 'low'): void {
+    if (!this.qualityMgr || !this.arenaRoot) return;
 
-    if (this.broadcastCamera) {
-      this.broadcastCamera.dispose();
-    }
+    const engine = this.arenaRoot.getEngine();
+    const scene  = this.arenaRoot.getScene();
 
-    if (this.scene) {
-      this.scene.dispose();
-    }
+    const skipInterval = this.qualityMgr.applyPreset(preset, engine, scene);
+    this.arenaRoot.setFrameSkipInterval(skipInterval);
 
-    if (this.engine) {
-      this.engine.dispose();
-    }
+    const qt = this.qualityMgr.getQualityTier();
+    this.lighting?.applyQualityPreset(qt, scene);
 
-    logger.log('ArenaManager disposed');
+    // Rebuild post-processing for the new tier (FXAA / bloom on / off)
+    const cameras = this.cameraSupport?.getCameras() ?? [];
+    this.postProcess?.applyQualityPreset(qt, scene, cameras);
+
+    logger.log(`[ArenaManager] Quality preset → ${preset}`);
+  }
+
+  // ============================================================================
+  // RENDER LOOP
+  // ============================================================================
+
+  public stopRenderLoop(): void {
+    this.arenaRoot?.stopRenderLoop();
+  }
+
+  public resize(): void {
+    this.arenaRoot?.resize();
+  }
+
+  public isRenderingActive(): boolean {
+    return this.arenaRoot?.isRenderingActive() ?? false;
   }
 
   // ============================================================================
   // GETTERS
   // ============================================================================
 
-  public getScene(): BABYLON.Scene | null {
-    return this.scene;
-  }
-
-  public getEngine(): BABYLON.Engine | null {
-    return this.engine;
-  }
-
-  public getCanvas(): HTMLCanvasElement | null {
-    return this.canvas;
-  }
-
-  public getArenaConfig(): IArenaConfig {
-    return { ...this.arenaConfig };
-  }
-
+  public getScene():       BABYLON.Scene        | null { return this.arenaRoot?.getScene()  ?? null; }
+  public getEngine():      BABYLON.Engine       | null { return this.arenaRoot?.getEngine() ?? null; }
+  public getCanvas():      HTMLCanvasElement    | null { return this.canvas; }
+  public getArenaConfig(): IArenaConfig               { return { ...this.arenaConfig }; }
   public getQualityTier(): 'LOW' | 'MEDIUM' | 'HIGH' {
-    return this.qualityTier;
+    return this.qualityMgr?.getQualityTier() ?? 'MEDIUM';
   }
 
-  /**
-   * Apply a quality preset at runtime (Phase 6 adaptive quality).
-   *
-   * high   — full resolution, all effects on
-   * medium — default; hardware scaling 1.0
-   * low    — half resolution via hardware scaling, frame-skip every other frame,
-   *           shadows and particles disabled
-   */
-  public setQualityPreset(preset: 'high' | 'medium' | 'low'): void {
-    if (!this.engine || !this.scene) return;
+  // ============================================================================
+  // DISPOSE
+  // ============================================================================
 
-    switch (preset) {
-      case 'high':
-        this.qualityTier = 'HIGH';
-        this.engine.setHardwareScalingLevel(1);
-        this.frameSkipInterval = 0;
-        this.scene.shadowsEnabled   = true;
-        this.scene.particlesEnabled = true;
-        break;
-
-      case 'medium':
-        this.qualityTier = 'MEDIUM';
-        this.engine.setHardwareScalingLevel(1);
-        this.frameSkipInterval = 0;
-        this.scene.shadowsEnabled   = true;
-        this.scene.particlesEnabled = true;
-        break;
-
-      case 'low':
-        this.qualityTier = 'LOW';
-        this.engine.setHardwareScalingLevel(2); // halve resolution — biggest mobile GPU win
-        this.frameSkipInterval = 1;             // render every other frame (~30fps)
-        this.scene.shadowsEnabled   = false;
-        this.scene.particlesEnabled = false;
-        break;
-    }
-
-    logger.log(`[ArenaManager] Quality preset set to: ${preset}`);
-  }
-
-  public isRenderingActive(): boolean {
-    return this.isRendering;
+  public dispose(): void {
+    this.broadcastCamera?.dispose();
+    this.postProcess?.dispose();
+    this.cameraSupport?.dispose();
+    this.underwaterFX?.dispose();
+    this.lighting?.dispose();
+    this.architecture?.dispose();
+    this.startingBlocks?.dispose();
+    this.laneSystem?.dispose();
+    this.poolDeck?.dispose();
+    this.poolWater?.dispose();
+    this.poolStructure?.dispose();
+    this.matLib?.dispose();          // after all geometry modules
+    this.atmosphere?.dispose();
+    this.arenaRoot?.dispose();
+    logger.log('[ArenaManager] Disposed');
   }
 }
 
