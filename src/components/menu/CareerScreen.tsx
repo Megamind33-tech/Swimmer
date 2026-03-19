@@ -277,9 +277,39 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
 
         {/* Career Ladder */}
         <div className="space-y-4">
-          <h2 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface mb-6 ml-2">
-            Tier Challenges
-          </h2>
+          <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
+            <h2 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface ml-2">
+              Tier Challenges
+            </h2>
+            {/* Tier quick-select — compact game selector buttons */}
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+              {CareerTiers.map((tier) => {
+                const isActive = expandedTier === tier.tier;
+                const isCompleted = tier.tier < currentTier;
+                const isCurrent = tier.tier === currentTier;
+                return (
+                  <button
+                    key={tier.tier}
+                    onClick={() => setExpandedTier(isActive ? -1 : tier.tier)}
+                    className={`relative flex-shrink-0 px-3 py-2 rounded-xl border font-headline font-black italic slanted uppercase text-[9px] tracking-widest transition-all duration-300 overflow-hidden ${
+                      isActive
+                        ? 'bg-primary/20 border-primary/50 text-primary text-glow shadow-[0_0_14px_rgba(129,236,255,0.25)]'
+                        : isCompleted
+                        ? 'bg-secondary/10 border-secondary/30 text-secondary hover:border-secondary/50'
+                        : isCurrent
+                        ? 'bg-primary/10 border-primary/20 text-primary hover:border-primary/50'
+                        : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/15 hover:text-on-surface'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1">
+                      {isCompleted ? '✦' : isCurrent ? '▶' : '◈'} T{tier.tier}
+                    </span>
+                    {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           
           {CareerTiers.map((tier, idx) => {
             const isExpanded = expandedTier === tier.tier;
@@ -347,7 +377,7 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
                             ? 'bg-primary/10 border-primary/40'
                             : event.status === 'COMPLETED'
                             ? 'bg-secondary/10 border-secondary/20 opacity-80'
-                            : 'bg-white/5 border-white/5 opacity-40 grayscale pointer-events-none'
+                            : 'bg-white/5 border-white/5 opacity-50 grayscale hover:opacity-70 hover:border-white/15'
                         }`}
                       >
                         <div className="flex items-center gap-4">
