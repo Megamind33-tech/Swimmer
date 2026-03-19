@@ -1116,8 +1116,8 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
       </div>
 
       <div className="hydro-page-content p-6 max-w-7xl mx-auto w-full space-y-8 pb-12 relative z-10">
-        {/* Tab Navigation */}
-        {!activeSubPage && (
+        {/* Navigation — main tabs or sub-page module selector */}
+        {!activeSubPage ? (
           <div className="flex gap-2 flex-wrap items-center">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -1126,14 +1126,38 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`relative px-6 py-3 rounded-xl font-headline font-black italic slanted uppercase text-[11px] tracking-wider transition-all duration-300 overflow-hidden border ${
-                    isActive 
-                      ? 'bg-primary/20 border-primary/40 text-primary text-glow shadow-[0_0_20px_rgba(129,236,255,0.2)]' 
+                    isActive
+                      ? 'bg-primary/20 border-primary/40 text-primary text-glow shadow-[0_0_20px_rgba(129,236,255,0.2)]'
                       : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/10 hover:text-on-surface'
                   }`}
                 >
                   <div className="flex items-center gap-2 relative z-10">
                     <GameIcon name={tab.icon} size={18} />
                     {tab.label}
+                  </div>
+                  {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          /* Sub-page module selector — scrollable horizontal command rail */
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none items-center">
+            {managementRoutes.map((route) => {
+              const isActive = activeSubPage === route.key;
+              return (
+                <button
+                  key={route.key}
+                  onClick={() => setActiveSubPage(route.key)}
+                  className={`relative flex-shrink-0 px-4 py-2.5 rounded-xl font-headline font-black italic slanted uppercase text-[10px] tracking-wider transition-all duration-300 overflow-hidden border ${
+                    isActive
+                      ? 'bg-primary/20 border-primary/50 text-primary text-glow shadow-[0_0_16px_rgba(129,236,255,0.25)]'
+                      : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-primary/20 hover:text-on-surface hover:bg-white/10'
+                  }`}
+                >
+                  <div className="relative z-10 flex items-center gap-1.5">
+                    {isActive && <span className="h-1 w-1 rounded-full bg-primary shadow-[0_0_6px_rgba(129,236,255,1)]" />}
+                    {route.title}
                   </div>
                   {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />}
                 </button>
