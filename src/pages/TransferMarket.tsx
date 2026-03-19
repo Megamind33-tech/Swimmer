@@ -125,6 +125,9 @@ const iconButtonStyle: React.CSSProperties = {
   boxShadow: swim26Boundary.elevation.level1,
 };
 
+// 30% reduction scale factor
+const S = 0.7;
+
 export function TransferMarket() {
   const [mode, setMode] = useState<TransferMode>('ITEM_TRANSFER');
   const [activeCardId, setActiveCardId] = useState<string>(exchangeCards[0]?.id ?? '');
@@ -150,11 +153,10 @@ export function TransferMarket() {
       style={{
         position: 'absolute',
         inset: 0,
-        minHeight: '100%',
+        overflowY: 'auto',
         background: `radial-gradient(circle at 18% 18%, rgba(74, 201, 214, 0.10), transparent 22%), radial-gradient(circle at 78% 14%, rgba(214, 180, 90, 0.10), transparent 18%), linear-gradient(180deg, #09161F 0%, ${swim26Color.bg.app} 54%, #061018 100%)`,
         color: swim26Color.text.primary,
         fontFamily: 'Inter, system-ui, sans-serif',
-        overflow: 'hidden',
       }}
     >
       <div
@@ -171,10 +173,10 @@ export function TransferMarket() {
         style={{
           position: 'relative',
           zIndex: 1,
-          height: '100%',
+          minHeight: '100%',
           padding: `${swim26Layout.safe.top}px ${swim26Layout.safe.right}px ${swim26Layout.safe.bottom}px ${swim26Layout.safe.left}px`,
           display: 'grid',
-          gridTemplateRows: `${swim26Size.topBar.height}px minmax(0, 1fr) 78px`,
+          gridTemplateRows: `${swim26Size.topBar.height}px auto auto`,
           gap: swim26Space.md,
           maxWidth: swim26Layout.grid.maxWidth,
           margin: '0 auto',
@@ -227,10 +229,10 @@ export function TransferMarket() {
 
         <div
           style={{
-            minHeight: 0,
             display: 'grid',
-            gridTemplateColumns: 'minmax(240px, 0.23fr) minmax(0, 0.47fr) minmax(240px, 0.30fr)',
+            gridTemplateColumns: 'minmax(200px, 0.23fr) minmax(0, 0.47fr) minmax(200px, 0.30fr)',
             gap: swim26Space.md,
+            alignItems: 'start',
           }}
         >
           <aside
@@ -239,78 +241,77 @@ export function TransferMarket() {
               background: 'linear-gradient(180deg, rgba(20, 38, 54, 0.96) 0%, rgba(13, 27, 39, 0.94) 100%)',
               display: 'grid',
               gridTemplateRows: 'auto auto 1fr auto',
-              gap: swim26Space.md,
-              padding: swim26Space.lg,
-              minHeight: 0,
+              gap: Math.round(swim26Space.md * S),
+              padding: Math.round(swim26Space.lg * S),
             }}
           >
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: '76px 1fr',
-                gap: swim26Space.md,
+                gridTemplateColumns: `${Math.round(76 * S)}px 1fr`,
+                gap: Math.round(swim26Space.md * S),
                 alignItems: 'center',
-                paddingBottom: swim26Space.md,
+                paddingBottom: Math.round(swim26Space.md * S),
                 borderBottom: `${swim26Boundary.border.thin}px solid rgba(255,255,255,0.08)`,
               }}
             >
               <div
                 style={{
-                  width: 76,
-                  height: 96,
-                  borderRadius: 18,
+                  width: Math.round(76 * S),
+                  height: Math.round(96 * S),
+                  borderRadius: 13,
                   border: `${swim26Boundary.border.strong}px solid rgba(74, 201, 214, 0.26)`,
                   background: 'linear-gradient(180deg, rgba(74, 201, 214, 0.14), rgba(13, 27, 39, 0.30))',
                   boxShadow: swim26Boundary.elevation.level2,
                   display: 'grid',
                   placeItems: 'center',
-                  fontSize: 30,
+                  fontSize: Math.round(30 * S),
                 }}
               >
                 🧑‍💼
               </div>
               <div>
-                <div style={{ color: swim26Color.featured.premium, fontSize: swim26Type.metadata.fontSize, fontWeight: 700, letterSpacing: '0.08em' }}>
+                <div style={{ color: swim26Color.featured.premium, fontSize: Math.round(swim26Type.metadata.fontSize * S), fontWeight: 700, letterSpacing: '0.08em' }}>
                   ECONOMY MANAGER
                 </div>
-                <div style={{ fontSize: swim26Type.sectionTitle.fontSize, lineHeight: '22px', fontWeight: 700, marginTop: 4 }}>Lena Mercer</div>
-                <div style={{ color: swim26Color.text.secondary, fontSize: swim26Type.helper.fontSize, marginTop: 4 }}>Transfer Efficiency Lead</div>
+                <div style={{ fontSize: Math.round(swim26Type.sectionTitle.fontSize * S), lineHeight: '16px', fontWeight: 700, marginTop: 3 }}>Lena Mercer</div>
+                <div style={{ color: swim26Color.text.secondary, fontSize: Math.round(swim26Type.helper.fontSize * S), marginTop: 3 }}>Transfer Efficiency Lead</div>
               </div>
             </div>
 
-            <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: swim26Space.md }}>
-              <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.text.secondary, letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: Math.round(swim26Space.md * S) }}>
+              <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: swim26Color.text.secondary, letterSpacing: '0.06em', marginBottom: 6 }}>
                 HELP PANEL
               </div>
-              <div style={{ fontSize: swim26Type.cardTitle.fontSize, lineHeight: '22px', fontWeight: 600, marginBottom: 10 }}>
+              <div style={{ fontSize: Math.round(swim26Type.cardTitle.fontSize * S), lineHeight: '16px', fontWeight: 600, marginBottom: 7 }}>
                 Choose a route, confirm the required athlete set, then compare the output value before locking the conversion.
               </div>
-              <div style={{ fontSize: 13, lineHeight: '18px', color: swim26Color.text.secondary }}>
+              <div style={{ fontSize: Math.round(13 * S), lineHeight: '13px', color: swim26Color.text.secondary }}>
                 Main rail cards show the exact input stack, conversion direction, result, cap, timer, and ratings tier so the trade is understandable in seconds.
               </div>
             </div>
 
-            <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: swim26Space.md, display: 'grid', gap: swim26Space.sm, alignContent: 'start' }}>
+            <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: Math.round(swim26Space.md * S), display: 'grid', gap: Math.round(swim26Space.sm * S), alignContent: 'start' }}>
               {[
                 { label: 'Budget Reserve', value: '182,000', accent: swim26Color.feedback.success },
                 { label: 'Open Conversions', value: '03', accent: swim26Color.accent.primary },
                 { label: 'Best Output', value: 'Elite Scout', accent: swim26Color.featured.premium },
               ].map((stat) => (
-                <div key={stat.label} style={{ display: 'grid', gap: 2, paddingBottom: swim26Space.sm, borderBottom: `${swim26Boundary.border.thin}px solid rgba(255,255,255,0.06)` }}>
-                  <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary }}>{stat.label}</div>
-                  <div style={{ fontSize: 22, lineHeight: '24px', fontWeight: 800, color: stat.accent }}>{stat.value}</div>
+                <div key={stat.label} style={{ display: 'grid', gap: 2, paddingBottom: Math.round(swim26Space.sm * S), borderBottom: `${swim26Boundary.border.thin}px solid rgba(255,255,255,0.06)` }}>
+                  <div style={{ fontSize: Math.round(swim26Type.helper.fontSize * S), color: swim26Color.text.secondary }}>{stat.label}</div>
+                  <div style={{ fontSize: Math.round(22 * S), lineHeight: '17px', fontWeight: 800, color: stat.accent }}>{stat.value}</div>
                 </div>
               ))}
             </div>
 
             <button
               style={{
-                minHeight: swim26Size.buttons.standard.height,
+                minHeight: Math.round(swim26Size.buttons.standard.height * S),
                 borderRadius: swim26Boundary.radius.md,
                 border: `${swim26Boundary.border.thin}px solid rgba(74, 201, 214, 0.28)`,
                 background: 'rgba(74, 201, 214, 0.12)',
                 color: swim26Color.accent.primary,
-                fontSize: swim26Type.buttonLabel.fontSize,
+                fontSize: Math.round(swim26Type.buttonLabel.fontSize * S),
                 fontWeight: swim26Type.buttonLabel.fontWeight,
                 letterSpacing: '0.02em',
                 boxShadow: swim26Boundary.elevation.level1,
@@ -320,7 +321,7 @@ export function TransferMarket() {
             </button>
           </aside>
 
-          <section style={{ minHeight: 0, overflowY: 'auto', paddingRight: 2, display: 'grid', gap: swim26Space.md, alignContent: 'start' }}>
+          <section style={{ display: 'grid', gap: Math.round(swim26Space.md * S), alignContent: 'start' }}>
             {activeCards.map((card) => {
               const active = activeCardId === card.id;
               return (
@@ -331,7 +332,7 @@ export function TransferMarket() {
                     ...panelStyle,
                     width: '100%',
                     textAlign: 'left',
-                    padding: swim26Space.lg,
+                    padding: Math.round(swim26Space.lg * S),
                     border: active ? swim26StateRules.active.border : `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
                     background: active
                       ? 'linear-gradient(180deg, rgba(28, 50, 69, 0.82) 0%, rgba(20, 38, 54, 0.90) 100%)'
@@ -339,62 +340,62 @@ export function TransferMarket() {
                     boxShadow: active ? swim26Boundary.elevation.level2 : swim26Boundary.elevation.level1,
                     display: 'grid',
                     gridTemplateRows: 'auto auto auto',
-                    gap: swim26Space.md,
+                    gap: Math.round(swim26Space.md * S),
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: swim26Space.md, alignItems: 'start', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: Math.round(swim26Space.md * S), alignItems: 'start', flexWrap: 'wrap' }}>
                     <div>
-                      <div style={{ fontSize: swim26Type.metadata.fontSize, color: card.featured ? swim26Color.featured.premium : swim26Color.accent.primary, fontWeight: 700, letterSpacing: '0.08em' }}>
+                      <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: card.featured ? swim26Color.featured.premium : swim26Color.accent.primary, fontWeight: 700, letterSpacing: '0.08em' }}>
                         {card.ratingTier}
                       </div>
-                      <div style={{ fontSize: 24, lineHeight: '28px', fontWeight: 800, marginTop: 4 }}>{card.title}</div>
-                      <div style={{ fontSize: 13, lineHeight: '18px', color: swim26Color.text.secondary, marginTop: 6, maxWidth: 520 }}>{card.subtitle}</div>
+                      <div style={{ fontSize: Math.round(24 * S), lineHeight: '20px', fontWeight: 800, marginTop: 3 }}>{card.title}</div>
+                      <div style={{ fontSize: Math.round(13 * S), lineHeight: '13px', color: swim26Color.text.secondary, marginTop: 4, maxWidth: 520 }}>{card.subtitle}</div>
                     </div>
-                    <div style={{ display: 'grid', gap: swim26Space.xs, justifyItems: 'end' }}>
-                      <span style={{ height: swim26Size.badge.height, padding: `0 ${swim26Space.sm}px`, borderRadius: swim26Boundary.radius.pill, background: 'rgba(255, 158, 87, 0.12)', color: swim26Color.feedback.warning, display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 800 }}>{card.timer}</span>
-                      <span style={{ height: swim26Size.badge.height, padding: `0 ${swim26Space.sm}px`, borderRadius: swim26Boundary.radius.pill, background: 'rgba(255,255,255,0.06)', color: swim26Color.text.secondary, display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 700 }}>{card.limit}</span>
+                    <div style={{ display: 'grid', gap: Math.round(swim26Space.xs * S), justifyItems: 'end' }}>
+                      <span style={{ height: Math.round(swim26Size.badge.height * S), padding: `0 ${Math.round(swim26Space.sm * S)}px`, borderRadius: swim26Boundary.radius.pill, background: 'rgba(255, 158, 87, 0.12)', color: swim26Color.feedback.warning, display: 'inline-flex', alignItems: 'center', fontSize: Math.round(10 * S), fontWeight: 800 }}>{card.timer}</span>
+                      <span style={{ height: Math.round(swim26Size.badge.height * S), padding: `0 ${Math.round(swim26Space.sm * S)}px`, borderRadius: swim26Boundary.radius.pill, background: 'rgba(255,255,255,0.06)', color: swim26Color.text.secondary, display: 'inline-flex', alignItems: 'center', fontSize: Math.round(10 * S), fontWeight: 700 }}>{card.limit}</span>
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 76px 1fr', gap: swim26Space.md, alignItems: 'stretch' }}>
-                    <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: swim26Space.md, display: 'grid', gap: swim26Space.sm }}>
-                      <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.text.secondary, letterSpacing: '0.06em' }}>REQUIRED INPUTS</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: `1fr ${Math.round(76 * S)}px 1fr`, gap: Math.round(swim26Space.md * S), alignItems: 'stretch' }}>
+                    <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: Math.round(swim26Space.md * S), display: 'grid', gap: Math.round(swim26Space.sm * S) }}>
+                      <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: swim26Color.text.secondary, letterSpacing: '0.06em' }}>REQUIRED INPUTS</div>
                       {card.inputItems.map((input) => (
-                        <div key={input} style={{ display: 'flex', alignItems: 'center', gap: swim26Space.sm, minHeight: 28 }}>
-                          <span style={{ width: 18, height: 18, borderRadius: 9, background: 'rgba(74, 201, 214, 0.12)', border: `1px solid rgba(74, 201, 214, 0.24)`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: swim26Color.accent.primary, fontSize: 11 }}>•</span>
-                          <span style={{ fontSize: 14, lineHeight: '18px', color: swim26Color.text.primary }}>{input}</span>
+                        <div key={input} style={{ display: 'flex', alignItems: 'center', gap: Math.round(swim26Space.sm * S), minHeight: Math.round(28 * S) }}>
+                          <span style={{ width: Math.round(18 * S), height: Math.round(18 * S), borderRadius: 9, background: 'rgba(74, 201, 214, 0.12)', border: `1px solid rgba(74, 201, 214, 0.24)`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: swim26Color.accent.primary, fontSize: Math.round(11 * S), flexShrink: 0 }}>•</span>
+                          <span style={{ fontSize: Math.round(14 * S), lineHeight: '13px', color: swim26Color.text.primary }}>{input}</span>
                         </div>
                       ))}
                     </div>
 
-                    <div style={{ display: 'grid', alignContent: 'center', justifyItems: 'center', gap: swim26Space.sm }}>
-                      <div style={{ width: 56, height: 56, borderRadius: 18, background: 'rgba(74, 201, 214, 0.12)', border: `${swim26Boundary.border.thin}px solid rgba(74, 201, 214, 0.30)`, display: 'grid', placeItems: 'center', color: swim26Color.accent.primary, fontSize: 28, boxShadow: swim26Boundary.elevation.level1 }}>→</div>
-                      <div style={{ fontSize: 11, lineHeight: '14px', color: swim26Color.text.secondary, letterSpacing: '0.06em', textAlign: 'center' }}>CONVERT</div>
+                    <div style={{ display: 'grid', alignContent: 'center', justifyItems: 'center', gap: Math.round(swim26Space.sm * S) }}>
+                      <div style={{ width: Math.round(56 * S), height: Math.round(56 * S), borderRadius: 13, background: 'rgba(74, 201, 214, 0.12)', border: `${swim26Boundary.border.thin}px solid rgba(74, 201, 214, 0.30)`, display: 'grid', placeItems: 'center', color: swim26Color.accent.primary, fontSize: Math.round(28 * S), boxShadow: swim26Boundary.elevation.level1 }}>→</div>
+                      <div style={{ fontSize: Math.round(11 * S), lineHeight: '10px', color: swim26Color.text.secondary, letterSpacing: '0.06em', textAlign: 'center' }}>CONVERT</div>
                     </div>
 
-                    <div style={{ ...panelStyle, background: 'rgba(214, 180, 90, 0.10)', border: `${swim26Boundary.border.thin}px solid rgba(214, 180, 90, 0.26)`, boxShadow: 'none', padding: swim26Space.md, display: 'grid', gap: swim26Space.sm, alignContent: 'start' }}>
-                      <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.featured.premium, letterSpacing: '0.06em' }}>RESULTING OUTPUT</div>
-                      <div style={{ fontSize: 20, lineHeight: '24px', fontWeight: 800, color: swim26Color.featured.premium }}>{card.outputItem}</div>
-                      <div style={{ fontSize: 13, lineHeight: '18px', color: swim26Color.text.secondary }}>{card.valueLabel}</div>
+                    <div style={{ ...panelStyle, background: 'rgba(214, 180, 90, 0.10)', border: `${swim26Boundary.border.thin}px solid rgba(214, 180, 90, 0.26)`, boxShadow: 'none', padding: Math.round(swim26Space.md * S), display: 'grid', gap: Math.round(swim26Space.sm * S), alignContent: 'start' }}>
+                      <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: swim26Color.featured.premium, letterSpacing: '0.06em' }}>RESULTING OUTPUT</div>
+                      <div style={{ fontSize: Math.round(20 * S), lineHeight: '17px', fontWeight: 800, color: swim26Color.featured.premium }}>{card.outputItem}</div>
+                      <div style={{ fontSize: Math.round(13 * S), lineHeight: '13px', color: swim26Color.text.secondary }}>{card.valueLabel}</div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: swim26Space.md, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: swim26Space.sm, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: Math.round(swim26Space.md * S), alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: Math.round(swim26Space.sm * S), flexWrap: 'wrap' }}>
                       {['Value locked', 'Athlete ratings verified', 'Trade path clear'].map((chip, index) => (
-                        <span key={chip} style={{ height: swim26Size.statusChip.height, padding: `0 ${swim26Space.sm}px`, borderRadius: swim26Boundary.radius.pill, background: index === 0 ? 'rgba(214, 180, 90, 0.12)' : 'rgba(255,255,255,0.06)', color: index === 0 ? swim26Color.featured.premium : swim26Color.text.secondary, display: 'inline-flex', alignItems: 'center', fontSize: 11, fontWeight: 700 }}>{chip}</span>
+                        <span key={chip} style={{ height: Math.round(swim26Size.statusChip.height * S), padding: `0 ${Math.round(swim26Space.sm * S)}px`, borderRadius: swim26Boundary.radius.pill, background: index === 0 ? 'rgba(214, 180, 90, 0.12)' : 'rgba(255,255,255,0.06)', color: index === 0 ? swim26Color.featured.premium : swim26Color.text.secondary, display: 'inline-flex', alignItems: 'center', fontSize: Math.round(11 * S), fontWeight: 700 }}>{chip}</span>
                       ))}
                     </div>
                     <button
                       style={{
-                        minWidth: swim26Size.buttons.cta.minWidth,
-                        minHeight: swim26Size.buttons.cta.height,
-                        padding: `0 ${swim26Space.lg}px`,
+                        minWidth: Math.round(swim26Size.buttons.cta.minWidth * S),
+                        minHeight: Math.round(swim26Size.buttons.cta.height * S),
+                        padding: `0 ${Math.round(swim26Space.lg * S)}px`,
                         borderRadius: swim26Boundary.radius.md,
                         border: `${swim26Boundary.border.thin}px solid ${swim26Color.accent.primary}`,
                         background: swim26Color.accent.primary,
                         color: '#06202A',
-                        fontSize: swim26Type.buttonLabel.fontSize,
+                        fontSize: Math.round(swim26Type.buttonLabel.fontSize * S),
                         fontWeight: swim26Type.buttonLabel.fontWeight,
                         letterSpacing: '0.04em',
                         boxShadow: swim26Boundary.elevation.level2,
@@ -408,10 +409,10 @@ export function TransferMarket() {
             })}
           </section>
 
-          <aside style={{ minHeight: 0, overflowY: 'auto', display: 'grid', gap: swim26Space.md, alignContent: 'start' }}>
-            <div style={{ ...panelStyle, padding: swim26Space.md, background: swim26Color.surface.primary }}>
-              <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.text.secondary, letterSpacing: '0.06em', marginBottom: 6 }}>SECONDARY OPTIONS</div>
-              <div style={{ fontSize: swim26Type.sectionTitle.fontSize, lineHeight: '22px', fontWeight: 700 }}>Quick transfer routes</div>
+          <aside style={{ display: 'grid', gap: Math.round(swim26Space.md * S), alignContent: 'start' }}>
+            <div style={{ ...panelStyle, padding: Math.round(swim26Space.md * S), background: swim26Color.surface.primary }}>
+              <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: swim26Color.text.secondary, letterSpacing: '0.06em', marginBottom: 4 }}>SECONDARY OPTIONS</div>
+              <div style={{ fontSize: Math.round(swim26Type.sectionTitle.fontSize * S), lineHeight: '16px', fontWeight: 700 }}>Quick transfer routes</div>
             </div>
 
             {sideOptions.map((option) => {
@@ -422,34 +423,34 @@ export function TransferMarket() {
                   key={option.id}
                   style={{
                     ...panelStyle,
-                    padding: swim26Space.md,
+                    padding: Math.round(swim26Space.md * S),
                     background: locked ? 'rgba(255,255,255,0.02)' : swim26Color.surface.secondary,
                     opacity: locked ? 0.72 : 1,
                     display: 'grid',
-                    gap: swim26Space.sm,
-                    minHeight: 152,
+                    gap: Math.round(swim26Space.sm * S),
+                    minHeight: Math.round(152 * S),
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: swim26Space.sm, alignItems: 'start' }}>
-                    <div style={{ fontSize: swim26Type.cardTitle.fontSize, lineHeight: '20px', fontWeight: 700 }}>{option.title}</div>
-                    <span style={{ height: swim26Size.badge.height, padding: `0 ${swim26Space.sm}px`, borderRadius: swim26Boundary.radius.pill, background: `${option.accent}20`, color: option.accent, display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 800 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: Math.round(swim26Space.sm * S), alignItems: 'start' }}>
+                    <div style={{ fontSize: Math.round(swim26Type.cardTitle.fontSize * S), lineHeight: '14px', fontWeight: 700 }}>{option.title}</div>
+                    <span style={{ height: Math.round(swim26Size.badge.height * S), padding: `0 ${Math.round(swim26Space.sm * S)}px`, borderRadius: swim26Boundary.radius.pill, background: `${option.accent}20`, color: option.accent, display: 'inline-flex', alignItems: 'center', fontSize: Math.round(10 * S), fontWeight: 800, flexShrink: 0 }}>
                       {locked ? 'LOCKED' : cooldown ? 'COOLDOWN' : 'ACTIVE'}
                     </span>
                   </div>
-                  <div style={{ fontSize: 13, lineHeight: '18px', color: swim26Color.text.secondary }}>{option.details}</div>
-                  <div style={{ display: 'grid', gap: 6 }}>
-                    <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary }}>{option.limit}</div>
-                    <div style={{ fontSize: swim26Type.helper.fontSize, color: locked ? swim26Color.feedback.warning : swim26Color.text.secondary }}>{option.refresh}</div>
+                  <div style={{ fontSize: Math.round(13 * S), lineHeight: '13px', color: swim26Color.text.secondary }}>{option.details}</div>
+                  <div style={{ display: 'grid', gap: 4 }}>
+                    <div style={{ fontSize: Math.round(swim26Type.helper.fontSize * S), color: swim26Color.text.secondary }}>{option.limit}</div>
+                    <div style={{ fontSize: Math.round(swim26Type.helper.fontSize * S), color: locked ? swim26Color.feedback.warning : swim26Color.text.secondary }}>{option.refresh}</div>
                   </div>
                   <button
                     style={{
                       marginTop: 'auto',
-                      minHeight: swim26Size.buttons.standard.height,
+                      minHeight: Math.round(swim26Size.buttons.standard.height * S),
                       borderRadius: swim26Boundary.radius.md,
                       border: `${swim26Boundary.border.thin}px solid ${locked ? 'rgba(255,255,255,0.12)' : option.accent}66`,
                       background: locked ? 'rgba(255,255,255,0.03)' : `${option.accent}18`,
                       color: locked ? swim26Color.text.disabled : option.accent,
-                      fontSize: swim26Type.buttonLabel.fontSize,
+                      fontSize: Math.round(swim26Type.buttonLabel.fontSize * S),
                       fontWeight: swim26Type.buttonLabel.fontWeight,
                       letterSpacing: '0.02em',
                     }}
@@ -496,6 +497,7 @@ export function TransferMarket() {
                   fontSize: swim26Type.buttonLabel.fontSize,
                   fontWeight: swim26Type.buttonLabel.fontWeight,
                   letterSpacing: '0.03em',
+                  minHeight: swim26Size.tab.height,
                 }}
               >
                 <span
