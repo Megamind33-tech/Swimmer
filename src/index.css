@@ -1,5 +1,5 @@
 /* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800;1,900&family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500&family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 /* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
 @import 'tailwindcss';
@@ -91,6 +91,26 @@ body {
   --z-hud:        50;
   --z-menu:       70;
   --z-landscape:  90;
+
+  /* ── Typography — font families ─────────────────────────────────────── */
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body:    'Barlow', sans-serif;
+
+  /* ── Typography — type scale ─────────────────────────────────────────── */
+  --text-xs:   10px;   /* tracked labels */
+  --text-sm:   12px;   /* metadata */
+  --text-base: 14px;   /* body */
+  --text-md:   16px;   /* UI labels */
+  --text-lg:   20px;   /* card descriptions */
+  --text-xl:   24px;   /* card titles mobile */
+  --text-2xl:  32px;   /* card titles desktop */
+  --text-3xl:  48px;   /* screen headings */
+
+  /* ── Typography — letter spacing ─────────────────────────────────────── */
+  --tracking-tight: 0;
+  --tracking-game:  0.08em;  /* UI labels */
+  --tracking-wide:  0.15em;  /* section headers */
+  --tracking-ultra: 0.25em;  /* mode badges */
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -113,7 +133,7 @@ body {
    ───────────────────────────────────────────────────────────────────────────── */
 
 body {
-  font-family: 'Barlow Condensed', "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-body), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: var(--color-text-primary);
@@ -124,7 +144,12 @@ body {
 
 /* Headline utility class — italic black condensed */
 .font-headline {
-  font-family: "Barlow Condensed", "Arial Narrow", Impact, system-ui, sans-serif;
+  font-family: var(--font-display), "Arial Narrow", Impact, system-ui, sans-serif;
+}
+
+/* Body utility class */
+.font-body {
+  font-family: var(--font-body), "Inter", system-ui, sans-serif;
 }
 
 /* Bebas Neue — impact display headings for lobby titles, scores, season branding */

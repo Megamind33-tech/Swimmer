@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { MenuScreen } from './GlobalMenuLayout';
+import { GameIcon } from '../../ui/GameIcon';
 
 interface LeftNavigationRailProps {
   currentScreen: MenuScreen;
@@ -80,11 +81,9 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
               {/* Slanted Speed Line Background (Hover) */}
               <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 -z-10 bg-gradient-to-r from-primary/5 via-primary/10 to-transparent -skew-x-12 rounded-2xl scale-x-0 group-hover:scale-x-100 origin-left`} />
 
-              <span className={`material-symbols-outlined text-4xl mb-1 transition-all duration-500 ${
+              <GameIcon name={item.icon} size={36} className={`mb-1 transition-all duration-500 ${
                 isActive ? 'text-primary text-glow' : 'opacity-60 group-hover:opacity-100'
-              }`}>
-                {item.icon}
-              </span>
+              }`} />
 
               <span className={`text-[9px] font-black uppercase tracking-[0.2em] text-center leading-tight transition-all duration-500 ${
                 isActive ? 'text-primary text-glow opacity-100' : 'opacity-40 group-hover:opacity-80'
@@ -103,7 +102,7 @@ export const LeftNavigationRail: React.FC<LeftNavigationRailProps> = ({
         {/* Footer Visual Accent */}
         <div className="mt-auto pt-10 px-4 w-full">
           <div className="h-40 w-full rounded-full bg-gradient-to-t from-primary/10 to-transparent flex flex-col items-center justify-end pb-8">
-            <span className="material-symbols-outlined text-primary/20 text-4xl animate-pulse">radar</span>
+            <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-primary/20 animate-pulse">📡</span>
           </div>
         </div>
       </div>

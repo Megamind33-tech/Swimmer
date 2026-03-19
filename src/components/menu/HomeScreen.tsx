@@ -108,7 +108,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   Start
                 </button>
               </div>
-              <span className="material-symbols-outlined hydro-feature-icon text-primary">speed</span>
+              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="hydro-feature-icon text-primary">⚡</span>
             </article>
 
             <article className="hydro-feature-card hydro-feature-gold" onClick={() => openSubPage('CAREER')}>
@@ -121,7 +121,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   Continue
                 </button>
               </div>
-              <span className="material-symbols-outlined hydro-feature-icon text-secondary">emoji_events</span>
+              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="hydro-feature-icon text-secondary">🏆</span>
             </article>
 
             <article className="hydro-feature-card hydro-feature-neutral" onClick={() => openSubPage('SOCIAL')}>
@@ -132,7 +132,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <p>Squad chat, rivals &amp; club feed.</p>
                 <button onClick={(e) => { e.stopPropagation(); openSubPage('SOCIAL'); }} className="hydro-cta hydro-cta-neutral">Open</button>
               </div>
-              <span className="material-symbols-outlined hydro-feature-icon text-blue-300">hub</span>
+              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="hydro-feature-icon text-blue-300">⊕</span>
             </article>
           </section>
         )}

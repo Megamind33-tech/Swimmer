@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { getDifficultyColor, getDifficultyBadgeIcon } from '../../utils/difficultyUtils';
+import { GameIcon } from '../../ui/GameIcon';
 
 interface GameModeCard {
   id: string;
@@ -273,16 +274,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                     boxShadow: isActivating ? `0 0 16px rgba(${mode.accentRgb},0.40)` : undefined,
                   }}
                 >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{
-                      fontSize: '26px',
-                      color: `rgba(${mode.accentRgb},1)`,
-                      filter: `drop-shadow(0 0 6px rgba(${mode.accentRgb},0.6))`,
-                    }}
-                  >
-                    {mode.icon}
-                  </span>
+                  <GameIcon name={mode.icon} size={26} style={{color: `rgba(${mode.accentRgb},1)`, filter: `drop-shadow(0 0 6px rgba(${mode.accentRgb},0.6))`}} />
                 </div>
 
                 {/* Text block */}
@@ -343,12 +335,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                     transform: isActivating ? 'translateX(4px)' : undefined,
                   }}
                 >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: '18px', color: `rgba(${mode.accentRgb},0.9)` }}
-                  >
-                    chevron_right
-                  </span>
+                  <span style={{fontSize:'18px', lineHeight:1, display:'inline-block', color: `rgba(${mode.accentRgb},0.9)`}}>›</span>
                 </div>
               </div>
 
