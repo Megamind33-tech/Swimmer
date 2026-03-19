@@ -82,11 +82,11 @@ export const RaceLobby: React.FC = () => {
       {/* TopAppBar */}
       <header className="h-16 flex items-center justify-between px-4 border-b border-outline-variant bg-surface z-10">
         <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-on-surface" data-icon="menu">menu</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-on-surface">☰</span>
           <h1 className="text-xl font-semibold tracking-tight text-on-surface">SWIM26</h1>
         </div>
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-on-surface" data-icon="account_circle">account_circle</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-on-surface">◉</span>
         </div>
       </header>
 
@@ -124,7 +124,7 @@ export const RaceLobby: React.FC = () => {
                     <span className="text-white font-semibold text-lg">{lane.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-sm" data-icon="star" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                    <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-primary">★</span>
                     <span className="text-white text-lg">{lane.time}</span>
                   </div>
                 </div>
@@ -148,7 +148,7 @@ export const RaceLobby: React.FC = () => {
         <div className="fixed bottom-24 left-0 right-0 px-6 flex justify-center">
           <button className="bg-primary text-white font-semibold py-4 px-12 text-xl tracking-widest shadow-[0_0_30px_rgba(15,98,254,0.6)] hover:bg-primary-fixed-dim transition-colors flex items-center gap-3">
             START RACE
-            <span className="material-symbols-outlined" data-icon="play_arrow">play_arrow</span>
+            <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>▶</span>
           </button>
         </div>
       </main>
@@ -156,19 +156,19 @@ export const RaceLobby: React.FC = () => {
       {/* BottomNavBar */}
       <nav className="h-16 bg-surface border-t border-outline-variant flex items-center justify-around fixed bottom-0 left-0 right-0 z-10">
         <button className="flex flex-col items-center gap-1 text-primary">
-          <span className="material-symbols-outlined" data-icon="home" style={{fontVariationSettings: "'FILL' 1"}}>home</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>⌂</span>
           <span className="text-[10px] font-medium">Home</span>
         </button>
         <button className="flex flex-col items-center gap-1 text-secondary hover:text-primary transition-colors">
-          <span className="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>🏆</span>
           <span className="text-[10px] font-medium">Career</span>
         </button>
         <button className="flex flex-col items-center gap-1 text-secondary hover:text-primary transition-colors">
-          <span className="material-symbols-outlined" data-icon="public">public</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>🌐</span>
           <span className="text-[10px] font-medium">Global</span>
         </button>
         <button className="flex flex-col items-center gap-1 text-secondary hover:text-primary transition-colors">
-          <span className="material-symbols-outlined" data-icon="person_4">person_4</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>👤</span>
           <span className="text-[10px] font-medium">Custom</span>
         </button>
       </nav>

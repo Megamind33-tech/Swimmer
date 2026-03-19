@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import eventsMainCardBackdropImage from '../../designs/custom_backgrounds/16GDP8cMj1ZeAFtQhML30ak33nG3RZIaL.jpg';
 import { HeroBackgroundMedia } from '../ui/MediaPrimitives';
+import { GameIcon } from '../../ui/GameIcon';
 
 type EventCategory = 'DAILY' | 'WEEKLY' | 'SEASONAL' | 'SPONSOR' | 'SPECIAL';
 
@@ -111,7 +112,7 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
             <div className="flex items-center gap-3 mb-4">
               <span className="h-[1px] w-12 bg-primary/40" />
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-sm animate-pulse">broadcast_on_home</span>
+                <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-primary animate-pulse">⊕</span>
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Live Synchronization Active</span>
               </div>
             </div>
@@ -128,7 +129,7 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
              </div>
              <div className="h-10 w-10 rounded-full border-2 border-primary/40 p-1">
                 <div className="h-full w-full rounded-full bg-primary/20 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary text-xl">star</span>
+                  <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="text-primary">★</span>
                 </div>
              </div>
           </div>
@@ -147,7 +148,7 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
                
                <div className="flex-1 relative z-10 p-4 rounded-2xl bg-surface/35 border border-white/10 backdrop-blur-sm">
                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/10 border border-secondary/20 mb-8">
-                   <span className="material-symbols-outlined text-secondary text-sm animate-bounce">rocket_launch</span>
+                   <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-secondary animate-bounce">🚀</span>
                    <span className="text-[10px] font-black uppercase tracking-widest text-secondary gold-glow italic slanted">Priority Championship</span>
                  </div>
                  
@@ -174,7 +175,7 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
                  >
                     <div className="absolute inset-x-0 bottom-0 h-1 bg-white/40 shadow-[0_0_20px_rgba(255,255,255,1)]" />
                     <span className="font-headline text-2xl font-black italic slanted uppercase text-surface relative z-10 group-hover/btn:tracking-widest transition-all">Engage Event</span>
-                    <span className="material-symbols-outlined text-surface text-3xl relative z-10 group-hover/btn:translate-x-2 transition-transform">arrow_forward</span>
+                    <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="text-surface relative z-10 group-hover/btn:translate-x-2 transition-transform">→</span>
                  </button>
                </div>
             </div>
@@ -226,9 +227,7 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
                  <div>
                    <div className="flex items-start justify-between mb-8">
                      <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover/card:bg-primary/20 group-hover/card:border-primary/40 transition-all">
-                       <span className="material-symbols-outlined text-3xl text-on-surface-variant group-hover/card:text-primary group-hover/card:text-glow transition-all">
-                         {event.icon as string}
-                       </span>
+                       <GameIcon name={event.icon as string} size={30} className="text-on-surface-variant group-hover/card:text-primary group-hover/card:text-glow transition-all" />
                      </div>
                      <div className="text-right">
                        <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest block opacity-60">Status</span>
@@ -262,7 +261,7 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
 
                    <button className="w-full h-12 rounded-[18px] bg-white/5 border border-white/10 group-hover/card:bg-primary group-hover/card:text-surface transition-all duration-500 font-headline font-black italic slanted uppercase text-[10px] tracking-widest flex items-center justify-center gap-2">
                       Access Data Stream
-                      <span className="material-symbols-outlined text-sm">open_in_new</span>
+                      <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}}>↗</span>
                    </button>
                  </div>
                </div>

@@ -96,7 +96,7 @@ export const LockerRoomScreen: React.FC<LockerRoomScreenProps> = ({ onSave }) =>
             <div className="flex items-center gap-3 mb-4">
               <span className="h-[1px] w-12 bg-primary/40" />
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-sm animate-pulse">checkroom</span>
+                <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-primary animate-pulse">🧢</span>
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Biometric Fitting Laboratory</span>
               </div>
             </div>
@@ -113,7 +113,7 @@ export const LockerRoomScreen: React.FC<LockerRoomScreenProps> = ({ onSave }) =>
              </div>
              <div className="h-10 w-10 rounded-full border-2 border-primary/40 p-1">
                 <div className="h-full w-full rounded-full bg-primary/20 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-primary text-xl">dataset</span>
+                  <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="text-primary">📋</span>
                 </div>
              </div>
           </div>
@@ -131,7 +131,7 @@ export const LockerRoomScreen: React.FC<LockerRoomScreenProps> = ({ onSave }) =>
                 
                 <div className="relative mb-8">
                    <div className="absolute inset-0 bg-primary/20 blur-3xl animate-pulse rounded-full" />
-                   <span className="material-symbols-outlined text-[120px] text-primary relative z-10 text-glow">person</span>
+                   <span style={{fontSize:'120px', lineHeight:1, display:'inline-block'}} className="text-primary relative z-10 text-glow">👤</span>
                 </div>
 
                 <div className="text-center relative z-10">
@@ -298,12 +298,12 @@ export const LockerRoomScreen: React.FC<LockerRoomScreenProps> = ({ onSave }) =>
                   <h4 className="font-headline text-sm font-black italic slanted uppercase text-on-surface mb-4 group-hover/look:text-primary transition-colors">{look.name}</h4>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-on-surface-variant">
-                       <span className="material-symbols-outlined text-xs">checkroom</span>
+                       <span style={{fontSize:'12px', lineHeight:1, display:'inline-block'}}>🧢</span>
                        {look.outfit}
                     </div>
                     <div className="h-[1px] w-full bg-white/5" />
                     <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest text-on-surface-variant">
-                       <span className="material-symbols-outlined text-xs">directions_walk</span>
+                       <span style={{fontSize:'12px', lineHeight:1, display:'inline-block'}}>🚶</span>
                        {look.walkout}
                     </div>
                   </div>
@@ -312,7 +312,7 @@ export const LockerRoomScreen: React.FC<LockerRoomScreenProps> = ({ onSave }) =>
               <button className="group/add p-6 bg-white/[0.03] border-2 border-dashed border-white/10 hover:border-primary/40 rounded-[32px] text-left transition-all flex items-center justify-center min-h-[160px]">
                 <div className="text-center">
                   <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-3 group-hover/add:bg-primary transition-all">
-                    <span className="material-symbols-outlined text-2xl group-hover/add:text-surface transition-colors">add</span>
+                    <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="group-hover/add:text-surface transition-colors">+</span>
                   </div>
                   <div className="font-headline text-[10px] font-black italic slanted uppercase tracking-widest text-on-surface-variant">Capture New State</div>
                 </div>
@@ -341,7 +341,7 @@ export const LockerRoomScreen: React.FC<LockerRoomScreenProps> = ({ onSave }) =>
             className="h-20 flex-1 px-8 rounded-[28px] bg-primary border border-white/20 shadow-[0_0_40px_rgba(129,236,255,0.3)] hover:shadow-[0_0_60px_rgba(129,236,255,0.5)] active:scale-95 transition-all font-headline font-black italic slanted uppercase text-xl leading-none text-surface flex items-center justify-center gap-4 group/save"
           >
             Overwrite Profile Look
-            <span className="material-symbols-outlined text-3xl group-hover/save:translate-x-2 transition-transform">save</span>
+            <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="group-hover/save:translate-x-2 transition-transform">💾</span>
           </button>
         </div>
       </div>

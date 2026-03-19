@@ -56,8 +56,8 @@ export const RaceResultScreen: React.FC<RaceResultScreenProps> = ({
            <div className="flex items-center justify-center gap-4 mb-2">
               <span className={`h-px w-16 ${isWinner ? 'bg-secondary' : 'bg-primary'}`} />
               <div className="flex items-center gap-2">
-                 <span className={`material-symbols-outlined text-sm animate-pulse ${isWinner ? 'text-secondary' : 'text-primary'}`}>
-                    {isWinner ? 'military_tech' : 'flag'}
+                 <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className={`animate-pulse ${isWinner ? 'text-secondary' : 'text-primary'}`}>
+                    {isWinner ? '🏅' : '⚑'}
                  </span>
                  <span className={`text-[10px] font-black uppercase tracking-[0.5em] ${isWinner ? 'text-secondary' : 'text-primary'}`}>
                     {isWinner ? 'Mission Success' : 'Session Terminated'}
@@ -109,7 +109,7 @@ export const RaceResultScreen: React.FC<RaceResultScreenProps> = ({
                   {/* 1st Place */}
                   <div className="group flex flex-col items-center flex-[1.2] max-[900px]:w-full -translate-y-4 max-[900px]:translate-y-0 transition-transform duration-500 hover:scale-110">
                      <div className="h-16 w-16 rounded-[24px] bg-secondary/20 border-2 border-secondary/40 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,215,9,0.2)]">
-                        <span className="material-symbols-outlined text-3xl text-secondary gold-glow">crown</span>
+                        <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="text-secondary gold-glow">👑</span>
                      </div>
                      <div className="w-full h-48 bg-secondary/10 rounded-t-[40px] border-t-2 border-x-2 border-secondary/30 flex flex-col items-center justify-center p-8 backdrop-blur-2xl relative shadow-[0_-20px_50px_rgba(255,215,9,0.1)]">
                         <div className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-2">Alpha Operator</div>
@@ -183,21 +183,21 @@ export const RaceResultScreen: React.FC<RaceResultScreenProps> = ({
                   
                   <div className="space-y-6">
                     {[
-                      { icon: 'speed', label: 'Combat XP', val: '+250', color: 'text-primary', bg: 'bg-primary/20' },
-                      { icon: 'monetization_on', label: 'Credits', val: '+2.5K', color: 'text-secondary', bg: 'bg-secondary/20' },
-                      { icon: 'military_tech', label: 'Reputation', val: '+120', color: 'text-success', bg: 'bg-success/20' }
+                      { icon: '⚡', label: 'Combat XP', val: '+250', color: 'text-primary', bg: 'bg-primary/20' },
+                      { icon: '◈', label: 'Credits', val: '+2.5K', color: 'text-secondary', bg: 'bg-secondary/20' },
+                      { icon: '🏅', label: 'Reputation', val: '+120', color: 'text-success', bg: 'bg-success/20' }
                     ].map((item, i) => (
                       <div key={i} className="group/reward p-6 rounded-3xl bg-white/[0.03] border border-white/5 hover:border-white/20 transition-all flex items-center justify-between">
                          <div className="flex items-center gap-4">
                             <div className={`h-12 w-12 rounded-2xl ${item.bg.replace('/20', '/10')} border border-white/5 flex items-center justify-center`}>
-                               <span className={`material-symbols-outlined text-2xl ${item.color}`}>{item.icon}</span>
+                               <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className={item.color}>{item.icon}</span>
                             </div>
                             <div>
                                <div className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-60 mb-1">{item.label}</div>
                                <div className={`font-headline text-2xl font-black italic slanted ${item.color}`}>{item.val}</div>
                             </div>
                          </div>
-                         <span className="material-symbols-outlined text-on-surface-variant opacity-20 group-hover/reward:translate-x-1 transition-transform">arrow_forward</span>
+                         <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-on-surface-variant opacity-20 group-hover/reward:translate-x-1 transition-transform">→</span>
                       </div>
                     ))}
                   </div>
@@ -228,7 +228,7 @@ export const RaceResultScreen: React.FC<RaceResultScreenProps> = ({
                   <div className="absolute top-0 right-0 h-24 w-24 bg-purple-500/10 blur-3xl" />
                   <div className="flex items-center gap-6">
                      <div className="h-16 w-16 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.2)]">
-                        <span className="material-symbols-outlined text-3xl text-purple-400">emoji_events</span>
+                        <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="text-purple-400">🏆</span>
                      </div>
                      <div>
                         <div className="text-[9px] font-black text-purple-400 uppercase tracking-[0.4em] mb-1">Badge Acquired</div>
@@ -245,20 +245,20 @@ export const RaceResultScreen: React.FC<RaceResultScreenProps> = ({
       <div className="fixed bottom-0 left-0 right-0 p-8 bg-surface/80 backdrop-blur-3xl border-t border-white/5 z-50">
          <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
             <button onClick={onWatchReplay} className="h-16 rounded-2xl border border-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
-                <span className="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform">play_circle</span>
+                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:rotate-12 transition-transform">⏵</span>
                 Watch Replay
             </button>
             <button onClick={onReturnHome} className="h-16 rounded-2xl border border-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
-                <span className="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">home</span>
+                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:-translate-x-1 transition-transform">⌂</span>
                 Exit Terminal
             </button>
             <button onClick={onRematch} className="h-16 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
-                <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-700">refresh</span>
+                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:rotate-180 transition-transform duration-700">↺</span>
                 Request Rematch
             </button>
             <button onClick={onContinue} className="h-16 rounded-2xl bg-primary shadow-[0_0_30px_rgba(129,236,255,0.2)] hover:shadow-[0_0_50px_rgba(129,236,255,0.4)] font-headline font-black italic slanted uppercase text-[13px] tracking-widest text-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
                 Continue Mission
-                <span className="material-symbols-outlined text-2xl group-hover:translate-x-2 transition-transform">arrow_forward</span>
+                <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="group-hover:translate-x-2 transition-transform">→</span>
             </button>
          </div>
       </div>

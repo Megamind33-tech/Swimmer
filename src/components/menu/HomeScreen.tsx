@@ -8,6 +8,7 @@ import { IPlayerSwimmer } from '../../types';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 import p2pQuickMatchImage from '../../designs/doh9161_copy.width_800.jpg/screen.png';
 import { FeatureCardMedia } from '../ui/MediaPrimitives';
+import { GameIcon } from '../../ui/GameIcon';
 
 interface HomeScreenProps {
   player?: IPlayerSwimmer;
@@ -211,14 +212,13 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
                 {/* Icon with Glass Look */}
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="relative h-10 w-10 rounded-lg bg-surface-highest/50 flex items-center justify-center border border-white/5 group-hover:border-primary/20 transition-all">
-                    <span
-                      className={`material-symbols-outlined text-2xl shrink-0 transition-all duration-300 ${
+                    <GameIcon
+                      name={obj.icon}
+                      size={24}
+                      className={`shrink-0 transition-all duration-300 ${
                         isCompleted ? 'text-secondary gold-glow' : 'text-primary/70 group-hover:text-primary'
                       }`}
-                      style={{ fontVariationSettings: isCompleted ? "'FILL' 1" : "'FILL' 0" }}
-                    >
-                      {obj.icon}
-                    </span>
+                    />
                   </div>
 
                   <div className="flex flex-col">

@@ -63,7 +63,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
             <div className="flex items-center gap-3 mb-4">
               <span className="h-[1px] w-12 bg-primary/40" />
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-sm animate-pulse">radar</span>
+                <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}} className="text-primary animate-pulse">📡</span>
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Pre-Flight Biometric Check In-Progress</span>
               </div>
             </div>
@@ -186,7 +186,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                      <div className="relative">
                         <div className="absolute inset-0 bg-primary/20 blur-2xl animate-pulse" />
                         <div className="h-20 w-20 rounded-[28px] bg-primary/20 border border-primary/40 flex items-center justify-center relative z-10">
-                           <span className="material-symbols-outlined text-4xl text-primary text-glow">biometrics</span>
+                           <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-primary text-glow">◉</span>
                         </div>
                      </div>
                      <div>
@@ -254,7 +254,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                     <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-1 block italic">Reward Forecast</span>
                     <div className="font-headline text-3xl font-black italic slanted text-secondary gold-glow">800 XP + 2.5K CR</div>
                   </div>
-                  <span className="material-symbols-outlined text-4xl text-secondary animate-bounce">monetization_on</span>
+                  <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-secondary animate-bounce">◈</span>
                </div>
             </div>
           </div>
@@ -268,7 +268,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                 disabled={isStarting}
                 className="flex-[1] h-20 rounded-[28px] border-2 border-white/10 hover:border-white/40 font-headline text-2xl font-black italic slanted uppercase text-on-surface-variant hover:text-on-surface transition-all duration-500 flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-3xl">close</span>
+                <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}}>✕</span>
                 Abort
               </button>
               
@@ -290,7 +290,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                  ) : (
                    <div className="flex items-center gap-6 group-hover:tracking-widest transition-all duration-700">
                       <span>Initiate Kinetic Run</span>
-                      <span className="material-symbols-outlined text-4xl group-hover:translate-x-3 transition-transform duration-700">rocket_launch</span>
+                      <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="group-hover:translate-x-3 transition-transform duration-700">🚀</span>
                    </div>
                  )}
                  

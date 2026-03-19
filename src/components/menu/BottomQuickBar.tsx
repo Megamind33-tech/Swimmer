@@ -5,6 +5,7 @@
 
 import React from 'react';
 import type { MenuScreen } from './GlobalMenuLayout';
+import { GameIcon } from '../../ui/GameIcon';
 import splashActionImage from '../../designs/doh9161_copy.width_800.jpg/screen.png';
 import raceActionImage from '../../designs/race_gameplay_interface/screen.png';
 import championshipActionImage from '../../designs/national_championships/screen.png';
@@ -119,9 +120,7 @@ export const BottomQuickBar: React.FC<BottomQuickBarProps> = (props) => {
 
           {/* Label Content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 skew-x-12 z-20">
-             <span className="material-symbols-outlined text-white text-2xl drop-shadow-[0_0_8px_rgba(0,0,0,0.8)] group-hover:text-glow transition-all">
-                {action.icon}
-             </span>
+             <GameIcon name={action.icon} size={24} className="text-white drop-shadow-[0_0_8px_rgba(0,0,0,0.8)] group-hover:text-glow transition-all" />
              <span className="text-[10px] font-black italic slanted uppercase tracking-[0.2em] text-white drop-shadow-[0_0_8px_rgba(0,0,0,0.8)]">
                 {action.label}
              </span>

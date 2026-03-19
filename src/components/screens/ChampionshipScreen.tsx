@@ -49,7 +49,7 @@ export const ChampionshipScreen: React.FC = () => {
       {/* TopAppBar */}
       <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-primary" style={{fontVariationSettings: "'FILL' 1"}}>waves</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary">〜</span>
           <span className="font-headline font-bold text-xl tracking-tighter">SWIM26</span>
         </div>
         <div className="bg-surface-container-highest px-4 py-1 -skew-x-12 border border-primary/30">
@@ -69,7 +69,7 @@ export const ChampionshipScreen: React.FC = () => {
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             <div className="mb-4 relative">
               <div className="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-full"></div>
-              <span className="material-symbols-outlined text-8xl text-yellow-400" style={{fontVariationSettings: "'FILL' 1", filter: 'drop-shadow(0 0 15px rgba(255, 215, 0, 0.4))'}}>military_tech</span>
+              <span style={{fontSize:'96px', lineHeight:1, display:'inline-block', filter: 'drop-shadow(0 0 15px rgba(255, 215, 0, 0.4))'}} className="text-yellow-400">🏅</span>
             </div>
             <h1 className="font-headline text-5xl md:text-7xl font-bold italic uppercase tracking-tighter leading-none -skew-x-12">
               National<br /><span className="text-primary">Championships</span>
@@ -171,7 +171,7 @@ export const ChampionshipScreen: React.FC = () => {
                 </div>
                 <p className="font-body text-xs text-on-surface-variant">Rank #142 globally. Need 4,500 more SP to qualify for the Semi-Finals.</p>
               </div>
-              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-on-surface/5 rotate-12">trending_up</span>
+              <span style={{fontSize:'128px', lineHeight:1, display:'inline-block'}} className="absolute -right-4 -bottom-4 text-on-surface/5 rotate-12">↗</span>
             </div>
           </div>
         </div>
@@ -180,19 +180,19 @@ export const ChampionshipScreen: React.FC = () => {
       {/* BottomNavBar */}
       <nav className="fixed bottom-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-xl border-t border-outline-variant/20 px-2 h-20 flex justify-around items-center">
         <div className="flex flex-col items-center gap-1 cursor-pointer transition-all border-t-2 border-primary px-4 pt-2">
-          <span className="material-symbols-outlined text-primary" style={{fontVariationSettings: "'FILL' 1"}}>home</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary">⌂</span>
           <span className="font-label text-[10px] font-bold uppercase text-primary">Home</span>
         </div>
         <div className="flex flex-col items-center gap-1 cursor-pointer opacity-50 hover:opacity-100 transition-all px-4 pt-2">
-          <span className="material-symbols-outlined">sports_score</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>🏅</span>
           <span className="font-label text-[10px] font-bold uppercase">Career</span>
         </div>
         <div className="flex flex-col items-center gap-1 cursor-pointer opacity-50 hover:opacity-100 transition-all px-4 pt-2">
-          <span className="material-symbols-outlined">groups</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>👥</span>
           <span className="font-label text-[10px] font-bold uppercase">Social</span>
         </div>
         <div className="flex flex-col items-center gap-1 cursor-pointer opacity-50 hover:opacity-100 transition-all px-4 pt-2">
-          <span className="material-symbols-outlined">military_tech</span>
+          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>🏅</span>
           <span className="font-label text-[10px] font-bold uppercase">Rewards</span>
         </div>
       </nav>
