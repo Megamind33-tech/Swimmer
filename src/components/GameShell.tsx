@@ -21,6 +21,7 @@ import { PlayScreen } from './menu/PlayScreen';
 import { PreRaceSetupScreen } from './menu/PreRaceSetupScreen';
 import { PreMatchScreen } from '../hud/overlays/PreMatchScreen';
 import { RaceScene, RaceConfig, RaceResult } from './RaceScene';
+import { SplashScreen } from './menu/SplashScreen';
 import lockerRoomBackground from '../designs/locker_room_custom/screen.png';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,6 +29,7 @@ import lockerRoomBackground from '../designs/locker_room_custom/screen.png';
 // ─────────────────────────────────────────────────────────────────────────────
 
 type GamePhase =
+  | 'home'          // SplashScreen — title screen / home page
   | 'menu'          // AppShell — lobby/management UI
   | 'mode-select'   // PlayScreen — choose race mode
   | 'pre-race'      // PreRaceSetupScreen — configure the race
@@ -82,7 +84,7 @@ const OverlayShell: React.FC<OverlayShellProps> = ({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function GameShell() {
-  const [phase,        setPhase]        = useState<GamePhase>('menu');
+  const [phase,        setPhase]        = useState<GamePhase>('home');
   const [selectedMode, setSelectedMode] = useState<string>('quick-race');
   const [raceConfig,   setRaceConfig]   = useState<RaceConfig>({
     distance: '100M',
@@ -114,7 +116,7 @@ export function GameShell() {
   const enterModeSelect  = () => navigateTo('mode-select');
   const onCancelPreRace  = () => navigateTo('mode-select');
   const onConfirmRace    = () => navigateTo('pre-match');
-  const onExitToLobby    = () => { setRaceResult(null); navigateTo('menu'); };
+  const onExitToLobby    = () => { setRaceResult(null); navigateTo('home'); };
   const onRestart        = () => { setRaceResult(null); navigateTo('pre-race'); };
   const onPause          = () => { /* RaceScene handles pause internally */ };
 
@@ -134,6 +136,14 @@ export function GameShell() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   const renderPhase = () => {
+    if (phase === 'home') {
+      return (
+        <div key="home" style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+          <SplashScreen onPlay={() => navigateTo('menu')} />
+        </div>
+      );
+    }
+
     if (phase === 'mode-select') {
       return (
         <OverlayShell key="mode-select" backgroundOpacity={0.28}>
