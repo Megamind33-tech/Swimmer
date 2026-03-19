@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   swim26Boundary,
   swim26Color,
@@ -10,100 +10,218 @@ import {
   swim26Type,
 } from '../theme/swim26DesignSystem';
 
-type TransferMode = 'ITEM_TRANSFER' | 'PLAYER_TRANSFER';
+type MarketTier = 'ALL' | 'LOCAL' | 'CONTINENTAL' | 'INTERNATIONAL';
+type ContractStatus = 'free' | 'attached';
 
-interface ExchangeCard {
+interface MarketAthlete {
   id: string;
-  title: string;
-  subtitle: string;
-  ratingTier: string;
-  inputItems: string[];
-  outputItem: string;
-  valueLabel: string;
-  limit: string;
-  timer: string;
-  action: string;
-  featured?: boolean;
+  name: string;
+  age: number;
+  ovr: number;
+  stroke: string;
+  nationality: string;
+  flag: string;
+  club: string;
+  status: ContractStatus;
+  price: number;
+  tier: Exclude<MarketTier, 'ALL'>;
+  portraitBg: string;
+  portraitEmoji: string;
 }
 
-interface SideOption {
-  id: string;
-  title: string;
-  details: string;
-  limit: string;
-  refresh: string;
-  state: 'active' | 'locked' | 'cooldown';
-  accent: string;
-}
+const athletes: MarketAthlete[] = [
+  // LOCAL
+  {
+    id: 'l1',
+    name: 'D. Okafor',
+    age: 22,
+    ovr: 84,
+    stroke: 'Freestyle',
+    nationality: 'Nigeria',
+    flag: '🇳🇬',
+    club: 'Lagos Aquatics',
+    status: 'free',
+    price: 420000,
+    tier: 'LOCAL',
+    portraitBg: 'linear-gradient(160deg, #1a3a28 0%, #0c1f18 100%)',
+    portraitEmoji: '🏊',
+  },
+  {
+    id: 'l2',
+    name: 'A. Mensah',
+    age: 19,
+    ovr: 79,
+    stroke: 'Breaststroke',
+    nationality: 'Ghana',
+    flag: '🇬🇭',
+    club: 'Accra Swim FC',
+    status: 'attached',
+    price: 310000,
+    tier: 'LOCAL',
+    portraitBg: 'linear-gradient(160deg, #2e1f0a 0%, #1a1005 100%)',
+    portraitEmoji: '🏊',
+  },
+  {
+    id: 'l3',
+    name: 'T. Banda',
+    age: 24,
+    ovr: 87,
+    stroke: 'Butterfly',
+    nationality: 'Zambia',
+    flag: '🇿🇲',
+    club: 'Lusaka Waves',
+    status: 'free',
+    price: 680000,
+    tier: 'LOCAL',
+    portraitBg: 'linear-gradient(160deg, #1e3040 0%, #0d1a24 100%)',
+    portraitEmoji: '🏊',
+  },
+  {
+    id: 'l4',
+    name: 'S. Ndlovu',
+    age: 21,
+    ovr: 82,
+    stroke: 'IM',
+    nationality: 'Zimbabwe',
+    flag: '🇿🇼',
+    club: 'Harare Marlins',
+    status: 'attached',
+    price: 495000,
+    tier: 'LOCAL',
+    portraitBg: 'linear-gradient(160deg, #2a1a30 0%, #160e1a 100%)',
+    portraitEmoji: '🏊',
+  },
 
-const exchangeCards: ExchangeCard[] = [
+  // CONTINENTAL
   {
-    id: 'elite-scout',
-    title: 'Elite Scout Conversion',
-    subtitle: 'Turn surplus athlete cards into a premium scouting reward.',
-    ratingTier: '82+ RATED ATHLETES',
-    inputItems: ['2× Sprint Specialist', '1× Relay Tactician', '20× Market Tokens'],
-    outputItem: 'Elite Scout Crate',
-    valueLabel: 'Value: 24,000 Market Credits',
-    limit: 'Daily cap: 2',
-    timer: 'Refresh in 01H 18M',
-    action: 'Convert Now',
-    featured: true,
+    id: 'c1',
+    name: 'N. El-Sayed',
+    age: 26,
+    ovr: 91,
+    stroke: 'Medley',
+    nationality: 'Egypt',
+    flag: '🇪🇬',
+    club: 'Cairo Pharaohs SC',
+    status: 'attached',
+    price: 1850000,
+    tier: 'CONTINENTAL',
+    portraitBg: 'linear-gradient(160deg, #3a2a08 0%, #1e1504 100%)',
+    portraitEmoji: '🏊',
   },
   {
-    id: 'chemistry-pack',
-    title: 'Chemistry Pack Exchange',
-    subtitle: 'Bundle mid-tier athlete inventory into chemistry and training boosts.',
-    ratingTier: '76–81 RATED ATHLETES',
-    inputItems: ['3× Technique Athletes', '10× Energy Gel', '5× Film Strips'],
-    outputItem: 'Gold Chemistry Pack',
-    valueLabel: 'Value: 12,500 Market Credits',
-    limit: 'Daily cap: 4',
-    timer: 'Refresh in 32M',
-    action: 'Build Pack',
+    id: 'c2',
+    name: 'F. Diallo',
+    age: 23,
+    ovr: 88,
+    stroke: 'Freestyle',
+    nationality: 'Senegal',
+    flag: '🇸🇳',
+    club: 'Dakar Sprint Club',
+    status: 'free',
+    price: 920000,
+    tier: 'CONTINENTAL',
+    portraitBg: 'linear-gradient(160deg, #0e2a1e 0%, #071510 100%)',
+    portraitEmoji: '🏊',
   },
   {
-    id: 'contract-swap',
-    title: 'Contract Swap Route',
-    subtitle: 'Exchange duplicate utility cards for direct roster contract value.',
-    ratingTier: '72+ RATED ATHLETES',
-    inputItems: ['1× Veteran Card', '2× Utility Athletes', '8× Contract Chips'],
-    outputItem: '80,000 Contract Cash',
-    valueLabel: 'Value: Direct economy payout',
-    limit: 'Weekly cap: 5',
-    timer: 'Refresh on Friday',
-    action: 'Cash Out',
+    id: 'c3',
+    name: 'R. Abebe',
+    age: 20,
+    ovr: 85,
+    stroke: 'Distance',
+    nationality: 'Ethiopia',
+    flag: '🇪🇹',
+    club: 'Addis Aqua FC',
+    status: 'free',
+    price: 730000,
+    tier: 'CONTINENTAL',
+    portraitBg: 'linear-gradient(160deg, #1a2e3a 0%, #0c1820 100%)',
+    portraitEmoji: '🏊',
+  },
+  {
+    id: 'c4',
+    name: 'L. Kofi',
+    age: 28,
+    ovr: 93,
+    stroke: 'Butterfly',
+    nationality: 'Kenya',
+    flag: '🇰🇪',
+    club: 'Nairobi Rift Swim',
+    status: 'attached',
+    price: 2400000,
+    tier: 'CONTINENTAL',
+    portraitBg: 'linear-gradient(160deg, #301a08 0%, #180c04 100%)',
+    portraitEmoji: '🏊',
+  },
+
+  // INTERNATIONAL
+  {
+    id: 'i1',
+    name: 'C. Rousseau',
+    age: 25,
+    ovr: 96,
+    stroke: 'Freestyle',
+    nationality: 'France',
+    flag: '🇫🇷',
+    club: 'Paris Natation Elite',
+    status: 'attached',
+    price: 5200000,
+    tier: 'INTERNATIONAL',
+    portraitBg: 'linear-gradient(160deg, #0c1f3a 0%, #060e1c 100%)',
+    portraitEmoji: '🏊',
+  },
+  {
+    id: 'i2',
+    name: 'M. Svensson',
+    age: 22,
+    ovr: 92,
+    stroke: 'Breaststroke',
+    nationality: 'Sweden',
+    flag: '🇸🇪',
+    club: 'Stockholm Aquatics',
+    status: 'free',
+    price: 3100000,
+    tier: 'INTERNATIONAL',
+    portraitBg: 'linear-gradient(160deg, #1a2a3e 0%, #0c1620 100%)',
+    portraitEmoji: '🏊',
+  },
+  {
+    id: 'i3',
+    name: 'Y. Tanaka',
+    age: 27,
+    ovr: 98,
+    stroke: 'IM',
+    nationality: 'Japan',
+    flag: '🇯🇵',
+    club: 'Tokyo Dolphins',
+    status: 'attached',
+    price: 8800000,
+    tier: 'INTERNATIONAL',
+    portraitBg: 'linear-gradient(160deg, #3a0c10 0%, #1c0608 100%)',
+    portraitEmoji: '🏊',
+  },
+  {
+    id: 'i4',
+    name: 'B. Carvalho',
+    age: 21,
+    ovr: 89,
+    stroke: 'Sprint',
+    nationality: 'Brazil',
+    flag: '🇧🇷',
+    club: 'Rio Aqua Stars',
+    status: 'free',
+    price: 1650000,
+    tier: 'INTERNATIONAL',
+    portraitBg: 'linear-gradient(160deg, #0e2e14 0%, #071608 100%)',
+    portraitEmoji: '🏊',
   },
 ];
 
-const sideOptions: SideOption[] = [
-  {
-    id: 'youth-cycle',
-    title: 'Youth Cycle Bundle',
-    details: 'Swap 3 academy cards for a youth refresh pack and scouting intel.',
-    limit: '2 remaining',
-    refresh: 'Resets in 04H',
-    state: 'active',
-    accent: swim26Color.feedback.success,
-  },
-  {
-    id: 'legend-pick',
-    title: 'Legend Pick Exchange',
-    details: 'Trade high-tier finals collectibles for one featured legendary selection.',
-    limit: '0 remaining',
-    refresh: 'Unlocks tomorrow',
-    state: 'locked',
-    accent: swim26Color.featured.premium,
-  },
-  {
-    id: 'speed-flip',
-    title: 'Speed Flip Offer',
-    details: 'Fast-turn conversion from sprint tokens into consumable race boosts.',
-    limit: '1 remaining',
-    refresh: 'Cooldown 18M',
-    state: 'cooldown',
-    accent: swim26Color.accent.primary,
-  },
+const TIERS: { id: MarketTier; label: string }[] = [
+  { id: 'ALL', label: 'All Players' },
+  { id: 'LOCAL', label: 'Local' },
+  { id: 'CONTINENTAL', label: 'Continental' },
+  { id: 'INTERNATIONAL', label: 'International' },
 ];
 
 const panelStyle: React.CSSProperties = {
@@ -125,28 +243,289 @@ const iconButtonStyle: React.CSSProperties = {
   boxShadow: swim26Boundary.elevation.level1,
 };
 
-// 30% reduction scale factor
-const S = 0.7;
+function formatPrice(price: number): string {
+  if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(1)}M`;
+  if (price >= 1_000) return `$${(price / 1_000).toFixed(0)}K`;
+  return `$${price}`;
+}
+
+function OvrTierColor(ovr: number): string {
+  if (ovr >= 95) return swim26Color.featured.premium;
+  if (ovr >= 90) return '#b06aff';
+  if (ovr >= 85) return swim26Color.accent.primary;
+  return swim26Color.text.secondary;
+}
+
+function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; signed: boolean; onSign: () => void }) {
+  const ovrColor = OvrTierColor(athlete.ovr);
+  const isFree = athlete.status === 'free';
+
+  return (
+    <div
+      style={{
+        ...panelStyle,
+        background: 'linear-gradient(180deg, rgba(20, 38, 54, 0.96) 0%, rgba(13, 27, 39, 0.97) 100%)',
+        borderRadius: swim26Boundary.radius.lg,
+        overflow: 'hidden',
+        display: 'grid',
+        gridTemplateRows: '1fr auto',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+      }}
+    >
+      {/* Portrait area */}
+      <div
+        style={{
+          position: 'relative',
+          background: athlete.portraitBg,
+          height: 180,
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+        }}
+      >
+        {/* Shimmer overlay */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(180deg, transparent 40%, rgba(13,27,39,0.82) 100%)',
+            pointerEvents: 'none',
+          }}
+        />
+
+        {/* Athlete silhouette / artwork */}
+        <div
+          style={{
+            fontSize: 96,
+            lineHeight: 1,
+            userSelect: 'none',
+            marginBottom: 8,
+            opacity: 0.85,
+          }}
+        >
+          {athlete.portraitEmoji}
+        </div>
+
+        {/* OVR badge – top left */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            background: 'rgba(6,20,30,0.88)',
+            border: `1.5px solid ${ovrColor}`,
+            borderRadius: swim26Boundary.radius.sm,
+            padding: '3px 8px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            lineHeight: 1,
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          <span
+            style={{
+              fontSize: 20,
+              fontWeight: 900,
+              color: ovrColor,
+              letterSpacing: '-0.02em',
+              fontStyle: 'italic',
+            }}
+          >
+            {athlete.ovr}
+          </span>
+          <span style={{ fontSize: 8, fontWeight: 800, color: swim26Color.text.secondary, letterSpacing: '0.06em' }}>
+            OVR
+          </span>
+        </div>
+
+        {/* Flag – top right */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            width: 34,
+            height: 34,
+            borderRadius: swim26Boundary.radius.sm,
+            background: 'rgba(6,20,30,0.72)',
+            border: `1px solid rgba(255,255,255,0.14)`,
+            display: 'grid',
+            placeItems: 'center',
+            fontSize: 20,
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          {athlete.flag}
+        </div>
+
+        {/* Status badge – bottom left */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 10,
+            left: 10,
+            padding: '2px 8px',
+            borderRadius: swim26Boundary.radius.pill,
+            background: isFree ? 'rgba(54, 198, 144, 0.18)' : 'rgba(255, 158, 87, 0.16)',
+            border: `1px solid ${isFree ? 'rgba(54,198,144,0.40)' : 'rgba(255,158,87,0.36)'}`,
+            fontSize: 9,
+            fontWeight: 800,
+            letterSpacing: '0.07em',
+            color: isFree ? swim26Color.feedback.success : swim26Color.feedback.warning,
+          }}
+        >
+          {isFree ? 'FREE AGENT' : 'CONTRACTED'}
+        </div>
+      </div>
+
+      {/* Card info */}
+      <div style={{ padding: '12px 14px 14px' }}>
+        {/* Name + age */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 900,
+              fontStyle: 'italic',
+              letterSpacing: '-0.01em',
+              color: swim26Color.text.primary,
+              textTransform: 'uppercase',
+            }}
+          >
+            {athlete.name}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: swim26Color.text.secondary,
+              letterSpacing: '0.05em',
+            }}
+          >
+            AGE {athlete.age}
+          </span>
+        </div>
+
+        {/* Stroke */}
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 800,
+            color: swim26Color.accent.primary,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: 8,
+          }}
+        >
+          {athlete.stroke}
+        </div>
+
+        {/* Club */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '5px 8px',
+            borderRadius: swim26Boundary.radius.sm,
+            background: 'rgba(255,255,255,0.04)',
+            border: `1px solid rgba(255,255,255,0.07)`,
+            marginBottom: 10,
+          }}
+        >
+          <span style={{ fontSize: 12, opacity: 0.6 }}>🏟</span>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: swim26Color.text.secondary,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {athlete.club}
+          </span>
+        </div>
+
+        {/* Price + Buy */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <div>
+            <div style={{ fontSize: 8, fontWeight: 700, color: swim26Color.text.secondary, letterSpacing: '0.06em', marginBottom: 1 }}>
+              TRANSFER FEE
+            </div>
+            <div
+              style={{
+                fontSize: 17,
+                fontWeight: 900,
+                fontStyle: 'italic',
+                color: isFree ? swim26Color.feedback.success : swim26Color.featured.premium,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {isFree ? 'Free' : formatPrice(athlete.price)}
+            </div>
+          </div>
+
+          <button
+            onClick={onSign}
+            disabled={signed}
+            style={{
+              padding: '9px 18px',
+              borderRadius: swim26Boundary.radius.md,
+              border: signed
+                ? '1px solid rgba(54,198,144,0.40)'
+                : `1px solid ${swim26Color.accent.primary}`,
+              background: signed
+                ? 'rgba(54,198,144,0.12)'
+                : swim26Color.accent.primary,
+              color: signed ? swim26Color.feedback.success : '#06202A',
+              fontSize: 11,
+              fontWeight: 900,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              cursor: signed ? 'default' : 'pointer',
+              transition: 'all 0.2s',
+              flexShrink: 0,
+            }}
+          >
+            {signed ? '✓ Signed' : 'Sign Now'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function TransferMarket() {
-  const [mode, setMode] = useState<TransferMode>('ITEM_TRANSFER');
-  const [activeCardId, setActiveCardId] = useState<string>(exchangeCards[0]?.id ?? '');
+  const [activeTier, setActiveTier] = useState<MarketTier>('ALL');
+  const [signedIds, setSignedIds] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const activeCards = useMemo(() => {
-    if (mode === 'ITEM_TRANSFER') return exchangeCards;
-    return exchangeCards.map((card, index) => ({
-      ...card,
-      id: `${card.id}-player`,
-      title: index === 0 ? 'Featured Player Transfer' : index === 1 ? 'Starter Squad Transfer' : 'Prospect Cash Transfer',
-      subtitle: index === 0
-        ? 'Exchange completed athlete sets for direct player acquisition credit.'
-        : index === 1
-          ? 'Convert balanced-rated squads into a targeted player transfer slot.'
-          : 'Move unused contracts into a lower-risk player purchase route.',
-      outputItem: index === 0 ? '95,000 Player Transfer Credit' : index === 1 ? 'Starter Player Pick Pack' : 'Prospect Transfer Token',
-      action: index === 0 ? 'Open Route' : index === 1 ? 'Claim Slot' : 'Convert Route',
-    }));
-  }, [mode]);
+  const filtered = athletes.filter((a) => {
+    const matchesTier = activeTier === 'ALL' || a.tier === activeTier;
+    const matchesSearch =
+      searchQuery.trim() === '' ||
+      a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.stroke.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.nationality.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesTier && matchesSearch;
+  });
+
+  const handleSign = (id: string) => {
+    setSignedIds((prev) => new Set(prev).add(id));
+  };
+
+  const tierCounts: Record<MarketTier, number> = {
+    ALL: athletes.length,
+    LOCAL: athletes.filter((a) => a.tier === 'LOCAL').length,
+    CONTINENTAL: athletes.filter((a) => a.tier === 'CONTINENTAL').length,
+    INTERNATIONAL: athletes.filter((a) => a.tier === 'INTERNATIONAL').length,
+  };
 
   return (
     <div
@@ -154,18 +533,20 @@ export function TransferMarket() {
         position: 'absolute',
         inset: 0,
         overflowY: 'auto',
-        background: `radial-gradient(circle at 18% 18%, rgba(74, 201, 214, 0.10), transparent 22%), radial-gradient(circle at 78% 14%, rgba(214, 180, 90, 0.10), transparent 18%), linear-gradient(180deg, #09161F 0%, ${swim26Color.bg.app} 54%, #061018 100%)`,
+        background: `radial-gradient(circle at 18% 18%, rgba(74, 201, 214, 0.10), transparent 22%), radial-gradient(circle at 78% 14%, rgba(214, 180, 90, 0.08), transparent 18%), linear-gradient(180deg, #09161F 0%, ${swim26Color.bg.app} 54%, #061018 100%)`,
         color: swim26Color.text.primary,
         fontFamily: 'Inter, system-ui, sans-serif',
       }}
     >
+      {/* Subtle scanline texture */}
       <div
         style={{
           position: 'fixed',
           inset: 0,
           pointerEvents: 'none',
-          opacity: 0.18,
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.025) 16%, transparent 16.4%, transparent 38%, rgba(255,255,255,0.018) 38.3%, transparent 39%, transparent 62%, rgba(255,255,255,0.02) 62.4%, transparent 63%, transparent 100%)',
+          opacity: 0.12,
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.022) 16%, transparent 16.4%, transparent 62%, rgba(255,255,255,0.018) 62.4%, transparent 63%)',
         }}
       />
 
@@ -175,31 +556,40 @@ export function TransferMarket() {
           zIndex: 1,
           minHeight: '100%',
           padding: `${swim26Layout.safe.top}px ${swim26Layout.safe.right}px ${swim26Layout.safe.bottom}px ${swim26Layout.safe.left}px`,
-          display: 'grid',
-          gridTemplateRows: `${swim26Size.topBar.height}px auto auto`,
-          gap: swim26Space.md,
           maxWidth: swim26Layout.grid.maxWidth,
           margin: '0 auto',
           boxSizing: 'border-box',
+          display: 'grid',
+          gridTemplateRows: 'auto auto auto 1fr',
+          gap: swim26Space.md,
         }}
       >
+        {/* ── HEADER ── */}
         <header
           style={{
             ...panelStyle,
             borderRadius: swim26Boundary.radius.lg,
             background: swim26Color.surface.primary,
             display: 'grid',
-            gridTemplateColumns: '88px minmax(260px, 1fr) auto',
+            gridTemplateColumns: '48px minmax(0, 1fr) auto',
             alignItems: 'center',
             columnGap: swim26Space.md,
             padding: `0 ${swim26Space.md}px`,
+            height: swim26Size.topBar.height,
           }}
         >
           <button style={{ ...iconButtonStyle, width: 48, color: swim26Color.text.primary }}>←</button>
 
-          <div style={{ display: 'grid', rowGap: 4, minWidth: 0 }}>
-            <div style={{ color: swim26Color.accent.primary, fontSize: swim26Type.metadata.fontSize, fontWeight: 700, letterSpacing: '0.08em' }}>
-              MARKET CONVERSION DESK
+          <div style={{ display: 'grid', rowGap: 2, minWidth: 0 }}>
+            <div
+              style={{
+                color: swim26Color.accent.primary,
+                fontSize: swim26Type.metadata.fontSize,
+                fontWeight: 700,
+                letterSpacing: '0.09em',
+              }}
+            >
+              TRANSFER MARKET
             </div>
             <h1
               style={{
@@ -208,284 +598,103 @@ export function TransferMarket() {
                 lineHeight: `${swim26Type.screenTitle.lineHeight}px`,
                 fontWeight: swim26Type.screenTitle.fontWeight,
                 letterSpacing: swim26Type.screenTitle.letterSpacing,
+                fontStyle: 'italic',
               }}
             >
-              Transfer Market
+              Sign Players
             </h1>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: swim26Space.sm }}>
-            {[
-              { label: 'Search', icon: '⌕' },
-              { label: 'Filters', icon: '☰' },
-              { label: 'Help', icon: '?' },
-            ].map((item) => (
-              <button key={item.label} aria-label={item.label} style={iconButtonStyle}>
-                <span style={{ fontSize: swim26Size.icon.md }}>{item.icon}</span>
-              </button>
-            ))}
-          </div>
-        </header>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(200px, 0.23fr) minmax(0, 0.47fr) minmax(200px, 0.30fr)',
-            gap: swim26Space.md,
-            alignItems: 'start',
-          }}
-        >
-          <aside
-            style={{
-              ...panelStyle,
-              background: 'linear-gradient(180deg, rgba(20, 38, 54, 0.96) 0%, rgba(13, 27, 39, 0.94) 100%)',
-              display: 'grid',
-              gridTemplateRows: 'auto auto 1fr auto',
-              gap: Math.round(swim26Space.md * S),
-              padding: Math.round(swim26Space.lg * S),
-            }}
-          >
+            {/* Search input inline */}
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: `${Math.round(76 * S)}px 1fr`,
-                gap: Math.round(swim26Space.md * S),
+                display: 'flex',
                 alignItems: 'center',
-                paddingBottom: Math.round(swim26Space.md * S),
-                borderBottom: `${swim26Boundary.border.thin}px solid rgba(255,255,255,0.08)`,
-              }}
-            >
-              <div
-                style={{
-                  width: Math.round(76 * S),
-                  height: Math.round(96 * S),
-                  borderRadius: 13,
-                  border: `${swim26Boundary.border.strong}px solid rgba(74, 201, 214, 0.26)`,
-                  background: 'linear-gradient(180deg, rgba(74, 201, 214, 0.14), rgba(13, 27, 39, 0.30))',
-                  boxShadow: swim26Boundary.elevation.level2,
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontSize: Math.round(30 * S),
-                }}
-              >
-                🧑‍💼
-              </div>
-              <div>
-                <div style={{ color: swim26Color.featured.premium, fontSize: Math.round(swim26Type.metadata.fontSize * S), fontWeight: 700, letterSpacing: '0.08em' }}>
-                  ECONOMY MANAGER
-                </div>
-                <div style={{ fontSize: Math.round(swim26Type.sectionTitle.fontSize * S), lineHeight: '16px', fontWeight: 700, marginTop: 3 }}>Lena Mercer</div>
-                <div style={{ color: swim26Color.text.secondary, fontSize: Math.round(swim26Type.helper.fontSize * S), marginTop: 3 }}>Transfer Efficiency Lead</div>
-              </div>
-            </div>
-
-            <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: Math.round(swim26Space.md * S) }}>
-              <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: swim26Color.text.secondary, letterSpacing: '0.06em', marginBottom: 6 }}>
-                HELP PANEL
-              </div>
-              <div style={{ fontSize: Math.round(swim26Type.cardTitle.fontSize * S), lineHeight: '16px', fontWeight: 600, marginBottom: 7 }}>
-                Choose a route, confirm the required athlete set, then compare the output value before locking the conversion.
-              </div>
-              <div style={{ fontSize: Math.round(13 * S), lineHeight: '13px', color: swim26Color.text.secondary }}>
-                Main rail cards show the exact input stack, conversion direction, result, cap, timer, and ratings tier so the trade is understandable in seconds.
-              </div>
-            </div>
-
-            <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: Math.round(swim26Space.md * S), display: 'grid', gap: Math.round(swim26Space.sm * S), alignContent: 'start' }}>
-              {[
-                { label: 'Budget Reserve', value: '182,000', accent: swim26Color.feedback.success },
-                { label: 'Open Conversions', value: '03', accent: swim26Color.accent.primary },
-                { label: 'Best Output', value: 'Elite Scout', accent: swim26Color.featured.premium },
-              ].map((stat) => (
-                <div key={stat.label} style={{ display: 'grid', gap: 2, paddingBottom: Math.round(swim26Space.sm * S), borderBottom: `${swim26Boundary.border.thin}px solid rgba(255,255,255,0.06)` }}>
-                  <div style={{ fontSize: Math.round(swim26Type.helper.fontSize * S), color: swim26Color.text.secondary }}>{stat.label}</div>
-                  <div style={{ fontSize: Math.round(22 * S), lineHeight: '17px', fontWeight: 800, color: stat.accent }}>{stat.value}</div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              style={{
-                minHeight: Math.round(swim26Size.buttons.standard.height * S),
-                borderRadius: swim26Boundary.radius.md,
-                border: `${swim26Boundary.border.thin}px solid rgba(74, 201, 214, 0.28)`,
-                background: 'rgba(74, 201, 214, 0.12)',
-                color: swim26Color.accent.primary,
-                fontSize: Math.round(swim26Type.buttonLabel.fontSize * S),
-                fontWeight: swim26Type.buttonLabel.fontWeight,
-                letterSpacing: '0.02em',
+                gap: 8,
+                padding: '0 12px',
+                height: swim26Components.utilityIconButton.preferredSize,
+                borderRadius: swim26Boundary.radius.sm,
+                border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+                background: swim26Color.surface.secondary,
                 boxShadow: swim26Boundary.elevation.level1,
               }}
             >
-              View conversion guide
-            </button>
-          </aside>
-
-          <section style={{ display: 'grid', gap: Math.round(swim26Space.md * S), alignContent: 'start' }}>
-            {activeCards.map((card) => {
-              const active = activeCardId === card.id;
-              return (
-                <button
-                  key={card.id}
-                  onClick={() => setActiveCardId(card.id)}
-                  style={{
-                    ...panelStyle,
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: Math.round(swim26Space.lg * S),
-                    border: active ? swim26StateRules.active.border : `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
-                    background: active
-                      ? 'linear-gradient(180deg, rgba(28, 50, 69, 0.82) 0%, rgba(20, 38, 54, 0.90) 100%)'
-                      : 'linear-gradient(180deg, rgba(20, 38, 54, 0.92) 0%, rgba(13, 27, 39, 0.94) 100%)',
-                    boxShadow: active ? swim26Boundary.elevation.level2 : swim26Boundary.elevation.level1,
-                    display: 'grid',
-                    gridTemplateRows: 'auto auto auto',
-                    gap: Math.round(swim26Space.md * S),
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: Math.round(swim26Space.md * S), alignItems: 'start', flexWrap: 'wrap' }}>
-                    <div>
-                      <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: card.featured ? swim26Color.featured.premium : swim26Color.accent.primary, fontWeight: 700, letterSpacing: '0.08em' }}>
-                        {card.ratingTier}
-                      </div>
-                      <div style={{ fontSize: Math.round(24 * S), lineHeight: '20px', fontWeight: 800, marginTop: 3 }}>{card.title}</div>
-                      <div style={{ fontSize: Math.round(13 * S), lineHeight: '13px', color: swim26Color.text.secondary, marginTop: 4, maxWidth: 520 }}>{card.subtitle}</div>
-                    </div>
-                    <div style={{ display: 'grid', gap: Math.round(swim26Space.xs * S), justifyItems: 'end' }}>
-                      <span style={{ height: Math.round(swim26Size.badge.height * S), padding: `0 ${Math.round(swim26Space.sm * S)}px`, borderRadius: swim26Boundary.radius.pill, background: 'rgba(255, 158, 87, 0.12)', color: swim26Color.feedback.warning, display: 'inline-flex', alignItems: 'center', fontSize: Math.round(10 * S), fontWeight: 800 }}>{card.timer}</span>
-                      <span style={{ height: Math.round(swim26Size.badge.height * S), padding: `0 ${Math.round(swim26Space.sm * S)}px`, borderRadius: swim26Boundary.radius.pill, background: 'rgba(255,255,255,0.06)', color: swim26Color.text.secondary, display: 'inline-flex', alignItems: 'center', fontSize: Math.round(10 * S), fontWeight: 700 }}>{card.limit}</span>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: `1fr ${Math.round(76 * S)}px 1fr`, gap: Math.round(swim26Space.md * S), alignItems: 'stretch' }}>
-                    <div style={{ ...panelStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none', padding: Math.round(swim26Space.md * S), display: 'grid', gap: Math.round(swim26Space.sm * S) }}>
-                      <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: swim26Color.text.secondary, letterSpacing: '0.06em' }}>REQUIRED INPUTS</div>
-                      {card.inputItems.map((input) => (
-                        <div key={input} style={{ display: 'flex', alignItems: 'center', gap: Math.round(swim26Space.sm * S), minHeight: Math.round(28 * S) }}>
-                          <span style={{ width: Math.round(18 * S), height: Math.round(18 * S), borderRadius: 9, background: 'rgba(74, 201, 214, 0.12)', border: `1px solid rgba(74, 201, 214, 0.24)`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: swim26Color.accent.primary, fontSize: Math.round(11 * S), flexShrink: 0 }}>•</span>
-                          <span style={{ fontSize: Math.round(14 * S), lineHeight: '13px', color: swim26Color.text.primary }}>{input}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div style={{ display: 'grid', alignContent: 'center', justifyItems: 'center', gap: Math.round(swim26Space.sm * S) }}>
-                      <div style={{ width: Math.round(56 * S), height: Math.round(56 * S), borderRadius: 13, background: 'rgba(74, 201, 214, 0.12)', border: `${swim26Boundary.border.thin}px solid rgba(74, 201, 214, 0.30)`, display: 'grid', placeItems: 'center', color: swim26Color.accent.primary, fontSize: Math.round(28 * S), boxShadow: swim26Boundary.elevation.level1 }}>→</div>
-                      <div style={{ fontSize: Math.round(11 * S), lineHeight: '10px', color: swim26Color.text.secondary, letterSpacing: '0.06em', textAlign: 'center' }}>CONVERT</div>
-                    </div>
-
-                    <div style={{ ...panelStyle, background: 'rgba(214, 180, 90, 0.10)', border: `${swim26Boundary.border.thin}px solid rgba(214, 180, 90, 0.26)`, boxShadow: 'none', padding: Math.round(swim26Space.md * S), display: 'grid', gap: Math.round(swim26Space.sm * S), alignContent: 'start' }}>
-                      <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: swim26Color.featured.premium, letterSpacing: '0.06em' }}>RESULTING OUTPUT</div>
-                      <div style={{ fontSize: Math.round(20 * S), lineHeight: '17px', fontWeight: 800, color: swim26Color.featured.premium }}>{card.outputItem}</div>
-                      <div style={{ fontSize: Math.round(13 * S), lineHeight: '13px', color: swim26Color.text.secondary }}>{card.valueLabel}</div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: Math.round(swim26Space.md * S), alignItems: 'center', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', gap: Math.round(swim26Space.sm * S), flexWrap: 'wrap' }}>
-                      {['Value locked', 'Athlete ratings verified', 'Trade path clear'].map((chip, index) => (
-                        <span key={chip} style={{ height: Math.round(swim26Size.statusChip.height * S), padding: `0 ${Math.round(swim26Space.sm * S)}px`, borderRadius: swim26Boundary.radius.pill, background: index === 0 ? 'rgba(214, 180, 90, 0.12)' : 'rgba(255,255,255,0.06)', color: index === 0 ? swim26Color.featured.premium : swim26Color.text.secondary, display: 'inline-flex', alignItems: 'center', fontSize: Math.round(11 * S), fontWeight: 700 }}>{chip}</span>
-                      ))}
-                    </div>
-                    <button
-                      style={{
-                        minWidth: Math.round(swim26Size.buttons.cta.minWidth * S),
-                        minHeight: Math.round(swim26Size.buttons.cta.height * S),
-                        padding: `0 ${Math.round(swim26Space.lg * S)}px`,
-                        borderRadius: swim26Boundary.radius.md,
-                        border: `${swim26Boundary.border.thin}px solid ${swim26Color.accent.primary}`,
-                        background: swim26Color.accent.primary,
-                        color: '#06202A',
-                        fontSize: Math.round(swim26Type.buttonLabel.fontSize * S),
-                        fontWeight: swim26Type.buttonLabel.fontWeight,
-                        letterSpacing: '0.04em',
-                        boxShadow: swim26Boundary.elevation.level2,
-                      }}
-                    >
-                      {card.action}
-                    </button>
-                  </div>
-                </button>
-              );
-            })}
-          </section>
-
-          <aside style={{ display: 'grid', gap: Math.round(swim26Space.md * S), alignContent: 'start' }}>
-            <div style={{ ...panelStyle, padding: Math.round(swim26Space.md * S), background: swim26Color.surface.primary }}>
-              <div style={{ fontSize: Math.round(swim26Type.metadata.fontSize * S), color: swim26Color.text.secondary, letterSpacing: '0.06em', marginBottom: 4 }}>SECONDARY OPTIONS</div>
-              <div style={{ fontSize: Math.round(swim26Type.sectionTitle.fontSize * S), lineHeight: '16px', fontWeight: 700 }}>Quick transfer routes</div>
+              <span style={{ fontSize: swim26Size.icon.md, color: swim26Color.text.secondary, lineHeight: 1 }}>⌕</span>
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Name, stroke, nation…"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  outline: 'none',
+                  color: swim26Color.text.primary,
+                  fontSize: swim26Type.helper.fontSize,
+                  width: 160,
+                  fontFamily: 'inherit',
+                }}
+              />
             </div>
 
-            {sideOptions.map((option) => {
-              const locked = option.state === 'locked';
-              const cooldown = option.state === 'cooldown';
-              return (
-                <div
-                  key={option.id}
-                  style={{
-                    ...panelStyle,
-                    padding: Math.round(swim26Space.md * S),
-                    background: locked ? 'rgba(255,255,255,0.02)' : swim26Color.surface.secondary,
-                    opacity: locked ? 0.72 : 1,
-                    display: 'grid',
-                    gap: Math.round(swim26Space.sm * S),
-                    minHeight: Math.round(152 * S),
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: Math.round(swim26Space.sm * S), alignItems: 'start' }}>
-                    <div style={{ fontSize: Math.round(swim26Type.cardTitle.fontSize * S), lineHeight: '14px', fontWeight: 700 }}>{option.title}</div>
-                    <span style={{ height: Math.round(swim26Size.badge.height * S), padding: `0 ${Math.round(swim26Space.sm * S)}px`, borderRadius: swim26Boundary.radius.pill, background: `${option.accent}20`, color: option.accent, display: 'inline-flex', alignItems: 'center', fontSize: Math.round(10 * S), fontWeight: 800, flexShrink: 0 }}>
-                      {locked ? 'LOCKED' : cooldown ? 'COOLDOWN' : 'ACTIVE'}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: Math.round(13 * S), lineHeight: '13px', color: swim26Color.text.secondary }}>{option.details}</div>
-                  <div style={{ display: 'grid', gap: 4 }}>
-                    <div style={{ fontSize: Math.round(swim26Type.helper.fontSize * S), color: swim26Color.text.secondary }}>{option.limit}</div>
-                    <div style={{ fontSize: Math.round(swim26Type.helper.fontSize * S), color: locked ? swim26Color.feedback.warning : swim26Color.text.secondary }}>{option.refresh}</div>
-                  </div>
-                  <button
-                    style={{
-                      marginTop: 'auto',
-                      minHeight: Math.round(swim26Size.buttons.standard.height * S),
-                      borderRadius: swim26Boundary.radius.md,
-                      border: `${swim26Boundary.border.thin}px solid ${locked ? 'rgba(255,255,255,0.12)' : option.accent}66`,
-                      background: locked ? 'rgba(255,255,255,0.03)' : `${option.accent}18`,
-                      color: locked ? swim26Color.text.disabled : option.accent,
-                      fontSize: Math.round(swim26Type.buttonLabel.fontSize * S),
-                      fontWeight: swim26Type.buttonLabel.fontWeight,
-                      letterSpacing: '0.02em',
-                    }}
-                  >
-                    {locked ? 'Unavailable' : cooldown ? 'Wait Reset' : 'Inspect'}
-                  </button>
-                </div>
-              );
-            })}
-          </aside>
+            <button aria-label="Filters" style={iconButtonStyle}>
+              <span style={{ fontSize: swim26Size.icon.md }}>☰</span>
+            </button>
+          </div>
+        </header>
+
+        {/* ── STATS ROW ── */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: swim26Space.sm,
+          }}
+        >
+          {[
+            { label: 'Available', value: athletes.filter((a) => a.status === 'free').length, accent: swim26Color.feedback.success },
+            { label: 'Contracted', value: athletes.filter((a) => a.status === 'attached').length, accent: swim26Color.feedback.warning },
+            { label: 'Signed by You', value: signedIds.size, accent: swim26Color.accent.primary },
+            { label: 'Total Listed', value: athletes.length, accent: swim26Color.text.secondary },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              style={{
+                ...panelStyle,
+                padding: `${swim26Space.sm}px ${swim26Space.md}px`,
+                background: swim26Color.surface.primary,
+                display: 'grid',
+                gap: 3,
+              }}
+            >
+              <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary, letterSpacing: '0.05em' }}>
+                {stat.label}
+              </div>
+              <div style={{ fontSize: 26, fontWeight: 900, fontStyle: 'italic', color: stat.accent, lineHeight: 1 }}>
+                {stat.value}
+              </div>
+            </div>
+          ))}
         </div>
 
+        {/* ── TIER FILTER TABS ── */}
         <nav
           style={{
             ...panelStyle,
             borderRadius: swim26Boundary.radius.lg,
             background: swim26Color.surface.primary,
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            gridTemplateColumns: 'repeat(4, 1fr)',
             gap: swim26Space.xs,
             padding: swim26Space.xs,
           }}
         >
-          {[
-            { id: 'ITEM_TRANSFER' as TransferMode, label: 'Item transfer' },
-            { id: 'PLAYER_TRANSFER' as TransferMode, label: 'Player transfer' },
-          ].map((tab) => {
-            const active = mode === tab.id;
+          {TIERS.map((tier) => {
+            const active = activeTier === tier.id;
             return (
               <button
-                key={tab.id}
-                onClick={() => {
-                  setMode(tab.id);
-                  setActiveCardId(tab.id === 'ITEM_TRANSFER' ? exchangeCards[0].id : `${exchangeCards[0].id}-player`);
-                }}
+                key={tier.id}
+                onClick={() => setActiveTier(tier.id)}
                 style={{
                   position: 'relative',
                   borderRadius: swim26Boundary.radius.md,
@@ -498,24 +707,73 @@ export function TransferMarket() {
                   fontWeight: swim26Type.buttonLabel.fontWeight,
                   letterSpacing: '0.03em',
                   minHeight: swim26Size.tab.height,
+                  cursor: 'pointer',
+                  transition: 'all 0.18s',
+                  gap: 2,
                 }}
               >
                 <span
                   style={{
                     position: 'absolute',
                     top: 0,
-                    left: '24%',
-                    right: '24%',
-                    height: 3,
+                    left: '20%',
+                    right: '20%',
+                    height: 2.5,
                     borderRadius: 999,
                     background: active ? swim26Color.accent.primary : 'transparent',
+                    transition: 'background 0.18s',
                   }}
                 />
-                {tab.label}
+                <span>{tier.label}</span>
+                <span
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    color: active ? swim26Color.accent.primary : swim26Color.text.secondary,
+                    letterSpacing: '0.06em',
+                    opacity: 0.8,
+                  }}
+                >
+                  {tierCounts[tier.id]} PLAYERS
+                </span>
               </button>
             );
           })}
         </nav>
+
+        {/* ── PLAYER GRID ── */}
+        <section>
+          {filtered.length === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: `${swim26Space.xl}px 0`,
+                color: swim26Color.text.secondary,
+                fontSize: swim26Type.cardTitle.fontSize,
+                fontWeight: 600,
+              }}
+            >
+              No players found matching your search.
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: swim26Space.md,
+              }}
+            >
+              {filtered.map((athlete) => (
+                <AthleteCard
+                  key={athlete.id}
+                  athlete={athlete}
+                  signed={signedIds.has(athlete.id)}
+                  onSign={() => handleSign(athlete.id)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
