@@ -114,16 +114,42 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   LANDSCAPE ENFORCEMENT
-   Hides everything except the landscape guard when in portrait.
-   The guard JS handles the actual overlay — this is a CSS safety net.
+   PORTRAIT / LANDSCAPE — no CSS enforcement.
+   Portrait mode is fully supported; the LandscapeGuard component handles
+   the optional rotate-device overlay for the Babylon race canvas when needed.
    ───────────────────────────────────────────────────────────────────────────── */
 
-@media (orientation: portrait) {
-  /* Allow the landscape guard overlay to display; blur the content behind */
-  #root > * > *:not([data-landscape-guard]) {
-    pointer-events: none;
-  }
+/* ─────────────────────────────────────────────────────────────────────────────
+   GLOBAL MOBILE / TOUCH RULES
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Remove tap flash on every interactive element */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; /* disable 300ms double-tap delay */
+}
+
+/* GPU layer hint for all animating buttons/cards (avoids paint jank on mobile) */
+button,
+[role="button"] {
+  will-change: transform;
+}
+
+/* Hard no-horizontal-scroll in every sub-container */
+html,
+body,
+#root {
+  overflow-x: hidden;
+}
+
+/* Loading spinner used in PreRaceSetupScreen CTA */
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -710,4 +736,109 @@ body {
   padding-right:  env(safe-area-inset-right,  0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-left:   env(safe-area-inset-left,   0px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SWIM26 RESPONSIVE UTILITIES
+   Screen-specific media-query overrides used across PlayScreen, PreRaceSetup,
+   PreMatchScreen and RaceGameplayHUD.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── PlayScreen mode cards ────────────────────────────────────────────────── */
+
+/* Suppress hover lift on true touch devices (no pointer hover capability) */
+@media (hover: none) {
+  .swim26-mode-card {
+    transform: none !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.50) !important;
+  }
+}
+
+/* Portrait phone: 1-column grid, compressed cards */
+@media (max-width: 480px) {
+  .swim26-mode-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Compact card — 80px target handled in JS via useMediaQuery */
+  .swim26-mode-card {
+    min-height: 0 !important;
+  }
+}
+
+/* Landscape phone: 2-column grid, reduced gap */
+@media (max-width: 896px) and (orientation: landscape) {
+  .swim26-mode-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* ── PreRaceSetupScreen param buttons ─────────────────────────────────────── */
+
+/* Portrait phones: distance grid drops from 3 → 2 columns */
+@media (max-width: 480px) {
+  .swim26-param-grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ── PreMatchScreen swimmer grid ──────────────────────────────────────────── */
+
+/* Default (desktop / tablet / landscape): 4 × 2 */
+.swim26-lineup-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows:    repeat(2, 1fr);
+  gap: 8px;
+  flex: 1;
+  overflow: hidden;
+  padding: 10px 12px 6px;
+}
+
+/* Portrait phone: 2 × 4 */
+@media (max-width: 480px) {
+  .swim26-lineup-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows:    repeat(4, 1fr);
+  }
+}
+
+/* ── RaceGameplayHUD ──────────────────────────────────────────────────────── */
+
+/* Portrait phone: compress the bottom stroke-control panels */
+@media (max-width: 480px) {
+  .swim26-stroke-zone {
+    height: 120px !important;
+  }
+
+  .swim26-stroke-btn {
+    width: 72px !important;
+  }
+
+  .swim26-controls-gap {
+    gap: 4px !important;
+  }
+
+  /* Hide the race-progress centre bar on very narrow screens */
+  .swim26-race-progress {
+    display: none !important;
+  }
+
+  /* Shrink user-status chip */
+  .swim26-user-status {
+    display: none !important;
+  }
+}
+
+/* Landscape phone: modest size reduction */
+@media (max-width: 896px) and (orientation: landscape) {
+  .swim26-stroke-zone {
+    height: 140px !important;
+  }
+
+  .swim26-stroke-btn {
+    width: 100px !important;
+  }
 }

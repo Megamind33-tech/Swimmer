@@ -1,6 +1,13 @@
 /**
  * Race Gameplay HUD - SWIM 26 Material Design 3
- * On-screen HUD during active race with stroke controls and meters
+ * On-screen HUD during active race with stroke controls and meters.
+ *
+ * Mobile responsiveness:
+ *   - Portrait phone (≤480px): stroke zones compressed (w-24 each), progress
+ *     bar and user-status chip hidden, stamina ring smaller
+ *   - Landscape phone (≤896px landscape): modest size reduction (w-28)
+ *   - Tablet / Desktop: original sizing (w-48, h-32 ring)
+ *   - SVG stamina ring uses viewBox="0 0 128 128" so it scales with container
  */
 
 import React, { useState } from 'react';
@@ -27,174 +34,197 @@ export const RaceGameplayHUD: React.FC<RaceGameplayHUDProps> = ({
   const [showControls, setShowControls] = useState(true);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 flex flex-col justify-between p-6">
-      {/* Top HUD: Progress & Race Info */}
-      <div className="flex justify-between items-start gap-4 pointer-events-auto">
+    <div className="fixed inset-0 pointer-events-none z-50 flex flex-col justify-between p-3 sm:p-6">
+
+      {/* ── TOP HUD: Progress & Race Info ─────────────────────────────────── */}
+      <div className="flex justify-between items-start gap-2 sm:gap-4 pointer-events-auto">
+
         {/* Split Timer & Rank */}
-        <div className="glass-panel p-4 flex flex-col gap-1 skew-12 border-l-4 border-primary">
-          <div className="flex items-center gap-2">
-            <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-secondary">⏰</span>
-            <span className="font-headline italic text-2xl text-on-surface tracking-tighter">{currentTime}</span>
+        <div className="glass-panel p-2 sm:p-4 flex flex-col gap-1 skew-12 border-l-4 border-primary">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <span style={{fontSize:'18px', lineHeight:1, display:'inline-block'}} className="text-secondary">⏰</span>
+            <span className="font-headline italic text-lg sm:text-2xl text-on-surface tracking-tighter">{currentTime}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="font-label text-[10px] tracking-widest text-on-surface-variant uppercase">CURRENT SPLIT</span>
-            <span className="font-headline italic text-secondary text-xl">{currentPosition}nd</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-label text-[9px] sm:text-[10px] tracking-widest text-on-surface-variant uppercase">SPLIT</span>
+            <span className="font-headline italic text-secondary text-base sm:text-xl">{currentPosition}nd</span>
           </div>
         </div>
 
-        {/* Race Progress Bar */}
-        <div className="flex-1 max-w-xl glass-panel h-14 skew-12 relative flex items-center px-6 overflow-hidden">
+        {/* Race Progress Bar — hidden on portrait phones (swim26-race-progress) */}
+        <div className="flex-1 max-w-xl glass-panel h-10 sm:h-14 skew-12 relative items-center px-3 sm:px-6 overflow-hidden swim26-race-progress hidden sm:flex">
           <div className="absolute inset-0 bg-surface-container-low/40" />
           <div className="w-full h-1.5 bg-surface-container-highest relative">
-            {/* Swimmer Progress Marker */}
             <div className="absolute h-full bg-secondary shadow-[0_0_15px_rgba(191,202,253,0.5)]" style={{width: `${(totalDistance / 50) * 100}%`}} />
-            {/* Competitor Markers */}
             <div className="absolute h-4 w-1 bg-primary -top-1.5" style={{left: '52%'}} />
             <div className="absolute h-4 w-1 bg-on-surface-variant -top-1.5 opacity-50" style={{left: '45%'}} />
           </div>
-          <div className="absolute bottom-1 right-6 flex items-baseline gap-1">
-            <span className="font-headline italic text-lg">{totalDistance}</span>
+          <div className="absolute bottom-1 right-3 sm:right-6 flex items-baseline gap-1">
+            <span className="font-headline italic text-base sm:text-lg">{totalDistance}</span>
             <span className="font-label text-[10px] text-on-surface-variant">/ 50m</span>
           </div>
         </div>
 
-        {/* User Status */}
-        <div className="glass-panel px-6 py-2 skew-12 border-r-4 border-secondary pointer-events-auto">
-          <div className="flex items-center gap-3">
+        {/* User Status — hidden on portrait phones (swim26-user-status) */}
+        <div className="glass-panel px-3 sm:px-6 py-2 skew-12 border-r-4 border-secondary pointer-events-auto swim26-user-status hidden sm:block">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="text-right">
-              <p className="font-label text-[10px] tracking-[0.2em] text-on-surface-variant">STATUS</p>
-              <p className="font-headline italic text-xl text-on-surface">LVL 99</p>
+              <p className="font-label text-[9px] sm:text-[10px] tracking-[0.2em] text-on-surface-variant">STATUS</p>
+              <p className="font-headline italic text-lg sm:text-xl text-on-surface">LVL 99</p>
             </div>
-            <div className="h-10 w-10 bg-primary-container flex items-center justify-center -skew-x-12 rounded">
-              <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-on-primary-container">👤</span>
+            <div className="h-8 w-8 sm:h-10 sm:w-10 bg-primary-container flex items-center justify-center -skew-x-12 rounded">
+              <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="text-on-primary-container">👤</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Central Action: HUD Brackets (Focus HUD) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-64 pointer-events-none">
-        {/* Corner Brackets */}
-        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-secondary/50" />
-        <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-secondary/50" />
-        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-secondary/50" />
-        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-secondary/50" />
-        {/* Velocity Vector Line */}
-        <div className="absolute left-1/2 bottom-0 h-16 w-[1px] bg-gradient-to-t from-secondary to-transparent" />
+      {/* ── Central HUD Brackets (Focus HUD) ─────────────────────────────── */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-40 sm:w-96 sm:h-64 pointer-events-none">
+        <div className="absolute top-0 left-0 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-l-2 border-secondary/50" />
+        <div className="absolute top-0 right-0 w-6 h-6 sm:w-8 sm:h-8 border-t-2 border-r-2 border-secondary/50" />
+        <div className="absolute bottom-0 left-0 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-l-2 border-secondary/50" />
+        <div className="absolute bottom-0 right-0 w-6 h-6 sm:w-8 sm:h-8 border-b-2 border-r-2 border-secondary/50" />
+        <div className="absolute left-1/2 bottom-0 h-10 sm:h-16 w-[1px] bg-gradient-to-t from-secondary to-transparent" />
       </div>
 
-      {/* Bottom Controls & Meters */}
+      {/* ── Bottom Controls & Meters ──────────────────────────────────────── */}
       {showControls && (
-        <div className="flex justify-between items-end gap-12 h-48 pointer-events-auto">
-          {/* Left: Stroke Control */}
-          <div className="h-full w-48 glass-panel border-t-4 border-primary/30 flex flex-col items-center justify-center group active:bg-primary/20 transition-colors">
+        <div
+          className="swim26-controls-gap flex justify-between items-end gap-2 sm:gap-12 pointer-events-auto"
+          style={{ height: 'auto' }}
+        >
+          {/* Left Stroke Control */}
+          <div
+            className="swim26-stroke-btn swim26-stroke-zone glass-panel border-t-4 border-primary/30 flex flex-col items-center justify-center active:bg-primary/20 transition-colors relative"
+            style={{
+              width: undefined,       /* controlled by CSS classes */
+              height: '140px',
+              minWidth: '72px',
+            }}
+          >
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-primary">☝</span>
+              <span style={{fontSize:'40px', lineHeight:1, display:'inline-block'}} className="text-primary">☝</span>
             </div>
-            <p className="font-label text-[10px] tracking-[0.3em] text-primary mb-2">LEFT STROKE</p>
-            <div className="w-12 h-1 bg-primary/20 overflow-hidden">
+            <p className="font-label text-[9px] sm:text-[10px] tracking-[0.3em] text-primary mb-2">L STROKE</p>
+            <div className="w-8 sm:w-12 h-1 bg-primary/20 overflow-hidden">
               <div className="h-full bg-primary w-1/2" />
             </div>
           </div>
 
           {/* Center: Power & Stamina Meters */}
-          <div className="flex-1 flex flex-col items-center justify-end pb-4 gap-6">
-            {/* Circular Stamina Meter */}
-            <div className="relative w-32 h-32 flex items-center justify-center">
-              <svg className="w-full h-full -rotate-90">
-                <circle className="text-surface-container-highest" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" strokeWidth="8" />
+          <div className="flex-1 flex flex-col items-center justify-end pb-2 sm:pb-4 gap-3 sm:gap-6">
+            {/* Circular Stamina Meter — viewBox makes it scale with container */}
+            <div className="relative w-20 h-20 sm:w-32 sm:h-32 flex items-center justify-center">
+              <svg
+                className="w-full h-full -rotate-90"
+                viewBox="0 0 128 128"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Track */}
+                <circle
+                  className="text-surface-container-highest"
+                  cx="64" cy="64"
+                  fill="transparent"
+                  r="58"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                />
+                {/* Progress */}
                 <circle
                   className="text-secondary"
-                  cx="64"
-                  cy="64"
+                  cx="64" cy="64"
                   fill="transparent"
                   r="58"
                   stroke="currentColor"
                   strokeDasharray="364"
                   strokeDashoffset={Math.max(0, 364 - (stamina / 100) * 364)}
                   strokeWidth="8"
-                  style={{filter: 'drop-shadow(0 0 10px #bfcafd)'}}
+                  style={{ filter: 'drop-shadow(0 0 10px #bfcafd)' }}
                 />
               </svg>
               <div className="absolute flex flex-col items-center">
-                <span className="font-headline italic text-3xl text-on-surface">{stamina}%</span>
-                <span className="font-label text-[8px] tracking-widest text-on-surface-variant">STAMINA</span>
+                <span className="font-headline italic text-xl sm:text-3xl text-on-surface">{stamina}%</span>
+                <span className="font-label text-[7px] sm:text-[8px] tracking-widest text-on-surface-variant">STAMINA</span>
               </div>
             </div>
 
             {/* Stroke Power Gauge */}
-            <div className="w-full max-w-md flex flex-col gap-2">
-              <div className="flex justify-between items-end px-2">
-                <span className="font-label text-[10px] tracking-widest text-primary">POWER OUTPUT</span>
-                <span className="font-headline italic text-lg text-primary">MAX STRETCH</span>
+            <div className="w-full max-w-xs sm:max-w-md flex flex-col gap-1 sm:gap-2">
+              <div className="flex justify-between items-end px-1 sm:px-2">
+                <span className="font-label text-[9px] sm:text-[10px] tracking-widest text-primary">POWER</span>
+                <span className="font-headline italic text-sm sm:text-lg text-primary">MAX</span>
               </div>
-              <div className="h-4 bg-surface-container-highest flex p-0.5 skew-12">
+              <div className="h-3 sm:h-4 bg-surface-container-highest flex p-0.5 skew-12">
                 <div className="h-full bg-primary w-[85%] shadow-[0_0_15px_rgba(129,236,255,0.3)]" />
                 <div className="h-full bg-white/10 w-[15%] ml-0.5" />
               </div>
             </div>
           </div>
 
-          {/* Right: Stroke Control */}
-          <div className="h-full w-48 glass-panel border-t-4 border-secondary/30 flex flex-col items-center justify-center group active:bg-secondary/20 transition-colors">
+          {/* Right Stroke Control */}
+          <div
+            className="swim26-stroke-btn swim26-stroke-zone glass-panel border-t-4 border-secondary/30 flex flex-col items-center justify-center active:bg-secondary/20 transition-colors relative"
+            style={{
+              height: '140px',
+              minWidth: '72px',
+            }}
+          >
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-secondary">☝</span>
+              <span style={{fontSize:'40px', lineHeight:1, display:'inline-block'}} className="text-secondary">☝</span>
             </div>
-            <p className="font-label text-[10px] tracking-[0.3em] text-secondary mb-2">RIGHT STROKE</p>
-            <div className="w-12 h-1 bg-secondary/20 overflow-hidden">
+            <p className="font-label text-[9px] sm:text-[10px] tracking-[0.3em] text-secondary mb-2">R STROKE</p>
+            <div className="w-8 sm:w-12 h-1 bg-secondary/20 overflow-hidden">
               <div className="h-full bg-secondary w-3/4" />
             </div>
           </div>
         </div>
       )}
 
-      {/* Performance Ticker at Bottom */}
-      <div className="fixed bottom-0 left-0 w-full bg-surface-container-lowest/80 h-6 border-t border-outline-variant/15 overflow-hidden flex items-center z-40 pointer-events-auto">
-        <div className="flex whitespace-nowrap gap-12 px-4 animate-scroll">
+      {/* ── Performance Ticker ────────────────────────────────────────────── */}
+      <div className="fixed bottom-0 left-0 w-full bg-surface-container-lowest/80 h-5 sm:h-6 border-t border-outline-variant/15 overflow-hidden flex items-center z-40 pointer-events-auto">
+        <div className="flex whitespace-nowrap gap-8 sm:gap-12 px-4 animate-ticker">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-secondary rounded-full" />
-            <span className="font-label text-[10px] tracking-tighter text-on-surface-variant uppercase">LANE 4: MCKENZIE (USA) - 0.2s LEAD</span>
+            <span className="font-label text-[9px] sm:text-[10px] tracking-tighter text-on-surface-variant uppercase">LANE 4: MCKENZIE (USA) - 0.2s LEAD</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-primary rounded-full" />
-            <span className="font-label text-[10px] tracking-tighter text-on-surface-variant uppercase">SWIM26 CHAMPIONSHIP SERIES - SEMI FINAL 1</span>
+            <span className="font-label text-[9px] sm:text-[10px] tracking-tighter text-on-surface-variant uppercase">SWIM26 CHAMPIONSHIP SERIES - SEMI FINAL 1</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-error rounded-full" />
-            <span className="font-label text-[10px] tracking-tighter text-on-surface-variant uppercase">LANE 1: DISQUALIFIED - EARLY START</span>
+            <span className="font-label text-[9px] sm:text-[10px] tracking-tighter text-on-surface-variant uppercase">LANE 1: DISQUALIFIED - EARLY START</span>
+          </div>
+          {/* Duplicate for seamless loop */}
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-secondary rounded-full" />
+            <span className="font-label text-[9px] sm:text-[10px] tracking-tighter text-on-surface-variant uppercase">LANE 4: MCKENZIE (USA) - 0.2s LEAD</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-primary rounded-full" />
+            <span className="font-label text-[9px] sm:text-[10px] tracking-tighter text-on-surface-variant uppercase">SWIM26 CHAMPIONSHIP SERIES - SEMI FINAL 1</span>
           </div>
         </div>
       </div>
 
-      {/* Pause/Finish Buttons - Top Right */}
-      <div className="fixed top-6 right-6 flex gap-2 pointer-events-auto z-50">
+      {/* ── Pause / Finish — Top Right ────────────────────────────────────── */}
+      <div className="fixed top-3 sm:top-6 right-3 sm:right-6 flex gap-2 pointer-events-auto z-50">
         <button
           onClick={onPause}
-          className="glass-panel px-4 py-2 rounded-lg border-l-4 border-primary hover:bg-surface-container-high transition-colors"
+          className="glass-panel px-3 sm:px-4 py-2 rounded-lg border-l-4 border-primary hover:bg-surface-container-high transition-colors"
+          style={{ minHeight: '44px', minWidth: '44px' }}
         >
-          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary">⏸</span>
+          <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="text-primary">⏸</span>
         </button>
         <button
           onClick={onFinish}
-          className="bg-primary text-on-primary px-4 py-2 rounded-lg hover:bg-primary-dim transition-colors font-bold text-sm uppercase"
+          className="bg-primary text-on-primary px-3 sm:px-4 py-2 rounded-lg hover:bg-primary-dim transition-colors font-bold text-xs sm:text-sm uppercase"
+          style={{ minHeight: '44px', whiteSpace: 'nowrap' }}
         >
           Finish
         </button>
       </div>
-
-      <style>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-        .animate-scroll {
-          animation: scroll 20s linear infinite;
-        }
-      `}</style>
     </div>
   );
 };

@@ -12,7 +12,22 @@
  * The outer div is height:100% + overflow:hidden so nothing escapes OverlayShell.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+// ─── Responsive hook ──────────────────────────────────────────────────────────
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState<boolean>(
+    () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false),
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [query]);
+  return matches;
+}
 
 // ─── Types & data ────────────────────────────────────────────────────────────
 
@@ -51,6 +66,9 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   const [selectedStroke,   setSelectedStroke]   = useState('FREESTYLE');
   const [selectedVenue,    setSelectedVenue]    = useState('olympic');
   const [isStarting,       setIsStarting]       = useState(false);
+
+  // Portrait phone (≤480px): distance grid drops from 3 → 2 columns
+  const isMobilePortrait = useMediaQuery('(max-width: 480px)');
 
   const distances = ['50M', '100M', '200M', '400M', '800M', '1500M'];
   const strokes   = ['FREESTYLE', 'BUTTERFLY', 'BREASTSTROKE', 'BACKSTROKE', 'IM'];
@@ -296,21 +314,21 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
         Mobile:          flex-col  — RIGHT (80px strip, order-first) | LEFT (flex-1 scroll)
       */}
       <div
-        className="flex-1 flex flex-col md:flex-row overflow-hidden"
+        className="flex-1 flex flex-col sm:flex-row overflow-hidden"
       >
 
         {/* ── RIGHT PANEL — Biometric card ──────────────────────────────── */}
         {/*
-          Mobile: order-first, height 80px, horizontal strip
-          Desktop: order-last, flex 1, full-height card
+          Mobile (< sm/640px): order-first, height 80px, horizontal strip
+          sm+ (landscape phone, tablet, desktop): order-last, full-height card
         */}
         <div
-          className="order-first md:order-last md:overflow-hidden"
+          className="order-first sm:order-last sm:overflow-hidden"
           style={{ flexShrink: 0 }}
         >
-          {/* ─ Mobile strip (hidden on md+) ─ */}
+          {/* ─ Mobile strip (hidden on sm+) ─ */}
           <div
-            className="flex md:hidden items-center gap-3 px-4"
+            className="flex sm:hidden items-center gap-3 px-4"
             style={{
               height: '80px',
               background: '#0d1929',
@@ -369,9 +387,9 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
             </div>
           </div>
 
-          {/* ─ Desktop full biometric card (hidden on mobile) ─ */}
+          {/* ─ Side-by-side biometric card (hidden on portrait phones, visible sm+) ─ */}
           <div
-            className="hidden md:flex flex-col h-full"
+            className="hidden sm:flex flex-col h-full"
             style={{
               flex: '1 0 0',
               width: '280px',
@@ -576,8 +594,8 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
               </span>
             </div>
             <div
-              className="grid gap-2"
-              style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}
+              className="grid gap-2 swim26-param-grid-3"
+              style={{ gridTemplateColumns: `repeat(${isMobilePortrait ? 2 : 3}, 1fr)` }}
             >
               {distances.map((dist) =>
                 paramBtn(dist, selectedDistance === dist, () => {

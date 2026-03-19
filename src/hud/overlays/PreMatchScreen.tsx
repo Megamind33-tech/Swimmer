@@ -23,6 +23,21 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, ChevronLeft } from 'lucide-react';
 
+// ─── Responsive hook ──────────────────────────────────────────────────────────
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState<boolean>(
+    () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false),
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [query]);
+  return matches;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
@@ -462,6 +477,9 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startRef    = useRef(Date.now());
 
+  // Portrait phones: 2-column × 4-row grid; landscape/tablet: 4-column × 2-row
+  const isMobilePortrait = useMediaQuery('(max-width: 480px)');
+
   useEffect(() => {
     startRef.current = Date.now();
     intervalRef.current = setInterval(() => {
@@ -578,10 +596,13 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
             <div
               style={{
                 fontFamily:    C.fontImpact,
-                fontSize:      '26px',
+                fontSize:      'clamp(16px, 4vw, 26px)',
                 lineHeight:    1,
                 color:         C.textPrimary,
                 letterSpacing: '0.04em',
+                overflow:      'hidden',
+                textOverflow:  'ellipsis',
+                whiteSpace:    'nowrap',
               }}
             >
               {eventName}
@@ -593,15 +614,15 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
         </motion.div>
 
         {/* ── SWIMMER GRID ── */}
+        {/*
+          Portrait phones (≤480px): 2 × 4 grid — narrower cards, still readable
+          Landscape / tablet / desktop: 4 × 2 grid — original broadcast layout
+        */}
         <div
+          className="swim26-lineup-grid"
           style={{
-            flex:       1,
-            overflow:   'hidden',
-            padding:    '10px 12px 6px',
-            display:    'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gridTemplateRows:    'repeat(2, 1fr)',
-            gap:        '8px',
+            gridTemplateColumns: isMobilePortrait ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+            gridTemplateRows:    isMobilePortrait ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
           }}
         >
           {ROSTER.map((swimmer, i) => (
@@ -686,8 +707,9 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
             onClick={handleSkip}
             style={{
               flexShrink:     0,
-              height:         '40px',
-              padding:        '0 20px',
+              height:         '44px',   /* minimum touch target */
+              minWidth:       '44px',
+              padding:        '0 16px',
               borderRadius:   '12px',
               display:        'flex',
               alignItems:     'center',
@@ -696,6 +718,7 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
               background:     `linear-gradient(135deg, ${C.aqua}, #7AE8FF)`,
               border:         'none',
               boxShadow:      `0 0 18px rgba(56,214,255,0.45)`,
+              whiteSpace:     'nowrap',
             }}
           >
             <Play size={14} fill="#041421" color="#041421" />

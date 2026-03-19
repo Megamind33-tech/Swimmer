@@ -1,32 +1,45 @@
 /**
  * Play Screen — Game Mode Selection  (SWIM26 rebuild)
  *
- * Fixes:
- *  1. No Material Icons font — inline emoji icons per spec
- *  2. Responsive CSS Grid: 3-col desktop / 2-col tablet+mobile-landscape / 1-col portrait
- *  3. Full hover + active transform states via React state
- *  4. Height-locked: header fixed, grid scrollable inside remaining viewport
+ * Mobile responsiveness:
+ *   - Portrait phone (≤480px): 1-column grid, cards 80px tall,
+ *     condensed layout: [Icon] [Title] [Rewards] in one row
+ *   - Landscape phone (≤896px landscape): 2-column grid, cards 110px,
+ *     full description visible
+ *   - Tablet / desktop: auto-fit 3-column grid, cards 160px, full layout
+ *   - Touch devices: hover states suppressed via (hover: none) + isTouch flag
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
+// ─── Responsive hook ──────────────────────────────────────────────────────────
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState<boolean>(
+    () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false),
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [query]);
+  return matches;
+}
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 interface GameModeCard {
   id: string;
   name: string;
-  /** Shown top-left as category label */
   category: string;
   description: string;
-  /** Inline emoji — no icon font required */
   icon: string;
-  /** Tier badge top-right */
   tier: 'ROOKIE' | 'COMPETITOR' | 'ELITE';
   rewards: { xp: number; coins: number };
-  /** Online player count, omit for solo modes */
   playerCount?: string;
-  accent: string;       // hex
-  accentRgb: string;    // "R,G,B" for rgba()
+  accent: string;
+  accentRgb: string;
   gradientFrom: string;
   gradientTo: string;
 }
@@ -132,6 +145,12 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
   const [pressedId,    setPressedId]    = useState<string | null>(null);
   const [activatingId, setActivatingId] = useState<string | null>(null);
 
+  // Responsive breakpoints
+  const isMobilePortrait  = useMediaQuery('(max-width: 480px)');
+  const isMobileLandscape = useMediaQuery('(max-width: 896px) and (orientation: landscape)');
+  // On touch-only devices, suppress hover lift so cards don't stick in hover state
+  const isTouch = useMediaQuery('(hover: none)');
+
   const handleSelect = (modeId: string) => {
     if (activatingId) return;
     setActivatingId(modeId);
@@ -141,13 +160,34 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
     }, 320);
   };
 
+  // Derived grid geometry
+  const gridCols = isMobilePortrait
+    ? '1fr'
+    : isMobileLandscape
+      ? 'repeat(2, 1fr)'
+      : 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))';
+
+  const gridGap = isMobilePortrait || isMobileLandscape ? '8px' : '12px';
+
+  const cardMinHeight = isMobilePortrait
+    ? '80px'
+    : isMobileLandscape
+      ? '110px'
+      : '160px';
+
+  const cardPadding = isMobilePortrait
+    ? '0 8px 0 12px'
+    : isMobileLandscape
+      ? '10px 12px 10px 16px'
+      : '16px 16px 12px 20px';
+
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
-        height: '100%',          // height-locked to parent
+        height: '100%',
         overflow: 'hidden',
         background: 'linear-gradient(180deg, #050B14 0%, #080F1C 100%)',
         position: 'relative',
@@ -158,17 +198,16 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
       <div className="caustic-blob caustic-blob-2" />
       <div className="caustic-blob caustic-blob-3" />
 
-      {/* ── Header (flex-shrink: 0 — never scrolls) ─────────────────────── */}
+      {/* ── Header ───────────────────────────────────────────────────────── */}
       <header
         style={{
           flexShrink: 0,
           position: 'relative',
-          padding: '20px 24px 16px',
+          padding: isMobilePortrait ? '12px 16px 10px' : '20px 24px 16px',
           background: 'linear-gradient(180deg, rgba(0,212,255,0.07) 0%, transparent 100%)',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        {/* Top accent line */}
         <div
           style={{
             position: 'absolute',
@@ -179,7 +218,6 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
         />
 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '12px' }}>
-          {/* Left: logo + title */}
           <div>
             <div
               style={{
@@ -188,7 +226,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                 textTransform: 'uppercase',
                 letterSpacing: '0.45em',
                 color: 'rgba(0,212,255,0.75)',
-                marginBottom: '4px',
+                marginBottom: '2px',
               }}
             >
               Arena Selection
@@ -196,7 +234,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
             <h1
               className="font-bebas"
               style={{
-                fontSize: 'clamp(36px, 8vw, 60px)',
+                fontSize: isMobilePortrait ? '32px' : 'clamp(36px, 8vw, 60px)',
                 lineHeight: 1,
                 color: '#F3FBFF',
                 letterSpacing: '-0.01em',
@@ -210,18 +248,18 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
             </h1>
           </div>
 
-          {/* Right: live badge */}
+          {/* Live badge */}
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '6px 10px',
+              padding: '5px 8px',
               borderRadius: '6px',
               background: 'rgba(0,212,255,0.08)',
               border: '1px solid rgba(0,212,255,0.22)',
-              marginBottom: '2px',
               flexShrink: 0,
+              marginBottom: '2px',
             }}
           >
             <span
@@ -233,6 +271,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                 borderRadius: '50%',
                 background: '#00d4ff',
                 boxShadow: '0 0 6px rgba(0,212,255,0.9)',
+                flexShrink: 0,
               }}
             />
             <span
@@ -245,46 +284,38 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                 whiteSpace: 'nowrap',
               }}
             >
-              24.7K Online
+              {isMobilePortrait ? '24.7K' : '24.7K Online'}
             </span>
           </div>
         </div>
       </header>
 
-      {/* ── Scrollable grid area ─────────────────────────────────────────── */}
+      {/* ── Scrollable grid ───────────────────────────────────────────────── */}
       <div
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '16px',
-          /* Custom scrollbar */
+          padding: isMobilePortrait ? '10px' : '16px',
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(0,212,255,0.25) transparent',
         }}
       >
-        {/*
-          Grid rules (inline style + className for media-query breakpoints):
-          - Default (mobile portrait): 1 column
-          - ≥640px (landscape / tablet): 2 columns
-          - ≥1024px (desktop): 3 columns
-          CSS auto-fit minmax handles this gracefully.
-        */}
         <div
+          className="swim26-mode-grid"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
-            gap: '12px',
+            gridTemplateColumns: gridCols,
+            gap: gridGap,
           }}
         >
           {MODES.map((mode) => {
-            const isHovered    = hoveredId    === mode.id;
+            const isHovered    = !isTouch && hoveredId    === mode.id;
             const isPressed    = pressedId    === mode.id;
             const isActivating = activatingId === mode.id;
             const tier         = TIER_COLORS[mode.tier];
 
-            // Derived transform/shadow
             let transform = 'translateY(0) scale(1)';
-            if (isPressed || isActivating) transform = 'scale(0.98)';
+            if (isPressed || isActivating) transform = 'scale(0.97)';
             else if (isHovered)            transform = 'translateY(-2px)';
 
             const borderOpacity = isHovered || isActivating ? 0.80 : 0.28;
@@ -295,20 +326,21 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
             return (
               <button
                 key={mode.id}
+                className="swim26-mode-card"
                 onClick={() => handleSelect(mode.id)}
-                onMouseEnter={() => setHoveredId(mode.id)}
+                onMouseEnter={() => { if (!isTouch) setHoveredId(mode.id); }}
                 onMouseLeave={() => { setHoveredId(null); setPressedId(null); }}
                 onMouseDown={() => setPressedId(mode.id)}
                 onMouseUp={() => setPressedId(null)}
                 onTouchStart={() => setPressedId(mode.id)}
-                onTouchEnd={() => { setPressedId(null); }}
+                onTouchEnd={() => setPressedId(null)}
                 disabled={!!activatingId}
                 style={{
                   position: 'relative',
                   textAlign: 'left',
                   overflow: 'hidden',
                   borderRadius: '12px',
-                  minHeight: '160px',
+                  minHeight: cardMinHeight,
                   background: `linear-gradient(135deg, ${mode.gradientFrom}, ${mode.gradientTo}), rgba(10,22,40,0.72)`,
                   border: `${isHovered || isActivating ? '2px' : '1px'} solid rgba(${mode.accentRgb},${borderOpacity})`,
                   boxShadow,
@@ -318,29 +350,17 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                   transition: 'all 0.15s ease',
                   cursor: activatingId ? 'default' : 'pointer',
                   padding: 0,
+                  /* Ensure minimum 44px tap target height */
+                  minWidth: '44px',
                 }}
               >
                 {/* Speed-line overlay */}
                 <div
                   className="speed-lines"
-                  style={{
-                    position: 'absolute', inset: 0,
-                    opacity: 0.25, pointerEvents: 'none',
-                  }}
+                  style={{ position: 'absolute', inset: 0, opacity: 0.25, pointerEvents: 'none' }}
                 />
 
-                {/* Hover glow sweep */}
-                {isHovered && (
-                  <div
-                    style={{
-                      position: 'absolute', inset: 0,
-                      background: `radial-gradient(ellipse at 20% 50%, rgba(${mode.accentRgb},0.12) 0%, transparent 65%)`,
-                      pointerEvents: 'none',
-                    }}
-                  />
-                )}
-
-                {/* Left accent bar (4px, full height) */}
+                {/* Left accent bar */}
                 <div
                   style={{
                     position: 'absolute',
@@ -351,221 +371,313 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
                   }}
                 />
 
-                {/* Card body */}
-                <div style={{ position: 'relative', zIndex: 1, padding: '16px 16px 12px 20px' }}>
-
-                  {/* Top row: category label (left) + tier badge (right) */}
+                {/* ── PORTRAIT COMPACT LAYOUT: [Icon] [Title] [Rewards] one row ── */}
+                {isMobilePortrait ? (
                   <div
                     style={{
+                      position: 'relative',
+                      zIndex: 1,
+                      padding: '0 12px 0 16px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '10px',
+                      gap: '10px',
+                      minHeight: '80px',
                     }}
                   >
+                    {/* Icon */}
                     <span
                       style={{
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.35em',
-                        color: `rgba(${mode.accentRgb},0.65)`,
+                        fontSize: '22px',
+                        lineHeight: 1,
+                        flexShrink: 0,
+                        filter: `drop-shadow(0 0 6px rgba(${mode.accentRgb},0.50))`,
                       }}
                     >
-                      {mode.category}
+                      {mode.icon}
                     </span>
 
-                    {/* Tier badge — pill style */}
+                    {/* Title */}
+                    <h3
+                      className="font-bebas"
+                      style={{
+                        margin: 0,
+                        fontSize: '20px',
+                        lineHeight: 1,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.02em',
+                        color: '#F3FBFF',
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {mode.name}
+                    </h3>
+
+                    {/* Rewards — compact */}
+                    <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                      <div
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 900,
+                          color: '#f59e0b',
+                          whiteSpace: 'nowrap',
+                          textShadow: '0 0 8px rgba(245,158,11,0.5)',
+                        }}
+                      >
+                        {mode.rewards.xp} XP
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '9px',
+                          fontWeight: 700,
+                          color: 'rgba(255,255,255,0.40)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {mode.rewards.coins.toLocaleString()} cr
+                      </div>
+                    </div>
+
+                    {/* Tier badge */}
                     <span
                       style={{
-                        fontSize: '8px',
+                        flexShrink: 0,
+                        fontSize: '7px',
                         fontWeight: 900,
                         textTransform: 'uppercase',
-                        letterSpacing: '0.15em',
+                        letterSpacing: '0.12em',
                         color: tier.text,
                         background: tier.bg,
                         border: `1px solid ${tier.border}`,
                         borderRadius: '999px',
-                        padding: '2px 8px',
+                        padding: '2px 6px',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {mode.tier}
                     </span>
                   </div>
-
-                  {/* Icon + Title row */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                    {/* Emoji icon */}
-                    <div
-                      style={{
-                        flexShrink: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '10px',
-                        background: `rgba(${mode.accentRgb},0.12)`,
-                        border: `1px solid rgba(${mode.accentRgb},0.28)`,
-                        fontSize: '22px',
-                        lineHeight: 1,
-                        boxShadow: isHovered ? `0 0 14px rgba(${mode.accentRgb},0.35)` : undefined,
-                        transition: 'box-shadow 0.15s ease',
-                      }}
-                    >
-                      {mode.icon}
-                    </div>
-
-                    {/* Mode title */}
-                    <h3
-                      className="font-bebas"
-                      style={{
-                        margin: 0,
-                        fontSize: 'clamp(18px, 3.5vw, 24px)',
-                        lineHeight: 1,
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.02em',
-                        color: '#F3FBFF',
-                        textShadow: isHovered ? `0 0 12px rgba(${mode.accentRgb},0.50)` : undefined,
-                        transition: 'text-shadow 0.15s ease',
-                      }}
-                    >
-                      {mode.name}
-                    </h3>
-                  </div>
-
-                  {/* Description (max 2 lines) */}
-                  <p
-                    style={{
-                      margin: '0 0 12px',
-                      fontSize: '13px',
-                      lineHeight: '1.4',
-                      color: 'rgba(255,255,255,0.72)',
-                      fontWeight: 500,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {mode.description}
-                  </p>
-
-                  {/* Rewards + live players footer */}
+                ) : (
+                  /* ── FULL CARD LAYOUT (landscape / tablet / desktop) ── */
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
+                      position: 'relative',
+                      zIndex: 1,
+                      padding: cardPadding,
                     }}
                   >
-                    {/* XP + Coins */}
-                    <div>
-                      <div
-                        style={{
-                          fontSize: '7px',
-                          fontWeight: 900,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.35em',
-                          color: 'rgba(255,255,255,0.32)',
-                          marginBottom: '2px',
-                        }}
-                      >
-                        Rewards
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: 900,
-                          fontStyle: 'italic',
-                          textTransform: 'uppercase',
-                          color: '#f59e0b',
-                          textShadow: '0 0 8px rgba(245,158,11,0.5)',
-                        }}
-                      >
-                        {mode.rewards.xp} XP · {mode.rewards.coins.toLocaleString()} Coins
-                      </div>
-                    </div>
-
-                    {/* Live players */}
-                    {mode.playerCount && (
-                      <>
-                        <div
-                          style={{
-                            width: '1px',
-                            height: '24px',
-                            background: 'rgba(255,255,255,0.08)',
-                            flexShrink: 0,
-                          }}
-                        />
-                        <div>
-                          <div
-                            style={{
-                              fontSize: '7px',
-                              fontWeight: 900,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.35em',
-                              color: 'rgba(255,255,255,0.32)',
-                              marginBottom: '2px',
-                            }}
-                          >
-                            Live
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <span
-                              className="animate-pulse"
-                              style={{
-                                display: 'inline-block',
-                                width: '5px',
-                                height: '5px',
-                                borderRadius: '50%',
-                                background: '#10b981',
-                                boxShadow: '0 0 4px rgba(16,185,129,0.9)',
-                                flexShrink: 0,
-                              }}
-                            />
-                            <span
-                              style={{
-                                fontSize: '11px',
-                                fontWeight: 900,
-                                color: 'rgba(255,255,255,0.82)',
-                                fontFamily: "'JetBrains Mono', monospace",
-                              }}
-                            >
-                              {mode.playerCount}
-                            </span>
-                          </div>
-                        </div>
-                      </>
-                    )}
-
-                    {/* Chevron (right-flush) */}
+                    {/* Top row: category + tier */}
                     <div
                       style={{
-                        marginLeft: 'auto',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '7px',
-                        background: `rgba(${mode.accentRgb},0.10)`,
-                        border: `1px solid rgba(${mode.accentRgb},0.22)`,
-                        opacity: isHovered ? 1 : 0,
-                        transform: isHovered ? 'translateX(0)' : 'translateX(-4px)',
-                        transition: 'opacity 0.15s ease, transform 0.15s ease',
-                        color: `rgba(${mode.accentRgb},0.9)`,
-                        fontSize: '16px',
-                        lineHeight: 1,
+                        justifyContent: 'space-between',
+                        marginBottom: isMobileLandscape ? '6px' : '10px',
                       }}
                     >
-                      ›
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.35em',
+                          color: `rgba(${mode.accentRgb},0.65)`,
+                        }}
+                      >
+                        {mode.category}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '8px',
+                          fontWeight: 900,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.15em',
+                          color: tier.text,
+                          background: tier.bg,
+                          border: `1px solid ${tier.border}`,
+                          borderRadius: '999px',
+                          padding: '2px 8px',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {mode.tier}
+                      </span>
+                    </div>
+
+                    {/* Icon + Title */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: isMobileLandscape ? '4px' : '8px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: isMobileLandscape ? '36px' : '44px',
+                          height: isMobileLandscape ? '36px' : '44px',
+                          borderRadius: '10px',
+                          background: `rgba(${mode.accentRgb},0.12)`,
+                          border: `1px solid rgba(${mode.accentRgb},0.28)`,
+                          fontSize: isMobileLandscape ? '18px' : '22px',
+                          lineHeight: 1,
+                        }}
+                      >
+                        {mode.icon}
+                      </div>
+
+                      <h3
+                        className="font-bebas"
+                        style={{
+                          margin: 0,
+                          fontSize: isMobileLandscape ? '18px' : 'clamp(18px, 3.5vw, 24px)',
+                          lineHeight: 1,
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.02em',
+                          color: '#F3FBFF',
+                          textShadow: isHovered ? `0 0 12px rgba(${mode.accentRgb},0.50)` : undefined,
+                          transition: 'text-shadow 0.15s ease',
+                        }}
+                      >
+                        {mode.name}
+                      </h3>
+                    </div>
+
+                    {/* Description — hidden on landscape mobile to save height */}
+                    {!isMobileLandscape && (
+                      <p
+                        style={{
+                          margin: '0 0 12px',
+                          fontSize: '13px',
+                          lineHeight: '1.4',
+                          color: 'rgba(255,255,255,0.72)',
+                          fontWeight: 500,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {mode.description}
+                      </p>
+                    )}
+
+                    {/* Rewards + live players */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div>
+                        <div
+                          style={{
+                            fontSize: '7px',
+                            fontWeight: 900,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.35em',
+                            color: 'rgba(255,255,255,0.32)',
+                            marginBottom: '2px',
+                          }}
+                        >
+                          Rewards
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '11px',
+                            fontWeight: 900,
+                            fontStyle: 'italic',
+                            textTransform: 'uppercase',
+                            color: '#f59e0b',
+                            textShadow: '0 0 8px rgba(245,158,11,0.5)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {mode.rewards.xp} XP · {mode.rewards.coins.toLocaleString()} Coins
+                        </div>
+                      </div>
+
+                      {mode.playerCount && !isMobileLandscape && (
+                        <>
+                          <div
+                            style={{
+                              width: '1px',
+                              height: '24px',
+                              background: 'rgba(255,255,255,0.08)',
+                              flexShrink: 0,
+                            }}
+                          />
+                          <div>
+                            <div
+                              style={{
+                                fontSize: '7px',
+                                fontWeight: 900,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.35em',
+                                color: 'rgba(255,255,255,0.32)',
+                                marginBottom: '2px',
+                              }}
+                            >
+                              Live
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                              <span
+                                className="animate-pulse"
+                                style={{
+                                  display: 'inline-block',
+                                  width: '5px',
+                                  height: '5px',
+                                  borderRadius: '50%',
+                                  background: '#10b981',
+                                  boxShadow: '0 0 4px rgba(16,185,129,0.9)',
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <span
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: 900,
+                                  color: 'rgba(255,255,255,0.82)',
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                }}
+                              >
+                                {mode.playerCount}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Chevron — desktop hover only */}
+                      {isHovered && (
+                        <div
+                          style={{
+                            marginLeft: 'auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '7px',
+                            background: `rgba(${mode.accentRgb},0.10)`,
+                            border: `1px solid rgba(${mode.accentRgb},0.22)`,
+                            color: `rgba(${mode.accentRgb},0.9)`,
+                            fontSize: '16px',
+                            lineHeight: 1,
+                          }}
+                        >
+                          ›
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Activating flash overlay */}
+                {/* Activating flash */}
                 {isActivating && (
                   <div
                     style={{
