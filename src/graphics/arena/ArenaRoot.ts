@@ -28,13 +28,18 @@ export class ArenaRoot {
     });
 
     this.scene = new BABYLON.Scene(this.engine);
-    // Slightly deeper blue-black than before — matches a real indoor natatorium
+
+    // Interim clear colour — ArenaAtmosphere.build() sets the theme-correct
+    // value immediately after.  Set a fallback here so the first frame before
+    // ArenaAtmosphere runs isn't a default grey flash.
     this.scene.clearColor = new BABYLON.Color4(0.06, 0.08, 0.12, 1);
 
-    // Fog initialised here; density / colour adjusted by ArenaAtmosphere
-    this.scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
-    this.scene.fogColor = new BABYLON.Color3(0.06, 0.08, 0.12);
-    this.scene.fogDensity = 0.004;
+    // Fog is owned entirely by ArenaAtmosphere (Phase 7: sets FOGMODE_EXP2 +
+    // density + colour at build time and when the theme changes).
+    // Do NOT set fogMode / fogDensity here — ArenaAtmosphere will override
+    // them and having FOGMODE_EXP set here produces wrong per-frame haze
+    // until ArenaAtmosphere.build() runs (first few frames on init).
+    // scene.fogMode defaults to FOGMODE_NONE until ArenaAtmosphere sets it.
   }
 
   // ─── Accessors ───────────────────────────────────────────────────────────

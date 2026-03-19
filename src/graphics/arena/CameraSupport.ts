@@ -143,6 +143,11 @@ export class CameraSupport {
 
   public getCurrentView(): CameraView { return this.currentView; }
 
+  /** Return all built cameras — used by ArenaPostProcess to attach the pipeline. */
+  public getCameras(): BABYLON.ArcRotateCamera[] {
+    return Array.from(this.cameras.values());
+  }
+
   public dispose(): void {
     this.cameras.forEach(c => c.dispose());
     this.cameras.clear();

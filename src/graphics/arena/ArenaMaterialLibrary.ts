@@ -290,6 +290,27 @@ export class ArenaMaterialLibrary {
     logger.log('[ArenaMaterialLibrary] Environment texture applied');
   }
 
+  /**
+   * Freeze all PBR materials that will never change after the initial build.
+   * Frozen materials skip per-frame uniform re-upload, which saves measurable
+   * CPU time with 20+ materials each being checked every frame.
+   *
+   * Call this AFTER ArenaManager._applyThemeInternal() has set poolWall's
+   * albedoColor, so the correct theme colour is baked in before the freeze.
+   *
+   * Excluded: poolWall — its albedoColor changes when setTheme() is called.
+   * All other materials are authored once and never mutated at runtime.
+   */
+  public freezeStaticMaterials(): void {
+    let count = 0;
+    for (const mat of this._allMaterials) {
+      if (mat.name === 'poolWall') continue;
+      mat.freeze();
+      count++;
+    }
+    logger.log(`[ArenaMaterialLibrary] Frozen ${count} static PBR materials`);
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // Procedural textures
   // ─────────────────────────────────────────────────────────────────────────

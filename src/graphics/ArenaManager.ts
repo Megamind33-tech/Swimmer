@@ -50,6 +50,8 @@ import { ArenaArchitecture }         from './arena/ArenaArchitecture';
 import { ArenaLighting }             from './arena/ArenaLighting';
 import { CameraSupport }             from './arena/CameraSupport';
 import { UnderwaterEffects }         from './arena/UnderwaterEffects';
+import { ArenaPostProcess }          from './arena/ArenaPostProcess';
+import { ArenaOptimizer }            from './arena/ArenaOptimizer';
 
 export class ArenaManager {
   // ── Infrastructure ──────────────────────────────────────────────────────
@@ -70,6 +72,7 @@ export class ArenaManager {
   private cameraSupport:  CameraSupport               | null = null;
   private broadcastCamera: BroadcastCamera            | null = null;
   private underwaterFX:   UnderwaterEffects           | null = null;
+  private postProcess:    ArenaPostProcess            | null = null;
 
   private isBroadcastMode = false;
 
@@ -178,18 +181,35 @@ export class ArenaManager {
     this.underwaterFX.build(scene, this.arenaConfig, qt);
     this.underwaterFX.syncAboveWaterState(scene);
 
+    //   e) Static scene optimization — freeze transforms, pickability, and
+    //      (LOW only) merge high-count detail mesh groups.
+    //      Run AFTER all geometry + post-build passes so scene.meshes is final.
+    ArenaOptimizer.optimize(scene, qt);
+
     // ── 13. Static cameras ────────────────────────────────────────────────
     this.cameraSupport = new CameraSupport();
     this.cameraSupport.build(scene, this.canvas, this.arenaConfig);
 
-    // ── 12. Broadcast camera (dormant until enableBroadcastMode) ──────────
+    // ── 14. Post-processing pipeline ─────────────────────────────────────
+    // Built AFTER cameras so all camera instances can be attached.
+    // imageProcessing (contrast/exposure) applies globally; FXAA and bloom
+    // attach per-camera through the DefaultRenderingPipeline.
+    this.postProcess = new ArenaPostProcess();
+    this.postProcess.build(scene, this.cameraSupport.getCameras(), qt);
+
+    // ── 15. Broadcast camera (dormant until enableBroadcastMode) ─────────
     this.broadcastCamera = new BroadcastCamera(scene, this.canvas);
     this.broadcastCamera.initialize();
 
-    // ── 13. Apply initial theme ───────────────────────────────────────────
+    // ── 16. Apply initial theme ───────────────────────────────────────────
     this._applyThemeInternal(this.arenaConfig.theme);
 
-    // ── 14. Register water update in render loop ──────────────────────────
+    // ── 17. Freeze static PBR materials ──────────────────────────────────
+    // Must run AFTER _applyThemeInternal() has set poolWall.albedoColor so the
+    // correct theme colour is baked into the frozen material state.
+    this.matLib?.freezeStaticMaterials();
+
+    // ── 18. Register water update in render loop ─────────────────────────
     this.arenaRoot.onRender((dt) => {
       this.poolWater?.update(dt);
 
@@ -205,7 +225,7 @@ export class ArenaManager {
       }
     });
 
-    // ── 15. Start render loop ─────────────────────────────────────────────
+    // ── 19. Start render loop ────────────────────────────────────────────
     this.arenaRoot.setFrameSkipInterval(this.qualityMgr.getFrameSkipInterval());
     this.arenaRoot.startRenderLoop();
 
@@ -325,6 +345,10 @@ export class ArenaManager {
     const qt = this.qualityMgr.getQualityTier();
     this.lighting?.applyQualityPreset(qt, scene);
 
+    // Rebuild post-processing for the new tier (FXAA / bloom on / off)
+    const cameras = this.cameraSupport?.getCameras() ?? [];
+    this.postProcess?.applyQualityPreset(qt, scene, cameras);
+
     logger.log(`[ArenaManager] Quality preset → ${preset}`);
   }
 
@@ -362,6 +386,7 @@ export class ArenaManager {
 
   public dispose(): void {
     this.broadcastCamera?.dispose();
+    this.postProcess?.dispose();
     this.cameraSupport?.dispose();
     this.underwaterFX?.dispose();
     this.lighting?.dispose();
