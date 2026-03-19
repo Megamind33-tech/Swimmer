@@ -47,7 +47,8 @@ export type CameraView =
   | 'DEFAULT'
   | 'AERIAL'
   | 'STARTING_BLOCK'
-  | 'RACING';
+  | 'RACING'
+  | 'UNDERWATER';
 
 export type TimeOfDay =
   | 'MORNING'

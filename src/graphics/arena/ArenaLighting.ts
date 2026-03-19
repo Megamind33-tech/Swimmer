@@ -348,6 +348,7 @@ export class ArenaLighting {
   }
 
   public getShadowGenerator(): BABYLON.ShadowGenerator | null { return this.shadowGenerator; }
+  public getHemiLight():       BABYLON.HemisphericLight | null { return this.hemiLight; }
   public getLights(): BABYLON.Light[] { return [...this.allLights]; }
   public getEnvProbe(): BABYLON.ReflectionProbe | null { return this.envProbe; }
 

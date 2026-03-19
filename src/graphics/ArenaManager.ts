@@ -49,6 +49,7 @@ import { StartingBlocks }            from './arena/StartingBlocks';
 import { ArenaArchitecture }         from './arena/ArenaArchitecture';
 import { ArenaLighting }             from './arena/ArenaLighting';
 import { CameraSupport }             from './arena/CameraSupport';
+import { UnderwaterEffects }         from './arena/UnderwaterEffects';
 
 export class ArenaManager {
   // ── Infrastructure ──────────────────────────────────────────────────────
@@ -68,6 +69,7 @@ export class ArenaManager {
   private lighting:       ArenaLighting               | null = null;
   private cameraSupport:  CameraSupport               | null = null;
   private broadcastCamera: BroadcastCamera            | null = null;
+  private underwaterFX:   UnderwaterEffects           | null = null;
 
   private isBroadcastMode = false;
 
@@ -115,7 +117,7 @@ export class ArenaManager {
 
     // ── 3. Atmosphere (clear colour + fog) ───────────────────────────────
     this.atmosphere = new ArenaAtmosphere();
-    this.atmosphere.build(scene, this.arenaConfig);
+    this.atmosphere.build(scene, this.arenaConfig, qt);
 
     // ── 4. Material library (PBR materials + procedural textures) ────────
     this.matLib = new ArenaMaterialLibrary();
@@ -170,6 +172,12 @@ export class ArenaManager {
       this.matLib.applyEnvironmentTexture(scene, envTex);
     }
 
+    //   d) Underwater volume effects: depth fog transition + caustic depth light
+    //      + bubble particles. Snapshot above-water state as baseline for lerp.
+    this.underwaterFX = new UnderwaterEffects();
+    this.underwaterFX.build(scene, this.arenaConfig, qt);
+    this.underwaterFX.syncAboveWaterState(scene);
+
     // ── 13. Static cameras ────────────────────────────────────────────────
     this.cameraSupport = new CameraSupport();
     this.cameraSupport.build(scene, this.canvas, this.arenaConfig);
@@ -184,6 +192,13 @@ export class ArenaManager {
     // ── 14. Register water update in render loop ──────────────────────────
     this.arenaRoot.onRender((dt) => {
       this.poolWater?.update(dt);
+
+      // Underwater volume: transition fog/clearColor based on active camera Y
+      if (this.underwaterFX && this.arenaRoot) {
+        const cam  = this.arenaRoot.getScene().activeCamera;
+        const camY = cam ? (cam as BABYLON.ArcRotateCamera).position.y : 10;
+        this.underwaterFX.update(this.arenaRoot.getScene(), camY, dt);
+      }
 
       if (this.isBroadcastMode && this.broadcastCamera) {
         this.broadcastCamera.update(dt);
@@ -215,6 +230,9 @@ export class ArenaManager {
     this.poolWater?.setColor(waterColor);
     this.matLib?.applyTheme(theme);
     this.poolStructure?.setPoolColor(waterColor); // no-op in Phase 3; kept for safety
+
+    // Resync above-water fog baseline so UnderwaterEffects restores correctly
+    this.underwaterFX?.syncAboveWaterState(scene);
   }
 
   public setTimeOfDay(time: TimeOfDay): void {
@@ -345,6 +363,7 @@ export class ArenaManager {
   public dispose(): void {
     this.broadcastCamera?.dispose();
     this.cameraSupport?.dispose();
+    this.underwaterFX?.dispose();
     this.lighting?.dispose();
     this.architecture?.dispose();
     this.startingBlocks?.dispose();

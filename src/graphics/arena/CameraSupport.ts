@@ -68,11 +68,22 @@ export class CameraSupport {
       },
       {
         view:   'RACING',
-        // Side-pool tracking position, mid-height
+        // Side-pool tracking position, mid-height — optimised for lane readability
         alpha:  -Math.PI / 2,
         beta:   Math.PI / 3.2,
         radius: 32,
         target: new BABYLON.Vector3(0, 1, 0),
+      },
+      {
+        view:   'UNDERWATER',
+        // Camera sits ~1 m below the water surface, looking up toward the surface.
+        // Reveals the underside of the water mesh (backFaceCulling=false on water mat),
+        // lane ropes, and swimmer silhouettes against the lit surface above.
+        // target.y = 2 (above surface) pulls the look-direction steeply upward.
+        alpha:  -Math.PI / 2,
+        beta:   1.88,     // ≈107.7° — camera below surface, looking up
+        radius: 10,
+        target: new BABYLON.Vector3(0, 2.0, 0),
       },
     ];
 
@@ -86,14 +97,16 @@ export class CameraSupport {
         scene,
       );
 
-      cam.lowerRadiusLimit  = 8;
-      cam.upperRadiusLimit  = 130;
-      cam.wheelPrecision    = 20;
+      cam.lowerRadiusLimit    = 8;
+      cam.upperRadiusLimit    = 130;
+      cam.wheelPrecision      = 20;
       cam.angularSensibilityX = 1200;
       cam.angularSensibilityY = 1200;
-      cam.inertia           = 0.70;
-      cam.minZ              = 0.5;
-      cam.maxZ              = 1200;
+      cam.inertia             = 0.70;
+      // Underwater camera needs tighter near-clip to avoid clipping pool geometry
+      // at close range (wall at ~0.5 m when looking sideways from inside pool).
+      cam.minZ = def.view === 'UNDERWATER' ? 0.15 : 0.5;
+      cam.maxZ = 1200;
 
       this.cameras.set(def.view, cam);
     }

@@ -1,18 +1,18 @@
 /**
- * ArenaAtmosphere
+ * ArenaAtmosphere  —  Phase 7 update
  * Controls scene-level ambient settings that affect the whole environment:
  *   - clear colour / background
- *   - fog colour & density
+ *   - fog mode (EXP2), colour & density — now quality-tier scaled
  *   - pool water colour mapping per theme
  *
- * Separating this from ArenaLighting keeps "paint the air" concerns distinct
- * from "place light sources" concerns.
- *
- * Phase 2 will add:
- *   - Sky dome mesh (HDR sky texture or procedural gradient)
- *   - Lens-flare on flood lights
- *   - Heat-haze / humidity post-process on high quality
- *   - God-rays / volumetric light shaft on NIGHT / EVENING
+ * Phase 7 changes:
+ *   - scene.fogMode is now explicitly FOGMODE_EXP2 (was FOGMODE_NONE — fog was
+ *     silently disabled because the mode was never set).
+ *   - Fog density is scaled by quality tier to simulate humid natatorium haze:
+ *       LOW  0.005 — barely visible, mobile-safe
+ *       MED  0.006 — subtle depth recession
+ *       HIGH 0.008 — perceptible humid haze on far bleachers / upper walls
+ *   - build() now accepts optional qualityTier for the above.
  */
 
 import * as BABYLON from '@babylonjs/core';
@@ -37,9 +37,28 @@ const CLEAR_COLORS: Record<PoolTheme, BABYLON.Color4> = {
   CUSTOM:       new BABYLON.Color4(0.07, 0.09, 0.12, 1),
 };
 
+// Fog density per quality tier — above-water natatorium haze.
+// EXP2 formula: factor = exp(-(density * distance)²)
+// At 80 m with HIGH density 0.008: factor ≈ 0.66 → 34% haze (distant bleachers)
+// At 80 m with LOW  density 0.005: factor ≈ 0.85 → 15% haze (mobile-safe)
+const FOG_DENSITY: Record<'LOW' | 'MEDIUM' | 'HIGH', number> = {
+  LOW:    0.005,
+  MEDIUM: 0.006,
+  HIGH:   0.008,
+};
+
 export class ArenaAtmosphere {
 
-  build(scene: BABYLON.Scene, config: IArenaConfig): void {
+  private _qualityTier: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
+
+  build(
+    scene:       BABYLON.Scene,
+    config:      IArenaConfig,
+    qualityTier: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM',
+  ): void {
+    this._qualityTier = qualityTier;
+    // EXP2 must be set before applyTheme — otherwise fogDensity has no effect
+    scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
     this.applyTheme(scene, config.theme);
     logger.log('[ArenaAtmosphere] Built');
   }
@@ -52,7 +71,10 @@ export class ArenaAtmosphere {
     const cc = CLEAR_COLORS[theme];
     scene.clearColor = cc;
     scene.fogColor   = new BABYLON.Color3(cc.r, cc.g, cc.b);
-    scene.fogDensity = 0.004;
+    scene.fogDensity = FOG_DENSITY[this._qualityTier];
+    // Guarantee EXP2 mode is set — applyTheme may be called standalone
+    // (e.g. from ArenaManager.setTheme) so we re-assert the mode here.
+    scene.fogMode    = BABYLON.Scene.FOGMODE_EXP2;
 
     logger.log(`[ArenaAtmosphere] Theme → ${theme}`);
     return WATER_COLORS[theme].clone();

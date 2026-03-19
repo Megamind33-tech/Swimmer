@@ -45,6 +45,9 @@ import { logger } from '../../utils';
 const BASIN_DEPTH    = 3.0;   // m  (matches PoolStructure.BASIN_DEPTH)
 const WALL_THICKNESS = 0.4;   // m  (matches PoolStructure.WALL_THICKNESS)
 
+/** Y position of the water surface mesh — shared with UnderwaterEffects. */
+export const WATER_SURFACE_Y = 0.02;
+
 export class PoolWater {
 
   // ── Meshes ────────────────────────────────────────────────────────────────
@@ -65,6 +68,7 @@ export class PoolWater {
   private _normScrollV = 0;
   private _causticU    = 0; // caustic overlay UV drift
   private _causticV    = 0;
+  private _idleTime    = 0; // accumulator for sinusoidal idle speed modulation
 
   // ── State ─────────────────────────────────────────────────────────────────
   private _tier: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
@@ -98,9 +102,10 @@ export class PoolWater {
       this._buildMedHigh(scene, qualityTier);
     }
 
-    // Caustic overlay: HIGH quality only (extra mesh + emissive material)
-    if (qualityTier === 'HIGH') {
-      this._buildCausticOverlay(scene, config);
+    // Caustic overlay: MED/HIGH — visible pool-floor light refraction pattern.
+    // MEDIUM uses reduced alpha for performance; HIGH uses full brightness.
+    if (qualityTier !== 'LOW') {
+      this._buildCausticOverlay(scene, config, qualityTier);
     }
 
     logger.log(`[PoolWater] Built Phase 4 (${qualityTier})`);
@@ -144,20 +149,26 @@ export class PoolWater {
 
   public update(deltaMs: number): void {
     const dt = deltaMs / 1000; // convert to seconds
+    this._idleTime += dt;
+
+    // Sinusoidal speed modulator — creates a gentle "breathing" rhythm to the
+    // water's idle animation without requiring race state awareness here.
+    const idleModU = 1.0 + 0.28 * Math.sin(this._idleTime * 0.38);
+    const idleModV = 1.0 + 0.22 * Math.sin(this._idleTime * 0.29 + 1.4);
 
     // LOW quality: manually scroll normal map UV since PBRMaterial has no
     // built-in wave animation.  WaterMaterial does this internally for MED/HIGH.
     if (this._tier === 'LOW' && this._waveBumpTex) {
-      this._normScrollU += 0.012 * dt;
-      this._normScrollV += 0.008 * dt;
+      this._normScrollU += 0.012 * dt * idleModU;
+      this._normScrollV += 0.008 * dt * idleModV;
       this._waveBumpTex.uOffset = this._normScrollU;
       this._waveBumpTex.vOffset = this._normScrollV;
     }
 
-    // Caustic UV drift — HIGH quality only
+    // Caustic UV drift — two independent sine-modulated axes break up regularity
     if (this._causticTex) {
-      this._causticU += 0.034 * dt;
-      this._causticV += 0.021 * dt;
+      this._causticU += 0.034 * dt * idleModU;
+      this._causticV += 0.021 * dt * idleModV;
       this._causticTex.uOffset = this._causticU;
       this._causticTex.vOffset = this._causticV;
     }
@@ -237,7 +248,15 @@ export class PoolWater {
    * UV-scrolled each frame in update() to simulate refracted light movement.
    * Only built for HIGH quality tier.
    */
-  private _buildCausticOverlay(scene: BABYLON.Scene, config: IArenaConfig): void {
+  /**
+   * Pool-floor caustic overlay.  MEDIUM uses smaller texture + reduced alpha.
+   * HIGH uses full 256px texture + higher alpha for more visible light refraction.
+   */
+  private _buildCausticOverlay(
+    scene:  BABYLON.Scene,
+    config: IArenaConfig,
+    tier:   'MEDIUM' | 'HIGH' = 'HIGH',
+  ): void {
     const innerW = config.poolWidth  - WALL_THICKNESS * 2;
     const innerL = config.poolLength - WALL_THICKNESS * 2;
 
@@ -248,16 +267,17 @@ export class PoolWater {
     this.causticMesh.position.y = -BASIN_DEPTH + 0.28;
     this.causticMesh.isPickable = false;
 
-    this._causticTex         = this._makeCausticTexture(scene, 256);
+    const texSize = tier === 'HIGH' ? 256 : 128;
+    this._causticTex         = this._makeCausticTexture(scene, texSize);
     this._causticTex.uScale  = 2.5;  // repeat pattern several times across pool length
     this._causticTex.vScale  = 5.0;
 
     this._causticMat = new BABYLON.StandardMaterial('causticMat', scene);
     this._causticMat.emissiveTexture = this._causticTex;
-    this._causticMat.emissiveColor   = new BABYLON.Color3(0.50, 0.78, 1.0); // cool-white
-    // Additive blending: bright caustic rings add onto the tile texture below
+    this._causticMat.emissiveColor   = new BABYLON.Color3(0.48, 0.76, 1.0); // cool pool-blue
+    // Additive blending: caustic rings add luminance onto tile texture below
     this._causticMat.alphaMode       = BABYLON.Engine.ALPHA_ADD;
-    this._causticMat.alpha           = 0.18;
+    this._causticMat.alpha           = tier === 'HIGH' ? 0.22 : 0.10;
     this._causticMat.disableLighting = true;  // emissive-only — not affected by lights
     this._causticMat.backFaceCulling = false;
 
