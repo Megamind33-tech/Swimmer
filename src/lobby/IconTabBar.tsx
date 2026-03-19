@@ -23,6 +23,9 @@ import {
   Trophy,
   Shirt,
   ShoppingBag,
+  Shield,
+  ShoppingCart,
+  Search,
 } from 'lucide-react';
 import { lobby } from '../theme/tokens';
 
@@ -30,7 +33,7 @@ import { lobby } from '../theme/tokens';
 // Tab definition
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type LobbyTab = 'race' | 'career' | 'training' | 'rankings' | 'style' | 'store';
+export type LobbyTab = 'race' | 'career' | 'training' | 'rankings' | 'style' | 'store' | 'club' | 'market' | 'scouts';
 
 interface TabDef {
   id:    LobbyTab;
@@ -41,8 +44,11 @@ interface TabDef {
 const TABS: TabDef[] = [
   { id: 'race',     icon: <Play        size={20} />, label: 'RACE'   },
   { id: 'career',   icon: <Medal       size={20} />, label: 'CAREER' },
-  { id: 'training', icon: <Target      size={20} />, label: 'TRAIN'  },
+  { id: 'club',     icon: <Shield      size={20} />, label: 'CLUB'   },
+  { id: 'scouts',   icon: <Search      size={20} />, label: 'SCOUTS' },
+  { id: 'market',   icon: <ShoppingCart size={20} />, label: 'MARKET' },
   { id: 'rankings', icon: <Trophy      size={20} />, label: 'RANK'   },
+  { id: 'training', icon: <Target      size={20} />, label: 'TRAIN'  },
   { id: 'style',    icon: <Shirt       size={20} />, label: 'STYLE'  },
   { id: 'store',    icon: <ShoppingBag size={20} />, label: 'STORE'  },
 ];
@@ -70,6 +76,7 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
       borderTop:         `1px solid ${lobby.panelBorder}`,
       backdropFilter:    'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
+      overflowX:         'auto',
     }}
   >
     {TABS.map((tab) => {
@@ -81,7 +88,8 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
           onClick={() => onChange(tab.id)}
           whileTap={{ scale: 0.88 }}
           style={{
-            flex:           1,
+            flex:           '0 0 auto',
+            minWidth:       '64px',
             display:        'flex',
             flexDirection:  'column',
             alignItems:     'center',
