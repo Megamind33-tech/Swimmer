@@ -1,10 +1,13 @@
 /**
- * OxygenBar — compact horizontal bar tracking O2 / exertion level
+ * OxygenBar — segmented broadcast-style O₂ indicator
  *
- * Always displayed in cyan/aqua tones since oxygen is a distinct resource.
- * At low oxygen the bar pulses and shifts to warning orange.
+ * 10 hard-edged rectangular segments. No glows. No rounded corners.
+ * Oxygen is a distinct resource from stamina.
  *
- * Positioned below StaminaBar in the top-left state cluster.
+ * Color thresholds:
+ *   > 45%  → Volt Yellow (#CCFF00) — healthy
+ *   20-45% → White (#FFFFFF) — mid / caution
+ *   < 20%  → Flat Red (#FF003C) — critical, segments pulse
  */
 
 import React from 'react';
@@ -14,23 +17,19 @@ interface OxygenBarProps {
   value: number;  // 0-100
 }
 
+const SEGMENTS = 10;
+
 function oxygenColor(pct: number): string {
-  if (pct > 45) return HUD_COLOR.aqua;
-  if (pct > 20) return HUD_COLOR.warning;
+  if (pct > 45) return HUD_COLOR.volt;
+  if (pct > 20) return HUD_COLOR.white;
   return HUD_COLOR.danger;
 }
 
-function oxygenGlow(pct: number): string {
-  if (pct > 45) return 'rgba(56, 214, 255, 0.65)';
-  if (pct > 20) return 'rgba(255, 194, 71, 0.65)';
-  return 'rgba(255, 93, 115, 0.65)';
-}
-
 export const OxygenBar: React.FC<OxygenBarProps> = ({ value }) => {
-  const pct   = Math.min(100, Math.max(0, value));
-  const color = oxygenColor(pct);
-  const glow  = oxygenGlow(pct);
-  const isCritical = pct < 20;
+  const pct         = Math.min(100, Math.max(0, value));
+  const color       = oxygenColor(pct);
+  const isCritical  = pct < 20;
+  const activeCount = Math.round((pct / 100) * SEGMENTS);
 
   return (
     <div
@@ -58,28 +57,30 @@ export const OxygenBar: React.FC<OxygenBarProps> = ({ value }) => {
         O₂
       </span>
 
-      {/* Bar track */}
+      {/* Segmented bar track */}
       <div
         style={{
-          flex:         1,
-          height:       '5px',
-          borderRadius: '3px',
-          background:   'rgba(255,255,255,0.07)',
-          overflow:     'hidden',
-          minWidth:     '56px',
+          display:  'flex',
+          gap:      '2px',
+          flex:     1,
+          minWidth: '56px',
         }}
       >
-        <div
-          style={{
-            width:      `${pct}%`,
-            height:     '100%',
-            borderRadius: '3px',
-            background: color,
-            boxShadow:  `0 0 6px ${glow}`,
-            transition: 'width 0.2s linear, background 0.4s ease',
-            animation:  isCritical ? 'hud-critical-pulse 0.7s ease-in-out infinite' : 'none',
-          }}
-        />
+        {Array.from({ length: SEGMENTS }, (_, i) => (
+          <div
+            key={i}
+            style={{
+              flex:         1,
+              height:       '5px',
+              borderRadius: '0px',
+              background:   i < activeCount ? color : 'rgba(255,255,255,0.08)',
+              transition:   'background 0.3s ease',
+              animation:    isCritical && i < activeCount
+                ? 'hud-critical-pulse 0.7s ease-in-out infinite'
+                : 'none',
+            }}
+          />
+        ))}
       </div>
 
       {/* Numeric value */}

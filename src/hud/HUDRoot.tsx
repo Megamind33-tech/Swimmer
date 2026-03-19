@@ -136,33 +136,32 @@ const RaceProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
       top:           '60px',
       left:          0,
       right:         0,
-      height:        '3px',
+      height:        '2px',
       background:    'rgba(255,255,255,0.06)',
       pointerEvents: 'none',
     }}
   >
+    {/* Solid volt yellow fill — no gradient, no glow */}
     <div
       style={{
-        height:       '100%',
-        width:        `${Math.min(100, progress * 100)}%`,
-        background:   `linear-gradient(90deg, ${HUD_COLOR.aqua} 0%, ${HUD_COLOR.cyanGlow} 100%)`,
-        boxShadow:    `0 0 8px ${HUD_COLOR.aquaGlow}`,
-        borderRadius: '0 2px 2px 0',
-        transition:   'width 0.25s linear',
+        height:     '100%',
+        width:      `${Math.min(100, progress * 100)}%`,
+        background: HUD_COLOR.volt,
+        transition: 'width 0.25s linear',
       }}
     />
+    {/* Hard-edged square progress marker */}
     <div
       style={{
-        position:     'absolute',
-        top:          '50%',
-        left:         `${Math.min(98, progress * 100)}%`,
-        transform:    'translate(-50%, -50%)',
-        width:        '8px',
-        height:       '8px',
-        borderRadius: '50%',
-        background:   HUD_COLOR.aqua,
-        boxShadow:    `0 0 10px ${HUD_COLOR.aquaGlow}`,
-        transition:   'left 0.25s linear',
+        position:   'absolute',
+        top:        '50%',
+        left:       `${Math.min(98, progress * 100)}%`,
+        transform:  'translate(-50%, -50%)',
+        width:      '6px',
+        height:     '6px',
+        borderRadius: '0px',
+        background: HUD_COLOR.volt,
+        transition: 'left 0.25s linear',
       }}
     />
   </div>
@@ -184,29 +183,29 @@ const CameraToggleButton: React.FC<CameraToggleButtonProps> = ({ label, onToggle
     style={{
       width:          '42px',
       height:         '42px',
-      borderRadius:   '12px',
+      borderRadius:   '0px',
       display:        'flex',
       flexDirection:  'column',
       alignItems:     'center',
       justifyContent: 'center',
       gap:            '2px',
       cursor:         'pointer',
-      background:     HUD_PANEL.background as string,
-      border:         HUD_PANEL.border     as string,
-      backdropFilter: 'blur(10px)',
+      background:     '#0A0A0A',
+      border:         '1px solid rgba(255,255,255,0.18)',
+      backdropFilter: 'blur(8px)',
       pointerEvents:  'auto',
       userSelect:     'none',
       WebkitUserSelect: 'none',
     }}
   >
-    <Camera size={14} color={HUD_COLOR.aqua} />
+    <Camera size={14} color={HUD_COLOR.white} strokeWidth={2.5} />
     <span
       style={{
         fontFamily:    HUD_FONT.label,
         fontWeight:    700,
         fontSize:      '7px',
         letterSpacing: '0.10em',
-        color:         HUD_COLOR.aqua,
+        color:         HUD_COLOR.textMuted,
         textTransform: 'uppercase',
       }}
     >
@@ -224,12 +223,9 @@ export interface CountdownOverlayProps {
 }
 
 export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ value }) => {
-  const isGo   = value === 0;
-  const label  = isGo ? 'GO!' : String(value);
-  const color  = isGo ? HUD_COLOR.success : HUD_COLOR.textPrimary;
-  const shadow = isGo
-    ? `0 0 30px ${HUD_COLOR.successGlow}, 0 0 60px ${HUD_COLOR.successGlow}`
-    : `0 0 30px rgba(243,251,255,0.5)`;
+  const isGo  = value === 0;
+  const label = isGo ? 'GO!' : String(value);
+  const color = isGo ? HUD_COLOR.volt : HUD_COLOR.white;
 
   return (
     <div
@@ -241,11 +237,12 @@ export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ value }) => 
         flexDirection:  'column',
         alignItems:     'center',
         justifyContent: 'center',
-        background:     'rgba(4,20,33,0.55)',
+        background:     'rgba(0,0,0,0.60)',
         backdropFilter: 'blur(2px)',
         pointerEvents:  'none',
       }}
     >
+      {/* Hard-edged countdown number — no glow */}
       <div
         key={label}
         style={{
@@ -253,7 +250,6 @@ export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ value }) => 
           fontSize:      isGo ? '96px' : '120px',
           lineHeight:    1,
           color,
-          textShadow:    shadow,
           letterSpacing: '0.02em',
           animation:     'hud-countdown-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
@@ -267,7 +263,7 @@ export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ value }) => 
           fontSize:      '14px',
           letterSpacing: '0.25em',
           textTransform: 'uppercase',
-          color:         HUD_COLOR.textSecondary,
+          color:         HUD_COLOR.grey,
           marginTop:     '12px',
           opacity:       isGo ? 0 : 1,
         }}
@@ -392,7 +388,7 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
             minWidth:       '128px',
             flexShrink:     0,
             height:         '48px',
-            borderColor:    criticalStamina ? 'rgba(255,93,115,0.30)' : undefined,
+            borderColor:    criticalStamina ? 'rgba(255,0,60,0.55)' : undefined,
           }}
         >
           <StaminaBar  value={stamina} />

@@ -48,15 +48,8 @@ interface RaceTimerPanelProps {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function positionColor(pos: number): string {
-  if (pos === 1) return HUD_COLOR.gold;
-  if (pos <= 3)  return HUD_COLOR.aqua;
-  return HUD_COLOR.textPrimary;
-}
-
-function positionGlow(pos: number): string {
-  if (pos === 1) return `0 0 10px ${HUD_COLOR.goldGlow}`;
-  if (pos <= 3)  return `0 0 10px ${HUD_COLOR.aquaGlow}`;
-  return 'none';
+  if (pos === 1) return HUD_COLOR.volt;   // 1st — high-vis volt yellow
+  return HUD_COLOR.white;                 // All others — pure white
 }
 
 /** Format metres gap as a time string using average swimming speed (~1.8 m/s). */
@@ -85,7 +78,6 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
   urgent = false,
 }) => {
   const posColor  = positionColor(position);
-  const posGlow   = positionGlow(position);
   const timeStr   = formatRaceTime(elapsedMs);
   const posStr    = ordinal(position);
   const gapStr    = formatGap(gapToAheadM, position);
@@ -103,7 +95,7 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
         userSelect:     'none',
         WebkitUserSelect: 'none',
         minWidth:       '220px',
-        ...(urgent && { border: '1px solid rgba(255,93,115,0.35)' }),
+        ...(urgent && { borderColor: 'rgba(255,0,60,0.55)', borderLeftWidth: '3px', borderLeftColor: '#FF003C' }),
       }}
     >
       {/* ── Event banner row ────────────────────────────────────────────── */}
@@ -114,7 +106,7 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
           justifyContent: 'space-between',
           marginBottom:   '4px',
           paddingBottom:  '3px',
-          borderBottom:   '1px solid rgba(56,214,255,0.09)',
+          borderBottom:   '1px solid rgba(255,255,255,0.10)',
           gap:            '8px',
         }}
       >
@@ -125,7 +117,7 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
             fontWeight:    700,
             fontSize:      '8px',
             letterSpacing: '0.13em',
-            color:         HUD_COLOR.aqua,
+            color:         HUD_COLOR.volt,
             textTransform: 'uppercase',
             lineHeight:    1,
             flexShrink:    0,
@@ -149,14 +141,14 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
           >
             {heat}
           </span>
-          <div style={{ width: '1px', height: '8px', background: 'rgba(56,214,255,0.15)' }} />
+          <div style={{ width: '1px', height: '8px', background: 'rgba(255,255,255,0.18)' }} />
           <span
             style={{
               fontFamily:    HUD_FONT.label,
               fontWeight:    700,
               fontSize:      '7px',
               letterSpacing: '0.10em',
-              color:         HUD_COLOR.gold,
+              color:         HUD_COLOR.white,
               textTransform: 'uppercase',
               lineHeight:    1,
             }}
@@ -200,7 +192,7 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
         </div>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '28px', background: 'rgba(56,214,255,0.12)' }} />
+        <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.12)' }} />
 
         {/* Position badge */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -211,7 +203,6 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
               lineHeight:    1,
               color:         posColor,
               letterSpacing: '0.03em',
-              textShadow:    posGlow,
             }}
           >
             {posStr}
@@ -233,7 +224,7 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
         </div>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '28px', background: 'rgba(56,214,255,0.12)' }} />
+        <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.12)' }} />
 
         {/* Gap to swimmer ahead */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '46px' }}>
@@ -243,9 +234,8 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
               fontWeight:    isLeading ? 700 : undefined,
               fontSize:      isLeading ? '8px' : '15px',
               lineHeight:    1,
-              color:         isLeading ? HUD_COLOR.gold : HUD_COLOR.textSecondary,
+              color:         isLeading ? HUD_COLOR.volt : HUD_COLOR.textSecondary,
               letterSpacing: isLeading ? '0.08em' : '0.02em',
-              textShadow:    isLeading ? `0 0 10px ${HUD_COLOR.goldGlow}` : 'none',
               textTransform: 'uppercase',
               fontVariantNumeric: 'tabular-nums',
             }}
@@ -269,7 +259,7 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
         </div>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '28px', background: 'rgba(56,214,255,0.12)' }} />
+        <div style={{ width: '1px', height: '28px', background: 'rgba(255,255,255,0.12)' }} />
 
         {/* Lap counter */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -279,7 +269,7 @@ export const RaceTimerPanel: React.FC<RaceTimerPanelProps> = ({
                 fontFamily:    HUD_FONT.impact,
                 fontSize:      '18px',
                 lineHeight:    1,
-                color:         HUD_COLOR.aqua,
+                color:         HUD_COLOR.volt,
                 letterSpacing: '0.02em',
               }}
             >
