@@ -60,7 +60,10 @@ const OverlayShell: React.FC<OverlayShellProps> = ({
   backgroundOpacity = 0.2,
   showBackground = true,
 }) => (
-  <div className="w-full h-full relative overflow-hidden bg-[#050B14]">
+  <div
+    className="overflow-hidden bg-[#0a0e1a]"
+    style={{ position: 'absolute', inset: 0 }}
+  >
     {showBackground && (
       <img
         src={lockerRoomBackground}
@@ -71,7 +74,10 @@ const OverlayShell: React.FC<OverlayShellProps> = ({
       />
     )}
     <div className="absolute inset-0 bg-[#050B14]/80 pointer-events-none" />
-    <div className="relative z-10 h-full overflow-y-auto">
+    {/* Internal scroll is allowed; the outer shell never scrolls */}
+    <div
+      className="relative z-10 h-full overflow-y-auto screen-safe-area"
+    >
       {children}
     </div>
   </div>
@@ -160,12 +166,14 @@ export function GameShell() {
   if (phase === 'pre-match') {
     const eventName = `${raceConfig.distance} ${raceConfig.stroke}`;
     return (
-      <PreMatchScreen
-        eventName={eventName}
-        heat="HEAT 1"
-        onStart={() => setPhase('racing')}
-        onBack={() => setPhase('pre-race')}
-      />
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+        <PreMatchScreen
+          eventName={eventName}
+          heat="HEAT 1"
+          onStart={() => setPhase('racing')}
+          onBack={() => setPhase('pre-race')}
+        />
+      </div>
     );
   }
 
@@ -173,17 +181,23 @@ export function GameShell() {
 
   if (phase === 'racing') {
     return (
-      <RaceScene
-        config={raceConfig}
-        onPause={onPause}
-        onRaceComplete={onRaceComplete}
-        onRestart={onRestart}
-        onExitToLobby={onExitToLobby}
-      />
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+        <RaceScene
+          config={raceConfig}
+          onPause={onPause}
+          onRaceComplete={onRaceComplete}
+          onRestart={onRestart}
+          onExitToLobby={onExitToLobby}
+        />
+      </div>
     );
   }
 
   // ── Default: menu (AppShell) ─────────────────────────────────────────────
 
-  return <AppShell onPlay={enterModeSelect} />;
+  return (
+    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+      <AppShell onPlay={enterModeSelect} />
+    </div>
+  );
 }
