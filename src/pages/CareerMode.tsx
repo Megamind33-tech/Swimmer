@@ -1,8 +1,9 @@
 import React from 'react'
 import { motion } from 'motion/react'
-import { ACHIEVEMENTS, CAREER_TRACK, HOME_EVENTS } from '../utils/gameData'
+import { ACHIEVEMENTS, CAREER_TRACK, HOME_EVENTS, CAREER_SPONSORS } from '../utils/gameData'
 import { ProgressBar } from '../components/ProgressBar'
 import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerResetIcon, SparklesIcon } from 'lucide-react'
+import { SponsorPanel } from './ProfilePage'
 
 const AQUA = '#38D6FF'
 const GOLD = '#D4A843'
@@ -99,6 +100,9 @@ export function CareerMode() {
             ))}
           </div>
         </div>
+
+        {/* Sponsors */}
+        <SponsorPanel sponsors={CAREER_SPONSORS} title="CAREER SPONSORS" />
 
         {/* Milestones */}
         <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '14px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>

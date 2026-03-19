@@ -45,13 +45,15 @@ import {
 } from '../pages/UtilityPages';
 import { SwimmerScreen }  from '../components/menu/SwimmerScreen';
 import { StoreScreen }    from '../components/menu/StoreScreen';
+import { ProfilePage }    from '../pages/ProfilePage';
+import { RewardsPage }    from '../pages/RewardsPage';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Settings is not a tab — it's accessed via the top utility bar. */
-type OverlayPage = 'settings' | null;
+/** Non-tab pages accessed via the top utility bar. */
+type OverlayPage = 'settings' | 'profile' | 'rewards' | null;
 
 interface AppShellProps {
   /** Called when player taps START RACE — hands off to GameShell */
@@ -168,11 +170,13 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
 
   const goToLobby     = () => handleTabChange('race');
   const openSettings  = () => setOverlayPage('settings');
+  const openProfile   = () => setOverlayPage('profile');
+  const openRewards   = () => setOverlayPage('rewards');
   const closeOverlay  = () => setOverlayPage(null);
 
-  // Show back button when: not on the race tab OR settings overlay is open
-  const showBack = activeTab !== 'race' || overlayPage === 'settings';
-  const backLabel = overlayPage === 'settings' ? 'Settings' : TAB_LABELS[activeTab];
+  // Show back button when: not on the race tab OR any overlay is open
+  const showBack = activeTab !== 'race' || overlayPage !== null;
+  const backLabel = overlayPage ? overlayPage.charAt(0).toUpperCase() + overlayPage.slice(1) : TAB_LABELS[activeTab];
 
   return (
     <div
@@ -180,15 +184,15 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
       style={{ background: '#041421' }}  /* lobbyBgDeep fallback */
     >
       {/* ── Persistent top bar ── */}
-      <TopUtilityBar onSettings={openSettings} />
+      <TopUtilityBar onSettings={openSettings} onProfile={openProfile} onRewards={openRewards} />
 
       {/* ── Back button (shown when not on race tab or in settings) ── */}
       <AnimatePresence>
         {showBack && (
           <BackButton
             key="app-back"
-            label={overlayPage === 'settings' ? 'Lobby' : 'Lobby'}
-            onClick={overlayPage === 'settings' ? closeOverlay : goToLobby}
+            label="Lobby"
+            onClick={overlayPage !== null ? closeOverlay : goToLobby}
           />
         )}
       </AnimatePresence>
@@ -212,14 +216,18 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
         >
           {overlayPage === 'settings' ? (
             <SettingsPage />
+          ) : overlayPage === 'profile' ? (
+            <ProfilePage />
+          ) : overlayPage === 'rewards' ? (
+            <RewardsPage />
           ) : (
             renderTab(activeTab, onPlay, handleNavigate)
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* ── Settings back-tap close area (tap outside settings to dismiss) ── */}
-      {overlayPage === 'settings' && (
+      {/* ── Overlay side-tap close area ── */}
+      {overlayPage !== null && (
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -235,7 +243,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             cursor:     'pointer',
             zIndex:     65,
           }}
-          aria-label="Close settings"
+          aria-label="Close overlay"
         />
       )}
 
