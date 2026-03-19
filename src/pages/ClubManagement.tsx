@@ -2,15 +2,31 @@ import React from 'react'
 import { motion } from 'motion/react'
 import { CLUB_OBJECTIVES, CLUB_UPCOMING_EVENTS, CLUB_SPONSORS, ROSTER_HIGHLIGHTS, SWIMMERS, USER_DATA } from '../utils/gameData'
 import { SwimmerCard } from '../components/SwimmerCard'
-import { ShieldIcon, ActivityIcon, CalendarIcon, FlagIcon } from 'lucide-react'
+import { ShieldIcon, ActivityIcon, CalendarIcon, FlagIcon, UserPlusIcon } from 'lucide-react'
 import { SponsorPanel } from './ProfilePage'
+import { useClubRoster, type SignedAthlete } from '../utils/clubRoster'
 
 const AQUA = '#38D6FF'
 const GOLD = '#D4A843'
 const PANEL = 'rgba(4,20,33,0.76)'
 const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 
+// Convert a SignedAthlete to the Swimmer shape expected by SwimmerCard
+function toSwimmerCard(a: SignedAthlete) {
+  return {
+    id: a.id,
+    name: a.name,
+    ovr: a.ovr,
+    stroke: a.stroke as any,
+    country: a.flag,
+    stats: { speed: a.ovr, stamina: a.ovr, technique: a.ovr, turn: a.ovr },
+    rarity: a.ovr >= 95 ? 'legendary' : a.ovr >= 88 ? 'epic' : a.ovr >= 82 ? 'rare' : 'common' as any,
+  }
+}
+
 export function ClubManagement() {
+  const signedAthletes = useClubRoster()
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
@@ -69,17 +85,53 @@ export function ClubManagement() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <FlagIcon size={12} color={GOLD} />
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>STARTING LINEUP</span>
+              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', marginLeft: '4px' }}>
+                {SWIMMERS.length + signedAthletes.length} athletes
+              </span>
             </div>
             <button style={{ height: '24px', paddingInline: '10px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA }}>
               AUTO BUILD
             </button>
           </div>
           <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '6px' }}>
+            {/* Core squad */}
             {SWIMMERS.map((swimmer, i) => (
               <motion.div key={swimmer.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} style={{ flexShrink: 0 }}>
                 <SwimmerCard swimmer={swimmer} size="sm" />
               </motion.div>
             ))}
+
+            {/* Signed athletes from Transfer Market */}
+            {signedAthletes.map((athlete, i) => (
+              <motion.div
+                key={athlete.id}
+                initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: i * 0.07, type: 'spring', stiffness: 260, damping: 22 }}
+                style={{ flexShrink: 0, position: 'relative' }}
+              >
+                {/* "NEW" badge for recently signed */}
+                <div style={{
+                  position: 'absolute',
+                  top: -4,
+                  right: -4,
+                  background: '#C41E3A',
+                  color: '#fff',
+                  fontSize: '6px',
+                  fontWeight: 900,
+                  padding: '2px 5px',
+                  borderRadius: '100px',
+                  zIndex: 10,
+                  letterSpacing: '0.08em',
+                  fontFamily: "'Rajdhani', sans-serif",
+                }}>
+                  NEW
+                </div>
+                <SwimmerCard swimmer={toSwimmerCard(athlete)} size="sm" />
+              </motion.div>
+            ))}
+
+            {/* Add slot */}
             <motion.div
               whileHover={{ scale: 1.02 }}
               style={{ width: '60px', height: '88px', borderRadius: '10px', border: '2px dashed rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.03)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
@@ -104,6 +156,7 @@ export function ClubManagement() {
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>ROSTER</span>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+              {/* Core roster highlights */}
               {ROSTER_HIGHLIGHTS.map((entry) => {
                 const swimmer = SWIMMERS.find((item) => item.id === entry.swimmerId)
                 if (!swimmer) return null
@@ -121,6 +174,42 @@ export function ClubManagement() {
                   </div>
                 )
               })}
+
+              {/* Signed athletes from Transfer Market */}
+              {signedAthletes.map((athlete) => (
+                <motion.div
+                  key={athlete.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{ borderRadius: '10px', border: `1px solid rgba(54,198,144,0.25)`, background: 'rgba(54,198,144,0.05)', padding: '8px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span style={{ fontSize: '12px' }}>{athlete.flag}</span>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '12px', color: '#F3FBFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{athlete.name}</div>
+                    </div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: '#38D6FF', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2px' }}>{athlete.stroke} · {athlete.tier}</div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', marginTop: '2px' }}>Age {athlete.age} · {athlete.nationality}</div>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1 }}>{athlete.ovr}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', justifyContent: 'flex-end' }}>
+                      <UserPlusIcon size={8} color="rgba(54,198,144,0.80)" />
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(54,198,144,0.80)', textTransform: 'uppercase' }}>SIGNED</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Empty state for signed section */}
+              {signedAthletes.length === 0 && (
+                <div style={{ borderRadius: '10px', border: '1px dashed rgba(56,214,255,0.15)', padding: '10px', textAlign: 'center' }}>
+                  <UserPlusIcon size={14} color="rgba(169,211,231,0.30)" style={{ margin: '0 auto 4px' }} />
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.35)', letterSpacing: '0.10em', textTransform: 'uppercase' }}>
+                    Sign athletes from the Transfer Market
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

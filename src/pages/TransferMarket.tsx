@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   swim26Boundary,
   swim26Color,
@@ -9,9 +9,11 @@ import {
   swim26StateRules,
   swim26Type,
 } from '../theme/swim26DesignSystem';
+import { signAthlete, useSignedIds } from '../utils/clubRoster';
 
 type MarketTier = 'ALL' | 'LOCAL' | 'CONTINENTAL' | 'INTERNATIONAL';
 type ContractStatus = 'free' | 'attached';
+type SortKey = 'ovr' | 'price' | 'age' | 'name';
 
 interface MarketAthlete {
   id: string;
@@ -224,6 +226,13 @@ const TIERS: { id: MarketTier; label: string }[] = [
   { id: 'INTERNATIONAL', label: 'International' },
 ];
 
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: 'ovr',   label: 'OVR (High → Low)' },
+  { key: 'price', label: 'Price (Low → High)' },
+  { key: 'age',   label: 'Age (Young → Old)' },
+  { key: 'name',  label: 'Name (A → Z)' },
+];
+
 const panelStyle: React.CSSProperties = {
   borderRadius: swim26Boundary.radius.md,
   border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
@@ -241,6 +250,8 @@ const iconButtonStyle: React.CSSProperties = {
   display: 'grid',
   placeItems: 'center',
   boxShadow: swim26Boundary.elevation.level1,
+  cursor: 'pointer',
+  flexShrink: 0,
 };
 
 function formatPrice(price: number): string {
@@ -256,7 +267,16 @@ function OvrTierColor(ovr: number): string {
   return swim26Color.text.secondary;
 }
 
-function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; signed: boolean; onSign: () => void }) {
+// ── Compact Athlete Card (–30% from original) ───────────────────────────────
+function AthleteCard({
+  athlete,
+  signed,
+  onSign,
+}: {
+  athlete: MarketAthlete;
+  signed: boolean;
+  onSign: () => void;
+}) {
   const ovrColor = OvrTierColor(athlete.ovr);
   const isFree = athlete.status === 'free';
 
@@ -264,43 +284,48 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
     <div
       style={{
         ...panelStyle,
-        background: 'linear-gradient(180deg, rgba(20, 38, 54, 0.96) 0%, rgba(13, 27, 39, 0.97) 100%)',
+        background:
+          'linear-gradient(180deg, rgba(20, 38, 54, 0.96) 0%, rgba(13, 27, 39, 0.97) 100%)',
         borderRadius: swim26Boundary.radius.lg,
         overflow: 'hidden',
         display: 'grid',
         gridTemplateRows: '1fr auto',
         transition: 'border-color 0.2s, box-shadow 0.2s',
+        border: signed
+          ? `1.5px solid rgba(54,198,144,0.40)`
+          : panelStyle.border,
       }}
     >
-      {/* Portrait area */}
+      {/* Portrait area — height reduced by 30%: 180 → 126 */}
       <div
         style={{
           position: 'relative',
           background: athlete.portraitBg,
-          height: 180,
+          height: 126,
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',
         }}
       >
-        {/* Shimmer overlay */}
+        {/* Gradient overlay */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(180deg, transparent 40%, rgba(13,27,39,0.82) 100%)',
+            background:
+              'linear-gradient(180deg, transparent 40%, rgba(13,27,39,0.82) 100%)',
             pointerEvents: 'none',
           }}
         />
 
-        {/* Athlete silhouette / artwork */}
+        {/* Athlete silhouette / artwork — emoji size 96 → 67 */}
         <div
           style={{
-            fontSize: 96,
+            fontSize: 67,
             lineHeight: 1,
             userSelect: 'none',
-            marginBottom: 8,
+            marginBottom: 6,
             opacity: 0.85,
           }}
         >
@@ -311,12 +336,12 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
         <div
           style={{
             position: 'absolute',
-            top: 10,
-            left: 10,
+            top: 7,
+            left: 7,
             background: 'rgba(6,20,30,0.88)',
             border: `1.5px solid ${ovrColor}`,
             borderRadius: swim26Boundary.radius.sm,
-            padding: '3px 8px',
+            padding: '2px 6px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -326,7 +351,7 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
         >
           <span
             style={{
-              fontSize: 20,
+              fontSize: 14,
               fontWeight: 900,
               color: ovrColor,
               letterSpacing: '-0.02em',
@@ -335,7 +360,14 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
           >
             {athlete.ovr}
           </span>
-          <span style={{ fontSize: 8, fontWeight: 800, color: swim26Color.text.secondary, letterSpacing: '0.06em' }}>
+          <span
+            style={{
+              fontSize: 7,
+              fontWeight: 800,
+              color: swim26Color.text.secondary,
+              letterSpacing: '0.06em',
+            }}
+          >
             OVR
           </span>
         </div>
@@ -344,16 +376,16 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
         <div
           style={{
             position: 'absolute',
-            top: 10,
-            right: 10,
-            width: 34,
-            height: 34,
+            top: 7,
+            right: 7,
+            width: 24,
+            height: 24,
             borderRadius: swim26Boundary.radius.sm,
             background: 'rgba(6,20,30,0.72)',
             border: `1px solid rgba(255,255,255,0.14)`,
             display: 'grid',
             placeItems: 'center',
-            fontSize: 20,
+            fontSize: 14,
             backdropFilter: 'blur(4px)',
           }}
         >
@@ -364,44 +396,60 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
         <div
           style={{
             position: 'absolute',
-            bottom: 10,
-            left: 10,
-            padding: '2px 8px',
+            bottom: 7,
+            left: 7,
+            padding: '2px 6px',
             borderRadius: swim26Boundary.radius.pill,
-            background: isFree ? 'rgba(54, 198, 144, 0.18)' : 'rgba(255, 158, 87, 0.16)',
+            background: isFree
+              ? 'rgba(54, 198, 144, 0.18)'
+              : 'rgba(255, 158, 87, 0.16)',
             border: `1px solid ${isFree ? 'rgba(54,198,144,0.40)' : 'rgba(255,158,87,0.36)'}`,
-            fontSize: 9,
+            fontSize: 7,
             fontWeight: 800,
             letterSpacing: '0.07em',
-            color: isFree ? swim26Color.feedback.success : swim26Color.feedback.warning,
+            color: isFree
+              ? swim26Color.feedback.success
+              : swim26Color.feedback.warning,
           }}
         >
           {isFree ? 'FREE AGENT' : 'CONTRACTED'}
         </div>
       </div>
 
-      {/* Card info */}
-      <div style={{ padding: '12px 14px 14px' }}>
+      {/* Card info — padding reduced from 12/14 → 8/10 */}
+      <div style={{ padding: '8px 10px 10px' }}>
         {/* Name + age */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            marginBottom: 2,
+          }}
+        >
           <span
             style={{
-              fontSize: 15,
+              fontSize: 11,
               fontWeight: 900,
               fontStyle: 'italic',
               letterSpacing: '-0.01em',
               color: swim26Color.text.primary,
               textTransform: 'uppercase',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '68%',
             }}
           >
             {athlete.name}
           </span>
           <span
             style={{
-              fontSize: 10,
+              fontSize: 8,
               fontWeight: 700,
               color: swim26Color.text.secondary,
               letterSpacing: '0.05em',
+              flexShrink: 0,
             }}
           >
             AGE {athlete.age}
@@ -411,12 +459,12 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
         {/* Stroke */}
         <div
           style={{
-            fontSize: 10,
+            fontSize: 8,
             fontWeight: 800,
             color: swim26Color.accent.primary,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            marginBottom: 8,
+            marginBottom: 6,
           }}
         >
           {athlete.stroke}
@@ -427,18 +475,18 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            padding: '5px 8px',
+            gap: 4,
+            padding: '3px 6px',
             borderRadius: swim26Boundary.radius.sm,
             background: 'rgba(255,255,255,0.04)',
             border: `1px solid rgba(255,255,255,0.07)`,
-            marginBottom: 10,
+            marginBottom: 7,
           }}
         >
-          <span style={{ fontSize: 12, opacity: 0.6 }}>🏟</span>
+          <span style={{ fontSize: 10, opacity: 0.6 }}>🏟</span>
           <span
             style={{
-              fontSize: 10,
+              fontSize: 8,
               fontWeight: 700,
               color: swim26Color.text.secondary,
               letterSpacing: '0.04em',
@@ -452,18 +500,35 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
           </span>
         </div>
 
-        {/* Price + Buy */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        {/* Price + Sign Button */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 6,
+          }}
+        >
           <div>
-            <div style={{ fontSize: 8, fontWeight: 700, color: swim26Color.text.secondary, letterSpacing: '0.06em', marginBottom: 1 }}>
+            <div
+              style={{
+                fontSize: 7,
+                fontWeight: 700,
+                color: swim26Color.text.secondary,
+                letterSpacing: '0.06em',
+                marginBottom: 1,
+              }}
+            >
               TRANSFER FEE
             </div>
             <div
               style={{
-                fontSize: 17,
+                fontSize: 13,
                 fontWeight: 900,
                 fontStyle: 'italic',
-                color: isFree ? swim26Color.feedback.success : swim26Color.featured.premium,
+                color: isFree
+                  ? swim26Color.feedback.success
+                  : swim26Color.featured.premium,
                 letterSpacing: '-0.01em',
               }}
             >
@@ -475,7 +540,7 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
             onClick={onSign}
             disabled={signed}
             style={{
-              padding: '9px 18px',
+              padding: '6px 13px',
               borderRadius: swim26Boundary.radius.md,
               border: signed
                 ? '1px solid rgba(54,198,144,0.40)'
@@ -484,7 +549,7 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
                 ? 'rgba(54,198,144,0.12)'
                 : swim26Color.accent.primary,
               color: signed ? swim26Color.feedback.success : '#06202A',
-              fontSize: 11,
+              fontSize: 9,
               fontWeight: 900,
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
@@ -501,23 +566,117 @@ function AthleteCard({ athlete, signed, onSign }: { athlete: MarketAthlete; sign
   );
 }
 
+// ── Sort Dropdown Menu ────────────────────────────────────────────────────────
+function SortMenu({
+  activeSort,
+  onSelect,
+  onClose,
+}: {
+  activeSort: SortKey;
+  onSelect: (k: SortKey) => void;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        top: '100%',
+        right: 0,
+        marginTop: 6,
+        minWidth: 180,
+        borderRadius: swim26Boundary.radius.md,
+        border: `1px solid ${swim26Color.divider}`,
+        background: '#0d1f2d',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.60)',
+        zIndex: 200,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          padding: '8px 12px 6px',
+          fontSize: 9,
+          fontWeight: 800,
+          letterSpacing: '0.10em',
+          color: swim26Color.text.secondary,
+          textTransform: 'uppercase',
+          borderBottom: `1px solid ${swim26Color.divider}`,
+        }}
+      >
+        Sort by
+      </div>
+      {SORT_OPTIONS.map((opt) => {
+        const isActive = activeSort === opt.key;
+        return (
+          <button
+            key={opt.key}
+            onClick={() => { onSelect(opt.key); onClose(); }}
+            style={{
+              width: '100%',
+              padding: '9px 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: isActive ? 'rgba(74,201,214,0.10)' : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: isActive ? swim26Color.accent.primary : swim26Color.text.primary,
+              fontSize: 11,
+              fontWeight: isActive ? 800 : 600,
+              letterSpacing: '0.02em',
+              textAlign: 'left',
+              transition: 'background 0.15s',
+            }}
+          >
+            {opt.label}
+            {isActive && (
+              <span style={{ fontSize: 12, color: swim26Color.accent.primary }}>✓</span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Main TransferMarket ───────────────────────────────────────────────────────
 export function TransferMarket() {
   const [activeTier, setActiveTier] = useState<MarketTier>('ALL');
-  const [signedIds, setSignedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('ovr');
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const sortButtonRef = useRef<HTMLDivElement>(null);
 
-  const filtered = athletes.filter((a) => {
-    const matchesTier = activeTier === 'ALL' || a.tier === activeTier;
-    const matchesSearch =
-      searchQuery.trim() === '' ||
-      a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.stroke.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.nationality.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTier && matchesSearch;
-  });
+  // Live signed IDs from shared localStorage store
+  const signedIds = useSignedIds();
 
-  const handleSign = (id: string) => {
-    setSignedIds((prev) => new Set(prev).add(id));
+  const handleSign = (athlete: MarketAthlete) => {
+    signAthlete({
+      id: athlete.id,
+      name: athlete.name,
+      age: athlete.age,
+      ovr: athlete.ovr,
+      stroke: athlete.stroke,
+      nationality: athlete.nationality,
+      flag: athlete.flag,
+      club: athlete.club,
+      status: athlete.status,
+      price: athlete.price,
+      tier: athlete.tier,
+    });
   };
 
   const tierCounts: Record<MarketTier, number> = {
@@ -526,6 +685,29 @@ export function TransferMarket() {
     CONTINENTAL: athletes.filter((a) => a.tier === 'CONTINENTAL').length,
     INTERNATIONAL: athletes.filter((a) => a.tier === 'INTERNATIONAL').length,
   };
+
+  const filtered = athletes
+    .filter((a) => {
+      const matchesTier = activeTier === 'ALL' || a.tier === activeTier;
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        q === '' ||
+        a.name.toLowerCase().includes(q) ||
+        a.stroke.toLowerCase().includes(q) ||
+        a.nationality.toLowerCase().includes(q) ||
+        a.club.toLowerCase().includes(q);
+      return matchesTier && matchesSearch;
+    })
+    .sort((a, b) => {
+      switch (sortKey) {
+        case 'ovr':   return b.ovr - a.ovr;
+        case 'price': return a.price - b.price;
+        case 'age':   return a.age - b.age;
+        case 'name':  return a.name.localeCompare(b.name);
+      }
+    });
+
+  const activeSortLabel = SORT_OPTIONS.find((o) => o.key === sortKey)?.label ?? '';
 
   return (
     <div
@@ -538,7 +720,7 @@ export function TransferMarket() {
         fontFamily: 'Inter, system-ui, sans-serif',
       }}
     >
-      {/* Subtle scanline texture */}
+      {/* Scanline texture */}
       <div
         style={{
           position: 'fixed',
@@ -560,7 +742,7 @@ export function TransferMarket() {
           margin: '0 auto',
           boxSizing: 'border-box',
           display: 'grid',
-          gridTemplateRows: 'auto auto auto 1fr',
+          gridTemplateRows: 'auto auto auto auto 1fr',
           gap: swim26Space.md,
         }}
       >
@@ -571,15 +753,14 @@ export function TransferMarket() {
             borderRadius: swim26Boundary.radius.lg,
             background: swim26Color.surface.primary,
             display: 'grid',
-            gridTemplateColumns: '48px minmax(0, 1fr) auto',
+            gridTemplateColumns: 'minmax(0, 1fr) auto',
             alignItems: 'center',
             columnGap: swim26Space.md,
             padding: `0 ${swim26Space.md}px`,
             height: swim26Size.topBar.height,
           }}
         >
-          <button style={{ ...iconButtonStyle, width: 48, color: swim26Color.text.primary }}>←</button>
-
+          {/* Title */}
           <div style={{ display: 'grid', rowGap: 2, minWidth: 0 }}>
             <div
               style={{
@@ -605,43 +786,91 @@ export function TransferMarket() {
             </h1>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: swim26Space.sm }}>
-            {/* Search input inline */}
-            <div
+          {/* Sort menu trigger */}
+          <div style={{ position: 'relative' }} ref={sortButtonRef}>
+            <button
+              aria-label="Sort options"
+              onClick={() => setShowSortMenu((v) => !v)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '0 12px',
-                height: swim26Components.utilityIconButton.preferredSize,
-                borderRadius: swim26Boundary.radius.sm,
-                border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
-                background: swim26Color.surface.secondary,
-                boxShadow: swim26Boundary.elevation.level1,
+                ...iconButtonStyle,
+                background: showSortMenu
+                  ? 'rgba(74,201,214,0.14)'
+                  : swim26Color.surface.secondary,
+                border: showSortMenu
+                  ? `1px solid ${swim26Color.accent.primary}`
+                  : `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+                color: showSortMenu ? swim26Color.accent.primary : swim26Color.text.secondary,
               }}
             >
-              <span style={{ fontSize: swim26Size.icon.md, color: swim26Color.text.secondary, lineHeight: 1 }}>⌕</span>
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Name, stroke, nation…"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  outline: 'none',
-                  color: swim26Color.text.primary,
-                  fontSize: swim26Type.helper.fontSize,
-                  width: 160,
-                  fontFamily: 'inherit',
-                }}
-              />
-            </div>
-
-            <button aria-label="Filters" style={iconButtonStyle}>
               <span style={{ fontSize: swim26Size.icon.md }}>☰</span>
             </button>
+            {showSortMenu && (
+              <SortMenu
+                activeSort={sortKey}
+                onSelect={setSortKey}
+                onClose={() => setShowSortMenu(false)}
+              />
+            )}
           </div>
         </header>
+
+        {/* ── SEARCH BAR ── */}
+        <div
+          style={{
+            ...panelStyle,
+            borderRadius: swim26Boundary.radius.lg,
+            background: swim26Color.surface.primary,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: `0 ${swim26Space.md}px`,
+            height: 42,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 18,
+              color: swim26Color.text.secondary,
+              lineHeight: 1,
+              flexShrink: 0,
+            }}
+          >
+            ⌕
+          </span>
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name, stroke, nationality or club…"
+            style={{
+              flex: 1,
+              background: 'none',
+              border: 'none',
+              outline: 'none',
+              color: swim26Color.text.primary,
+              fontSize: 13,
+              fontFamily: 'inherit',
+              letterSpacing: '0.01em',
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: swim26Color.text.secondary,
+                fontSize: 16,
+                lineHeight: 1,
+                padding: 0,
+                flexShrink: 0,
+              }}
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
         {/* ── STATS ROW ── */}
         <div
@@ -652,8 +881,8 @@ export function TransferMarket() {
           }}
         >
           {[
-            { label: 'Available', value: athletes.filter((a) => a.status === 'free').length, accent: swim26Color.feedback.success },
-            { label: 'Contracted', value: athletes.filter((a) => a.status === 'attached').length, accent: swim26Color.feedback.warning },
+            { label: 'Available',   value: athletes.filter((a) => a.status === 'free').length,  accent: swim26Color.feedback.success  },
+            { label: 'Contracted',  value: athletes.filter((a) => a.status === 'attached').length, accent: swim26Color.feedback.warning },
             { label: 'Signed by You', value: signedIds.size, accent: swim26Color.accent.primary },
             { label: 'Total Listed', value: athletes.length, accent: swim26Color.text.secondary },
           ].map((stat) => (
@@ -667,10 +896,24 @@ export function TransferMarket() {
                 gap: 3,
               }}
             >
-              <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary, letterSpacing: '0.05em' }}>
+              <div
+                style={{
+                  fontSize: swim26Type.helper.fontSize,
+                  color: swim26Color.text.secondary,
+                  letterSpacing: '0.05em',
+                }}
+              >
                 {stat.label}
               </div>
-              <div style={{ fontSize: 26, fontWeight: 900, fontStyle: 'italic', color: stat.accent, lineHeight: 1 }}>
+              <div
+                style={{
+                  fontSize: 26,
+                  fontWeight: 900,
+                  fontStyle: 'italic',
+                  color: stat.accent,
+                  lineHeight: 1,
+                }}
+              >
                 {stat.value}
               </div>
             </div>
@@ -741,6 +984,33 @@ export function TransferMarket() {
           })}
         </nav>
 
+        {/* ── Active sort label ── */}
+        {searchQuery || sortKey !== 'ovr' ? (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 11,
+              color: swim26Color.text.secondary,
+              marginTop: -swim26Space.sm,
+            }}
+          >
+            {sortKey !== 'ovr' && (
+              <span>
+                Sorted by{' '}
+                <strong style={{ color: swim26Color.accent.primary }}>{activeSortLabel}</strong>
+              </span>
+            )}
+            {searchQuery && (
+              <span>
+                · {filtered.length} result{filtered.length !== 1 ? 's' : ''} for{' '}
+                <strong style={{ color: swim26Color.text.primary }}>"{searchQuery}"</strong>
+              </span>
+            )}
+          </div>
+        ) : null}
+
         {/* ── PLAYER GRID ── */}
         <section>
           {filtered.length === 0 ? (
@@ -759,7 +1029,7 @@ export function TransferMarket() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))',
                 gap: swim26Space.md,
               }}
             >
@@ -768,7 +1038,7 @@ export function TransferMarket() {
                   key={athlete.id}
                   athlete={athlete}
                   signed={signedIds.has(athlete.id)}
-                  onSign={() => handleSign(athlete.id)}
+                  onSign={() => handleSign(athlete)}
                 />
               ))}
             </div>
