@@ -11,7 +11,7 @@
  *   5. Content split: LEFT (60%) hero + CTAs │ RIGHT (40%) FeaturedEventCard
  *
  * Layout contract:
- *   - Positioned absolute, top: 48px (TopUtilityBar), bottom: 56px (IconTabBar)
+ *   - Fills its parent container absolutely (parent handles top/bottom offset)
  *   - No scroll — everything must fit within the landscape viewport
  *   - Landscape mobile minimum: 375 × 667 px
  *
@@ -104,10 +104,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
   <div
     style={{
       position: 'absolute',
-      top:      '48px',
-      bottom:   '56px',
-      left:     0,
-      right:    0,
+      inset:    0,
       overflow: 'hidden',
     }}
   >
@@ -213,7 +210,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
           <div
             style={{
               fontFamily:    "'Bebas Neue', Impact, 'Arial Narrow', sans-serif",
-              fontSize:      'clamp(52px, 9vw, 68px)',
+              fontSize:      'clamp(34px, 6vw, 50px)',
               lineHeight:    0.88,
               letterSpacing: '0.02em',
               color:         lobby.textPrimary,

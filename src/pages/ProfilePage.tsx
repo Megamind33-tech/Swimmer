@@ -98,10 +98,10 @@ export function ProfilePage() {
         </div>
 
         {/* Sponsor count pill */}
-        <div style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.20)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.80), rgba(26,19,8,0.80))', backdropFilter: 'blur(12px)', padding: '12px 14px', textAlign: 'center' }}>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '6px' }}>Active Sponsors</div>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '36px', color: GOLD, lineHeight: 1, textShadow: '0 0 18px rgba(212,168,67,0.40)' }}>{PLAYER_SPONSORS.length}</div>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', marginTop: '4px' }}>personal deals</div>
+        <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.20)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.80), rgba(26,19,8,0.80))', backdropFilter: 'blur(12px)', padding: '9px 12px', textAlign: 'center' }}>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '4px' }}>Active Sponsors</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '24px', color: GOLD, lineHeight: 1, textShadow: '0 0 14px rgba(212,168,67,0.40)' }}>{PLAYER_SPONSORS.length}</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', marginTop: '3px' }}>personal deals</div>
         </div>
       </div>
 
@@ -141,12 +141,12 @@ export function ProfilePage() {
               style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}
             >
               {/* Stat bars */}
-              <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '16px', flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '14px' }}>
-                  <ActivityIcon size={14} color={AQUA} />
-                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: '#F3FBFF', letterSpacing: '0.06em' }}>ATHLETE ATTRIBUTES</span>
+              <div style={{ borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '9px' }}>
+                  <ActivityIcon size={12} color={AQUA} />
+                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>ATHLETE ATTRIBUTES</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
                   {PLAYER_STATS.map((stat) => (
                     <div key={stat.label}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
@@ -176,11 +176,11 @@ export function ProfilePage() {
               key="records"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              style={{ height: '100%', borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+              style={{ height: '100%', borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '14px', flexShrink: 0 }}>
-                <TrophyIcon size={14} color={GOLD} />
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: '#F3FBFF', letterSpacing: '0.06em' }}>PERSONAL RECORDS</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px', flexShrink: 0 }}>
+                <TrophyIcon size={12} color={GOLD} />
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>PERSONAL RECORDS</span>
               </div>
               <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {PERSONAL_RECORDS.map((rec, i) => (
@@ -223,17 +223,17 @@ export function ProfilePage() {
 
 // ─── Shared sponsor panel ──────────────────────────────────────────────────────
 
-export function SponsorPanel({ sponsors, title }: { sponsors: Sponsor[]; title: string }) {
+export function SponsorPanel({ sponsors, title, compact }: { sponsors: Sponsor[]; title: string; compact?: boolean }) {
   return (
-    <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '14px 16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px', flexShrink: 0 }}>
-        <AwardIcon size={13} color={GOLD} />
-        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: '#F3FBFF', letterSpacing: '0.06em' }}>{title}</span>
-        <div style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(169,211,231,0.40)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
+    <div style={{ borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', ...(compact ? { flexShrink: 0 } : { flex: 1 }) }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px', flexShrink: 0 }}>
+        <AwardIcon size={12} color={GOLD} />
+        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>{title}</span>
+        <div style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.40)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
           {sponsors.length} ACTIVE
         </div>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '7px' }}>
+      <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px', ...(compact ? {} : { flex: 1 }) }}>
         {sponsors.map((s, i) => {
           const colors = TIER_COLORS[s.tier]
           return (
@@ -242,23 +242,23 @@ export function SponsorPanel({ sponsors, title }: { sponsors: Sponsor[]; title: 
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.06 }}
-              style={{ borderRadius: '10px', border: `1px solid ${colors.border}`, background: colors.bg, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '12px' }}
+              style={{ borderRadius: '9px', border: `1px solid ${colors.border}`, background: colors.bg, padding: '7px 10px', display: 'flex', alignItems: 'center', gap: '9px' }}
             >
               {/* Logo */}
-              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(0,0,0,0.35)', border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '18px', lineHeight: 1 }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(0,0,0,0.35)', border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '14px', lineHeight: 1 }}>
                 {s.logo}
               </div>
               {/* Info */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '13px', color: '#F3FBFF' }}>{s.name}</span>
-                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', color: colors.text, background: `${colors.bg}`, border: `1px solid ${colors.border}`, padding: '1px 6px', borderRadius: '4px', letterSpacing: '0.10em' }}>{s.tier}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '1px' }}>
+                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '12px', color: '#F3FBFF' }}>{s.name}</span>
+                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '8px', color: colors.text, background: `${colors.bg}`, border: `1px solid ${colors.border}`, padding: '1px 5px', borderRadius: '3px', letterSpacing: '0.10em' }}>{s.tier}</span>
                 </div>
-                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)' }}>{s.category} · {s.bonus}</div>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.55)' }}>{s.category} · {s.bonus}</div>
               </div>
               {/* Value */}
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: GOLD, letterSpacing: '0.04em', lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: GOLD, letterSpacing: '0.04em', lineHeight: 1 }}>{s.value}</div>
               </div>
             </motion.div>
           )

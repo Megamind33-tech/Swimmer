@@ -1,26 +1,20 @@
 /**
  * AppShell — Phase 2 premium game lobby shell
  *
- * Entry experience is now a landscape game lobby, not a website.
- *
  * Layout contract:
- *   TopUtilityBar  — 48px, absolute top   (profile, currencies, settings)
+ *   TopUtilityBar  — 48px, absolute top   (profile, currencies, settings, championships)
  *   Content area   — fills between bars, no scroll, occupies absolute inset
- *   IconTabBar     — 56px, absolute bottom (6 icon-first tabs)
+ *   IconTabBar     — 60px, absolute bottom (9 tabs: 4 left | RACE | 4 right)
  *
  * Navigation: flat — every main destination reachable in ≤ 2 taps.
  *   Primary tabs (IconTabBar):
- *     race | career | training | rankings | style | store
- *   Settings: via TopUtilityBar gear icon (1 tap)
- *
- * Back button: shown whenever the active tab is not 'race' or settings overlay
- * is open. Tapping returns to the race/lobby tab.
+ *     career | club | scouts | training | RACE | market | rankings | style | store
+ *   Top bar quick-access:
+ *     Profile | Rewards | Championships | Coins | Gems | Settings
  *
  * AppShell does NOT own:
  *   - PlayScreen / PreRaceSetup / RaceScene / PauseMenu / RaceResultScreen
  *     (all game-flow screens live in GameShell)
- *
- * AppShell exposes onPlay so GameShell can trigger the race.
  */
 
 import React, { useState } from 'react';
@@ -53,7 +47,7 @@ import { RewardsPage }    from '../pages/RewardsPage';
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Non-tab pages accessed via the top utility bar. */
-type OverlayPage = 'settings' | 'profile' | 'rewards' | null;
+type OverlayPage = 'settings' | 'profile' | 'rewards' | 'championships' | null;
 
 interface AppShellProps {
   /** Called when player taps START RACE — hands off to GameShell */
@@ -162,31 +156,39 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
   };
 
   const handleNavigate = (dest: string) => {
-    // Allow LobbyScreen quick-access buttons to change tabs
+    if (dest === 'championships') {
+      setOverlayPage('championships');
+      return;
+    }
     if (['race','career','club','scouts','market','rankings','training','style','store'].includes(dest)) {
       handleTabChange(dest as LobbyTab);
     }
   };
 
-  const goToLobby     = () => handleTabChange('race');
-  const openSettings  = () => setOverlayPage('settings');
-  const openProfile   = () => setOverlayPage('profile');
-  const openRewards   = () => setOverlayPage('rewards');
-  const closeOverlay  = () => setOverlayPage(null);
+  const goToLobby           = () => handleTabChange('race');
+  const openSettings        = () => setOverlayPage('settings');
+  const openProfile         = () => setOverlayPage('profile');
+  const openRewards         = () => setOverlayPage('rewards');
+  const openChampionships   = () => setOverlayPage('championships');
+  const closeOverlay        = () => setOverlayPage(null);
 
   // Show back button when: not on the race tab OR any overlay is open
   const showBack = activeTab !== 'race' || overlayPage !== null;
-  const backLabel = overlayPage ? overlayPage.charAt(0).toUpperCase() + overlayPage.slice(1) : TAB_LABELS[activeTab];
 
   return (
     <div
       className="w-full h-full relative overflow-hidden select-none"
-      style={{ background: '#041421' }}  /* lobbyBgDeep fallback */
+      style={{ background: '#041421' }}
     >
       {/* ── Persistent top bar ── */}
-      <TopUtilityBar onSettings={openSettings} onProfile={openProfile} onRewards={openRewards} />
+      <TopUtilityBar
+        onSettings={openSettings}
+        onProfile={openProfile}
+        onRewards={openRewards}
+        onNavigate={handleNavigate}
+      />
 
-      {/* ── Back button (shown when not on race tab or in settings) ── */}
+      {/* ── Back button (shown when not on race tab or in overlay) ── */}
       <AnimatePresence>
         {showBack && (
           <BackButton
@@ -220,6 +222,8 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             <ProfilePage />
           ) : overlayPage === 'rewards' ? (
             <RewardsPage />
+          ) : overlayPage === 'championships' ? (
+            <Championships />
           ) : (
             renderTab(activeTab, onPlay, handleNavigate)
           )}
@@ -249,7 +253,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
 
       {/* ── Persistent bottom tab bar ── */}
       <IconTabBar
-        activeTab={overlayPage ? activeTab : activeTab}
+        activeTab={activeTab}
         onChange={handleTabChange}
       />
     </div>

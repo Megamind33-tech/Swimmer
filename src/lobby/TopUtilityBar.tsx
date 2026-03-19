@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { Settings, UserRound, Gift } from 'lucide-react';
+import { Settings, UserRound, Gift, Trophy } from 'lucide-react';
 import { ProfileBadge } from './ProfileBadge';
 import { lobby } from '../theme/tokens';
 import { USER_DATA } from '../utils/gameData';
@@ -73,9 +73,10 @@ interface TopUtilityBarProps {
   onSettings: () => void;
   onProfile?: () => void;
   onRewards?: () => void;
+  onNavigate?: (tab: string) => void;
 }
 
-export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProfile, onRewards }) => (
+export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProfile, onRewards, onNavigate }) => (
   <div
     style={{
       position: 'absolute',
@@ -99,6 +100,37 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
 
     {/* Spacer */}
     <div style={{ flex: 1 }} />
+
+    {/* Championships quick-access */}
+    {onNavigate && (
+      <motion.button
+        whileTap={{ scale: 0.88 }}
+        whileHover={{ scale: 1.08 }}
+        onClick={() => onNavigate('championships')}
+        title="Championships"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          height: '30px',
+          paddingInline: '10px',
+          borderRadius: '8px',
+          border: '1px solid rgba(212,168,67,0.28)',
+          background: 'rgba(212,168,67,0.07)',
+          color: lobby.gold,
+          cursor: 'pointer',
+          flexShrink: 0,
+          fontFamily: "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
+          fontWeight: 700,
+          fontSize: '10px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase' as const,
+        }}
+      >
+        <Trophy size={12} />
+        Events
+      </motion.button>
+    )}
 
     {/* Profile button */}
     <motion.button

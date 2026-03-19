@@ -87,16 +87,16 @@ export function Rankings() {
       style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px' }}
     >
       {/* Header */}
-      <div style={{ borderRadius: '16px', border: `1px solid rgba(212,168,67,0.25)`, background: 'linear-gradient(135deg, rgba(28,22,8,0.92) 0%, rgba(17,13,3,0.92) 100%)', backdropFilter: 'blur(14px)', padding: '14px 20px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '14px' }}>
-        <TrophyIcon size={36} color={GOLD} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 12px rgba(212,168,67,0.55))`, flexShrink: 0 }} />
+      <div style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.25)`, background: 'linear-gradient(135deg, rgba(28,22,8,0.92) 0%, rgba(17,13,3,0.92) 100%)', backdropFilter: 'blur(14px)', padding: '10px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <TrophyIcon size={22} color={GOLD} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 10px rgba(212,168,67,0.55))`, flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '28px', color: '#F3FBFF', letterSpacing: '0.06em', lineHeight: 1 }}>LEADERBOARD</div>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(232,224,208,0.60)', marginTop: '2px' }}>Season 26 · Week 8</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: '#F3FBFF', letterSpacing: '0.06em', lineHeight: 1 }}>LEADERBOARD</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(232,224,208,0.60)', marginTop: '1px' }}>Season 26 · Week 8</div>
         </div>
         {/* Player rank badge */}
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(56,214,255,0.65)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>YOUR RANK</div>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '32px', color: AQUA, lineHeight: 1, filter: `drop-shadow(0 0 10px rgba(56,214,255,0.50))` }}>#{rows.find(r => r.isPlayer)?.rank ?? '—'}</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(56,214,255,0.65)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>YOUR RANK</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: AQUA, lineHeight: 1, filter: `drop-shadow(0 0 8px rgba(56,214,255,0.50))` }}>#{rows.find(r => r.isPlayer)?.rank ?? '—'}</div>
         </div>
       </div>
 

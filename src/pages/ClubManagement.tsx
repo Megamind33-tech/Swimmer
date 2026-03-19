@@ -21,13 +21,13 @@ export function ClubManagement() {
       {/* ── LEFT COLUMN ── */}
       <div style={{ width: '170px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {/* Team OVR */}
-        <div style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.28)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.92) 0%, rgba(26,19,8,0.90) 100%)', backdropFilter: 'blur(12px)', padding: '12px 14px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <ShieldIcon size={14} color={GOLD} />
-            <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>Team OVR</span>
+        <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.28)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.92) 0%, rgba(26,19,8,0.90) 100%)', backdropFilter: 'blur(12px)', padding: '10px 12px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+            <ShieldIcon size={12} color={GOLD} />
+            <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>Team OVR</span>
           </div>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '48px', color: GOLD, letterSpacing: '0.04em', lineHeight: 1, textShadow: '0 0 20px rgba(212,168,67,0.45)' }}>{USER_DATA.clubOvr}</div>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '4px' }}>My Club</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '32px', color: GOLD, letterSpacing: '0.04em', lineHeight: 1, textShadow: '0 0 16px rgba(212,168,67,0.45)' }}>{USER_DATA.clubOvr}</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '3px' }}>My Club</div>
         </div>
 
         {/* Active Training */}
@@ -93,7 +93,7 @@ export function ClubManagement() {
         </div>
 
         {/* Sponsors */}
-        <SponsorPanel sponsors={CLUB_SPONSORS} title="CLUB SPONSORS" />
+        <SponsorPanel sponsors={CLUB_SPONSORS} title="CLUB SPONSORS" compact />
 
         {/* Bottom Row: Roster + Events */}
         <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', minHeight: 0 }}>
