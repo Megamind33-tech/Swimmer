@@ -156,3 +156,32 @@ export const CAREER_TRACK = [
   { id: 'ct2', week: 'Week 4', event: 'National Championship', stage: 'National Duty', state: 'Current' },
   { id: 'ct3', week: 'Week 8', event: 'World Qualifier', stage: 'National Duty', state: 'Upcoming' },
 ]
+
+export interface Sponsor {
+  id: string
+  name: string
+  logo: string
+  tier: 'Title' | 'Gold' | 'Silver'
+  value: string
+  category: string
+  bonus: string
+}
+
+export const CAREER_SPONSORS: Sponsor[] = [
+  { id: 'cs1', name: 'Speedo', logo: '🌊', tier: 'Title', value: '120K/yr', category: 'Apparel', bonus: '+5% XP on race wins' },
+  { id: 'cs2', name: 'TYR Sport', logo: '⚡', tier: 'Gold', value: '60K/yr', category: 'Equipment', bonus: '+3% stamina recovery' },
+  { id: 'cs3', name: 'Nike', logo: '✔', tier: 'Silver', value: '35K/yr', category: 'Footwear', bonus: '+2% split bonus' },
+]
+
+export const CLUB_SPONSORS: Sponsor[] = [
+  { id: 'cls1', name: 'Adidas', logo: '🔶', tier: 'Title', value: '250K/yr', category: 'Apparel', bonus: '+8% team OVR boost' },
+  { id: 'cls2', name: 'Red Bull', logo: '🐂', tier: 'Gold', value: '100K/yr', category: 'Energy', bonus: '+5% race intensity' },
+  { id: 'cls3', name: 'Omega', logo: '⌚', tier: 'Gold', value: '80K/yr', category: 'Timekeeping', bonus: 'Official timing partner' },
+  { id: 'cls4', name: 'Gatorade', logo: '🥤', tier: 'Silver', value: '40K/yr', category: 'Nutrition', bonus: '+3% endurance training' },
+]
+
+export const PLAYER_SPONSORS: Sponsor[] = [
+  { id: 'ps1', name: 'Arena', logo: '🏊', tier: 'Title', value: '90K/yr', category: 'Swimwear', bonus: '+6% technique rating' },
+  { id: 'ps2', name: 'Finis', logo: '🌀', tier: 'Gold', value: '45K/yr', category: 'Training Gear', bonus: '+4% drill efficiency' },
+  { id: 'ps3', name: 'Garmin', logo: '📡', tier: 'Silver', value: '25K/yr', category: 'Wearables', bonus: 'Live biometric tracking' },
+]

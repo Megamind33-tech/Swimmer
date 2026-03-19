@@ -1,8 +1,9 @@
 import React from 'react'
 import { motion } from 'motion/react'
-import { CLUB_OBJECTIVES, CLUB_UPCOMING_EVENTS, ROSTER_HIGHLIGHTS, SWIMMERS, USER_DATA } from '../utils/gameData'
+import { CLUB_OBJECTIVES, CLUB_UPCOMING_EVENTS, CLUB_SPONSORS, ROSTER_HIGHLIGHTS, SWIMMERS, USER_DATA } from '../utils/gameData'
 import { SwimmerCard } from '../components/SwimmerCard'
 import { ShieldIcon, ActivityIcon, CalendarIcon, FlagIcon } from 'lucide-react'
+import { SponsorPanel } from './ProfilePage'
 
 const AQUA = '#38D6FF'
 const GOLD = '#D4A843'
@@ -90,6 +91,9 @@ export function ClubManagement() {
             </motion.div>
           </div>
         </div>
+
+        {/* Sponsors */}
+        <SponsorPanel sponsors={CLUB_SPONSORS} title="CLUB SPONSORS" />
 
         {/* Bottom Row: Roster + Events */}
         <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', minHeight: 0 }}>

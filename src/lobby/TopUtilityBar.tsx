@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { Settings } from 'lucide-react';
+import { Settings, UserRound, Gift } from 'lucide-react';
 import { ProfileBadge } from './ProfileBadge';
 import { lobby } from '../theme/tokens';
 import { USER_DATA } from '../utils/gameData';
@@ -71,9 +71,11 @@ const CurrencyBadge: React.FC<CurrencyBadgeProps> = ({ icon, value, color, onAdd
 
 interface TopUtilityBarProps {
   onSettings: () => void;
+  onProfile?: () => void;
+  onRewards?: () => void;
 }
 
-export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings }) => (
+export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProfile, onRewards }) => (
   <div
     style={{
       position: 'absolute',
@@ -97,6 +99,64 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings }) => (
 
     {/* Spacer */}
     <div style={{ flex: 1 }} />
+
+    {/* Profile button */}
+    <motion.button
+      whileTap={{ scale: 0.88 }}
+      whileHover={{ scale: 1.08 }}
+      onClick={onProfile}
+      title="Player Profile"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+        height: '30px',
+        paddingInline: '10px',
+        borderRadius: '8px',
+        border: '1px solid rgba(56,214,255,0.22)',
+        background: 'rgba(56,214,255,0.07)',
+        color: lobby.cyanGlow,
+        cursor: 'pointer',
+        flexShrink: 0,
+        fontFamily: "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
+        fontWeight: 700,
+        fontSize: '10px',
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase' as const,
+      }}
+    >
+      <UserRound size={12} />
+      Profile
+    </motion.button>
+
+    {/* Rewards button */}
+    <motion.button
+      whileTap={{ scale: 0.88 }}
+      whileHover={{ scale: 1.08 }}
+      onClick={onRewards}
+      title="Rewards"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+        height: '30px',
+        paddingInline: '10px',
+        borderRadius: '8px',
+        border: '1px solid rgba(212,168,67,0.28)',
+        background: 'rgba(212,168,67,0.08)',
+        color: lobby.gold,
+        cursor: 'pointer',
+        flexShrink: 0,
+        fontFamily: "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
+        fontWeight: 700,
+        fontSize: '10px',
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase' as const,
+      }}
+    >
+      <Gift size={12} />
+      Rewards
+    </motion.button>
 
     <CurrencyBadge
       icon="🪙"
