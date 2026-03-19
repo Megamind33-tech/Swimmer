@@ -1,272 +1,744 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import {
+  swim26Boundary,
+  swim26Color,
+  swim26Components,
+  swim26Layout,
+  swim26Size,
+  swim26Space,
+  swim26StateRules,
+  swim26Type,
+} from '../../theme/swim26DesignSystem';
 
-interface MemberData {
+type ActivityTab = 'ALL' | 'CHAT' | 'MATCH' | 'INFO';
+type BottomNav = 'HOME' | 'QUESTS' | 'REWARDS' | 'TOURNAMENT' | 'LEADERBOARDS';
+type FeedType = 'quest' | 'unlock' | 'match' | 'chat' | 'info';
+
+interface FeedItem {
   id: number;
-  name: string;
-  level: number;
-  specialty: string;
-  avatarUrl: string;
-  online: boolean;
-  offline?: boolean;
-  grayscale?: boolean;
+  type: FeedType;
+  title: string;
+  body: string;
+  time: string;
+  action?: string;
+  tag: string;
+  unread?: boolean;
 }
 
-export const SocialClubScreen: React.FC = () => {
-  const members: MemberData[] = [
-    {
-      id: 1,
-      name: "HYDR0_VOSS",
-      level: 48,
-      specialty: "Freestyle Pro",
-      avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuBELpN9Tbu_FFujeNEEvGZ_D_iyVNrfPzZm0KoazQ_S2WQzKcAU7w7hVqPAqDHeBLun-2bbwiZyU7gZFOGp-_3Ad0YzH07ioRmQBVzSytnLkzQ7BCNJiohE79mJAt3sTKS3-qBrR2JQDrzHGyhn0eRjME9aRPXcMV3kUCn3CkqdbvUugZHDaTz6b6x94_61dky5a9w8GKB0bCaTb8j4mjzcTsXITAE4FcYFEwRG8ySPrK-9ZaDIirE6FknOztPhsaMBs5BMZqQyRxOJ",
-      online: true,
-    },
-    {
-      id: 2,
-      name: "WAVE_RUNNER",
-      level: 32,
-      specialty: "Backstroke Master",
-      avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuAxAhsxguiT9KVaXloci75k6404hdVCtWsiylPJg0CXr44RdJ8IG-6gR6Ixu4EobKkeB0xTx94KoqEr6tp5hCVvZQKUWivp7vkMxdvFG1pb6zH4UPAzNUgR2kUsyXBz62gT9DhiyHzw6iVrAXEShGtGkq3HPFbfbStQDpgV01jlSZSLrWI9WmZJfsV3s6qJc2tJlE5n0DSL0zo9a0AdtQVZHr7yheT4qSyUUWbOAX6ugqcQXivTlN5HzCDwLr69h4LvqIX4jZ0QF635",
-      online: true,
-    },
-    {
-      id: 3,
-      name: "DEPTH_CHARGE",
-      level: 0,
-      specialty: "Training Mode",
-      avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCckRby7_VG2-e4y7eXIk9TOjP3s1qd2rumCGRRxAeLzuWqlD8EvMLsUiYyeBe5kghEddPnHNjz6mnnWMroqUL5Ef_bYJbdn3Zd7RwzyrGVI1GbDH56K94qb22FqyTCGl8KDqax4_ru8zPC1ikYveKpt3KNrtu-avmaL9HceriCXXaTGgRU_t6e_-OVabBMIl9AEexmNwvDU2jZrT_yL7yjxUURIOkV0Tk9gMP60FqEGciTij-_DMTWSarPHrp_VUUaJJGiaS2oIN1G",
-      online: false,
-      offline: true,
-      grayscale: true,
-    },
-  ];
+const activityTabs: ActivityTab[] = ['ALL', 'CHAT', 'MATCH', 'INFO'];
 
-  const chatMessages = [
-    {
-      id: 3,
-      username: "AQUA_WOLF",
-      message: "Just hit a new PR on the 200m! This game's physics are insane lately.",
-      time: "13:45",
-      isOwn: false,
-    },
-    {
-      id: 2,
-      username: "YOU",
-      message: "Count me in. I've got the Hydro-Skins equipped. Let's crush that leaderboard.",
-      time: "13:58",
-      isOwn: true,
-      badge: "CAPTAIN",
-    },
-    {
-      id: 1,
-      username: "FIN_REAPER",
-      message: "Anyone down for the 4x100 Relay challenge starting in 5 mins? We need one more power-swimmer.",
-      time: "14:02",
-      isOwn: false,
-      badge: "MVP",
-    },
-  ];
+const localNavItems: { id: BottomNav; label: string; icon: string; badge?: number }[] = [
+  { id: 'HOME', label: 'Home', icon: '⌂' },
+  { id: 'QUESTS', label: 'Quests', icon: '◈', badge: 2 },
+  { id: 'REWARDS', label: 'Rewards', icon: '✦', badge: 3 },
+  { id: 'TOURNAMENT', label: 'Tournament', icon: '⚑' },
+  { id: 'LEADERBOARDS', label: 'Leaderboards', icon: '▤' },
+];
+
+const feedItems: FeedItem[] = [
+  {
+    id: 1,
+    type: 'quest',
+    title: 'Quest Complete: Relay Recovery',
+    body: 'Your club finished the 3-stage recovery quest. Claim 1,250 XP and a Hydro Crate before reset.',
+    time: '4m ago',
+    action: 'Claim',
+    tag: 'COMPLETED',
+    unread: true,
+  },
+  {
+    id: 2,
+    type: 'unlock',
+    title: 'New Facility Unlock: Tactical Film Room',
+    body: 'Analysis upgrades are now live. Team split review time drops by 12% this week.',
+    time: '18m ago',
+    action: 'Inspect',
+    tag: 'UNLOCK',
+  },
+  {
+    id: 3,
+    type: 'match',
+    title: 'Match Window Open: Coastal Sprint Final',
+    body: 'Round 6 seeding closes in 32 minutes. Your relay is seeded 3rd and still eligible for prestige bonus.',
+    time: '32m left',
+    action: 'Enter',
+    tag: 'LIVE',
+    unread: true,
+  },
+  {
+    id: 4,
+    type: 'chat',
+    title: 'Captain Message from A. Voss',
+    body: 'Need two more swimmers online for tonight’s 4x100. Reply if you can lock your slot before warmup.',
+    time: '1h ago',
+    action: 'Reply',
+    tag: 'CHAT',
+  },
+  {
+    id: 5,
+    type: 'info',
+    title: 'League Notice: Region Rotation Published',
+    body: 'Southern Atlantic pools rotate into ranked play on Friday. Lane familiarity bonuses are now visible in scouting.',
+    time: 'Today',
+    tag: 'NOTICE',
+  },
+];
+
+const typeStyles: Record<FeedType, { accent: string; wash: string; icon: string; tagText: string }> = {
+  quest: {
+    accent: swim26Color.feedback.success,
+    wash: 'rgba(54, 198, 144, 0.10)',
+    icon: '✓',
+    tagText: 'QUEST',
+  },
+  unlock: {
+    accent: swim26Color.featured.premium,
+    wash: 'rgba(214, 180, 90, 0.12)',
+    icon: '✦',
+    tagText: 'UNLOCK',
+  },
+  match: {
+    accent: swim26Color.accent.primary,
+    wash: 'rgba(74, 201, 214, 0.10)',
+    icon: '⚑',
+    tagText: 'MATCH',
+  },
+  chat: {
+    accent: swim26Color.accent.secondary,
+    wash: 'rgba(30, 143, 163, 0.12)',
+    icon: '✉',
+    tagText: 'CHAT',
+  },
+  info: {
+    accent: swim26Color.feedback.warning,
+    wash: 'rgba(255, 158, 87, 0.12)',
+    icon: 'i',
+    tagText: 'INFO',
+  },
+};
+
+const iconButtonStyle: React.CSSProperties = {
+  width: swim26Components.utilityIconButton.preferredSize,
+  height: swim26Components.utilityIconButton.preferredSize,
+  borderRadius: swim26Boundary.radius.sm,
+  border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+  background: swim26Color.surface.secondary,
+  color: swim26Color.text.secondary,
+  display: 'grid',
+  placeItems: 'center',
+  boxShadow: swim26Boundary.elevation.level1,
+};
+
+const statCardStyle: React.CSSProperties = {
+  borderRadius: swim26Boundary.radius.md,
+  border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+  background: swim26Color.surface.secondary,
+  padding: swim26Space.md,
+  boxShadow: swim26Boundary.elevation.level1,
+};
+
+export const SocialClubScreen: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<ActivityTab>('ALL');
+  const [activeNav, setActiveNav] = useState<BottomNav>('HOME');
+
+  const filteredFeed = useMemo(() => {
+    if (activeTab === 'ALL') return feedItems;
+    if (activeTab === 'CHAT') return feedItems.filter((item) => item.type === 'chat');
+    if (activeTab === 'MATCH') return feedItems.filter((item) => item.type === 'match' || item.type === 'quest');
+    return feedItems.filter((item) => item.type === 'info' || item.type === 'unlock');
+  }, [activeTab]);
 
   return (
-    <div className="bg-background text-on-surface font-body selection:bg-primary selection:text-on-primary min-h-screen flex flex-col dark">
-      {/* TopAppBar */}
-      <header className="h-16 flex items-center justify-between px-6 bg-surface-container border-b border-outline-variant/20 sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <span style={{fontSize:'30px', lineHeight:1, display:'inline-block'}} className="text-primary">〜</span>
-          <h1 className="font-headline font-bold text-2xl tracking-tighter uppercase italic text-glow">SWIM26</h1>
-        </div>
-        <div className="bg-surface-container-highest px-4 py-1 flex items-center gap-4">
-          <span className="font-label text-xs font-bold tracking-widest text-on-surface-variant">1,250 Gold | 50 SP</span>
-        </div>
-      </header>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: `radial-gradient(circle at 18% 18%, rgba(74, 201, 214, 0.12), transparent 24%), radial-gradient(circle at 78% 20%, rgba(214, 180, 90, 0.10), transparent 18%), linear-gradient(180deg, #0A1822 0%, ${swim26Color.bg.app} 48%, #061018 100%)`,
+        color: swim26Color.text.primary,
+        fontFamily: 'Inter, system-ui, sans-serif',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          opacity: 0.2,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 18%, transparent 18.5%, transparent 39%, rgba(255,255,255,0.02) 39.4%, transparent 40%, transparent 61%, rgba(255,255,255,0.025) 61.4%, transparent 62%, transparent 100%)',
+        }}
+      />
 
-      <main className="flex-1 p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-screen-2xl mx-auto w-full">
-        {/* Left Column: Club Identity (Bento Style) */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          {/* Club Crest Card */}
-          <div className="relative overflow-hidden bg-surface-container-high p-8 flex flex-col items-center justify-center text-center">
-            <div className="absolute inset-0 opacity-20 pointer-events-none">
-              <img alt="" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB03Sl5zVVzdPbuy_n5kC81OMW9XURyFsz6XzdWHaGBhwvDl2HsUwGlDon8DMENvwEQ7uzZ6CNqlQALRZZrfpfRJq0v7Xz944Bka0qmkoHyd0_5ODAYRLkC0HfB95XhUkonIQD6T6l8xuq3E8E1iv0jNoeieofDr1wv2CZMPWWjOiLoLbaKVW51FcbY4aGsa4wW_EAei9WuzDHVaOKJV2vw2ijiHAC2PqVau3r6MAr-St1BatmsGern2GIGuDO2YeMLuYwZNVwHnZds" />
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          minHeight: '100vh',
+          padding: `${swim26Layout.safe.top}px ${swim26Layout.safe.right}px ${swim26Layout.safe.bottom}px ${swim26Layout.safe.left}px`,
+          display: 'grid',
+          gridTemplateRows: `${swim26Size.topBar.height}px minmax(0, 1fr) ${swim26Size.bottomNav.height}px`,
+          gap: swim26Space.md,
+          maxWidth: swim26Layout.grid.maxWidth,
+          margin: '0 auto',
+          boxSizing: 'border-box',
+        }}
+      >
+        <header
+          style={{
+            borderRadius: swim26Boundary.radius.lg,
+            border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+            background: swim26Color.surface.primary,
+            boxShadow: swim26Boundary.elevation.level1,
+            padding: `0 ${swim26Space.md}px`,
+            display: 'grid',
+            gridTemplateColumns: '88px minmax(240px, 1fr) auto',
+            alignItems: 'center',
+            columnGap: swim26Space.md,
+          }}
+        >
+          <button
+            style={{
+              ...iconButtonStyle,
+              width: 48,
+              justifySelf: 'start',
+              color: swim26Color.text.primary,
+            }}
+          >
+            ←
+          </button>
+
+          <div style={{ display: 'grid', rowGap: 4, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: swim26Space.sm, minWidth: 0 }}>
+              <span
+                style={{
+                  height: swim26Size.statusChip.height,
+                  minWidth: swim26Components.countdownChip.minWidth,
+                  padding: `0 ${swim26Space.sm}px`,
+                  borderRadius: swim26Boundary.radius.pill,
+                  border: `${swim26Boundary.border.thin}px solid rgba(214, 180, 90, 0.35)`,
+                  background: 'rgba(214, 180, 90, 0.12)',
+                  color: swim26Color.featured.premium,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: swim26Type.metadata.fontSize,
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                }}
+              >
+                SEASON 26
+              </span>
+              <span style={{ color: swim26Color.text.secondary, fontSize: swim26Type.helper.fontSize, whiteSpace: 'nowrap' }}>
+                REGIONAL CLUB LEAGUE
+              </span>
             </div>
-            <div className="relative z-10">
-              <div className="w-32 h-32 bg-primary flex items-center justify-center mb-4 transform -skew-x-12 border-4 border-on-primary">
-                <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-on-primary">🏅</span>
-              </div>
-              <h2 className="font-headline text-4xl font-black italic uppercase -skew-x-6">Team SWIM</h2>
-              <p className="font-label text-primary text-sm tracking-[0.2em] font-bold mt-2">ELITE DIVISION | RANK #12</p>
-            </div>
-            <div className="mt-8 grid grid-cols-2 gap-4 w-full relative z-10">
-              <div className="bg-surface-container-lowest p-4 text-left border-l-2 border-primary">
-                <p className="text-[10px] uppercase font-bold text-on-surface-variant">Active Members</p>
-                <p className="text-2xl font-headline font-bold italic">142/150</p>
-              </div>
-              <div className="bg-surface-container-lowest p-4 text-left border-l-2 border-primary">
-                <p className="text-[10px] uppercase font-bold text-on-surface-variant">Season Points</p>
-                <p className="text-2xl font-headline font-bold italic">89.4k</p>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: swim26Space.md, minWidth: 0, flexWrap: 'wrap' }}>
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: swim26Type.screenTitle.fontSize,
+                  fontWeight: swim26Type.screenTitle.fontWeight,
+                  lineHeight: `${swim26Type.screenTitle.lineHeight}px`,
+                  letterSpacing: swim26Type.screenTitle.letterSpacing,
+                  minWidth: 0,
+                }}
+              >
+                League Hub
+              </h1>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: swim26Space.xs,
+                  height: swim26Size.statusChip.height,
+                  padding: `0 ${swim26Space.sm}px`,
+                  borderRadius: swim26Boundary.radius.pill,
+                  background: 'rgba(255, 158, 87, 0.12)',
+                  border: `${swim26Boundary.border.thin}px solid rgba(255, 158, 87, 0.28)`,
+                  color: swim26Color.feedback.warning,
+                  fontSize: swim26Type.metadata.fontSize,
+                  fontWeight: 700,
+                }}
+              >
+                <span>⏱</span>
+                Season closes in 03D 12H
               </div>
             </div>
           </div>
 
-          {/* Online Now Vertical List */}
-          <div className="bg-surface-container p-6 flex flex-col flex-1 min-h-[400px]">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-headline text-lg font-bold italic uppercase">Active Members</h3>
-              <span className="bg-primary/20 text-primary px-2 py-0.5 text-[10px] font-bold tracking-tighter">ONLINE: 48</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: swim26Space.sm, justifySelf: 'end' }}>
+            {[
+              { label: 'Messages', icon: '✉' },
+              { label: 'Alerts', icon: '◉' },
+              { label: 'Settings', icon: '⚙' },
+            ].map((item, index) => (
+              <button key={item.label} aria-label={item.label} style={{ ...iconButtonStyle, position: 'relative' }}>
+                <span style={{ fontSize: swim26Size.icon.md }}>{item.icon}</span>
+                {index === 1 ? (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      right: 8,
+                      top: 8,
+                      width: swim26Components.notificationBadge.dot,
+                      height: swim26Components.notificationBadge.dot,
+                      borderRadius: swim26Boundary.radius.pill,
+                      background: swim26Color.feedback.alert,
+                    }}
+                  />
+                ) : null}
+              </button>
+            ))}
+          </div>
+        </header>
+
+        <div
+          style={{
+            minHeight: 0,
+            display: 'grid',
+            gridTemplateColumns: 'minmax(308px, 0.34fr) minmax(0, 0.66fr)',
+            gridTemplateRows: 'minmax(0, 1fr) 92px',
+            gap: swim26Space.md,
+          }}
+        >
+          <aside
+            style={{
+              ...statCardStyle,
+              gridRow: '1 / span 2',
+              borderColor: 'rgba(214, 180, 90, 0.22)',
+              background: `linear-gradient(180deg, rgba(20, 38, 54, 0.96) 0%, rgba(13, 27, 39, 0.94) 100%)`,
+              display: 'grid',
+              gridTemplateRows: 'auto auto auto 1fr auto',
+              gap: swim26Space.md,
+              padding: swim26Space.lg,
+              minHeight: 0,
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '88px 1fr',
+                gap: swim26Space.md,
+                alignItems: 'center',
+                paddingBottom: swim26Space.md,
+                borderBottom: `${swim26Boundary.border.thin}px solid rgba(255,255,255,0.08)`,
+              }}
+            >
+              <div
+                style={{
+                  width: 88,
+                  height: 88,
+                  borderRadius: 22,
+                  border: `${swim26Boundary.border.strong}px solid rgba(214, 180, 90, 0.42)`,
+                  background: 'linear-gradient(180deg, rgba(214, 180, 90, 0.20), rgba(74, 201, 214, 0.12))',
+                  display: 'grid',
+                  placeItems: 'center',
+                  boxShadow: swim26Boundary.elevation.level2,
+                  fontSize: 40,
+                }}
+              >
+                🛡
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ color: swim26Color.featured.premium, fontSize: swim26Type.metadata.fontSize, fontWeight: 700, letterSpacing: '0.08em' }}>
+                  CONTINENTAL DIVISION
+                </div>
+                <h2
+                  style={{
+                    margin: '4px 0 6px',
+                    fontSize: swim26Type.displayHeading.fontSize,
+                    lineHeight: `${swim26Type.displayHeading.lineHeight}px`,
+                    fontWeight: swim26Type.displayHeading.fontWeight,
+                    letterSpacing: swim26Type.displayHeading.letterSpacing,
+                  }}
+                >
+                  Aqua Vortex
+                </h2>
+                <div style={{ color: swim26Color.text.secondary, fontSize: swim26Type.metadata.fontSize, fontWeight: 600 }}>
+                  Southern Atlantic Region
+                </div>
+              </div>
             </div>
-            <div className="space-y-4 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
-              {members.map((member) => (
-                <div key={member.id} className={`flex items-center gap-4 bg-surface-container-low p-3 hover:bg-surface-container-high transition-colors group ${member.grayscale ? 'opacity-70' : ''}`}>
-                  <div className="relative">
-                    <div className={`w-12 h-12 bg-outline-variant overflow-hidden ${member.grayscale ? 'grayscale' : ''}`}>
-                      <img alt="" className="w-full h-full object-cover" src={member.avatarUrl} />
-                    </div>
-                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-surface ${member.online ? 'bg-primary' : 'bg-outline'}`}></div>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-headline font-bold text-sm tracking-tight italic">{member.name}</p>
-                    <p className="text-[10px] text-on-surface-variant uppercase">{member.offline ? 'Offline' : `Lvl ${member.level}`} • {member.specialty}</p>
-                  </div>
-                  <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity">➤</span>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: swim26Space.sm }}>
+              {[
+                { label: 'Members', value: '142 / 150', accent: swim26Color.accent.primary },
+                { label: 'League Rank', value: '#12', accent: swim26Color.featured.premium },
+                { label: 'Club Score', value: '89,420', accent: swim26Color.feedback.success },
+                { label: 'Weekly Wins', value: '18', accent: swim26Color.accent.secondary },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  style={{
+                    ...statCardStyle,
+                    padding: swim26Space.sm,
+                    background: 'rgba(255,255,255,0.03)',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    boxShadow: 'none',
+                  }}
+                >
+                  <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary, marginBottom: 6 }}>{stat.label}</div>
+                  <div style={{ fontSize: 24, lineHeight: '26px', fontWeight: 800, color: stat.accent }}>{stat.value}</div>
                 </div>
               ))}
             </div>
-            <button className="mt-auto w-full bg-surface-container-highest py-3 font-label text-[10px] font-bold tracking-[0.3em] uppercase hover:bg-primary hover:text-on-primary transition-all">VIEW FULL ROSTER</button>
-          </div>
-        </div>
 
-        {/* Right Column: Interactive Hub */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-          {/* Global Feed / Chat (Main Canvas) */}
-          <div className="flex-1 glass-panel flex flex-col relative overflow-hidden min-h-[600px] border-t-4 border-primary" style={{background: 'rgba(28, 38, 57, 0.6)', backdropFilter: 'blur(12px)'}}>
-            {/* Chat Background Texture */}
-            <div className="absolute inset-0 opacity-5 pointer-events-none">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent"></div>
-            </div>
-
-            {/* Chat Header */}
-            <div className="relative z-10 flex items-center justify-between p-6 border-b border-outline-variant/30">
-              <div className="flex items-center gap-4">
-                <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary">👥</span>
-                <div>
-                  <h2 className="font-headline text-xl font-bold italic uppercase tracking-tight">Global Hub</h2>
-                  <p className="text-[10px] text-on-surface-variant font-bold tracking-widest">2,842 PLAYERS ACTIVE IN CHAT</p>
-                </div>
+            <div style={{ ...statCardStyle, background: 'rgba(255,255,255,0.03)', boxShadow: 'none' }}>
+              <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.text.secondary, marginBottom: 8, letterSpacing: '0.06em' }}>
+                LEAGUE MOTTO
               </div>
-              <div className="flex gap-2">
-                <button className="w-10 h-10 flex items-center justify-center bg-surface-container-highest hover:bg-primary hover:text-on-primary transition-colors">
-                  <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}}>≡</span>
-                </button>
-                <button className="w-10 h-10 flex items-center justify-center bg-surface-container-highest hover:bg-primary hover:text-on-primary transition-colors">
-                  <span style={{fontSize:'14px', lineHeight:1, display:'inline-block'}}>⚙</span>
-                </button>
+              <div style={{ fontSize: swim26Type.cardTitle.fontSize, lineHeight: '24px', fontWeight: 600 }}>
+                “Win the water early, hold the lane late, and leave every relay tighter than it started.”
               </div>
             </div>
 
-            {/* Chat Messages */}
-            <div className="relative z-10 flex-1 overflow-y-auto p-6 space-y-6 flex flex-col-reverse">
-              {chatMessages.map((msg, idx) => (
-                msg.isOwn ? (
-                  <div key={msg.id} className="flex gap-4 flex-row-reverse self-end max-w-[80%] text-right">
-                    <div className="w-10 h-10 bg-primary flex-shrink-0">
-                      <img alt="" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeYbciEnggKz2R2XVVX-8TORWcdx2TIm6z8ko507GT8GctQDNj1Xsup7aZxq6pacTg2ukeRlHLgzsjguIdKFofvajodAKB5WqMiwNoEUUxBbu0sloS4zA--nyVdXkPP6XIShzx2TjqSm032YleiusxKN0fXKHB0si3nOrmx8mimSWr1mB6_RCocJSrBk2JLnu5cn8KGWbIK4ESAFccBo-MJrqgSHwBWUFWKAWEt_E0xDaEjkDFkRSanQwgAw3zDd5-2ShaLgCNASWG" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-row-reverse">
-                        <span className="font-headline text-xs font-bold italic text-on-surface">YOU</span>
-                        <span className="text-[8px] bg-primary text-on-primary px-1 font-black">CAPTAIN</span>
-                      </div>
-                      <div className="bg-primary/20 p-3 relative transform skew-x-2 border-r-2 border-primary">
-                        <p className="text-sm font-light">{msg.message}</p>
-                      </div>
-                      <span className="text-[9px] text-on-surface-variant font-bold">{msg.time}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div key={msg.id} className="flex gap-4 max-w-[80%]">
-                    <div className="w-10 h-10 bg-outline-variant flex-shrink-0">
-                      <img alt="" className="w-full h-full object-cover" src={msg.id === 1 ? "https://lh3.googleusercontent.com/aida-public/AB6AXuCqElRoyhVJr4gHAzGDenp6kn_S8Tf9uSPpLPIxTWpsUF_qEmyBU4Q-UbcvkWUCFoov0Dt7jENHLc2KE-QOJiHbITibioFYG4XsymS0TfV8KiMzUIg1TTbzIFbroVQx4a-XvIUrSMFYP0P2y3PKGqJIWgv2WN55JoKk7zlTCuUpiAfVqbmvVpdSwpvl_4y4i7NGOM7KSrJ2V2gQfR6W-HSZnPSTdizn2SYjT8a8qyTIQBz6bACLGBy6nmJroxA2JlF-X8ltlcjDTlbx" : "https://lh3.googleusercontent.com/aida-public/AB6AXuD8z5JC7my7N36ji5DRMqL8Y_zlY6dYPU90cyywvNM7lBm6GSKv64UJ4V56VZqAn-KMYptN3uTulCBCZ3j8xhsDvfJzl_m3AtaoTE1o3uHJdxhIZRx3ADNF9s83rSqHI_NR74FnynnlrtbTd2T2sYzBlTqlAmeTIjfoUhGbiwFKS6DI85xhATDG_jWJm750qsiaBUoN8GgyiERdPBjU06Zepxf01PEEb3rZ3wXdT2BbgiYRTFxbJER2Cb2Pnv_fb7yEW0aC4BFi1OWS"} />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-headline text-xs font-bold italic text-primary">{msg.username}</span>
-                        {msg.badge && <span className="text-[8px] bg-secondary-container px-1 text-on-secondary-container font-black">{msg.badge}</span>}
-                      </div>
-                      <div className="bg-surface-container-high p-3 relative transform -skew-x-2">
-                        <p className="text-sm font-light">{msg.message}</p>
-                      </div>
-                      <span className="text-[9px] text-on-surface-variant font-bold">{msg.time}</span>
-                    </div>
-                  </div>
-                )
+            <div
+              style={{
+                ...statCardStyle,
+                background: 'rgba(255,255,255,0.03)',
+                boxShadow: 'none',
+                display: 'grid',
+                gap: swim26Space.sm,
+                alignContent: 'start',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.text.secondary, letterSpacing: '0.06em' }}>PRESTIGE STATUS</span>
+                <span
+                  style={{
+                    height: swim26Size.badge.height,
+                    padding: `0 ${swim26Space.sm}px`,
+                    borderRadius: swim26Boundary.radius.pill,
+                    background: 'rgba(214, 180, 90, 0.12)',
+                    border: `${swim26Boundary.border.thin}px solid rgba(214, 180, 90, 0.28)`,
+                    color: swim26Color.featured.premium,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    fontSize: 11,
+                    fontWeight: 700,
+                  }}
+                >
+                  ELITE TIER
+                </span>
+              </div>
+              <div style={{ height: 10, borderRadius: 999, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                <div
+                  style={{
+                    width: '72%',
+                    height: '100%',
+                    borderRadius: 999,
+                    background: `linear-gradient(90deg, ${swim26Color.featured.premium} 0%, ${swim26Color.accent.primary} 100%)`,
+                  }}
+                />
+              </div>
+              <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary, lineHeight: '16px' }}>
+                1,880 more prestige points unlock Champion League placement and a +6% fan income multiplier.
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: swim26Space.sm }}>
+              {[
+                { label: 'Invite', tone: swim26Color.accent.primary, background: 'rgba(74, 201, 214, 0.14)', border: 'rgba(74, 201, 214, 0.36)' },
+                { label: 'Manage', tone: swim26Color.text.primary, background: swim26Color.surface.tertiary, border: swim26Color.divider },
+              ].map((action) => (
+                <button
+                  key={action.label}
+                  style={{
+                    minHeight: swim26Size.buttons.standard.height,
+                    borderRadius: swim26Boundary.radius.md,
+                    border: `${swim26Boundary.border.thin}px solid ${action.border}`,
+                    background: action.background,
+                    color: action.tone,
+                    fontSize: swim26Type.buttonLabel.fontSize,
+                    fontWeight: swim26Type.buttonLabel.fontWeight,
+                    letterSpacing: '0.02em',
+                    boxShadow: swim26Boundary.elevation.level1,
+                  }}
+                >
+                  {action.label}
+                </button>
               ))}
             </div>
+          </aside>
 
-            {/* Input Area */}
-            <div className="relative z-10 p-6 bg-surface-container-highest/80 border-t border-outline-variant/30">
-              <div className="flex items-center gap-4 bg-surface-container-lowest p-1">
-                <input className="flex-1 bg-transparent border-none focus:ring-0 font-label text-sm uppercase placeholder:text-on-surface-variant/50 px-4" placeholder="TRANSMIT MESSAGE TO SECTOR 26..." type="text" />
-                <button className="bg-primary text-on-primary w-12 h-12 flex items-center justify-center hover:bg-primary-container transition-all">
-                  <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>➤</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Slanted Section: Rankings & Social Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-surface-container-high slanted-right h-24 flex items-center px-8 group hover:bg-surface-container-highest transition-colors cursor-pointer border-r-4 border-primary/40">
-              <div className="flex items-center gap-6">
-                <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-primary-fixed">🏆</span>
-                <div>
-                  <p className="font-headline text-2xl font-black italic uppercase">League Rank</p>
-                  <p className="text-xs font-bold tracking-[0.4em] text-primary">#142 GLOBAL</p>
+          <section
+            style={{
+              ...statCardStyle,
+              minHeight: 0,
+              padding: swim26Space.lg,
+              display: 'grid',
+              gridTemplateRows: 'auto auto minmax(0, 1fr)',
+              gap: swim26Space.md,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: swim26Space.md, alignItems: 'start', flexWrap: 'wrap' }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.accent.primary, letterSpacing: '0.08em', fontWeight: 700 }}>
+                  LIVE LEAGUE OPERATIONS
+                </div>
+                <h3 style={{ margin: '6px 0 8px', fontSize: 28, lineHeight: '32px', fontWeight: 800 }}>Club Feed & Match Control</h3>
+                <div style={{ color: swim26Color.text.secondary, fontSize: swim26Type.cardTitle.fontSize, lineHeight: '22px', maxWidth: 620 }}>
+                  Competitive updates, club chat, match readiness, and unlock notices are grouped into one scannable operations panel.
                 </div>
               </div>
-            </div>
-            <div className="bg-surface-container-high h-24 flex items-center px-8 border-l-4 border-secondary group hover:bg-surface-container-highest transition-colors cursor-pointer">
-              <div className="flex items-center gap-6 ml-auto md:ml-0">
-                <div className="text-right md:text-left">
-                  <p className="font-headline text-2xl font-black italic uppercase">Social Feed</p>
-                  <p className="text-xs font-bold tracking-[0.4em] text-secondary">24 NEW NOTIFICATIONS</p>
-                </div>
-                <span style={{fontSize:'36px', lineHeight:1, display:'inline-block'}} className="text-secondary">🔔</span>
+
+              <div
+                style={{
+                  minWidth: 220,
+                  borderRadius: swim26Boundary.radius.md,
+                  border: `${swim26Boundary.border.thin}px solid rgba(74, 201, 214, 0.18)`,
+                  background: 'rgba(74, 201, 214, 0.08)',
+                  padding: swim26Space.md,
+                  display: 'grid',
+                  gap: 6,
+                }}
+              >
+                <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.text.secondary }}>Match readiness</div>
+                <div style={{ fontSize: 26, lineHeight: '28px', fontWeight: 800, color: swim26Color.accent.primary }}>3 / 4 Ready</div>
+                <div style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary }}>One swimmer has not confirmed tonight’s final entry.</div>
               </div>
             </div>
+
+            <div
+              style={{
+                height: swim26Components.tabGroup.height,
+                borderRadius: swim26Boundary.radius.md,
+                border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+                background: 'rgba(255,255,255,0.03)',
+                padding: swim26Space.xs,
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+                gap: swim26Space.xs,
+              }}
+            >
+              {activityTabs.map((tab) => {
+                const active = activeTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    style={{
+                      borderRadius: swim26Boundary.radius.sm,
+                      border: active ? swim26StateRules.active.border : '1px solid transparent',
+                      background: active ? 'rgba(74, 201, 214, 0.10)' : 'transparent',
+                      color: active ? swim26Color.text.primary : swim26Color.text.secondary,
+                      fontSize: swim26Type.tabLabel.fontSize,
+                      fontWeight: swim26Type.tabLabel.fontWeight,
+                      letterSpacing: swim26Type.tabLabel.letterSpacing,
+                    }}
+                  >
+                    {tab}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ minHeight: 0, overflowY: 'auto', paddingRight: 4, display: 'grid', gap: swim26Space.sm }}>
+              {filteredFeed.map((item) => {
+                const style = typeStyles[item.type];
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      minHeight: 88,
+                      borderRadius: swim26Boundary.radius.md,
+                      border: `${swim26Boundary.border.thin}px solid ${item.unread ? style.accent : swim26Color.divider}`,
+                      background: item.unread ? style.wash : 'rgba(255,255,255,0.03)',
+                      boxShadow: item.unread ? swim26Boundary.elevation.level1 : 'none',
+                      display: 'grid',
+                      gridTemplateColumns: '56px minmax(0, 1fr) auto',
+                      alignItems: 'center',
+                      gap: swim26Space.md,
+                      padding: `${swim26Space.sm}px ${swim26Space.md}px`,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: swim26Boundary.radius.sm,
+                        background: style.wash,
+                        border: `${swim26Boundary.border.thin}px solid ${style.accent}55`,
+                        color: style.accent,
+                        display: 'grid',
+                        placeItems: 'center',
+                        fontSize: swim26Size.icon.md,
+                        fontWeight: 800,
+                      }}
+                    >
+                      {style.icon}
+                    </div>
+
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: swim26Space.sm, marginBottom: 6, flexWrap: 'wrap' }}>
+                        <span
+                          style={{
+                            height: swim26Size.badge.height,
+                            padding: `0 ${swim26Space.sm}px`,
+                            borderRadius: swim26Boundary.radius.pill,
+                            background: style.wash,
+                            color: style.accent,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            fontSize: 10,
+                            fontWeight: 800,
+                            letterSpacing: '0.06em',
+                          }}
+                        >
+                          {item.tag}
+                        </span>
+                        <span style={{ fontSize: swim26Type.helper.fontSize, color: swim26Color.text.secondary }}>{item.time}</span>
+                      </div>
+                      <div style={{ fontSize: swim26Type.cardTitle.fontSize, lineHeight: '20px', fontWeight: 700, marginBottom: 4 }}>{item.title}</div>
+                      <div style={{ fontSize: 13, lineHeight: '18px', color: swim26Color.text.secondary }}>{item.body}</div>
+                    </div>
+
+                    <div style={{ display: 'grid', justifyItems: 'end', alignItems: 'center', gap: swim26Space.sm, minWidth: 104 }}>
+                      {item.action ? (
+                        <button
+                          style={{
+                            minWidth: 104,
+                            minHeight: 40,
+                            padding: `0 ${swim26Space.md}px`,
+                            borderRadius: swim26Boundary.radius.sm,
+                            border: `${swim26Boundary.border.thin}px solid ${style.accent}66`,
+                            background: item.type === 'quest' || item.type === 'match' ? style.accent : 'rgba(255,255,255,0.04)',
+                            color: item.type === 'quest' || item.type === 'match' ? '#06202A' : style.accent,
+                            fontSize: swim26Type.buttonLabel.fontSize,
+                            fontWeight: 700,
+                            boxShadow: swim26Boundary.elevation.level1,
+                          }}
+                        >
+                          {item.action}
+                        </button>
+                      ) : (
+                        <span style={{ width: 104 }} />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <div
+            style={{
+              ...statCardStyle,
+              gridColumn: '2',
+              display: 'grid',
+              gridTemplateColumns: '52px minmax(0, 1fr) 120px',
+              gap: swim26Space.sm,
+              alignItems: 'center',
+              padding: swim26Space.sm,
+            }}
+          >
+            <button style={{ ...iconButtonStyle, width: 52, height: 52, color: swim26Color.text.primary }}>＋</button>
+            <div
+              style={{
+                minHeight: 52,
+                borderRadius: swim26Boundary.radius.md,
+                border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+                background: 'rgba(255,255,255,0.03)',
+                display: 'flex',
+                alignItems: 'center',
+                padding: `0 ${swim26Space.md}px`,
+                color: swim26Color.text.secondary,
+                fontSize: swim26Type.cardTitle.fontSize,
+              }}
+            >
+              Send a club update, tag a match squad, or post a strategy note…
+            </div>
+            <button
+              style={{
+                minHeight: 52,
+                borderRadius: swim26Boundary.radius.md,
+                border: `${swim26Boundary.border.thin}px solid ${swim26Color.accent.primary}`,
+                background: swim26Color.accent.primary,
+                color: '#06202A',
+                fontSize: swim26Type.buttonLabel.fontSize,
+                fontWeight: swim26Type.buttonLabel.fontWeight,
+                letterSpacing: '0.04em',
+                boxShadow: swim26Boundary.elevation.level2,
+              }}
+            >
+              SEND
+            </button>
           </div>
         </div>
-      </main>
 
-      {/* BottomNavBar */}
-      <nav className="h-20 bg-surface-container border-t border-outline-variant/20 flex items-center justify-around px-2 sticky bottom-0 z-50">
-        <a className="flex flex-col items-center gap-1 w-full text-on-surface-variant hover:text-primary transition-colors" href="#">
-          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>⌂</span>
-          <span className="font-label text-[10px] font-bold uppercase tracking-widest">Home</span>
-        </a>
-        <a className="flex flex-col items-center gap-1 w-full text-on-surface-variant hover:text-primary transition-colors" href="#">
-          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>🏅</span>
-          <span className="font-label text-[10px] font-bold uppercase tracking-widest">Career</span>
-        </a>
-        <a className="flex flex-col items-center gap-1 w-full text-primary border-t-2 border-primary pt-1" href="#">
-          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>👥</span>
-          <span className="font-label text-[10px] font-bold uppercase tracking-widest">Social</span>
-        </a>
-        <a className="flex flex-col items-center gap-1 w-full text-on-surface-variant hover:text-primary transition-colors" href="#">
-          <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>🏅</span>
-          <span className="font-label text-[10px] font-bold uppercase tracking-widest">Rewards</span>
-        </a>
-      </nav>
-
-      <style>{`
-        .slanted-right { clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); }
-        .slanted-left { clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%); }
-        .glass-panel { backdrop-filter: blur(12px); background: rgba(28, 38, 57, 0.6); }
-        .kinetic-border { border-left: 4px solid #81ecff; }
-        .text-glow { text-shadow: 0 0 10px rgba(129, 236, 255, 0.5); }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #414857; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #81ecff; }
-      `}</style>
+        <nav
+          style={{
+            borderRadius: swim26Boundary.radius.lg,
+            border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+            background: swim26Color.surface.primary,
+            boxShadow: swim26Boundary.elevation.level1,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+            alignItems: 'stretch',
+            padding: swim26Space.xs,
+            gap: swim26Space.xs,
+          }}
+        >
+          {localNavItems.map((item) => {
+            const active = activeNav === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveNav(item.id)}
+                style={{
+                  position: 'relative',
+                  borderRadius: swim26Boundary.radius.md,
+                  border: active ? swim26StateRules.active.border : '1px solid transparent',
+                  background: active ? 'rgba(74, 201, 214, 0.10)' : 'transparent',
+                  color: active ? swim26Color.text.primary : swim26Color.text.secondary,
+                  display: 'grid',
+                  justifyItems: 'center',
+                  alignContent: 'center',
+                  gap: swim26Space.xs,
+                  paddingTop: swim26Space.sm,
+                  paddingBottom: swim26Space.xs,
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '18%',
+                    right: '18%',
+                    height: 3,
+                    borderRadius: 999,
+                    background: active ? swim26Color.accent.primary : 'transparent',
+                  }}
+                />
+                <span style={{ fontSize: 22, lineHeight: 1 }}>{item.icon}</span>
+                <span style={{ fontSize: 12, lineHeight: '14px', fontWeight: 600 }}>{item.label}</span>
+                {item.badge ? (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: '28%',
+                      minWidth: 18,
+                      height: 18,
+                      borderRadius: 999,
+                      background: swim26Color.feedback.alert,
+                      color: '#fff',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 10,
+                      fontWeight: 800,
+                      padding: '0 4px',
+                    }}
+                  >
+                    {item.badge}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
 };

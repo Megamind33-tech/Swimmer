@@ -1,342 +1,541 @@
-/**
- * Store Screen — Game UI premium marketplace
- * Compact fixed layout, no scrolling, game font + color system.
- */
+import React, { useMemo, useState } from 'react';
+import {
+  swim26Boundary,
+  swim26Color,
+  swim26Components,
+  swim26Layout,
+  swim26Size,
+  swim26Space,
+  swim26StateRules,
+  swim26Type,
+} from '../../theme/swim26DesignSystem';
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ShoppingBagIcon, StarIcon, TagIcon, SparklesIcon, PackageIcon, CalendarIcon } from 'lucide-react';
+type TopCategory = 'RECOMMENDED' | 'SCORES_GEMS' | 'EXCHANGES' | 'GOLD' | 'BRONZE' | 'SILVER';
+type SubCategory = 'FEATURED' | 'MONTHLY_SUPPLY_CARD' | 'RESOURCE' | 'OLYMPIADS_STORY' | 'BEST_SELLER' | 'PREMIUM_PASS' | 'COMMONWEALTH';
 
-const AQUA        = '#38D6FF';
-const GOLD        = '#D4A843';
-const PANEL       = 'rgba(4,20,33,0.76)';
-const PANEL_BORDER = 'rgba(56,214,255,0.13)';
+type PriceKind = 'premium' | 'sports' | 'cash';
+type ProductKind = 'standard' | 'featured' | 'limited' | 'resource';
 
-type StoreTab = 'FEATURED' | 'COSMETICS' | 'SEASON_PASS' | 'BUNDLES' | 'CELEBRATION' | 'EVENT_SHOP';
-
-interface StoreItem {
+interface StoreProduct {
   id: string;
-  name: string;
-  desc: string;
-  price: number;
-  currency: 'PREMIUM' | 'COINS';
-  rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
-  icon: string;
-  tag?: string;
+  topCategory: TopCategory;
+  subCategory: SubCategory;
+  title: string;
+  subtitle?: string;
+  artwork: string;
+  badge?: string;
+  priceLabel: string;
+  priceKind: PriceKind;
+  limit?: string;
+  expiry?: string;
+  valueNote?: string;
+  kind: ProductKind;
 }
-
-const FEATURED: StoreItem[] = [
-  { id: 'f1', name: 'Championship Bundle', desc: 'Suit + Cap + Goggles + Victory Pose', price: 1999, currency: 'PREMIUM', rarity: 'LEGENDARY', icon: '👑', tag: 'LIMITED' },
-  { id: 'f2', name: 'Premium Season Pass',  desc: '50 exclusive reward tiers',          price: 999,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '⭐', tag: 'NEW' },
-  { id: 'f3', name: 'Neon Cyber Suit',      desc: 'Futuristic racing suit + LED FX',     price: 500,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '🩱' },
-  { id: 'f4', name: 'Gold Elite Suit',      desc: 'Premium gold suit for champions',     price: 800,  currency: 'PREMIUM', rarity: 'LEGENDARY', icon: '🩱' },
-];
-
-const COSMETICS: StoreItem[] = [
-  { id: 'c1', name: 'Neon Cyber Suit',    desc: 'Futuristic suit with LED FX',       price: 500,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '🩱' },
-  { id: 'c2', name: 'Gold Elite Suit',    desc: 'Champion gold racing suit',         price: 800,  currency: 'PREMIUM', rarity: 'LEGENDARY', icon: '🩱' },
-  { id: 'c3', name: 'Dragon Cap',         desc: 'Legendary dragon racing cap',       price: 300,  currency: 'PREMIUM', rarity: 'RARE',      icon: '🎩' },
-  { id: 'c4', name: 'Vision Pro Goggles', desc: 'Advanced goggles with HUD display', price: 350,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '🔍' },
-  { id: 'c5', name: 'Shadow Gloves',      desc: 'Grip gloves for open water',        price: 200,  currency: 'COINS',   rarity: 'RARE',      icon: '🧤' },
-  { id: 'c6', name: 'Hydro Fins',         desc: 'Speed fins for underwater kicks',   price: 450,  currency: 'PREMIUM', rarity: 'EPIC',      icon: '🦶' },
-];
-
-const CELEBRATIONS: StoreItem[] = [
-  { id: 'cel1', name: 'Victory Fireworks', desc: 'Spectacular fireworks animation', price: 250, currency: 'PREMIUM', rarity: 'EPIC',   icon: '🎆' },
-  { id: 'cel2', name: 'Champion Poses',    desc: '5 premium victory poses',         price: 400, currency: 'PREMIUM', rarity: 'EPIC',   icon: '💪' },
-  { id: 'cel3', name: 'Elite Walkout',     desc: 'Premium pool walkout animation',  price: 200, currency: 'PREMIUM', rarity: 'RARE',   icon: '🚶' },
-  { id: 'cel4', name: 'Wave Celebration',  desc: 'Water splash victory move',       price: 150, currency: 'COINS',   rarity: 'COMMON', icon: '🌊' },
-];
-
-const RARITY_STYLES: Record<string, { border: string; label: string; bg: string }> = {
-  LEGENDARY: { border: 'rgba(212,168,67,0.35)',   label: GOLD,   bg: 'rgba(212,168,67,0.08)' },
-  EPIC:      { border: 'rgba(167,139,250,0.30)',   label: '#A78BFA', bg: 'rgba(88,28,135,0.10)' },
-  RARE:      { border: 'rgba(56,214,255,0.25)',    label: AQUA,  bg: 'rgba(56,214,255,0.06)' },
-  COMMON:    { border: 'rgba(255,255,255,0.10)',   label: 'rgba(169,211,231,0.55)', bg: 'rgba(255,255,255,0.03)' },
-};
 
 interface StoreScreenProps {
   playerPremiumCurrency?: number;
   playerCoins?: number;
 }
 
-const TABS: { id: StoreTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'FEATURED',    label: 'FEATURED',  icon: <StarIcon    size={11} /> },
-  { id: 'COSMETICS',   label: 'COSMETICS', icon: <TagIcon     size={11} /> },
-  { id: 'SEASON_PASS', label: 'SEASON',    icon: <StarIcon    size={11} /> },
-  { id: 'BUNDLES',     label: 'BUNDLES',   icon: <PackageIcon size={11} /> },
-  { id: 'CELEBRATION', label: 'VICTORY',   icon: <SparklesIcon size={11} /> },
-  { id: 'EVENT_SHOP',  label: 'EVENTS',    icon: <CalendarIcon size={11} /> },
+const topCategories: { id: TopCategory; label: string; badge?: string }[] = [
+  { id: 'RECOMMENDED', label: 'Recommended' },
+  { id: 'SCORES_GEMS', label: 'SWIM SCORES & Gems', badge: '3' },
+  { id: 'EXCHANGES', label: 'Exchanges' },
+  { id: 'GOLD', label: 'Gold' },
+  { id: 'BRONZE', label: 'Bronze' },
+  { id: 'SILVER', label: 'Silver', badge: 'NEW' },
 ];
+
+const subCategories: { id: SubCategory; label: string }[] = [
+  { id: 'FEATURED', label: 'Featured' },
+  { id: 'MONTHLY_SUPPLY_CARD', label: 'Monthly Supply Card' },
+  { id: 'RESOURCE', label: 'Resource' },
+  { id: 'OLYMPIADS_STORY', label: "Olympiad's Story" },
+  { id: 'BEST_SELLER', label: 'Best Seller' },
+  { id: 'PREMIUM_PASS', label: 'Premium Pass' },
+  { id: 'COMMONWEALTH', label: 'Commonwealth' },
+];
+
+const products: StoreProduct[] = [
+  {
+    id: 'p1',
+    topCategory: 'RECOMMENDED',
+    subCategory: 'FEATURED',
+    title: 'Champion Launch Bundle',
+    subtitle: 'Premium seasonal entry bundle',
+    artwork: '🏆',
+    badge: '300% VALUE',
+    priceLabel: '$19.99',
+    priceKind: 'cash',
+    limit: '1 per account',
+    expiry: 'Ends in 18H',
+    valueNote: 'Includes 4,000 Gems + score boosters',
+    kind: 'featured',
+  },
+  {
+    id: 'p2',
+    topCategory: 'SCORES_GEMS',
+    subCategory: 'BEST_SELLER',
+    title: 'Gem Vault',
+    subtitle: '4,500 Gems',
+    artwork: '◆',
+    badge: '20% OFF',
+    priceLabel: '$9.99',
+    priceKind: 'cash',
+    limit: 'Daily 2',
+    valueNote: 'Bonus +600 gems included',
+    kind: 'featured',
+  },
+  {
+    id: 'p3',
+    topCategory: 'EXCHANGES',
+    subCategory: 'RESOURCE',
+    title: 'Energy Conversion Pack',
+    subtitle: 'Turns score fragments into boosts',
+    artwork: '⚡',
+    badge: 'LATEST',
+    priceLabel: '1,200 SS',
+    priceKind: 'sports',
+    expiry: 'Refresh in 42M',
+    valueNote: 'Limit 3 today',
+    kind: 'resource',
+  },
+  {
+    id: 'p4',
+    topCategory: 'GOLD',
+    subCategory: 'RESOURCE',
+    title: 'Gold Reserve Case',
+    subtitle: '80,000 club gold',
+    artwork: '◉',
+    badge: '50% OFF',
+    priceLabel: '◆ 320',
+    priceKind: 'premium',
+    limit: 'Weekly 5',
+    kind: 'standard',
+  },
+  {
+    id: 'p5',
+    topCategory: 'BRONZE',
+    subCategory: 'COMMONWEALTH',
+    title: 'Bronze Travel Pack',
+    subtitle: 'Commonwealth route starter',
+    artwork: '🧳',
+    priceLabel: '4,000 SS',
+    priceKind: 'sports',
+    limit: '2 remaining',
+    kind: 'standard',
+  },
+  {
+    id: 'p6',
+    topCategory: 'SILVER',
+    subCategory: 'MONTHLY_SUPPLY_CARD',
+    title: 'Supply Card Plus',
+    subtitle: '30-day income stream',
+    artwork: '🪪',
+    badge: 'BEST SELLER',
+    priceLabel: '$4.99',
+    priceKind: 'cash',
+    expiry: 'Monthly reset',
+    valueNote: 'Daily gems + training keys',
+    kind: 'limited',
+  },
+  {
+    id: 'p7',
+    topCategory: 'RECOMMENDED',
+    subCategory: 'PREMIUM_PASS',
+    title: 'Premium Pass Upgrade',
+    subtitle: 'Unlock 50 reward tiers',
+    artwork: '✦',
+    badge: 'LATEST',
+    priceLabel: '◆ 999',
+    priceKind: 'premium',
+    expiry: 'Season 26',
+    kind: 'limited',
+  },
+  {
+    id: 'p8',
+    topCategory: 'SCORES_GEMS',
+    subCategory: 'OLYMPIADS_STORY',
+    title: 'Olympiad Story Set',
+    subtitle: 'Narrative cosmetics + score drops',
+    artwork: '📖',
+    badge: '300% VALUE',
+    priceLabel: '$14.99',
+    priceKind: 'cash',
+    limit: '1 remaining',
+    kind: 'featured',
+  },
+];
+
+const shellPanel: React.CSSProperties = {
+  borderRadius: swim26Boundary.radius.md,
+  border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+  background: swim26Color.surface.secondary,
+  boxShadow: swim26Boundary.elevation.level1,
+};
+
+const iconButtonStyle: React.CSSProperties = {
+  width: swim26Components.utilityIconButton.preferredSize,
+  height: swim26Components.utilityIconButton.preferredSize,
+  borderRadius: swim26Boundary.radius.sm,
+  border: `${swim26Boundary.border.thin}px solid ${swim26Color.divider}`,
+  background: swim26Color.surface.secondary,
+  color: swim26Color.text.secondary,
+  display: 'grid',
+  placeItems: 'center',
+  boxShadow: swim26Boundary.elevation.level1,
+};
 
 export const StoreScreen: React.FC<StoreScreenProps> = ({
   playerPremiumCurrency = 250,
   playerCoins = 5000,
 }) => {
-  const [activeTab, setActiveTab] = useState<StoreTab>('FEATURED');
-  const [toast, setToast] = useState<string | null>(null);
+  const [activeTopCategory, setActiveTopCategory] = useState<TopCategory>('RECOMMENDED');
+  const [activeSubCategory, setActiveSubCategory] = useState<SubCategory>('FEATURED');
 
-  const buy = (name: string) => {
-    setToast(`Purchased: ${name}`);
-    setTimeout(() => setToast(null), 2500);
-  };
+  const visibleProducts = useMemo(() => {
+    return products.filter((product) => {
+      const topMatches = product.topCategory === activeTopCategory || activeTopCategory === 'RECOMMENDED';
+      const subMatches = product.subCategory === activeSubCategory || activeSubCategory === 'FEATURED';
+      if (activeTopCategory === 'RECOMMENDED' && activeSubCategory === 'FEATURED') return true;
+      return topMatches && subMatches;
+    });
+  }, [activeTopCategory, activeSubCategory]);
 
   return (
-    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '8px', padding: '10px' }}>
-      {/* ── Header ── */}
-      <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(14px)', padding: '10px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShoppingBagIcon size={14} color={AQUA} />
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: '#F3FBFF', letterSpacing: '0.06em' }}>PREMIUM <span style={{ color: AQUA }}>STORE</span></span>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        background: `radial-gradient(circle at 20% 18%, rgba(74, 201, 214, 0.10), transparent 22%), radial-gradient(circle at 78% 16%, rgba(214, 180, 90, 0.10), transparent 18%), linear-gradient(180deg, #09151E 0%, ${swim26Color.bg.app} 54%, #061018 100%)`,
+        color: swim26Color.text.primary,
+        fontFamily: 'Inter, system-ui, sans-serif',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          opacity: 0.16,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.022) 16%, transparent 16.4%, transparent 38%, rgba(255,255,255,0.016) 38.2%, transparent 39%, transparent 62%, rgba(255,255,255,0.02) 62.4%, transparent 63%, transparent 100%)',
+        }}
+      />
+
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          height: '100%',
+          padding: `${swim26Layout.safe.top}px ${swim26Layout.safe.right}px ${swim26Layout.safe.bottom}px ${swim26Layout.safe.left}px`,
+          display: 'grid',
+          gridTemplateRows: `${swim26Size.topBar.height}px 50px minmax(0, 1fr) 42px`,
+          gap: swim26Space.md,
+          maxWidth: swim26Layout.grid.maxWidth,
+          margin: '0 auto',
+          boxSizing: 'border-box',
+        }}
+      >
+        <header
+          style={{
+            ...shellPanel,
+            borderRadius: swim26Boundary.radius.lg,
+            background: swim26Color.surface.primary,
+            display: 'grid',
+            gridTemplateColumns: '88px minmax(260px, 1fr) auto',
+            alignItems: 'center',
+            columnGap: swim26Space.md,
+            padding: `0 ${swim26Space.md}px`,
+          }}
+        >
+          <button style={{ ...iconButtonStyle, width: 48, color: swim26Color.text.primary }}>←</button>
+
+          <div style={{ display: 'grid', rowGap: 4 }}>
+            <div style={{ fontSize: swim26Type.metadata.fontSize, color: swim26Color.accent.primary, fontWeight: 700, letterSpacing: '0.08em' }}>
+              PREMIUM RETAIL FLOOR
+            </div>
+            <h1 style={{ margin: 0, fontSize: swim26Type.screenTitle.fontSize, lineHeight: `${swim26Type.screenTitle.lineHeight}px`, fontWeight: swim26Type.screenTitle.fontWeight, letterSpacing: swim26Type.screenTitle.letterSpacing }}>
+              Store
+            </h1>
           </div>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Global Marketplace</div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: swim26Space.sm }}>
+            <CurrencyPill label="Gems" value={`◆ ${playerPremiumCurrency.toLocaleString()}`} accent={swim26Color.accent.primary} />
+            <CurrencyPill label="Scores" value={`${playerCoins.toLocaleString()} SS`} accent={swim26Color.featured.premium} />
+            {['⌕', '☰'].map((icon) => (
+              <button key={icon} style={iconButtonStyle}>{icon}</button>
+            ))}
+          </div>
+        </header>
+
+        <div
+          style={{
+            ...shellPanel,
+            background: swim26Color.surface.primary,
+            padding: swim26Space.xs,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
+            gap: swim26Space.xs,
+            alignItems: 'stretch',
+          }}
+        >
+          {topCategories.map((category) => {
+            const active = activeTopCategory === category.id;
+            return (
+              <button
+                key={category.id}
+                onClick={() => setActiveTopCategory(category.id)}
+                style={{
+                  position: 'relative',
+                  borderRadius: swim26Boundary.radius.sm,
+                  border: active ? swim26StateRules.active.border : '1px solid transparent',
+                  background: active ? 'rgba(74, 201, 214, 0.10)' : 'transparent',
+                  color: active ? swim26Color.text.primary : swim26Color.text.secondary,
+                  display: 'grid',
+                  placeItems: 'center',
+                  padding: `0 ${swim26Space.sm}px`,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  textAlign: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '16%',
+                    right: '16%',
+                    height: 3,
+                    borderRadius: 999,
+                    background: active ? swim26Color.accent.primary : 'transparent',
+                  }}
+                />
+                <span>{category.label}</span>
+                {category.badge ? (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 6,
+                      right: 8,
+                      minWidth: 18,
+                      height: 18,
+                      borderRadius: 999,
+                      background: category.badge === 'NEW' ? swim26Color.feedback.success : swim26Color.feedback.alert,
+                      color: '#fff',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0 4px',
+                      fontSize: 10,
+                      fontWeight: 800,
+                    }}
+                  >
+                    {category.badge}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <CurrencyBadge icon={<span style={{ fontFamily: "'Bebas Neue'", fontSize: '12px', color: AQUA, lineHeight: 1 }}>◆</span>} value={playerPremiumCurrency} label="Diamonds" color={AQUA} />
-          <CurrencyBadge icon={<span style={{ fontFamily: "'Bebas Neue'", fontSize: '11px', color: GOLD, lineHeight: 1 }}>C</span>} value={playerCoins} label="Coins" color={GOLD} />
+
+        <div style={{ minHeight: 0, display: 'grid', gridTemplateColumns: '220px minmax(0, 1fr)', gap: swim26Space.md }}>
+          <aside
+            style={{
+              ...shellPanel,
+              background: swim26Color.surface.primary,
+              padding: swim26Space.sm,
+              display: 'grid',
+              gap: swim26Space.xs,
+              alignContent: 'start',
+            }}
+          >
+            {subCategories.map((subCategory) => {
+              const active = activeSubCategory === subCategory.id;
+              return (
+                <button
+                  key={subCategory.id}
+                  onClick={() => setActiveSubCategory(subCategory.id)}
+                  style={{
+                    borderRadius: swim26Boundary.radius.md,
+                    border: active ? swim26StateRules.active.border : `1px solid transparent`,
+                    background: active ? 'rgba(74, 201, 214, 0.10)' : 'rgba(255,255,255,0.02)',
+                    color: active ? swim26Color.text.primary : swim26Color.text.secondary,
+                    minHeight: swim26Size.buttons.standard.height,
+                    padding: `0 ${swim26Space.md}px`,
+                    textAlign: 'left',
+                    fontSize: swim26Type.tabLabel.fontSize,
+                    fontWeight: swim26Type.tabLabel.fontWeight,
+                    letterSpacing: swim26Type.tabLabel.letterSpacing,
+                    boxShadow: active ? swim26Boundary.elevation.level1 : 'none',
+                  }}
+                >
+                  {subCategory.label}
+                </button>
+              );
+            })}
+          </aside>
+
+          <section
+            style={{
+              ...shellPanel,
+              padding: swim26Space.md,
+              minHeight: 0,
+              overflowY: 'auto',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: swim26Space.md,
+              alignContent: 'start',
+            }}
+          >
+            {visibleProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </section>
         </div>
-      </div>
 
-      {/* ── Tab bar ── */}
-      <div style={{ display: 'flex', gap: '5px', flexShrink: 0 }}>
-        {TABS.map((tab) => {
-          const active = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{ flex: 1, height: '30px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.14)' : 'rgba(255,255,255,0.04)', border: active ? `1px solid rgba(56,214,255,0.40)` : `1px solid ${PANEL_BORDER}`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.10em', color: active ? AQUA : 'rgba(169,211,231,0.50)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', transition: 'all 0.15s', boxShadow: active ? '0 0 10px rgba(56,214,255,0.15)' : 'none' }}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          );
-        })}
+        <footer
+          style={{
+            ...shellPanel,
+            background: 'rgba(255,255,255,0.03)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: `0 ${swim26Space.md}px`,
+            color: swim26Color.text.secondary,
+            fontSize: swim26Type.helper.fontSize,
+          }}
+        >
+          <span>Offers refresh daily at 00:00 UTC. Regional pricing and limit rules apply.</span>
+          <span>Tap any product card for expanded details.</span>
+        </footer>
       </div>
-
-      {/* ── Content ── */}
-      <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(14px)', overflow: 'hidden', position: 'relative' }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.16 }}
-            style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '12px' }}
-          >
-            {renderContent(activeTab, buy)}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* ── Toast ── */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            style={{ position: 'absolute', bottom: '74px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, background: 'rgba(4,20,33,0.95)', border: `1px solid rgba(56,214,255,0.35)`, borderRadius: '10px', padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 0 24px rgba(56,214,255,0.20)', backdropFilter: 'blur(12px)', whiteSpace: 'nowrap' }}
-          >
-            <ShoppingBagIcon size={14} color={AQUA} />
-            <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '13px', color: '#F3FBFF' }}>{toast}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
 
-// ─────────────────────────────────────────────────────────
-// Tab content renderers
-// ─────────────────────────────────────────────────────────
-
-function renderContent(tab: StoreTab, buy: (name: string) => void): React.ReactNode {
-  switch (tab) {
-    case 'FEATURED':
-      return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-          {FEATURED.map((item) => <ItemCard key={item.id} item={item} onBuy={buy} featured />)}
-        </div>
-      );
-    case 'COSMETICS':
-      return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-          {COSMETICS.map((item) => <ItemCard key={item.id} item={item} onBuy={buy} />)}
-        </div>
-      );
-    case 'SEASON_PASS':
-      return <SeasonPassContent buy={buy} />;
-    case 'BUNDLES':
-      return <BundlesContent buy={buy} />;
-    case 'CELEBRATION':
-      return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-          {CELEBRATIONS.map((item) => <ItemCard key={item.id} item={item} onBuy={buy} />)}
-        </div>
-      );
-    case 'EVENT_SHOP':
-      return <EventShopContent />;
-    default:
-      return null;
-  }
-}
-
-// ─────────────────────────────────────────────────────────
-// Item Card
-// ─────────────────────────────────────────────────────────
-
-function ItemCard({ item, onBuy, featured }: { item: StoreItem; onBuy: (name: string) => void; featured?: boolean }) {
-  const rs = RARITY_STYLES[item.rarity] ?? RARITY_STYLES.COMMON;
+function CurrencyPill({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
-    <motion.div
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
-      style={{ borderRadius: '12px', border: `1px solid ${rs.border}`, background: rs.bg, padding: featured ? '14px' : '10px', display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative', overflow: 'hidden' }}
+    <div
+      style={{
+        minWidth: 104,
+        height: swim26Size.currencyCounter.height,
+        borderRadius: swim26Boundary.radius.pill,
+        border: `${swim26Boundary.border.thin}px solid ${accent}44`,
+        background: 'rgba(255,255,255,0.04)',
+        padding: `0 ${swim26Space.sm}px`,
+        display: 'grid',
+        alignContent: 'center',
+        justifyItems: 'end',
+      }}
     >
-      {item.tag && (
-        <div style={{ position: 'absolute', top: '8px', right: '8px', background: item.tag === 'LIMITED' ? 'rgba(196,30,58,0.90)' : 'rgba(13,124,102,0.90)', borderRadius: '5px', padding: '2px 7px', fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', letterSpacing: '0.12em', color: '#fff' }}>
-          {item.tag}
-        </div>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ fontSize: featured ? '28px' : '22px', lineHeight: 1 }}>{item.icon}</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: featured ? '16px' : '14px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: rs.label, letterSpacing: '0.10em', marginTop: '2px', textTransform: 'uppercase' }}>{item.rarity}</div>
-        </div>
-      </div>
-      {featured && (
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.60)', lineHeight: 1.4 }}>{item.desc}</div>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: item.currency === 'PREMIUM' ? AQUA : GOLD, letterSpacing: '0.04em', textShadow: item.currency === 'PREMIUM' ? '0 0 8px rgba(56,214,255,0.40)' : '0 0 8px rgba(212,168,67,0.40)' }}>{item.price.toLocaleString()}</span>
-          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase' }}>{item.currency === 'PREMIUM' ? '◆' : 'C'}</span>
-        </div>
-        <button
-          onClick={() => onBuy(item.name)}
-          style={{ height: '26px', paddingInline: '12px', borderRadius: '7px', cursor: 'pointer', background: item.currency === 'PREMIUM' ? 'rgba(56,214,255,0.12)' : 'rgba(212,168,67,0.12)', border: `1px solid ${item.currency === 'PREMIUM' ? 'rgba(56,214,255,0.30)' : 'rgba(212,168,67,0.30)'}`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.10em', color: item.currency === 'PREMIUM' ? AQUA : GOLD }}
-        >
-          BUY
-        </button>
-      </div>
-    </motion.div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
-// Season Pass
-// ─────────────────────────────────────────────────────────
-
-function SeasonPassContent({ buy }: { buy: (name: string) => void }) {
-  const benefits = [
-    { label: 'Exclusive Assets',  icon: '✦' },
-    { label: '2× XP Boost',       icon: '⚡' },
-    { label: 'Diamond Reserves',  icon: '◆' },
-    { label: 'Elite Gear Bundle',  icon: '🎽' },
-  ];
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      {/* Banner */}
-      <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.28)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.90) 0%, rgba(11,17,32,0.92) 100%)', padding: '14px 18px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', right: 0, top: 0, width: '160px', height: '160px', borderRadius: '50%', background: GOLD, opacity: 0.06, filter: 'blur(50px)', pointerEvents: 'none' }} />
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', fontWeight: 700, color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '4px' }}>Season Pass</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '28px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1 }}>SEASON 04: <span style={{ color: GOLD }}>VELOCITY</span></div>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(232,224,208,0.60)', marginTop: '4px', marginBottom: '14px' }}>Deploy the premium infrastructure — unlock top-tier rewards</div>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-          {benefits.map((b) => (
-            <div key={b.label} style={{ flex: 1, borderRadius: '10px', border: `1px solid rgba(212,168,67,0.18)`, background: 'rgba(212,168,67,0.05)', padding: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '16px' }}>{b.icon}</span>
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: 'rgba(212,168,67,0.70)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>{b.label}</span>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={() => buy('Premium Season Pass')}
-          style={{ width: '100%', height: '38px', borderRadius: '10px', cursor: 'pointer', background: 'rgba(212,168,67,0.15)', border: `1.5px solid rgba(212,168,67,0.45)`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', letterSpacing: '0.10em', color: GOLD, boxShadow: '0 0 16px rgba(212,168,67,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}
-        >
-          UNLOCK ACCESS · <span style={{ color: AQUA }}>◆ 999</span>
-        </button>
-      </div>
+      <span style={{ fontSize: 10, lineHeight: '12px', color: swim26Color.text.secondary }}>{label}</span>
+      <span style={{ fontSize: 16, lineHeight: '16px', fontWeight: 800, color: accent }}>{value}</span>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// Bundles
-// ─────────────────────────────────────────────────────────
+function ProductCard({ product }: { product: StoreProduct }) {
+  const featured = product.kind === 'featured';
+  const limited = product.kind === 'limited';
+  const resource = product.kind === 'resource';
 
-function BundlesContent({ buy }: { buy: (name: string) => void }) {
-  const bundles = [
-    { id: 'b1', name: 'Apex Starter Kit',      items: 'Hydro Suit · Neon Cap · Goggles',                         price: 1200, rarity: 'EPIC' as const },
-    { id: 'b2', name: 'Grand Prix Collection', items: 'Full Kinetic Cosmetics · Walkout · Victory Celebration',   price: 2500, rarity: 'LEGENDARY' as const },
-  ];
+  const borderColor = featured
+    ? 'rgba(214, 180, 90, 0.26)'
+    : limited
+      ? 'rgba(74, 201, 214, 0.24)'
+      : 'rgba(255,255,255,0.10)';
+
+  const priceColor = product.priceKind === 'cash'
+    ? swim26Color.featured.premium
+    : product.priceKind === 'premium'
+      ? swim26Color.accent.primary
+      : swim26Color.text.primary;
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-      {bundles.map((b) => {
-        const rs = RARITY_STYLES[b.rarity];
-        return (
-          <motion.div key={b.id} whileHover={{ scale: 1.01 }} style={{ borderRadius: '12px', border: `1px solid ${rs.border}`, background: rs.bg, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: rs.label, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '4px' }}>{b.rarity} BUNDLE</div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1 }}>{b.name}</div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.55)', marginTop: '5px', lineHeight: 1.4 }}>{b.items}</div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: AQUA, letterSpacing: '0.04em', textShadow: '0 0 10px rgba(56,214,255,0.40)' }}>◆ {b.price.toLocaleString()}</span>
-              <button onClick={() => buy(b.name)} style={{ height: '30px', paddingInline: '16px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(56,214,255,0.10)', border: `1px solid rgba(56,214,255,0.30)`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', letterSpacing: '0.10em', color: AQUA }}>
-                ACQUIRE
-              </button>
-            </div>
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
-// Event Shop
-// ─────────────────────────────────────────────────────────
-
-function EventShopContent() {
-  const items = [
-    { name: 'Sprint Boost Pack',       cost: '500 Tokens' },
-    { name: 'Exclusive Sprint Suit',   cost: '1,000 Tokens' },
-    { name: 'VIP Event Pass',          cost: '2,000 Tokens' },
-  ];
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <div style={{ borderRadius: '10px', border: `1px solid rgba(212,168,67,0.20)`, background: 'rgba(212,168,67,0.05)', padding: '10px 14px', marginBottom: '4px' }}>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '3px' }}>Limited Event</div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: '#F3FBFF', letterSpacing: '0.04em' }}>SPRINT CUP <span style={{ color: GOLD }}>TOKEN SHOP</span></div>
+    <div
+      style={{
+        ...shellPanel,
+        minHeight: featured ? 248 : 224,
+        padding: swim26Space.md,
+        border: `${swim26Boundary.border.thin}px solid ${borderColor}`,
+        background: featured
+          ? 'linear-gradient(180deg, rgba(20, 38, 54, 0.94) 0%, rgba(13, 27, 39, 0.94) 100%)'
+          : resource
+            ? 'linear-gradient(180deg, rgba(28, 50, 69, 0.70) 0%, rgba(13, 27, 39, 0.92) 100%)'
+            : swim26Color.surface.secondary,
+        display: 'grid',
+        gridTemplateRows: 'auto minmax(92px, 1fr) auto',
+        gap: swim26Space.md,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: swim26Space.sm, alignItems: 'start' }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: swim26Type.cardTitle.fontSize, lineHeight: '20px', fontWeight: 700 }}>{product.title}</div>
+          {product.subtitle ? <div style={{ marginTop: 4, fontSize: 12, lineHeight: '16px', color: swim26Color.text.secondary }}>{product.subtitle}</div> : null}
+        </div>
+        {product.badge ? (
+          <span
+            style={{
+              height: swim26Size.badge.height,
+              padding: `0 ${swim26Space.sm}px`,
+              borderRadius: swim26Boundary.radius.pill,
+              background: product.badge.includes('OFF') ? 'rgba(240, 106, 95, 0.16)' : product.badge.includes('VALUE') ? 'rgba(214, 180, 90, 0.16)' : 'rgba(74, 201, 214, 0.14)',
+              color: product.badge.includes('OFF') ? swim26Color.feedback.alert : product.badge.includes('VALUE') ? swim26Color.featured.premium : swim26Color.accent.primary,
+              display: 'inline-flex',
+              alignItems: 'center',
+              fontSize: 10,
+              fontWeight: 800,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {product.badge}
+          </span>
+        ) : null}
       </div>
-      {items.map((item) => (
-        <div key={item.name} style={{ borderRadius: '10px', border: `1px solid ${PANEL_BORDER}`, background: 'rgba(56,214,255,0.03)', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '13px', color: '#F3FBFF' }}>{item.name}</span>
-          <button style={{ height: '28px', paddingInline: '14px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(212,168,67,0.12)', border: `1px solid rgba(212,168,67,0.30)`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.10em', color: GOLD, whiteSpace: 'nowrap' }}>
-            {item.cost}
+
+      <div
+        style={{
+          borderRadius: swim26Boundary.radius.md,
+          border: `${swim26Boundary.border.thin}px solid rgba(255,255,255,0.08)`,
+          background: 'rgba(255,255,255,0.03)',
+          display: 'grid',
+          placeItems: 'center',
+          minHeight: featured ? 104 : 88,
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          fontSize: featured ? 44 : 34,
+        }}
+      >
+        {product.artwork}
+      </div>
+
+      <div style={{ display: 'grid', gap: swim26Space.sm }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: swim26Space.sm, alignItems: 'center' }}>
+          <div style={{ display: 'grid', gap: 2 }}>
+            <div style={{ fontSize: 18, lineHeight: '20px', fontWeight: 800, color: priceColor }}>{product.priceLabel}</div>
+            {product.valueNote ? <div style={{ fontSize: 11, lineHeight: '14px', color: swim26Color.text.secondary }}>{product.valueNote}</div> : null}
+          </div>
+          <button
+            style={{
+              minWidth: swim26Size.buttons.standard.minWidth,
+              minHeight: swim26Size.buttons.standard.height,
+              borderRadius: swim26Boundary.radius.md,
+              border: `${swim26Boundary.border.thin}px solid ${priceColor}55`,
+              background: `${priceColor}18`,
+              color: priceColor,
+              fontSize: swim26Type.buttonLabel.fontSize,
+              fontWeight: swim26Type.buttonLabel.fontWeight,
+              letterSpacing: '0.02em',
+            }}
+          >
+            Buy
           </button>
         </div>
-      ))}
-    </div>
-  );
-}
 
-// ─────────────────────────────────────────────────────────
-// Currency Badge
-// ─────────────────────────────────────────────────────────
-
-function CurrencyBadge({ icon, value, label, color }: { icon: React.ReactNode; value: number; label: string; color: string }) {
-  return (
-    <div style={{ borderRadius: '9px', border: `1px solid rgba(56,214,255,0.18)`, background: 'rgba(0,0,0,0.30)', padding: '5px 10px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: `${color}90`, textTransform: 'uppercase', letterSpacing: '0.10em' }}>{label}</span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-        {icon}
-        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color, letterSpacing: '0.04em', textShadow: `0 0 8px ${color}40` }}>{value.toLocaleString()}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: swim26Space.sm, flexWrap: 'wrap' }}>
+          {product.limit ? <span style={{ fontSize: 11, lineHeight: '14px', color: swim26Color.text.secondary }}>{product.limit}</span> : <span />}
+          {product.expiry ? <span style={{ fontSize: 11, lineHeight: '14px', color: swim26Color.feedback.warning }}>{product.expiry}</span> : null}
+        </div>
       </div>
     </div>
   );
