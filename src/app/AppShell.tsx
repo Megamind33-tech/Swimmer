@@ -58,7 +58,7 @@ interface AppShellProps {
 // Tab → page map
 // ─────────────────────────────────────────────────────────────────────────────
 
-function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) => void): React.ReactNode {
+function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) => void, onBack?: () => void): React.ReactNode {
   switch (tab) {
     case 'race':     return <LobbyScreen onStartRace={onPlay} onNavigate={onNavigate} />;
     case 'career':   return <CareerMode />;
@@ -68,7 +68,7 @@ function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) =>
     case 'rankings': return <Rankings />;
     case 'training': return <TrainingPage />;
     case 'style':    return <SwimmerScreen />;
-    case 'store':    return <StoreScreen />;
+    case 'store':    return <StoreScreen onBack={onBack} />;
     default:         return <LobbyScreen onStartRace={onPlay} onNavigate={onNavigate} />;
   }
 }
@@ -172,21 +172,26 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
   const openChampionships   = () => setOverlayPage('championships');
   const closeOverlay        = () => setOverlayPage(null);
 
-  // Show back button when: not on the race tab OR any overlay is open
-  const showBack = activeTab !== 'race' || overlayPage !== null;
+  // In store mode (no overlay), hide the global chrome so the store owns its full viewport
+  const isStoreFullscreen = activeTab === 'store' && overlayPage === null;
+
+  // Show back button when: not on the race tab OR any overlay is open (but NOT in store — store has its own back)
+  const showBack = !isStoreFullscreen && (activeTab !== 'race' || overlayPage !== null);
 
   return (
     <div
       className="w-full h-full relative overflow-hidden select-none"
       style={{ background: '#041421' }}
     >
-      {/* ── Persistent top bar ── */}
-      <TopUtilityBar
-        onSettings={openSettings}
-        onProfile={openProfile}
-        onRewards={openRewards}
-        onNavigate={handleNavigate}
-      />
+      {/* ── Persistent top bar (hidden in store fullscreen) ── */}
+      {!isStoreFullscreen && (
+        <TopUtilityBar
+          onSettings={openSettings}
+          onProfile={openProfile}
+          onRewards={openRewards}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {/* ── Back button (shown when not on race tab or in overlay) ── */}
       <AnimatePresence>
@@ -209,8 +214,8 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           transition={{ duration: 0.18 }}
           style={{
             position: 'absolute',
-            top:      '48px',
-            bottom:   '60px',
+            top:      isStoreFullscreen ? 0 : '48px',
+            bottom:   isStoreFullscreen ? 0 : '60px',
             left:     0,
             right:    0,
             overflow: 'hidden',
@@ -225,7 +230,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           ) : overlayPage === 'championships' ? (
             <Championships />
           ) : (
-            renderTab(activeTab, onPlay, handleNavigate)
+            renderTab(activeTab, onPlay, handleNavigate, goToLobby)
           )}
         </motion.div>
       </AnimatePresence>
@@ -251,11 +256,13 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
         />
       )}
 
-      {/* ── Persistent bottom tab bar ── */}
-      <IconTabBar
-        activeTab={activeTab}
-        onChange={handleTabChange}
-      />
+      {/* ── Persistent bottom tab bar (hidden in store fullscreen) ── */}
+      {!isStoreFullscreen && (
+        <IconTabBar
+          activeTab={activeTab}
+          onChange={handleTabChange}
+        />
+      )}
     </div>
   );
 };
