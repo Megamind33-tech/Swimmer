@@ -1,26 +1,29 @@
 /**
- * StaminaBar — compact horizontal bar for the top-left state cluster
+ * StaminaBar — segmented broadcast-style stamina indicator
+ *
+ * 10 hard-edged rectangular segments replace the old smooth bar.
+ * No glows. No rounded corners. No colored translucent overlays.
  *
  * Color thresholds:
- *   > 55%  → aqua (healthy)
- *   25-55% → warning amber
- *   < 25%  → danger red (critical, subtle pulse animation)
- *
- * Icon + bar + numeric value in one compact row (≈ 14px tall).
+ *   > 55%  → Volt Yellow (#CCFF00) — healthy
+ *   25-55% → White (#FFFFFF) — mid / caution
+ *   < 25%  → Flat Red (#FF003C) — critical, segments pulse
  */
 
 import React from 'react';
-import { HUD_COLOR, HUD_FONT, staminaColor, staminaGlow } from '../hudTokens';
+import { HUD_COLOR, HUD_FONT, staminaColor } from '../hudTokens';
 
 interface StaminaBarProps {
   value: number;  // 0-100
 }
 
+const SEGMENTS = 10;
+
 export const StaminaBar: React.FC<StaminaBarProps> = ({ value }) => {
-  const pct   = Math.min(100, Math.max(0, value));
-  const color = staminaColor(pct);
-  const glow  = staminaGlow(pct);
-  const isCritical = pct < 25;
+  const pct          = Math.min(100, Math.max(0, value));
+  const color        = staminaColor(pct);
+  const isCritical   = pct < 25;
+  const activeCount  = Math.round((pct / 100) * SEGMENTS);
 
   return (
     <div
@@ -48,28 +51,30 @@ export const StaminaBar: React.FC<StaminaBarProps> = ({ value }) => {
         STM
       </span>
 
-      {/* Bar track */}
+      {/* Segmented bar track */}
       <div
         style={{
-          flex:         1,
-          height:       '5px',
-          borderRadius: '3px',
-          background:   'rgba(255,255,255,0.07)',
-          overflow:     'hidden',
-          minWidth:     '56px',
+          display:  'flex',
+          gap:      '2px',
+          flex:     1,
+          minWidth: '56px',
         }}
       >
-        <div
-          style={{
-            width:      `${pct}%`,
-            height:     '100%',
-            borderRadius: '3px',
-            background: color,
-            boxShadow:  `0 0 6px ${glow}`,
-            transition: 'width 0.18s linear, background 0.4s ease',
-            animation:  isCritical ? 'hud-critical-pulse 0.8s ease-in-out infinite' : 'none',
-          }}
-        />
+        {Array.from({ length: SEGMENTS }, (_, i) => (
+          <div
+            key={i}
+            style={{
+              flex:       1,
+              height:     '5px',
+              borderRadius: '0px',
+              background: i < activeCount ? color : 'rgba(255,255,255,0.08)',
+              transition: 'background 0.3s ease',
+              animation:  isCritical && i < activeCount
+                ? 'hud-critical-pulse 0.8s ease-in-out infinite'
+                : 'none',
+            }}
+          />
+        ))}
       </div>
 
       {/* Numeric value */}
@@ -84,7 +89,6 @@ export const StaminaBar: React.FC<StaminaBarProps> = ({ value }) => {
           textAlign:          'right',
           lineHeight:         1,
           flexShrink:         0,
-          textShadow:         isCritical ? `0 0 8px ${glow}` : 'none',
         }}
       >
         {Math.round(pct)}

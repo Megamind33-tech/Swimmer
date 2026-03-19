@@ -28,7 +28,7 @@ body,
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
   touch-action: pan-x pan-y; /* Allow scrollable sub-regions; canvas overrides to none */
-  background: #0a0e1a;        /* Deep navy game base */
+  background: #0A0A0A;        /* Carbon black game base */
 }
 
 /* Ensure all direct screen children fill the full viewport */
@@ -50,36 +50,42 @@ body {
    ───────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Colors */
-  --color-primary:        #00E5FF;
-  --color-primary-dim:    #00B2CC;
-  --color-primary-glow:   rgba(0, 229, 255, 0.25);
-  --color-gold:           #D4A843;
-  --color-gold-glow:      rgba(212, 168, 67, 0.35);
-  --color-danger:         #EF4444;
-  --color-action:         #0D7C66;
-  --color-action-dark:    #065A46;
-  --color-surface-base:   #050B14;
-  --color-surface-mid:    #0A1628;
-  --color-surface-high:   #111D2E;
-  --color-surface-highest:#1B2838;
+  /* ── Broadcast Standard Colors — SWIM26 FC26 aesthetic ─────────────────── */
+  --color-volt:           #CCFF00;    /* High-vis accent */
+  --color-broadcast-red:  #FF003C;    /* Flat stark danger */
+  --color-carbon:         #0A0A0A;    /* Deepest surface */
+  --color-graphite:       #1A1A1A;    /* Elevated surface */
+
+  /* Legacy aliases — kept so un-migrated components compile */
+  --color-primary:        #CCFF00;
+  --color-primary-dim:    #AADD00;
+  --color-primary-glow:   rgba(0, 0, 0, 0);  /* No glows */
+  --color-gold:           #CCFF00;
+  --color-gold-glow:      rgba(0, 0, 0, 0);  /* No glows */
+  --color-danger:         #FF003C;
+  --color-action:         #CCFF00;
+  --color-action-dark:    #AADD00;
+  --color-surface-base:   #0A0A0A;
+  --color-surface-mid:    #1A1A1A;
+  --color-surface-high:   #222222;
+  --color-surface-highest:#2A2A2A;
   --color-text-primary:   #FFFFFF;
   --color-text-secondary: rgba(255, 255, 255, 0.70);
-  --color-text-muted:     rgba(255, 255, 255, 0.45);
+  --color-text-muted:     rgba(255, 255, 255, 0.40);
   --color-border-subtle:  rgba(255, 255, 255, 0.08);
   --color-border-soft:    rgba(255, 255, 255, 0.15);
-  --color-overlay-dark:   rgba(5, 11, 20, 0.72);
+  --color-overlay-dark:   rgba(0, 0, 0, 0.72);
 
-  /* ── "Deep Ocean Tactical" design language tokens ──────────────────────── */
-  --color-bg-deep:        #080d1a;
-  --color-bg-panel:       #0d1929;
-  --color-bg-card:        #111e30;
-  --color-accent-cyan:    #00d4ff;
-  --color-accent-teal:    #0891b2;
-  --color-accent-amber:   #f59e0b;
-  --color-accent-green:   #10b981;
-  --color-accent-red:     #ef4444;
-  --color-accent-purple:  #8b5cf6;
+  /* Surfaces (broadcast-standard flat blacks) */
+  --color-bg-deep:        #0A0A0A;
+  --color-bg-panel:       #1A1A1A;
+  --color-bg-card:        #222222;
+  --color-accent-cyan:    #CCFF00;    /* Legacy → volt */
+  --color-accent-teal:    #CCFF00;    /* Legacy → volt */
+  --color-accent-amber:   #FFFFFF;    /* Legacy → white */
+  --color-accent-green:   #CCFF00;    /* Legacy → volt */
+  --color-accent-red:     #FF003C;
+  --color-accent-purple:  #FFFFFF;    /* Legacy → white */
 
   /* HUD sizing */
   --hud-top-bar-height:     52px;
@@ -93,10 +99,10 @@ body {
   --control-nav-tab:        56px;
   --control-play-btn-width: 64px;
 
-  /* Shadows */
-  --shadow-glow-primary:  0 0 12px rgba(0, 229, 255, 0.45);
-  --shadow-glow-gold:     0 0 12px rgba(212, 168, 67, 0.50);
-  --shadow-card:          0 4px 24px rgba(0, 0, 0, 0.40);
+  /* Shadows — structural only, no neon glows */
+  --shadow-glow-primary:  none;
+  --shadow-glow-gold:     none;
+  --shadow-card:          0 4px 24px rgba(0, 0, 0, 0.60);
 
   /* Z-index */
   --z-hud:        50;

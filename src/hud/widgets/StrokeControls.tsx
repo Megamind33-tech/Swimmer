@@ -1,25 +1,15 @@
 /**
  * StrokeControls — functional bottom-zone controls
  *
- * Layout zones (landscape ergonomics):
+ * Broadcast standard redesign:
+ *   - VirtualJoystick: square container, hard white borders, flat knob
+ *   - StaminaRing → StaminaWidget: rectangular panel with segmented bar
+ *   - ActionCluster: mechanical flat buttons, 0px radius, volt highlight
  *
- *  VirtualJoystick (Bottom-Left or Bottom-Right depending on handedness)
- *    Real virtual joystick using useVirtualJoystick.
- *    Knob tracks pointer with setPointerCapture; dead zone 8%.
- *    Positioned for thumb accessibility.
- *
- *  StaminaRing (Bottom-Center)
- *    Circular SVG stamina gauge + distance readout. Read-only.
- *
- *  ActionCluster (Bottom-Left or Bottom-Right)
- *    Sprint + LEFT stroke + RIGHT stroke buttons.
- *    Wired to useActionButtons (haptic + audio + flash state).
- *
- * Touch contract:
+ * Touch contract unchanged:
  *   - All buttons use onPointerDown (not onClick) for minimum latency
  *   - 80px+ tap targets on stroke buttons
  *   - useGestureLock prevents conflicting simultaneous gestures
- *   - Visual: scale compression + glow pulse + flash on press
  */
 
 import React from 'react';
@@ -31,13 +21,13 @@ import type { InputAction } from '../../input/inputTypes';
 import { HUD_COLOR, HUD_FONT, staminaColor } from '../hudTokens';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VirtualJoystick (Bottom-Left)
+// VirtualJoystick — square mechanical design
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface VirtualJoystickProps {
   joystick:    UseVirtualJoystickResult;
   gestureLock: UseGestureLockResult;
-  size:        number;  // px diameter of the joystick container
+  size:        number;  // px side length of the square container
 }
 
 export const VirtualJoystick: React.FC<VirtualJoystickProps> = ({
@@ -48,7 +38,6 @@ export const VirtualJoystick: React.FC<VirtualJoystickProps> = ({
   const { handlers, knobOffset, active } = joystick;
   const ZONE_ID = 'joystick';
 
-  // Wrap handlers with gesture lock so no other zone steals the pointer
   const wrappedHandlers = {
     onPointerDown: (e: React.PointerEvent) => {
       if (!gestureLock.tryLock(ZONE_ID, e.pointerId)) return;
@@ -68,91 +57,82 @@ export const VirtualJoystick: React.FC<VirtualJoystickProps> = ({
     },
   };
 
-  const containerBorder = active
-    ? `1.5px solid rgba(56,214,255,0.45)`
-    : `1px solid rgba(56,214,255,0.12)`;
-  const containerGlow   = active ? '0 0 20px rgba(56,214,255,0.18)' : 'none';
-
   return (
     <div
       {...wrappedHandlers}
       style={{
-        width:          `${size}px`,
-        height:         `${size}px`,
-        borderRadius:   '50%',
-        background:     active
-          ? 'rgba(4,20,33,0.62)'
-          : 'rgba(4,20,33,0.44)',
-        border:         containerBorder,
-        boxShadow:      containerGlow,
-        position:       'relative',
-        flexShrink:     0,
-        touchAction:    'none',
-        cursor:         'grab',
-        transition:     'border-color 0.12s, box-shadow 0.12s, background 0.12s',
+        width:        `${size}px`,
+        height:       `${size}px`,
+        borderRadius: '0px',
+        background:   active ? 'rgba(10,10,10,0.85)' : 'rgba(10,10,10,0.70)',
+        border:       active
+          ? `2px solid rgba(255,255,255,0.55)`
+          : `1px solid rgba(255,255,255,0.18)`,
+        position:     'relative',
+        flexShrink:   0,
+        touchAction:  'none',
+        cursor:       'crosshair',
+        transition:   'border-color 0.08s, background 0.08s',
       }}
     >
-      {/* Guide ring */}
-      <div
-        style={{
-          position:     'absolute',
-          inset:        '18%',
-          borderRadius: '50%',
-          border:       '1px solid rgba(56,214,255,0.08)',
-          pointerEvents: 'none',
-        }}
-      />
-
       {/* Crosshair H */}
       <div
         style={{
-          position:   'absolute',
-          top:        '50%',
-          left:       '18%',
-          right:      '18%',
-          height:     '1px',
-          marginTop:  '-0.5px',
-          background: 'rgba(56,214,255,0.10)',
-          pointerEvents: 'none',
+          position:     'absolute',
+          top:          '50%',
+          left:         '12%',
+          right:        '12%',
+          height:       '1px',
+          marginTop:    '-0.5px',
+          background:   'rgba(255,255,255,0.12)',
+          pointerEvents:'none',
         }}
       />
       {/* Crosshair V */}
       <div
         style={{
-          position:   'absolute',
-          left:       '50%',
-          top:        '18%',
-          bottom:     '18%',
-          width:      '1px',
-          marginLeft: '-0.5px',
-          background: 'rgba(56,214,255,0.10)',
-          pointerEvents: 'none',
+          position:     'absolute',
+          left:         '50%',
+          top:          '12%',
+          bottom:       '12%',
+          width:        '1px',
+          marginLeft:   '-0.5px',
+          background:   'rgba(255,255,255,0.12)',
+          pointerEvents:'none',
         }}
       />
 
-      {/* Knob */}
+      {/* Corner tick marks — top-left */}
+      <div style={{ position: 'absolute', top: '6px', left: '6px', width: '8px', height: '1px', background: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '6px', left: '6px', width: '1px', height: '8px', background: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+      {/* top-right */}
+      <div style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '1px', background: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '6px', right: '6px', width: '1px', height: '8px', background: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+      {/* bottom-left */}
+      <div style={{ position: 'absolute', bottom: '6px', left: '6px', width: '8px', height: '1px', background: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '6px', left: '6px', width: '1px', height: '8px', background: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+      {/* bottom-right */}
+      <div style={{ position: 'absolute', bottom: '6px', right: '6px', width: '8px', height: '1px', background: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '6px', right: '6px', width: '1px', height: '8px', background: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
+
+      {/* Knob — flat square, volt yellow when active */}
       <div
         style={{
           position:     'absolute',
           top:          '50%',
           left:         '50%',
-          width:        `${size * 0.34}px`,
-          height:       `${size * 0.34}px`,
-          marginTop:    `${-(size * 0.34) / 2}px`,
-          marginLeft:   `${-(size * 0.34) / 2}px`,
-          borderRadius: '50%',
-          background:   active
-            ? `radial-gradient(circle at 35% 35%, rgba(122,232,255,0.85), rgba(56,214,255,0.55))`
-            : 'rgba(56,214,255,0.20)',
+          width:        `${size * 0.30}px`,
+          height:       `${size * 0.30}px`,
+          marginTop:    `${-(size * 0.30) / 2}px`,
+          marginLeft:   `${-(size * 0.30) / 2}px`,
+          borderRadius: '0px',
+          background:   active ? HUD_COLOR.volt : 'rgba(255,255,255,0.22)',
           border:       active
-            ? '2px solid rgba(122,232,255,0.80)'
-            : '1.5px solid rgba(56,214,255,0.30)',
-          boxShadow:    active
-            ? '0 0 14px rgba(56,214,255,0.55), 0 2px 6px rgba(0,0,0,0.5)'
-            : '0 0 8px rgba(56,214,255,0.18)',
+            ? `2px solid ${HUD_COLOR.volt}`
+            : '1px solid rgba(255,255,255,0.35)',
           transform:    `translate(${knobOffset.x}px, ${knobOffset.y}px)`,
           transition:   active ? 'none' : 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1)',
-          pointerEvents: 'none',
+          pointerEvents:'none',
         }}
       />
 
@@ -167,11 +147,11 @@ export const VirtualJoystick: React.FC<VirtualJoystickProps> = ({
           fontFamily:    HUD_FONT.label,
           fontWeight:    700,
           fontSize:      '7px',
-          color:         active ? 'rgba(56,214,255,0.60)' : 'rgba(169,211,231,0.28)',
+          color:         active ? HUD_COLOR.volt : 'rgba(255,255,255,0.28)',
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
           pointerEvents: 'none',
-          transition:    'color 0.12s',
+          transition:    'color 0.08s',
         }}
       >
         MOVE
@@ -181,7 +161,7 @@ export const VirtualJoystick: React.FC<VirtualJoystickProps> = ({
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Stamina Ring (Bottom-Center)
+// StaminaRing → Broadcast Stamina Widget (rectangular, segmented)
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface StaminaRingProps {
@@ -190,99 +170,79 @@ interface StaminaRingProps {
   totalDistanceM: number;
 }
 
-const RING_R  = 30;
-const RING_C  = 2 * Math.PI * RING_R;
+const STAMINA_SEGMENTS = 10;
 
 export const StaminaRing: React.FC<StaminaRingProps> = ({ stamina, distanceM, totalDistanceM }) => {
-  const pct    = Math.min(100, Math.max(0, stamina));
-  const color  = staminaColor(pct);
-  const offset = RING_C * (1 - pct / 100);
+  const pct          = Math.min(100, Math.max(0, stamina));
+  const color        = staminaColor(pct);
+  const isCritical   = pct < 25;
+  const activeCount  = Math.round((pct / 100) * STAMINA_SEGMENTS);
 
   return (
     <div
       style={{
-        display:       'flex',
-        flexDirection: 'column',
-        alignItems:    'center',
-        gap:           '4px',
-        flexShrink:    0,
+        display:        'flex',
+        flexDirection:  'column',
+        alignItems:     'stretch',
+        gap:            '5px',
+        flexShrink:     0,
+        background:     '#0A0A0A',
+        border:         '1px solid rgba(255,255,255,0.18)',
+        padding:        '8px 10px',
+        minWidth:       '80px',
       }}
     >
-      {/* SVG ring */}
-      <div style={{ position: 'relative', width: '74px', height: '74px' }}>
-        <svg
-          width="74" height="74"
-          viewBox="0 0 74 74"
-          style={{ transform: 'rotate(-90deg)' }}
-        >
-          {/* Track */}
-          <circle
-            cx="37" cy="37" r={RING_R}
-            fill="none"
-            stroke="rgba(255,255,255,0.07)"
-            strokeWidth="6"
-          />
-          {/* Fill */}
-          <circle
-            cx="37" cy="37" r={RING_R}
-            fill="none"
-            stroke={color}
-            strokeWidth="6"
-            strokeDasharray={RING_C}
-            strokeDashoffset={offset}
-            strokeLinecap="round"
-            style={{
-              filter:     `drop-shadow(0 0 5px ${color})`,
-              transition: 'stroke-dashoffset 0.25s linear, stroke 0.4s ease',
-            }}
-          />
-        </svg>
-
-        {/* Center readout */}
-        <div
+      {/* Top row: label + stamina number */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <span
           style={{
-            position:       'absolute',
-            inset:          0,
-            display:        'flex',
-            flexDirection:  'column',
-            alignItems:     'center',
-            justifyContent: 'center',
+            fontFamily:    HUD_FONT.label,
+            fontWeight:    700,
+            fontSize:      '8px',
+            letterSpacing: '0.12em',
+            color:         HUD_COLOR.grey,
+            textTransform: 'uppercase',
           }}
         >
-          <span
-            style={{
-              fontFamily:         HUD_FONT.impact,
-              fontSize:           '18px',
-              lineHeight:         1,
-              color,
-              fontVariantNumeric: 'tabular-nums',
-              letterSpacing:      '0.01em',
-            }}
-          >
-            {Math.round(pct)}
-          </span>
-          <span
-            style={{
-              fontFamily:    HUD_FONT.label,
-              fontWeight:    700,
-              fontSize:      '7px',
-              letterSpacing: '0.10em',
-              textTransform: 'uppercase',
-              color:         HUD_COLOR.textMuted,
-            }}
-          >
-            STM
-          </span>
-        </div>
+          STM
+        </span>
+        <span
+          style={{
+            fontFamily:         HUD_FONT.impact,
+            fontSize:           '22px',
+            lineHeight:         1,
+            color,
+            fontVariantNumeric: 'tabular-nums',
+            animation:          isCritical ? 'hud-critical-pulse 0.8s ease-in-out infinite' : 'none',
+          }}
+        >
+          {Math.round(pct)}
+        </span>
       </div>
 
-      {/* Distance */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+      {/* Segmented stamina bar */}
+      <div style={{ display: 'flex', gap: '2px' }}>
+        {Array.from({ length: STAMINA_SEGMENTS }, (_, i) => (
+          <div
+            key={i}
+            style={{
+              flex:         1,
+              height:       '4px',
+              borderRadius: '0px',
+              background:   i < activeCount ? color : 'rgba(255,255,255,0.08)',
+              transition:   'background 0.3s ease',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Distance readout */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', justifyContent: 'center' }}>
         <span
           style={{
             fontFamily:         HUD_FONT.impact,
             fontSize:           '14px',
-            color:              HUD_COLOR.textPrimary,
+            color:              HUD_COLOR.white,
             fontVariantNumeric: 'tabular-nums',
             letterSpacing:      '0.01em',
           }}
@@ -294,7 +254,7 @@ export const StaminaRing: React.FC<StaminaRingProps> = ({ stamina, distanceM, to
             fontFamily:    HUD_FONT.label,
             fontWeight:    600,
             fontSize:      '9px',
-            color:         HUD_COLOR.textMuted,
+            color:         HUD_COLOR.grey,
             letterSpacing: '0.04em',
           }}
         >
@@ -306,7 +266,7 @@ export const StaminaRing: React.FC<StaminaRingProps> = ({ stamina, distanceM, to
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Stroke Button
+// Stroke Button — mechanical flat button
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface StrokeButtonProps {
@@ -321,10 +281,10 @@ interface StrokeButtonProps {
 }
 
 const StrokeButton: React.FC<StrokeButtonProps> = ({
-  action, label, icon, size, buttons, gestureLock, flashColor, glowColor,
+  action, label, icon, size, buttons, gestureLock, flashColor,
 }) => {
   const state   = buttons.states[action];
-  const flash   = state?.flash ?? false;
+  const flash   = state?.flash   ?? false;
   const pressed = state?.pressed ?? false;
 
   return (
@@ -341,28 +301,20 @@ const StrokeButton: React.FC<StrokeButtonProps> = ({
         gestureLock.unlock(e.pointerId);
         buttons.release(action);
       }}
-      animate={{
-        scale:     pressed ? 0.93 : 1,
-        boxShadow: flash
-          ? `0 0 28px ${glowColor}, 0 0 10px ${glowColor}, inset 0 0 8px rgba(255,255,255,0.06)`
-          : 'none',
-      }}
+      animate={{ scale: pressed ? 0.93 : 1 }}
       transition={{ type: 'spring', stiffness: 700, damping: 32 }}
       style={{
         width:          `${size}px`,
         height:         `${size * 0.93}px`,
-        borderRadius:   '16px',
+        borderRadius:   '0px',
         display:        'flex',
         flexDirection:  'column',
         alignItems:     'center',
         justifyContent: 'center',
         gap:            '4px',
         cursor:         'pointer',
-        border:         `2px solid ${flash ? flashColor : 'rgba(255,255,255,0.12)'}`,
-        background:     flash
-          ? `rgba(56,214,255,0.14)`
-          : 'rgba(4,20,33,0.65)',
-        backdropFilter: 'blur(8px)',
+        border:         `2px solid ${flash ? flashColor : 'rgba(255,255,255,0.18)'}`,
+        background:     flash ? 'rgba(204,255,0,0.10)' : '#0A0A0A',
         transition:     'border-color 0.08s, background 0.08s',
         touchAction:    'none',
         userSelect:     'none',
@@ -389,7 +341,7 @@ const StrokeButton: React.FC<StrokeButtonProps> = ({
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Action Cluster (Bottom-Right)
+// Action Cluster — mechanical sprint + stroke buttons
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface ActionClusterProps {
@@ -417,7 +369,7 @@ export const ActionCluster: React.FC<ActionClusterProps> = ({
         flexShrink:    0,
       }}
     >
-      {/* Sprint button (above stroke buttons) */}
+      {/* Sprint button */}
       <motion.button
         onPointerDown={(e) => {
           if (!gestureLock.tryLock('sprint', e.pointerId)) return;
@@ -431,26 +383,19 @@ export const ActionCluster: React.FC<ActionClusterProps> = ({
           gestureLock.unlock(e.pointerId);
           buttons.release('sprint');
         }}
-        animate={{
-          scale:     sprintPressed ? 0.94 : 1,
-          boxShadow: sprintFlash
-            ? `0 0 22px ${HUD_COLOR.warningGlow}, 0 0 8px ${HUD_COLOR.warningGlow}`
-            : 'none',
-        }}
+        animate={{ scale: sprintPressed ? 0.94 : 1 }}
         transition={{ type: 'spring', stiffness: 700, damping: 32 }}
         style={{
           height:         '26px',
           width:          `${buttonSize * 2 + 6}px`,
-          borderRadius:   '8px',
+          borderRadius:   '0px',
           display:        'flex',
           alignItems:     'center',
           justifyContent: 'center',
           gap:            '5px',
           cursor:         'pointer',
-          border:         `1px solid ${sprintFlash ? HUD_COLOR.warning : 'rgba(255,194,71,0.22)'}`,
-          background:     sprintFlash
-            ? 'rgba(255,194,71,0.18)'
-            : 'rgba(255,194,71,0.06)',
+          border:         `2px solid ${sprintFlash ? HUD_COLOR.volt : 'rgba(204,255,0,0.30)'}`,
+          background:     sprintFlash ? 'rgba(204,255,0,0.12)' : '#0A0A0A',
           transition:     'border-color 0.08s, background 0.08s',
           touchAction:    'none',
           userSelect:     'none',
@@ -465,7 +410,7 @@ export const ActionCluster: React.FC<ActionClusterProps> = ({
             fontSize:      '9px',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            color:         sprintFlash ? HUD_COLOR.warning : 'rgba(255,194,71,0.55)',
+            color:         sprintFlash ? HUD_COLOR.volt : 'rgba(204,255,0,0.55)',
             transition:    'color 0.08s',
           }}
         >
@@ -482,8 +427,8 @@ export const ActionCluster: React.FC<ActionClusterProps> = ({
           size={buttonSize}
           buttons={buttons}
           gestureLock={gestureLock}
-          flashColor={HUD_COLOR.aqua}
-          glowColor={HUD_COLOR.aquaGlow}
+          flashColor={HUD_COLOR.volt}
+          glowColor="rgba(204,255,0,0)"
         />
         <StrokeButton
           action="strokeRight"
@@ -492,8 +437,8 @@ export const ActionCluster: React.FC<ActionClusterProps> = ({
           size={buttonSize}
           buttons={buttons}
           gestureLock={gestureLock}
-          flashColor={HUD_COLOR.cyanGlow}
-          glowColor="rgba(122,232,255,0.65)"
+          flashColor={HUD_COLOR.volt}
+          glowColor="rgba(204,255,0,0)"
         />
       </div>
     </div>

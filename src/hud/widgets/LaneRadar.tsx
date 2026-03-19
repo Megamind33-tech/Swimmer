@@ -1,12 +1,14 @@
 /**
- * LaneRadar — compact lane-board for the top-right zone (Phase 7)
+ * LaneRadar — compact lane-board for the top-right zone
  *
  * Shows all 8 lanes as horizontal tracks with lane numbers and
- * swimmer position dots. Reads instantly as a swimming race minimap.
+ * swimmer position markers. Reads instantly as a swimming race minimap.
  *
- * Lane numbers (1–8) on the left column make the layout unmistakably aquatic.
- * Player lane is highlighted with aqua track + larger glowing dot.
- * AI lanes show dimly with small dots.
+ * Broadcast standard:
+ *   - Hard-edged black panel (0px radius)
+ *   - Player lane: Volt Yellow (#CCFF00) number + square block marker
+ *   - AI lanes: grey numbers + small white square blocks
+ *   - No glows. No circular dots. No colored translucent backgrounds.
  *
  * Layout: 100px × 58px
  */
@@ -55,9 +57,9 @@ export const LaneRadar: React.FC<LaneRadarProps> = ({ lanes, playerLane }) => {
       {/* Lanes */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         {sorted.map((lane) => {
-          const isPlayer       = lane.isPlayer || lane.lane === playerLane;
+          const isPlayer        = lane.isPlayer || lane.lane === playerLane;
           const clampedProgress = Math.min(0.96, Math.max(0.02, lane.progress));
-          const initial        = isPlayer ? '●' : (LANE_INITIALS[(lane.lane - 1) % 8] ?? '·');
+          const initial         = isPlayer ? '▶' : (LANE_INITIALS[(lane.lane - 1) % 8] ?? '·');
 
           return (
             <div key={lane.lane} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
@@ -71,11 +73,8 @@ export const LaneRadar: React.FC<LaneRadarProps> = ({ lanes, playerLane }) => {
                   width:         '8px',
                   textAlign:     'center',
                   flexShrink:    0,
-                  color:         isPlayer
-                    ? HUD_COLOR.gold
-                    : 'rgba(169,211,231,0.30)',
+                  color:         isPlayer ? HUD_COLOR.volt : 'rgba(255,255,255,0.25)',
                   letterSpacing: '0',
-                  textShadow:    isPlayer ? `0 0 6px ${HUD_COLOR.goldGlow}` : 'none',
                 }}
               >
                 {lane.lane}
@@ -84,46 +83,41 @@ export const LaneRadar: React.FC<LaneRadarProps> = ({ lanes, playerLane }) => {
               {/* Track row */}
               <div
                 style={{
-                  position:     'relative',
-                  flex:         1,
-                  height:       '5px',
-                  borderRadius: '2px',
-                  background:   isPlayer
-                    ? 'rgba(56,214,255,0.12)'
-                    : 'rgba(255,255,255,0.04)',
-                  overflow:     'visible',
+                  position:   'relative',
+                  flex:       1,
+                  height:     '5px',
+                  borderRadius: '0px',
+                  background: isPlayer
+                    ? 'rgba(204,255,0,0.08)'
+                    : 'rgba(255,255,255,0.05)',
+                  overflow:   'visible',
                 }}
               >
-                {/* Player lane left accent */}
+                {/* Player lane left accent bar */}
                 {isPlayer && (
                   <div
                     style={{
-                      position:     'absolute',
-                      left:         '-3px',
-                      top:          0,
-                      width:        '2px',
-                      height:       '100%',
-                      background:   HUD_COLOR.aqua,
-                      borderRadius: '1px',
-                      boxShadow:    `0 0 4px ${HUD_COLOR.aquaGlow}`,
+                      position:   'absolute',
+                      left:       '-3px',
+                      top:        0,
+                      width:      '2px',
+                      height:     '100%',
+                      background: HUD_COLOR.volt,
                     }}
                   />
                 )}
 
-                {/* Swimmer dot */}
+                {/* Swimmer position marker — square block */}
                 <div
                   style={{
                     position:     'absolute',
                     top:          '50%',
                     left:         `${clampedProgress * 100}%`,
                     transform:    'translate(-50%, -50%)',
-                    width:        isPlayer ? '7px' : '4px',
-                    height:       isPlayer ? '7px' : '4px',
-                    borderRadius: '50%',
-                    background:   isPlayer
-                      ? HUD_COLOR.aqua
-                      : 'rgba(255,255,255,0.38)',
-                    boxShadow:    isPlayer ? `0 0 7px ${HUD_COLOR.aquaGlow}` : 'none',
+                    width:        isPlayer ? '6px' : '3px',
+                    height:       isPlayer ? '6px' : '3px',
+                    borderRadius: '0px',
+                    background:   isPlayer ? HUD_COLOR.volt : 'rgba(255,255,255,0.45)',
                     transition:   'left 0.2s linear',
                     zIndex:       2,
                   }}
@@ -140,9 +134,7 @@ export const LaneRadar: React.FC<LaneRadarProps> = ({ lanes, playerLane }) => {
                   width:       '7px',
                   textAlign:   'center',
                   flexShrink:  0,
-                  color:       isPlayer
-                    ? HUD_COLOR.aqua
-                    : 'rgba(169,211,231,0.22)',
+                  color:       isPlayer ? HUD_COLOR.volt : 'rgba(255,255,255,0.20)',
                   letterSpacing: '0',
                 }}
               >

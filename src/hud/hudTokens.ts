@@ -1,62 +1,80 @@
 /**
  * hudTokens — shared visual constants for all race HUD widgets
  *
- * Separate from lobby tokens so the HUD can evolve independently.
- * Every HUD widget imports from here instead of hardcoding values.
- *
- * Design language:
- *   - Translucent dark panels (no flat opaque blocks)
- *   - Aqua (#38D6FF) for player-owned state: stamina, position, progress
- *   - Gold (#FFD76A) for rank / achievement highlights
- *   - Warning amber (#FFC247) for mid-stamina / off-rhythm states
- *   - Danger red (#FF5D73) for critical stamina / disqualification risk
- *   - Success green (#37E28D) for PBs, good turns, perfect starts
+ * Design language: SWIM26 Sports Broadcast Standard (FC 26 / EA Sports aesthetic)
+ *   - Hard-edged black panels — no translucent colored glass
+ *   - Volt Yellow (#CCFF00) — player-owned state: active, 1st place, highlights
+ *   - White (#FFFFFF) — primary readouts, mid-state indicators
+ *   - Flat Red (#FF003C) — critical stamina / danger states only
+ *   - NO glows. NO neon. NO caustics. NO colored transparent overlays.
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Panel surfaces
+// Panel surfaces — opaque, hard-edged broadcast panels
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const HUD_PANEL = {
-  background:    'rgba(4, 20, 33, 0.74)',
-  border:        '1px solid rgba(56, 214, 255, 0.15)',
-  backdropFilter:'blur(10px)',
-  borderRadius:  '10px',
+  background:    'rgba(10, 10, 10, 0.90)',
+  border:        '1px solid rgba(255, 255, 255, 0.12)',
+  backdropFilter:'blur(8px)',
+  borderRadius:  '0px',
 } as const;
 
-/** Brighter panel for top-center timer (needs strong contrast) */
+/** Strong panel for top-center timer — maximum contrast */
 export const HUD_PANEL_STRONG = {
-  background:    'rgba(4, 20, 33, 0.88)',
-  border:        '1px solid rgba(56, 214, 255, 0.22)',
-  backdropFilter:'blur(12px)',
-  borderRadius:  '10px',
+  background:    '#0A0A0A',
+  border:        '1px solid rgba(255, 255, 255, 0.18)',
+  backdropFilter:'blur(10px)',
+  borderRadius:  '0px',
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Colors
+// Colors — Broadcast standard palette
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const HUD_COLOR = {
-  aqua:          '#38D6FF',
-  aquaGlow:      'rgba(56, 214, 255, 0.70)',
-  cyanGlow:      '#7AE8FF',
+  /** High-vis Volt Yellow — active states, 1st place, player highlights */
+  volt:          '#CCFF00',
+  voltDim:       'rgba(204, 255, 0, 0.55)',
 
-  gold:          '#FFD76A',
-  goldGlow:      'rgba(255, 215, 106, 0.65)',
+  /** Primary text — pure white */
+  white:         '#FFFFFF',
 
-  warning:       '#FFC247',
-  warningGlow:   'rgba(255, 194, 71, 0.65)',
+  /** Secondary / muted text */
+  grey:          '#888888',
 
-  danger:        '#FF5D73',
-  dangerGlow:    'rgba(255, 93, 115, 0.65)',
+  /** Flat stark red — critical danger only, no glow */
+  danger:        '#FF003C',
 
-  success:       '#37E28D',
-  successGlow:   'rgba(55, 226, 141, 0.65)',
+  // ── Legacy aliases kept so un-migrated components compile ─────────────────
+  /** @deprecated Use volt or white */
+  aqua:          '#FFFFFF',
+  /** @deprecated No glows in broadcast standard */
+  aquaGlow:      'rgba(255, 255, 255, 0)',
+  /** @deprecated Use white */
+  cyanGlow:      '#FFFFFF',
+  /** @deprecated Use volt */
+  gold:          '#CCFF00',
+  /** @deprecated No glows */
+  goldGlow:      'rgba(204, 255, 0, 0)',
+  /** @deprecated Use white for mid-state */
+  warning:       '#FFFFFF',
+  /** @deprecated No glows */
+  warningGlow:   'rgba(255, 255, 255, 0)',
+  /** @deprecated No glows */
+  dangerGlow:    'rgba(255, 0, 60, 0)',
+  /** @deprecated Use volt */
+  success:       '#CCFF00',
+  /** @deprecated No glows */
+  successGlow:   'rgba(204, 255, 0, 0)',
 
-  textPrimary:   '#F3FBFF',
-  textSecondary: '#A9D3E7',
-  textMuted:     'rgba(169, 211, 231, 0.45)',
-  bgDeep:        '#041421',
+  // ── Text hierarchy ─────────────────────────────────────────────────────────
+  textPrimary:   '#FFFFFF',
+  textSecondary: '#888888',
+  textMuted:     'rgba(255, 255, 255, 0.40)',
+
+  // ── Backgrounds ────────────────────────────────────────────────────────────
+  bgDeep:        '#0A0A0A',
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -71,19 +89,18 @@ export const HUD_FONT = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Stamina color thresholds
+// Stamina color thresholds — no glows, flat colors only
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function staminaColor(pct: number): string {
-  if (pct > 55) return HUD_COLOR.aqua;
-  if (pct > 25) return HUD_COLOR.warning;
-  return HUD_COLOR.danger;
+  if (pct > 55) return HUD_COLOR.volt;    // Healthy — high-vis volt yellow
+  if (pct > 25) return HUD_COLOR.white;   // Mid — neutral white
+  return HUD_COLOR.danger;                // Critical — flat stark red
 }
 
-export function staminaGlow(pct: number): string {
-  if (pct > 55) return HUD_COLOR.aquaGlow;
-  if (pct > 25) return HUD_COLOR.warningGlow;
-  return HUD_COLOR.dangerGlow;
+/** @deprecated No glows in broadcast standard. Always returns 'none'. */
+export function staminaGlow(_pct: number): string {
+  return 'none';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

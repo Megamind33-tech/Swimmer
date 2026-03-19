@@ -22,15 +22,9 @@ interface RhythmMeterProps {
 const SEGMENTS = 10;
 
 function rhythmColor(pct: number): string {
-  if (pct > 70) return HUD_COLOR.aqua;
-  if (pct > 40) return HUD_COLOR.warning;
-  return HUD_COLOR.danger;
-}
-
-function rhythmGlow(pct: number): string {
-  if (pct > 70) return 'rgba(56, 214, 255, 0.70)';
-  if (pct > 40) return 'rgba(255, 194, 71, 0.65)';
-  return 'rgba(255, 93, 115, 0.60)';
+  if (pct > 70) return HUD_COLOR.volt;    // In rhythm — volt yellow
+  if (pct > 40) return HUD_COLOR.white;   // Partial — white
+  return HUD_COLOR.danger;                // Off-rhythm — flat red
 }
 
 // Heights for each segment to create a waveform silhouette
@@ -40,7 +34,6 @@ export const RhythmMeter: React.FC<RhythmMeterProps> = ({ value }) => {
   const pct         = Math.min(100, Math.max(0, value));
   const activeCount = Math.round((pct / 100) * SEGMENTS);
   const color       = rhythmColor(pct);
-  const glow        = rhythmGlow(pct);
 
   return (
     <div
@@ -88,9 +81,8 @@ export const RhythmMeter: React.FC<RhythmMeterProps> = ({ value }) => {
               style={{
                 flex:         1,
                 height:       `${segH}px`,
-                borderRadius: '1.5px',
+                borderRadius: '0px',
                 background:   isActive ? color : 'rgba(255,255,255,0.07)',
-                boxShadow:    isActive ? `0 0 4px ${glow}` : 'none',
                 transition:   'height 0.15s ease, background 0.3s ease',
               }}
             />

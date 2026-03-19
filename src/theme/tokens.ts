@@ -22,46 +22,46 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const colors = {
-  /** Neon cyan — primary race action, progress, interactive highlights */
+  /** Volt Yellow — primary accent: active states, highlights, 1st place */
   primary: {
-    DEFAULT: '#00E5FF',
-    dim:     '#00B2CC',
-    deep:    '#006B80',
-    glow:    'rgba(0, 229, 255, 0.25)',
-    glowStrong: 'rgba(0, 229, 255, 0.55)',
+    DEFAULT: '#CCFF00',
+    dim:     '#AADD00',
+    deep:    '#667A00',
+    glow:    'rgba(204, 255, 0, 0)',   // No glows in broadcast standard
+    glowStrong: 'rgba(204, 255, 0, 0)',
   },
 
-  /** Gold — XP, achievements, rankings, season rewards */
+  /** Gold (alias → volt) — rankings, achievements */
   gold: {
-    DEFAULT: '#D4A843',
-    light:   '#F5C842',
-    dark:    '#A67C00',
-    glow:    'rgba(212, 168, 67, 0.35)',
-    glowStrong: 'rgba(212, 168, 67, 0.65)',
+    DEFAULT: '#CCFF00',
+    light:   '#DDFF33',
+    dark:    '#AADD00',
+    glow:    'rgba(204, 255, 0, 0)',
+    glowStrong: 'rgba(204, 255, 0, 0)',
   },
 
-  /** Red — danger, disqualification, critical stamina warning */
+  /** Red — danger, disqualification, critical stamina warning — flat, no glow */
   danger: {
-    DEFAULT: '#EF4444',
-    dark:    '#B91C1C',
-    glow:    'rgba(239, 68, 68, 0.35)',
+    DEFAULT: '#FF003C',
+    dark:    '#CC0030',
+    glow:    'rgba(255, 0, 60, 0)',
   },
 
-  /** Green — pool action, PLAY button, success states */
+  /** Action — PLAY button, pool CTA */
   action: {
-    DEFAULT: '#0D7C66',
-    light:   '#10A37F',
-    dark:    '#065A46',
-    glow:    'rgba(13, 124, 102, 0.45)',
+    DEFAULT: '#CCFF00',
+    light:   '#DDFF33',
+    dark:    '#AADD00',
+    glow:    'rgba(204, 255, 0, 0)',
   },
 
-  /** Surfaces — dark navy-black game background layers */
+  /** Surfaces — carbon-black game background layers */
   surface: {
-    base:    '#050B14',   // deepest background / vignette
-    low:     '#080F1C',   // panel base
-    mid:     '#0A1628',   // cards, drawers
-    high:    '#111D2E',   // elevated elements
-    highest: '#1B2838',   // top surface chips, badges
+    base:    '#0A0A0A',   // deepest background
+    low:     '#111111',   // panel base
+    mid:     '#1A1A1A',   // cards, drawers (graphite)
+    high:    '#222222',   // elevated elements
+    highest: '#2A2A2A',   // top surface chips, badges
   },
 
   /** Text hierarchy */
@@ -79,19 +79,19 @@ export const colors = {
     visible: 'rgba(255, 255, 255, 0.25)',
   },
 
-  /** Race HUD — stamina states */
+  /** Race HUD — stamina states (flat, no glow) */
   stamina: {
-    high:   '#00E5FF',   // > 60 %
-    mid:    '#D4A843',   // 20–60 %
-    low:    '#EF4444',   // < 20 %
+    high:   '#CCFF00',   // > 55% — volt yellow
+    mid:    '#FFFFFF',   // 25–55% — white
+    low:    '#FF003C',   // < 25% — flat red
   },
 
-  /** Backdrop overlays */
+  /** Backdrop overlays — monochromatic only */
   overlay: {
-    dark:   'rgba(5, 11, 20, 0.72)',
-    darker: 'rgba(5, 11, 20, 0.88)',
-    pause:  'rgba(5, 11, 20, 0.80)',
-    tinted: 'rgba(10, 22, 40, 0.80)',
+    dark:   'rgba(0, 0, 0, 0.72)',
+    darker: 'rgba(0, 0, 0, 0.88)',
+    pause:  'rgba(0, 0, 0, 0.80)',
+    tinted: 'rgba(10, 10, 10, 0.80)',
   },
 } as const;
 
@@ -120,13 +120,13 @@ export const spacing = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const radii = {
-  sm:   '8px',
-  md:   '12px',
-  lg:   '16px',
-  xl:   '20px',
-  '2xl':'24px',
-  '3xl':'32px',
-  full: '9999px',
+  sm:   '0px',
+  md:   '0px',
+  lg:   '0px',
+  xl:   '0px',
+  '2xl':'0px',
+  '3xl':'0px',
+  full: '9999px',  // Kept only for pill badges where strictly needed
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -134,25 +134,25 @@ export const radii = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const shadows = {
-  /** Neon primary glow — on interactive elements, selected states */
-  glowPrimary:  '0 0 12px rgba(0, 229, 255, 0.45)',
-  glowPrimaryLg:'0 0 30px rgba(0, 229, 255, 0.35)',
+  /** @deprecated No neon glows in broadcast standard */
+  glowPrimary:  'none',
+  glowPrimaryLg:'none',
 
-  /** Gold glow — XP, achievements, first-place */
-  glowGold:     '0 0 12px rgba(212, 168, 67, 0.50)',
-  glowGoldLg:   '0 0 30px rgba(212, 168, 67, 0.40)',
+  /** @deprecated No neon glows in broadcast standard */
+  glowGold:     'none',
+  glowGoldLg:   'none',
 
-  /** Danger glow — low stamina, warnings */
-  glowDanger:   '0 0 12px rgba(239, 68, 68, 0.50)',
+  /** @deprecated No neon glows in broadcast standard */
+  glowDanger:   'none',
 
-  /** Action glow — PLAY button */
-  glowAction:   '0 0 18px rgba(13, 124, 102, 0.55)',
+  /** @deprecated No neon glows in broadcast standard */
+  glowAction:   'none',
 
-  /** Elevation shadows */
-  card:         '0 4px 24px rgba(0, 0, 0, 0.40)',
-  elevated:     '0 8px 40px rgba(0, 0, 0, 0.55)',
+  /** Hard structural elevation shadows — monochromatic only */
+  card:         '0 4px 24px rgba(0, 0, 0, 0.60)',
+  elevated:     '0 8px 40px rgba(0, 0, 0, 0.75)',
 
-  /** Inner highlight — top edge of raised panels */
+  /** Inner highlight — subtle top-edge on raised panels */
   insetTop:     'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
 } as const;
 
@@ -236,34 +236,33 @@ export const zIndex = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Phase 2 premium lobby colors.
- * These replace generic surface/text tokens in lobby-specific components.
+ * Broadcast lobby colors — flat, high-contrast Sports Broadcast standard.
  * Rules:
- *   - bgDeep  → deepest scene layer, vignette edges
- *   - bgOcean → mid panels, cards
- *   - bgPanel → glass overlays (semi-transparent)
- *   - aqua    → primary action, active states, glow source
- *   - cyanGlow → lighter glow highlight, XP bar fill end
+ *   - bgDeep  → carbon black base
+ *   - bgPanel → opaque graphite panels (no colored glass)
+ *   - volt    → primary action, active states (no glow)
+ *   - white   → primary text
+ *   - danger  → flat stark red (#FF003C)
  */
 export const lobby = {
-  bgDeep:        '#041421',
-  bgOcean:       '#06263A',
-  bgPanel:       'rgba(4, 20, 33, 0.76)',
-  textPrimary:   '#F3FBFF',
-  textSecondary: '#A9D3E7',
-  aqua:          '#38D6FF',
-  cyanGlow:      '#7AE8FF',
-  warning:       '#FFC247',
-  danger:        '#FF5D73',
-  success:       '#37E28D',
-  gold:          '#FFD76A',
+  bgDeep:        '#0A0A0A',
+  bgOcean:       '#1A1A1A',
+  bgPanel:       'rgba(10, 10, 10, 0.88)',
+  textPrimary:   '#FFFFFF',
+  textSecondary: '#888888',
+  aqua:          '#CCFF00',    // Legacy alias → volt yellow
+  cyanGlow:      '#CCFF00',    // Legacy alias → volt yellow
+  warning:       '#FFFFFF',    // White for mid-states
+  danger:        '#FF003C',    // Flat stark red
+  success:       '#CCFF00',    // Volt for success
+  gold:          '#CCFF00',    // Volt for gold/ranking
 
-  // Derived alpha variants
-  aquaGlow:      'rgba(56, 214, 255, 0.40)',
-  aquaSubtle:    'rgba(56, 214, 255, 0.10)',
-  aquaBorder:    'rgba(56, 214, 255, 0.20)',
-  panelBorder:   'rgba(56, 214, 255, 0.12)',
-  goldGlow:      'rgba(255, 215, 106, 0.35)',
+  // Border & overlay alphas — monochromatic only
+  aquaGlow:      'rgba(204, 255, 0, 0)',    // No colored glows
+  aquaSubtle:    'rgba(255, 255, 255, 0.06)',
+  aquaBorder:    'rgba(255, 255, 255, 0.14)',
+  panelBorder:   'rgba(255, 255, 255, 0.10)',
+  goldGlow:      'rgba(204, 255, 0, 0)',
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -320,7 +319,7 @@ export function injectCSSTokens(): void {
   root.style.setProperty('--z-menu',                 String(zIndex.menu));
   root.style.setProperty('--z-landscape',            String(zIndex.landscape));
 
-  // Lobby theme (Phase 2)
+  // Lobby theme
   root.style.setProperty('--lobby-bg-deep',          lobby.bgDeep);
   root.style.setProperty('--lobby-bg-ocean',         lobby.bgOcean);
   root.style.setProperty('--lobby-bg-panel',         lobby.bgPanel);
@@ -336,4 +335,10 @@ export function injectCSSTokens(): void {
   root.style.setProperty('--lobby-aqua-subtle',      lobby.aquaSubtle);
   root.style.setProperty('--lobby-aqua-border',      lobby.aquaBorder);
   root.style.setProperty('--lobby-panel-border',     lobby.panelBorder);
+
+  // Broadcast standard accent
+  root.style.setProperty('--color-volt',             '#CCFF00');
+  root.style.setProperty('--color-broadcast-red',    '#FF003C');
+  root.style.setProperty('--color-carbon',           '#0A0A0A');
+  root.style.setProperty('--color-graphite',         '#1A1A1A');
 }

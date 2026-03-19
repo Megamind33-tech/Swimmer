@@ -79,13 +79,12 @@ export default {
 
         "surface-tint": "#0f62fe",
 
-        // New Game-Focus Colors
-        "neon-cyan": "#00ffff",
-        "neon-cyan-glow": "rgba(0, 255, 255, 0.5)",
-        "pool-navy": "#001a33",
-        "pool-teal": "#005a7a",
-        "pool-dark": "#0a0e1a",
-        "broadcast-overlay": "rgba(10, 14, 26, 0.92)",
+        // Broadcast Standard Colors — SWIM26 FC26 aesthetic
+        "volt":           "#CCFF00",         // High-vis accent
+        "broadcast-red":  "#FF003C",         // Flat danger red
+        "carbon":         "#0A0A0A",         // Deepest surface
+        "graphite":       "#1A1A1A",         // Elevated surface
+        "broadcast-white":"#FFFFFF",
       },
       fontFamily: {
         "headline": ["IBM Plex Sans", "sans-serif"],
@@ -107,19 +106,14 @@ export default {
         "slide-in-down": "slideInDown 0.6s ease-out",
         "slide-in-left": "slideInLeft 0.6s ease-out",
         "slide-in-right": "slideInRight 0.6s ease-out",
-        "glow": "glow 3s ease-in-out infinite",
+        "slide-in-up-fast": "slideInUp 0.3s ease-out",
         "float": "float 6s ease-in-out infinite",
         "pulse-scale": "pulse-scale 2s ease-in-out infinite",
-        "button-glow": "button-glow 2s ease-in-out infinite",
-        "skew": "skewX(-12deg)",
         "squash-stretch": "squashStretch 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        "neon-glow": "neonGlow 2s ease-in-out infinite",
-        "neon-pulse": "neonPulse 1.5s ease-in-out infinite",
         "magnetic-tilt": "magneticTilt 0.3s ease-out",
         "parallax-float": "parallaxFloat 8s ease-in-out infinite",
         "ticker-scroll": "tickerScroll 40s linear infinite",
         "live-pulse": "livePulse 1.2s ease-in-out infinite",
-        "caustics": "caustics 8s ease-in-out infinite",
         "water-fill": "waterFill 0.6s ease-out forwards",
         "shimmer": "shimmer 3s ease-in-out infinite",
       },
@@ -164,14 +158,6 @@ export default {
             transform: "translateX(0)",
           },
         },
-        glow: {
-          "0%, 100%": {
-            textShadow: "0 0 5px rgba(15, 98, 254, 0.2)",
-          },
-          "50%": {
-            textShadow: "0 0 20px rgba(15, 98, 254, 0.6)",
-          },
-        },
         float: {
           "0%, 100%": {
             transform: "translateY(0px)",
@@ -188,45 +174,10 @@ export default {
             transform: "scale(1.05)",
           },
         },
-        "button-glow": {
-          "0%, 100%": {
-            boxShadow: "0 0 10px rgba(15, 98, 254, 0.3)",
-          },
-          "50%": {
-            boxShadow: "0 0 20px rgba(15, 98, 254, 0.6)",
-          },
-        },
         squashStretch: {
-          "0%": {
-            transform: "scale(1)",
-            boxShadow: "0 0 0px rgba(0, 255, 255, 0)",
-          },
-          "50%": {
-            transform: "scale(0.95)",
-            boxShadow: "0 0 20px rgba(0, 255, 255, 0.6)",
-          },
-          "100%": {
-            transform: "scale(1)",
-            boxShadow: "0 0 0px rgba(0, 255, 255, 0)",
-          },
-        },
-        neonGlow: {
-          "0%, 100%": {
-            boxShadow: "0 0 10px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1)",
-          },
-          "50%": {
-            boxShadow: "0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.2)",
-          },
-        },
-        neonPulse: {
-          "0%, 100%": {
-            borderColor: "rgba(0, 255, 255, 0.3)",
-            color: "rgba(255, 255, 255, 0.7)",
-          },
-          "50%": {
-            borderColor: "rgba(0, 255, 255, 0.8)",
-            color: "rgba(0, 255, 255, 1)",
-          },
+          "0%":   { transform: "scale(1)" },
+          "50%":  { transform: "scale(0.95)" },
+          "100%": { transform: "scale(1)" },
         },
         magneticTilt: {
           "from": {
@@ -266,16 +217,6 @@ export default {
           "50%": {
             opacity: "0.7",
             transform: "scale(1.05)",
-          },
-        },
-        caustics: {
-          "0%, 100%": {
-            backgroundPosition: "0% 0%",
-            opacity: "0.15",
-          },
-          "50%": {
-            backgroundPosition: "100% 100%",
-            opacity: "0.25",
           },
         },
         waterFill: {
