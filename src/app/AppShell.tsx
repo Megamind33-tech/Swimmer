@@ -172,19 +172,23 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
   const openChampionships   = () => setOverlayPage('championships');
   const closeOverlay        = () => setOverlayPage(null);
 
-  // In store mode (no overlay), hide the global chrome so the store owns its full viewport
+  // In store mode (no overlay), store owns its own back button
   const isStoreFullscreen = activeTab === 'store' && overlayPage === null;
 
-  // Show back button when: not on the race tab OR any overlay is open (but NOT in store — store has its own back)
-  const showBack = !isStoreFullscreen && (activeTab !== 'race' || overlayPage !== null);
+  // Hide header/footer chrome everywhere except the Lobby (race tab, no overlay)
+  const isLobby = activeTab === 'race' && overlayPage === null;
+  const hideChrome = !isLobby;
+
+  // Show back button when not on lobby and not in store fullscreen (store has its own back)
+  const showBack = hideChrome && !isStoreFullscreen;
 
   return (
     <div
       className="w-full h-full relative overflow-hidden select-none"
       style={{ background: '#041421' }}
     >
-      {/* ── Persistent top bar (hidden in store fullscreen) ── */}
-      {!isStoreFullscreen && (
+      {/* ── Persistent top bar (lobby only) ── */}
+      {!hideChrome && (
         <TopUtilityBar
           onSettings={openSettings}
           onProfile={openProfile}
@@ -214,8 +218,8 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           transition={{ duration: 0.18 }}
           style={{
             position: 'absolute',
-            top:      isStoreFullscreen ? 0 : '48px',
-            bottom:   isStoreFullscreen ? 0 : '60px',
+            top:      hideChrome ? 0 : '48px',
+            bottom:   hideChrome ? 0 : '60px',
             left:     0,
             right:    0,
             overflow: 'hidden',
@@ -243,9 +247,9 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           onClick={closeOverlay}
           style={{
             position:   'absolute',
-            top:        '48px',
+            top:        0,
             right:      0,
-            bottom:     '60px',
+            bottom:     0,
             width:      '32px',
             background: 'transparent',
             border:     'none',
@@ -256,8 +260,8 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
         />
       )}
 
-      {/* ── Persistent bottom tab bar (hidden in store fullscreen) ── */}
-      {!isStoreFullscreen && (
+      {/* ── Persistent bottom tab bar (lobby only) ── */}
+      {!hideChrome && (
         <IconTabBar
           activeTab={activeTab}
           onChange={handleTabChange}
