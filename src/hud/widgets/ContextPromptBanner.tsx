@@ -250,8 +250,27 @@ export function useContextPrompts(
   const lastPositionRef = useRef<number>(position); // for lane advance detection
 
   // Keep the latest race values accessible without re-creating the interval
-  const latestRef = useRef({ elapsedMs, position, distanceM, totalDistanceM, stamina, rhythm });
-  latestRef.current = { elapsedMs, position, distanceM, totalDistanceM, stamina, rhythm };
+  // Lazy-initialize to avoid object allocation on every render
+  const latestRef = useRef<{
+    elapsedMs:      number;
+    position:       number;
+    distanceM:      number;
+    totalDistanceM: number;
+    stamina:        number;
+    rhythm:         number;
+  } | null>(null);
+
+  if (!latestRef.current) {
+    latestRef.current = { elapsedMs, position, distanceM, totalDistanceM, stamina, rhythm };
+  } else {
+    // Directly mutate the ref object to avoid repeated object allocations on every render
+    latestRef.current.elapsedMs      = elapsedMs;
+    latestRef.current.position       = position;
+    latestRef.current.distanceM      = distanceM;
+    latestRef.current.totalDistanceM = totalDistanceM;
+    latestRef.current.stamina        = stamina;
+    latestRef.current.rhythm         = rhythm;
+  }
 
   const fire = useCallback((type: PromptType) => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -263,6 +282,7 @@ export function useContextPrompts(
   // Poll at 4Hz — decoupled from render frequency
   useEffect(() => {
     const id = setInterval(() => {
+      if (!latestRef.current) return;
       const { elapsedMs, position, distanceM, totalDistanceM, rhythm } = latestRef.current;
       const progress = totalDistanceM > 0 ? distanceM / totalDistanceM : 0;
       const fired    = firedRef.current;
