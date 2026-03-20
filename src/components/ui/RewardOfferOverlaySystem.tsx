@@ -2,6 +2,7 @@ import React from 'react';
 import {
   swim26Boundary,
   swim26Color,
+  swim26Layout,
   swim26Overlay,
   swim26Size,
   swim26Space,

@@ -4,7 +4,7 @@
  * Replaces the old website-style HomePage as the default landing screen.
  *
  * Visual layers (back to front):
- *   1. Deep ocean radial gradient base (#041421 → #062b42)
+ *   1. Deep ocean radial gradient base (carbon → pool blue)
  *   2. Caustic light blob animation (three blobs, CSS keyframes)
  *   3. Subtle pool lane-line overlay (5 lines, 4% opacity)
  *   4. Edge vignette (radial darkening toward corners)
@@ -29,6 +29,7 @@ import { PrimaryButton, SecondaryButton } from './GameButtons';
 import { FeaturedEventCard } from './FeaturedEventCard';
 import { lobby } from '../theme/tokens';
 import { USER_DATA } from '../utils/gameData';
+import appSkinBackground from '../designs/app_skin/venue-skin.jpg';
 
 interface LobbyScreenProps {
   /** Triggers the race flow (hands off to GameShell) */
@@ -60,7 +61,7 @@ const LaneLines: React.FC = () => (
           right:      0,
           top:        `${(i + 1) * (100 / 6)}%`,
           height:     '1px',
-          background: 'linear-gradient(90deg, transparent 0%, #38D6FF 12%, #38D6FF 88%, transparent 100%)',
+          background: 'var(--lobby-venue-lane-lines)',
         }}
       />
     ))}
@@ -108,13 +109,41 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
       overflow: 'hidden',
     }}
   >
+    {/* App skin (venue photo) */}
+    <img
+      src={appSkinBackground}
+      alt=""
+      aria-hidden
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        opacity: 0.10,
+        mixBlendMode: 'overlay',
+        filter: 'saturate(0.9) contrast(1.05)',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }}
+    />
+    <div
+      aria-hidden
+      style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'rgba(0,0,0,0.40)',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }}
+    />
     {/* ── BACKGROUND LAYER 1: ocean radial gradient ── */}
     <div
       aria-hidden
       style={{
         position:   'absolute',
         inset:      0,
-        background: 'radial-gradient(ellipse at 28% 55%, #062b42 0%, #041421 62%)',
+        background: 'var(--lobby-venue-ocean-radial)',
       }}
     />
 
@@ -135,7 +164,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
         position:      'absolute',
         inset:         0,
         pointerEvents: 'none',
-        background:    'radial-gradient(ellipse at center, transparent 38%, rgba(4,20,33,0.72) 100%)',
+        background:    'var(--lobby-venue-vignette-radial)',
       }}
     />
 
@@ -174,8 +203,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
               gap:           '6px',
               padding:       '3px 11px',
               borderRadius:  '100px',
-              background:    'rgba(56,214,255,0.09)',
-              border:        '1px solid rgba(56,214,255,0.28)',
+                background:    'rgba(204,255,0,0.09)',
+                border:        '1px solid rgba(204,255,0,0.28)',
               color:         lobby.aqua,
               fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
               fontWeight:    700,
@@ -192,7 +221,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
                 height:       '6px',
                 borderRadius: '50%',
                 background:   lobby.success,
-                boxShadow:    `0 0 6px rgba(55,226,141,0.8)`,
+                boxShadow:    'none',
                 animation:    'countdown-pulse 1.8s ease-in-out infinite',
               }}
             />
@@ -220,7 +249,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
             <span
               style={{
                 color:      lobby.aqua,
-                textShadow: '0 0 22px rgba(56,214,255,0.60), 0 0 48px rgba(56,214,255,0.25)',
+                textShadow: 'none',
               }}
             >
               26
@@ -247,7 +276,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
         <div
           style={{
             height:     '1px',
-            background: 'linear-gradient(90deg, rgba(56,214,255,0.28) 0%, transparent 65%)',
+            background: 'linear-gradient(90deg, rgba(204,255,0,0.28) 0%, transparent 65%)',
           }}
         />
 
@@ -285,8 +314,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
               gap:           '4px',
               padding:       '3px 9px',
               borderRadius:  '6px',
-              background:    'rgba(255,215,106,0.08)',
-              border:        '1px solid rgba(255,215,106,0.20)',
+              background:    'rgba(204,255,0,0.08)',
+              border:        '1px solid rgba(204,255,0,0.20)',
               color:         lobby.gold,
               fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
               fontWeight:    700,
@@ -316,24 +345,24 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
             label="OVR"
             value={<span style={{ color: lobby.aqua }}>94</span>}
           />
-          <span style={{ color: 'rgba(169,211,231,0.25)', fontSize: '11px' }}>·</span>
+          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px' }}>·</span>
           <StatItem
             label="W/L"
             value={
               <>
                 <span style={{ color: lobby.textPrimary }}>847</span>
-                <span style={{ color: 'rgba(169,211,231,0.50)' }}>/231</span>
+                <span style={{ color: 'rgba(255,255,255,0.50)' }}>/231</span>
               </>
             }
           />
-          <span style={{ color: 'rgba(169,211,231,0.25)', fontSize: '11px' }}>·</span>
+          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px' }}>·</span>
           <StatItem
             label="RANK"
             value={
               <span
                 style={{
                   color:      lobby.gold,
-                  textShadow: '0 0 8px rgba(255,215,106,0.35)',
+                  textShadow: 'none',
                 }}
               >
                 #{USER_DATA.level > 20 ? 4 : 12}

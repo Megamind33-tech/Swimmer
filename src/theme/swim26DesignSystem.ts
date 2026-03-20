@@ -1,3 +1,17 @@
+import { colors as tokenColors } from './tokens';
+
+function hexToRgba(hex: string, alpha: number): string {
+  const clean = hex.replace('#', '');
+  const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
+  const int = parseInt(full, 16);
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+const volt = tokenColors.primary.DEFAULT;
+
 export const viewportClasses = {
   compact: { minWidth: 896, maxWidth: 1138, minHeight: 568, maxHeight: 667 },
   standard: { minWidth: 1139, maxWidth: 1334, minHeight: 668, maxHeight: 767 },
@@ -67,8 +81,8 @@ export const swim26Boundary = {
     overlayCard: 0.72,
   },
   divider: {
-    default: 'rgba(255,255,255,0.10)',
-    emphasis: 'rgba(74, 201, 214, 0.24)',
+    default: tokenColors.border.subtle,
+    emphasis: hexToRgba(volt, 0.24),
   },
   elevation: {
     level0: 'none',
@@ -76,33 +90,35 @@ export const swim26Boundary = {
     level2: '0 8px 20px rgba(0,0,0,0.32)',
     level3: '0 12px 28px rgba(0,0,0,0.42)',
   },
-  activeOutline: '2px solid rgba(74, 201, 214, 0.8)',
+  activeOutline: `2px solid ${hexToRgba(volt, 0.8)}`,
 } as const;
 
 export const swim26Color = {
-  bg: { app: '#07131C' },
+  bg: { app: tokenColors.surface.base },
   surface: {
-    primary: 'rgba(13, 27, 39, 0.94)',
-    secondary: 'rgba(20, 38, 54, 0.90)',
-    tertiary: 'rgba(28, 50, 69, 0.82)',
+    // Keep relative "primary < secondary < tertiary" brightness levels,
+    // but derive the base hue from broadcast carbon/graphite.
+    primary: hexToRgba(tokenColors.surface.low, 0.94),
+    secondary: hexToRgba(tokenColors.surface.mid, 0.90),
+    tertiary: hexToRgba(tokenColors.surface.high, 0.82),
   },
   text: {
-    primary: '#F4FAFF',
-    secondary: 'rgba(228, 239, 247, 0.76)',
-    disabled: 'rgba(196, 208, 219, 0.42)',
+    primary: tokenColors.text.primary,
+    secondary: tokenColors.text.secondary,
+    disabled: tokenColors.text.muted,
   },
   accent: {
-    primary: '#4AC9D6',
-    secondary: '#1E8FA3',
+    primary: tokenColors.primary.DEFAULT,
+    secondary: tokenColors.primary.dim,
   },
   feedback: {
-    success: '#36C690',
-    warning: '#FF9E57',
-    alert: '#F06A5F',
+    success: tokenColors.primary.DEFAULT,
+    warning: tokenColors.text.primary,
+    alert: tokenColors.danger.DEFAULT,
   },
-  featured: { premium: '#D6B45A' },
-  divider: 'rgba(255,255,255,0.10)',
-  overlay: { dim: 'rgba(3, 10, 16, 0.62)' },
+  featured: { premium: tokenColors.gold.light },
+  divider: tokenColors.border.subtle,
+  overlay: { dim: tokenColors.overlay.dark },
 } as const;
 
 export const swim26Type = {
@@ -205,15 +221,15 @@ export const swim26ResponsiveRules = {
 
 export const swim26StateRules = {
   active: {
-    border: '2px solid rgba(74, 201, 214, 0.8)',
-    accentWash: 'rgba(74, 201, 214, 0.10)',
+    border: `2px solid ${hexToRgba(volt, 0.8)}`,
+    accentWash: hexToRgba(volt, 0.10),
     elevation: 'level2',
   },
   inactive: {
     border: '1px solid rgba(255,255,255,0.10)',
   },
   disabled: {
-    text: 'rgba(196, 208, 219, 0.42)',
+    text: tokenColors.text.muted,
     saturationReduction: 0.22,
     elevation: 'level0',
   },

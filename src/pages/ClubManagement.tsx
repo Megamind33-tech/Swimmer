@@ -6,8 +6,8 @@ import { ShieldIcon, ActivityIcon, CalendarIcon, FlagIcon, UserPlusIcon } from '
 import { SponsorPanel } from './ProfilePage'
 import { useClubRoster, type SignedAthlete } from '../utils/clubRoster'
 
-const AQUA = '#38D6FF'
-const GOLD = '#D4A843'
+const AQUA = 'var(--color-volt)'
+const GOLD = 'var(--color-volt)'
 const PANEL = 'rgba(4,20,33,0.76)'
 const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 
@@ -188,7 +188,7 @@ export function ClubManagement() {
                       <span style={{ fontSize: '12px' }}>{athlete.flag}</span>
                       <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '12px', color: '#F3FBFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{athlete.name}</div>
                     </div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: '#38D6FF', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2px' }}>{athlete.stroke} · {athlete.tier}</div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: AQUA, textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2px' }}>{athlete.stroke} · {athlete.tier}</div>
                     <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', marginTop: '2px' }}>Age {athlete.age} · {athlete.nationality}</div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>

@@ -38,7 +38,7 @@ export const PrimaryButton: React.FC<GameButtonProps> = ({
 }) => (
   <motion.button
     whileTap={{ scale: 0.94 }}
-    whileHover={{ scale: 1.03, boxShadow: '0 0 28px rgba(56,214,255,0.55), 0 2px 10px rgba(0,0,0,0.5)' }}
+    whileHover={{ scale: 1.03 }}
     onClick={onClick}
     disabled={disabled}
     style={{
@@ -52,8 +52,8 @@ export const PrimaryButton: React.FC<GameButtonProps> = ({
       borderRadius: '10px',
       border: 'none',
       background: disabled
-        ? 'rgba(56,214,255,0.25)'
-        : 'linear-gradient(140deg, #38D6FF 0%, #1dc3ee 100%)',
+        ? 'rgba(204,255,0,0.25)'
+        : 'linear-gradient(140deg, var(--color-volt) 0%, var(--color-primary-dim) 100%)',
       color: lobby.bgDeep,
       fontFamily: "'Bebas Neue', Impact, 'Arial Narrow', sans-serif",
       fontSize: '20px',
@@ -62,7 +62,7 @@ export const PrimaryButton: React.FC<GameButtonProps> = ({
       flexShrink: 0,
       boxShadow: disabled
         ? 'none'
-        : '0 0 20px rgba(56,214,255,0.38), 0 2px 8px rgba(0,0,0,0.45)',
+        : '0 4px 16px rgba(0,0,0,0.55)',
       transition: 'opacity 0.15s',
       opacity: disabled ? 0.5 : 1,
       userSelect: 'none',
@@ -99,9 +99,9 @@ export const SecondaryButton: React.FC<GameButtonProps> = ({
       padding: '0 18px',
       width: fullWidth ? '100%' : 'auto',
       borderRadius: '10px',
-      border: `1px solid ${disabled ? 'rgba(56,214,255,0.18)' : 'rgba(56,214,255,0.38)'}`,
-      background: 'rgba(56,214,255,0.08)',
-      color: disabled ? 'rgba(56,214,255,0.4)' : lobby.aqua,
+      border: `1px solid ${disabled ? 'rgba(204,255,0,0.18)' : 'rgba(204,255,0,0.38)'}`,
+      background: 'rgba(204,255,0,0.08)',
+      color: disabled ? 'rgba(204,255,0,0.4)' : lobby.aqua,
       fontFamily: "'Bebas Neue', Impact, 'Arial Narrow', sans-serif",
       fontSize: '20px',
       letterSpacing: '0.06em',

@@ -66,11 +66,11 @@ export interface PreMatchScreenProps {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const C = {
-  bg:           '#041421',
+  bg:           'var(--color-carbon)',
   panel:        'rgba(4,20,33,0.82)',
   border:       'rgba(56,214,255,0.14)',
-  aqua:         '#38D6FF',
-  aquaGlow:     'rgba(56,214,255,0.40)',
+  aqua:         'var(--color-volt)',
+  aquaGlow:     'rgba(204,255,0,0.40)',
   gold:         '#FFD76A',
   danger:       '#FF5D73',
   success:      '#37E28D',
@@ -110,7 +110,7 @@ const ROSTER: SwimmerEntry[] = [
     lane: 4, name: 'YOU', nationality: 'Your Nation', flag: '🏊', overall: 94,
     strengths:  ['Speed', 'Dive Start'],
     weaknesses: ['Back Half'],
-    isPlayer: true, accentColor: '#38D6FF',
+    isPlayer: true, accentColor: C.aqua,
   },
   {
     lane: 5, name: 'Marcus Webb', nationality: 'USA', flag: '🇺🇸', overall: 93,
@@ -725,12 +725,12 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
               whiteSpace:     'nowrap',
             }}
           >
-            <Play size={14} fill="#041421" color="#041421" />
+            <Play size={14} fill="var(--color-carbon)" color="var(--color-carbon)" />
             <span
               style={{
                 fontFamily:    C.fontImpact,
                 fontSize:      '15px',
-                color:         '#041421',
+                color:         'var(--color-carbon)',
                 letterSpacing: '0.08em',
               }}
             >

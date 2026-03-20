@@ -22,7 +22,7 @@ import { PreRaceSetupScreen } from './menu/PreRaceSetupScreen';
 import { PreMatchScreen } from '../hud/overlays/PreMatchScreen';
 import { RaceScene, RaceConfig, RaceResult } from './RaceScene';
 import { SplashScreen } from './menu/SplashScreen';
-import lockerRoomBackground from '../designs/locker_room_custom/screen.png';
+import appSkinBackground from '../designs/app_skin/venue-skin.jpg';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -48,7 +48,7 @@ interface OverlayShellProps {
 
 const OverlayShell: React.FC<OverlayShellProps> = ({
   children,
-  backgroundOpacity = 0.2,
+  backgroundOpacity = 0.14,
   showBackground = true,
 }) => (
   <div
@@ -63,7 +63,7 @@ const OverlayShell: React.FC<OverlayShellProps> = ({
 
     {showBackground && (
       <img
-        src={lockerRoomBackground}
+        src={appSkinBackground}
         alt=""
         aria-hidden
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"

@@ -2,13 +2,13 @@ import React from 'react'
 import { motion } from 'motion/react'
 import { TrophyIcon, CalendarIcon, UsersIcon } from 'lucide-react'
 
-const AQUA = '#38D6FF'
-const GOLD = '#D4A843'
+const AQUA = 'var(--color-volt)'
+const GOLD = 'var(--color-volt)'
 const PANEL = 'rgba(4,20,33,0.76)'
 const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 
 const UPCOMING_EVENTS = [
-  { title: 'Sprint Series',   type: 'Freestyle Only', req: 'OVR 100+',   time: 'Starts in 5h',  accent: '#38D6FF', border: 'rgba(56,214,255,0.25)' },
+  { title: 'Sprint Series',   type: 'Freestyle Only', req: 'OVR 100+',   time: 'Starts in 5h',  accent: AQUA, border: 'rgba(56,214,255,0.25)' },
   { title: 'Endurance Test',  type: 'Medley',         req: 'Level 20+',  time: 'Tomorrow',      accent: '#A78BFA', border: 'rgba(167,139,250,0.25)' },
   { title: 'Rookie Cup',      type: 'All Strokes',    req: 'Max OVR 90', time: 'Starts in 3d',  accent: '#34D399', border: 'rgba(52,211,153,0.25)' },
 ]
@@ -49,7 +49,7 @@ export function Championships() {
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <TrophyIcon size={44} color={GOLD} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 14px rgba(212,168,67,0.55))` }} />
-            <button style={{ height: '30px', paddingInline: '16px', borderRadius: '8px', cursor: 'pointer', background: '#F3FBFF', border: 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.10em', color: '#041421', boxShadow: '0 0 14px rgba(243,251,255,0.25)', whiteSpace: 'nowrap' }}>
+            <button style={{ height: '30px', paddingInline: '16px', borderRadius: '8px', cursor: 'pointer', background: '#F3FBFF', border: 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.10em', color: 'var(--color-carbon)', boxShadow: '0 0 14px rgba(243,251,255,0.25)', whiteSpace: 'nowrap' }}>
               ENTER TOURNAMENT
             </button>
           </div>

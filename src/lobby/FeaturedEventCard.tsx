@@ -81,12 +81,12 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
 
   return (
     <motion.div
-      whileHover={{ scale: 1.015, boxShadow: '0 6px 32px rgba(0,0,0,0.65), 0 0 20px rgba(56,214,255,0.12)' }}
+      whileHover={{ scale: 1.015 }}
       style={{
         width:           '100%',
         height:          '100%',
         borderRadius:    '14px',
-        background:      'rgba(5,30,48,0.88)',
+        background:      'var(--lobby-bg-panel)',
         border:          `1px solid ${lobby.aquaBorder}`,
         backdropFilter:  'blur(18px)',
         WebkitBackdropFilter: 'blur(18px)',
@@ -94,14 +94,14 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
         display:         'flex',
         flexDirection:   'column',
         position:        'relative',
-        boxShadow:       '0 4px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(56,214,255,0.08)',
+        boxShadow:       '0 4px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)',
       }}
     >
       {/* Top accent stripe */}
       <div
         style={{
           height:     '3px',
-          background: 'linear-gradient(90deg, #38D6FF 0%, #7AE8FF 55%, transparent 100%)',
+          background: 'linear-gradient(90deg, var(--color-volt) 0%, var(--color-primary-dim) 55%, transparent 100%)',
           flexShrink: 0,
         }}
       />
@@ -125,8 +125,8 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
             gap:            '4px',
             padding:        '2px 8px',
             borderRadius:   '4px',
-            background:     'rgba(255,199,71,0.13)',
-            border:         '1px solid rgba(255,199,71,0.30)',
+            background:     'rgba(204,255,0,0.10)',
+            border:         '1px solid rgba(204,255,0,0.24)',
             color:          lobby.warning,
             fontFamily:     "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
             fontWeight:     700,
@@ -173,7 +173,7 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
         <div
           style={{
             height:     '1px',
-            background: `rgba(56,214,255,0.10)`,
+            background: `rgba(204,255,0,0.10)`,
             flexShrink: 0,
           }}
         />
@@ -198,7 +198,7 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
               fontSize:           '15px',
               color:              lobby.warning,
               fontVariantNumeric: 'tabular-nums',
-              textShadow:         '0 0 8px rgba(255,199,71,0.4)',
+              textShadow:         'none',
               letterSpacing:      '0.04em',
             }}
           >
@@ -216,7 +216,7 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
               fontSize:      '11px',
               color:         lobby.gold,
               letterSpacing: '0.05em',
-              textShadow:    '0 0 8px rgba(255,215,106,0.35)',
+              textShadow:    'none',
             }}
           >
             {FEATURED.rewardLabel}
@@ -232,7 +232,7 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
               fontFamily:     "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
               fontSize:       '9px',
               fontWeight:     600,
-              color:          'rgba(169,211,231,0.55)',
+              color:          'rgba(255,255,255,0.55)',
               marginBottom:   '4px',
               letterSpacing:  '0.04em',
             }}
@@ -253,7 +253,7 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
                 width:      `${fillPct}%`,
                 height:     '100%',
                 borderRadius: '2px',
-                background: 'linear-gradient(90deg, #38D6FF, #7AE8FF)',
+                background: 'linear-gradient(90deg, var(--color-volt), var(--color-primary-dim))',
               }}
             />
           </div>
@@ -263,14 +263,14 @@ export const FeaturedEventCard: React.FC<FeaturedEventCardProps> = ({ onJoin }) 
       {/* JOIN NOW button */}
       <motion.button
         whileTap={{ scale: 0.96 }}
-        whileHover={{ background: 'rgba(56,214,255,0.18)' }}
+        whileHover={{ background: 'rgba(204,255,0,0.12)' }}
         onClick={onJoin}
         style={{
           margin:         '0 10px 10px',
           height:         '36px',
           borderRadius:   '8px',
-          background:     'rgba(56,214,255,0.10)',
-          border:         `1px solid rgba(56,214,255,0.35)`,
+          background:     'rgba(204,255,0,0.10)',
+          border:         `1px solid rgba(204,255,0,0.28)`,
           color:          lobby.aqua,
           fontFamily:     "'Bebas Neue', Impact, 'Arial Narrow', sans-serif",
           fontSize:       '17px',

@@ -276,6 +276,7 @@ function AthleteCard({
   athlete: MarketAthlete;
   signed: boolean;
   onSign: () => void;
+  key?: React.Key;
 }) {
   const ovrColor = OvrTierColor(athlete.ovr);
   const isFree = athlete.status === 'free';

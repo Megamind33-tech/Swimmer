@@ -474,7 +474,7 @@ manager.startWarmup();
 
 **Responsibility:** Professional menu interface
 **Components:**
-- MainMenu
+- AppShell (lobby/management hub + race entry)
 - PlayMenu (mode selection)
 - TrainingMenu
 - MultiplayerMenu

@@ -65,6 +65,7 @@ function NavTab({
   tab: TabDef;
   isActive: boolean;
   onChange: (id: LobbyTab) => void;
+  key?: React.Key;
 }) {
   const Icon = tab.icon;
   return (
@@ -81,7 +82,7 @@ function NavTab({
         gap:            '3px',
         cursor:         'pointer',
         background:     isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
-        border:         isActive ? '1px solid rgba(212,168,67,0.20)' : '1px solid transparent',
+        border:         isActive ? '1px solid rgba(204,255,0,0.20)' : '1px solid transparent',
         borderRadius:   '10px',
         padding:        '4px 2px',
         position:       'relative',
@@ -100,8 +101,8 @@ function NavTab({
             right:        '20%',
             height:       '2px',
             borderRadius: '0 0 3px 3px',
-            background:   '#D4A843',
-            boxShadow:    '0 0 10px rgba(212,168,67,0.70), 0 0 20px rgba(212,168,67,0.35)',
+            background:   'var(--color-volt)',
+            boxShadow:    'none',
           }}
           transition={{ type: 'spring', stiffness: 350, damping: 30 }}
         />
@@ -113,7 +114,7 @@ function NavTab({
           size={15}
           style={{
             color:  isActive ? '#ffffff' : 'rgba(255,255,255,0.40)',
-            filter: isActive ? 'drop-shadow(0 0 6px rgba(212,168,67,0.80))' : 'none',
+            filter: 'none',
             transition: 'color 0.18s ease, filter 0.18s ease',
           }}
         />
@@ -183,7 +184,7 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
         left:       0,
         right:      0,
         height:     '1px',
-        background: 'linear-gradient(90deg, transparent 0%, rgba(212,168,67,0.30) 30%, rgba(212,168,67,0.30) 70%, transparent 100%)',
+        background: 'linear-gradient(90deg, transparent 0%, rgba(204,255,0,0.30) 30%, rgba(204,255,0,0.30) 70%, transparent 100%)',
         pointerEvents: 'none',
       }} />
 
@@ -206,12 +207,12 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
           marginTop:    '-10px',
           borderRadius: '14px',
           background:   raceActive
-            ? 'linear-gradient(to bottom, #0F9A7E, #076B52)'
-            : 'linear-gradient(to bottom, #0D7C66, #065A46)',
-          border:       '1px solid rgba(13,124,102,0.70)',
+            ? 'linear-gradient(to bottom, var(--color-volt), var(--color-primary-dim))'
+            : 'linear-gradient(to bottom, rgba(204,255,0,0.25), rgba(204,255,0,0.08))',
+          border:       '1px solid rgba(204,255,0,0.55)',
           boxShadow:    raceActive
-            ? '0 0 24px rgba(13,124,102,0.70), 0 4px 16px rgba(0,0,0,0.50)'
-            : '0 0 18px rgba(13,124,102,0.45), 0 4px 12px rgba(0,0,0,0.40)',
+            ? '0 4px 16px rgba(0,0,0,0.55)'
+            : '0 4px 12px rgba(0,0,0,0.40)',
           display:      'flex',
           flexDirection:'column',
           alignItems:   'center',
@@ -239,7 +240,7 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
           position:      'absolute',
           inset:         0,
           borderRadius:  '14px',
-          background:    '#0D7C66',
+          background:    'var(--color-volt)',
           opacity:       raceActive ? 0.25 : 0.15,
           animation:     'ping 2s cubic-bezier(0,0,0.2,1) infinite',
           pointerEvents: 'none',

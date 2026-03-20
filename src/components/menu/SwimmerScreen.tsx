@@ -7,8 +7,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 
-const AQUA        = '#38D6FF';
-const GOLD        = '#D4A843';
+const AQUA        = 'var(--color-volt)';
+const GOLD        = 'var(--color-volt)';
 const PANEL       = 'rgba(4,20,33,0.76)';
 const PANEL_BORDER = 'rgba(56,214,255,0.13)';
 const PURPLE      = '#A78BFA';
@@ -46,7 +46,7 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
               <img src={miaPhiriAthleteImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={swimmerName} />
             </div>
             <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '22px', height: '22px', borderRadius: '7px', background: AQUA, border: '2px solid rgba(4,20,33,0.90)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: '#041421', letterSpacing: '0.02em' }}>{swimmerLevel}</span>
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: 'var(--color-carbon)', letterSpacing: '0.02em' }}>{swimmerLevel}</span>
             </div>
           </div>
           <div style={{ textAlign: 'center' }}>

@@ -266,6 +266,27 @@ export const lobby = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// VENUE THEME — Phase 2 aquatic ambience (pool/water wash)
+//
+// Important: these are *venue* visuals only. Accent/interactivity should still
+// come from primary volt / white / flat red (see `colors` + `lobby` + HUD tokens).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const venue = {
+  oceanRadial: 'radial-gradient(ellipse at 28% 55%, #062b42 0%, #041421 62%)',
+  // Monochrome vignette; keep water darkness without introducing neon cyan accents.
+  vignetteRadial: 'radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,0.72) 100%)',
+
+  // Lane lines should be subtle "pool" structure, not the UI accent.
+  laneLinesGradient: 'linear-gradient(90deg, transparent 0%, rgba(204, 255, 0, 0.60) 12%, rgba(204, 255, 0, 0.60) 88%, transparent 100%)',
+
+  // Caustic blobs: low-alpha volt (still reads aquatic, but matches broadcast standard).
+  causticBlob1: 'radial-gradient(ellipse, rgba(204, 255, 0, 0.07) 0%, transparent 68%)',
+  causticBlob2: 'radial-gradient(ellipse, rgba(204, 255, 0, 0.05) 0%, transparent 68%)',
+  causticBlob3: 'radial-gradient(ellipse, rgba(204, 255, 0, 0.06) 0%, transparent 68%)',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // CSS CUSTOM PROPERTY INJECTION
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -335,6 +356,14 @@ export function injectCSSTokens(): void {
   root.style.setProperty('--lobby-aqua-subtle',      lobby.aquaSubtle);
   root.style.setProperty('--lobby-aqua-border',      lobby.aquaBorder);
   root.style.setProperty('--lobby-panel-border',     lobby.panelBorder);
+
+  // Venue theme (Phase 2 lobby water/pool ambience)
+  root.style.setProperty('--lobby-venue-ocean-radial',     venue.oceanRadial);
+  root.style.setProperty('--lobby-venue-vignette-radial',  venue.vignetteRadial);
+  root.style.setProperty('--lobby-venue-lane-lines',      venue.laneLinesGradient);
+  root.style.setProperty('--lobby-venue-caustic-blob-1',   venue.causticBlob1);
+  root.style.setProperty('--lobby-venue-caustic-blob-2',   venue.causticBlob2);
+  root.style.setProperty('--lobby-venue-caustic-blob-3',   venue.causticBlob3);
 
   // Broadcast standard accent
   root.style.setProperty('--color-volt',             '#CCFF00');

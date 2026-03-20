@@ -574,7 +574,7 @@ function rarityPalette(product: StoreProduct) {
     return {
       bg: 'linear-gradient(175deg, #1E6E7A 0%, #0D4250 38%, #041218 100%)',
       border: 'rgba(74,201,214,0.55)',
-      accent: '#4AC9D6',
+      accent: 'var(--color-volt)',
       glow: 'rgba(74,201,214,0.25)',
     };
   }

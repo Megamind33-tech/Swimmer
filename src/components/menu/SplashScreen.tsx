@@ -11,6 +11,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Play } from 'lucide-react';
+import appSkinBackground from '../../designs/app_skin/venue-skin.jpg';
 
 interface SplashScreenProps {
   onPlay: () => void;
@@ -80,7 +81,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onPlay }) => {
       style={{
         position:   'absolute',
         inset:      0,
-        background: 'radial-gradient(ellipse 120% 80% at 50% 40%, #062b42 0%, #041421 60%, #020b14 100%)',
+        background: 'radial-gradient(ellipse 120% 80% at 50% 40%, #062b42 0%, var(--color-carbon) 60%, #020b14 100%)',
         display:    'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -90,6 +91,32 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onPlay }) => {
         WebkitUserSelect: 'none',
       }}
     >
+      {/* App skin (venue photo) */}
+      <img
+        src={appSkinBackground}
+        alt=""
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          opacity: 0.08,
+          mixBlendMode: 'overlay',
+          filter: 'saturate(0.9) contrast(1.05)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0,0,0,0.45)',
+          pointerEvents: 'none',
+        }}
+      />
       {/* Background decoration */}
       <LaneLines />
       <CausticBlobs />

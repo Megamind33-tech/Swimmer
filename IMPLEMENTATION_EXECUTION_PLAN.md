@@ -593,7 +593,7 @@ Implement first 10 career events (School tier) with progression tracking.
 Polish all UI components, add main menu, implement cosmetics economy.
 
 ### Tasks
-- MainMenu component (mode selection, load game)
+- AppShell component (lobby tabs + race entry)
 - Settings screen (audio, graphics, controls)
 - Achievements UI (milestones, unlocks)
 - Currency system (earned from races, used for cosmetics)

@@ -92,7 +92,7 @@ export const RaceLobby: React.FC = () => {
 
       {/* Main Content: Race Lobby */}
       <main className="flex-grow relative overflow-hidden flex flex-col p-6" style={{
-        backgroundImage: 'linear-gradient(rgba(15, 98, 254, 0.8), rgba(22, 22, 22, 0.95)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuDOvEV97kNUGMhZqKyFNQwpdO4VNRG4Z2sKdTVjLT8wEOtJlsm2ZzLT4YMWSfz2sLuCPfCLfDm7XDnVtqbQA4Fb2NOrpP0pufFvV-kmjDact6l3VlDcaIoFLH2rD4DohD7LQL_w-W3kCcbJZlvdp34971jn2oUjFTH6Ek9x6hnl1sQ_M-P7H5PjGphbqXhysqhZBoQx0TCrJI-OgxcolCj2L7e0InZjeVWOacIl0-b6dpEv0PvKvFrRmxEmM8g0jfVdCiZMIP1RNjZQ)',
+        backgroundImage: 'linear-gradient(rgba(204, 255, 0, 0.20), rgba(22, 22, 22, 0.95)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuDOvEV97kNUGMhZqKyFNQwpdO4VNRG4Z2sKdTVjLT8wEOtJlsm2ZzLT4YMWSfz2sLuCPfCLfDm7XDnVtqbQA4Fb2NOrpP0pufFvV-kmjDact6l3VlDcaIoFLH2rD4DohD7LQL_w-W3kCcbJZlvdp34971jn2oUjFTH6Ek9x6hnl1sQ_M-P7H5PjGphbqXhysqhZBoQx0TCrJI-OgxcolCj2L7e0InZjeVWOacIl0-b6dpEv0PvKvFrRmxEmM8g0jfVdCiZMIP1RNjZQ)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}>
@@ -116,7 +116,7 @@ export const RaceLobby: React.FC = () => {
         <section className="flex-grow flex flex-col gap-2 mb-24 max-w-5xl mx-auto w-full">
           {lanes.map((lane) => (
             lane.isUser ? (
-              <div key={lane.lane} className="group flex items-center bg-primary/20 border-l-4 border-primary h-16 shadow-[0_0_20px_rgba(15,98,254,0.3)] backdrop-blur-sm">
+              <div key={lane.lane} className="group flex items-center bg-primary/20 border-l-4 border-primary h-16 shadow-[0_0_20px_rgba(204,255,0,0.25)] backdrop-blur-sm">
                 <div className="w-12 flex justify-center text-primary font-bold text-xl">{lane.lane}</div>
                 <div className="flex-grow px-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -146,7 +146,7 @@ export const RaceLobby: React.FC = () => {
 
         {/* CTA Action */}
         <div className="fixed bottom-24 left-0 right-0 px-6 flex justify-center">
-          <button className="bg-primary text-white font-semibold py-4 px-12 text-xl tracking-widest shadow-[0_0_30px_rgba(15,98,254,0.6)] hover:bg-primary-fixed-dim transition-colors flex items-center gap-3">
+          <button className="bg-primary text-white font-semibold py-4 px-12 text-xl tracking-widest shadow-[0_0_30px_rgba(204,255,0,0.28)] hover:bg-primary-fixed-dim transition-colors flex items-center gap-3">
             START RACE
             <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}}>▶</span>
           </button>

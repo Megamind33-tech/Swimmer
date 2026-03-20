@@ -9,16 +9,19 @@ export default {
     extend: {
       colors: {
         // SWIM26 Design System Colors (Aquatic Dark Theme)
-        "primary": "#00E5FF",       // Neon aqua — race action, glow, active states
-        "primary-dim": "#00B2CC",
-        "primary-fixed": "#7AE8FF",
-        "primary-fixed-dim": "#38D6FF",
-        "primary-container": "#00354A",
+        // Sports Broadcast Standard (volt yellow)
+        // NOTE: this tailwind "primary" is now aligned with src/theme/tokens.ts (`colors.primary.DEFAULT`).
+        "primary": "#CCFF00",
+        "primary-dim": "#AADD00",
+        "primary-fixed": "#DDFF33",
+        "primary-fixed-dim": "#AADD00",
+        "primary-container": "#0A1628",
 
-        "secondary": "#D4A843",     // Gold — XP, rewards, achievements
-        "secondary-dim": "#A67C00",
-        "secondary-fixed": "#FFD76A",
-        "secondary-fixed-dim": "#F5C842",
+        // Gold story is an alias of volt in this project (so we don't reintroduce a third brand color).
+        "secondary": "#CCFF00",
+        "secondary-dim": "#AADD00",
+        "secondary-fixed": "#DDFF33",
+        "secondary-fixed-dim": "#AADD00",
         "secondary-container": "#3A2A00",
 
         "tertiary": "#f9f9f9",

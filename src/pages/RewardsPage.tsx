@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { GiftIcon, InboxIcon, ClockIcon, CheckCircleIcon, ChevronRightIcon } from 'lucide-react'
 
-const AQUA = '#38D6FF'
-const GOLD = '#D4A843'
+const AQUA = 'var(--color-volt)'
+const GOLD = 'var(--color-volt)'
 const PANEL = 'rgba(4,20,33,0.76)'
 const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 

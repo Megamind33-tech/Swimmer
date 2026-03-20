@@ -59,10 +59,10 @@ export const SplitFlash: React.FC<SplitFlashProps> = ({ split }) => (
             padding:        '6px 18px 7px',
             borderRadius:   '8px',
             background:     'rgba(4,20,33,0.86)',
-            border:         '1px solid rgba(56,214,255,0.22)',
+            border:         '1px solid rgba(204,255,0,0.20)',
             backdropFilter: 'blur(14px)',
             WebkitBackdropFilter: 'blur(14px)',
-            boxShadow:      '0 0 20px rgba(56,214,255,0.12), 0 2px 18px rgba(0,0,0,0.55)',
+            boxShadow:      '0 2px 18px rgba(0,0,0,0.55)',
             whiteSpace:     'nowrap',
           }}
         >
@@ -96,7 +96,7 @@ export const SplitFlash: React.FC<SplitFlashProps> = ({ split }) => (
           </div>
 
           {/* Vertical divider */}
-          <div style={{ width: '1px', height: '20px', background: 'rgba(56,214,255,0.18)' }} />
+          <div style={{ width: '1px', height: '20px', background: 'rgba(204,255,0,0.18)' }} />
 
           {/* Split time */}
           <span

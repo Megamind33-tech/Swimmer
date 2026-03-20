@@ -33,11 +33,11 @@ import { loadPerformancePreset, savePerformancePreset, DEFAULT_PERFORMANCE_PRESE
 // Design constants
 // ─────────────────────────────────────────────────────────────────────────────
 
-const AQUA  = '#38D6FF';
-const CYAN  = '#7AE8FF';
-const GOLD  = '#D4A843';
+const AQUA  = 'var(--color-volt)';
+const CYAN  = 'var(--color-primary-dim)';
+const GOLD  = 'var(--color-volt)';
 const PANEL = 'rgba(4,20,33,0.76)';
-const PANEL_BORDER = 'rgba(56,214,255,0.13)';
+const PANEL_BORDER = 'var(--lobby-panel-border)';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared sub-components (used across Settings + Training)
@@ -436,8 +436,8 @@ export function SettingsPage() {
               <RefreshCwIcon size={14} color="#A9D3E7" />
             </button>
             <button onClick={handleSave} style={{ height: '34px', paddingInline: '16px', borderRadius: '10px', cursor: 'pointer', background: saved ? 'rgba(55,226,141,0.18)' : `linear-gradient(90deg, ${AQUA}, ${CYAN})`, border: saved ? '1px solid rgba(55,226,141,0.50)' : 'none', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: saved ? '0 0 12px rgba(55,226,141,0.30)' : `0 0 14px rgba(56,214,255,0.30)`, transition: 'all 0.2s' }}>
-              {saved ? <CheckIcon size={13} color="#37E28D" /> : <SaveIcon size={13} color="#041421" />}
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: saved ? '#37E28D' : '#041421' }}>{saved ? 'SAVED' : 'SAVE'}</span>
+              {saved ? <CheckIcon size={13} color="#37E28D" /> : <SaveIcon size={13} color="var(--color-carbon)" />}
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: saved ? '#37E28D' : 'var(--color-carbon)' }}>{saved ? 'SAVED' : 'SAVE'}</span>
             </button>
           </div>
         </div>
@@ -670,7 +670,7 @@ export function TrainingPage() {
             <div style={{ marginTop: 'auto' }}>
               <button
                 onClick={() => setSessionActive((v) => !v)}
-                style={{ width: '100%', height: '46px', borderRadius: '12px', cursor: 'pointer', background: sessionActive ? 'rgba(239,68,68,0.18)' : `linear-gradient(90deg, ${drill.color}, ${drill.color}BB)`, border: sessionActive ? '1px solid rgba(239,68,68,0.40)' : 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', letterSpacing: '0.10em', color: sessionActive ? '#F87171' : '#041421', boxShadow: sessionActive ? 'none' : `0 0 20px ${drill.color}55`, transition: 'all 0.2s' }}
+                style={{ width: '100%', height: '46px', borderRadius: '12px', cursor: 'pointer', background: sessionActive ? 'rgba(239,68,68,0.18)' : `linear-gradient(90deg, ${drill.color}, ${drill.color}BB)`, border: sessionActive ? '1px solid rgba(239,68,68,0.40)' : 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', letterSpacing: '0.10em', color: sessionActive ? '#F87171' : 'var(--color-carbon)', boxShadow: sessionActive ? 'none' : `0 0 20px ${drill.color}55`, transition: 'all 0.2s' }}
               >
                 {sessionActive ? 'END SESSION' : 'START SESSION'}
               </button>

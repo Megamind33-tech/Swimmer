@@ -41,6 +41,7 @@ import { SwimmerScreen }  from '../components/menu/SwimmerScreen';
 import { StoreScreen }    from '../components/menu/StoreScreen';
 import { ProfilePage }    from '../pages/ProfilePage';
 import { RewardsPage }    from '../pages/RewardsPage';
+import appSkinBackground  from '../designs/app_skin/venue-skin.jpg';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -185,8 +186,36 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
   return (
     <div
       className="w-full h-full relative overflow-hidden select-none"
-      style={{ background: '#041421' }}
+      style={{ background: 'var(--lobby-venue-ocean-radial)' }}
     >
+      {/* App skin (venue photo) — keep it subtle so UI stays readable */}
+      <img
+        src={appSkinBackground}
+        alt=""
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          opacity: 0.12,
+          mixBlendMode: 'overlay',
+          filter: 'saturate(0.9) contrast(1.05)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(0,0,0,0.45)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
       {/* ── Persistent top bar (lobby only) ── */}
       {!hideChrome && (
         <TopUtilityBar
@@ -223,6 +252,11 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             left:     0,
             right:    0,
             overflow: 'hidden',
+            /* BackButton sits at top: 54px with ~32px height — without inset, it steals taps over the left rail (Scouts, Club, etc.). */
+            paddingTop: showBack
+              ? 'calc(env(safe-area-inset-top, 0px) + 86px)'
+              : undefined,
+            boxSizing: 'border-box',
           }}
         >
           {overlayPage === 'settings' ? (

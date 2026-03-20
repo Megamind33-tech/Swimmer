@@ -699,13 +699,13 @@ export const ResultsOverlay: React.FC<ResultsOverlayProps> = ({
                 style={{
                   fontFamily:    HUD_FONT.impact,
                   fontSize:      '15px',
-                  color:         '#041421',
+                  color:         'var(--color-carbon)',
                   letterSpacing: '0.08em',
                 }}
               >
                 CONTINUE
               </span>
-              <ArrowRight size={13} color="#041421" />
+              <ArrowRight size={13} color="var(--color-carbon)" />
             </motion.button>
 
             {/* LOBBY */}

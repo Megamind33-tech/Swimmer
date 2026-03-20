@@ -76,8 +76,11 @@ export class PoolStructure {
     const innerW = W - WT * 2;
     const innerL = L - WT * 2;
     if (matLib.poolFloor.albedoTexture) {
-      matLib.poolFloor.albedoTexture.uScale = Math.round(innerW); // ~24 for 25 m pool
-      matLib.poolFloor.albedoTexture.vScale = Math.round(innerL); // ~49 for 50 m pool
+      // Babylon texture base type no longer includes uScale/vScale in typings.
+      // These values still exist at runtime on texture implementations.
+      const albedo = matLib.poolFloor.albedoTexture as any;
+      albedo.uScale = Math.round(innerW); // ~24 for 25 m pool
+      albedo.vScale = Math.round(innerL); // ~49 for 50 m pool
     }
 
     const copingMat   = matLib.coping;

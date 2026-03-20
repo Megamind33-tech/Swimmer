@@ -56,11 +56,11 @@ const PauseBtn: React.FC<PauseBtnProps> = ({ icon, label, onClick, variant = 'gh
       ? '1px solid rgba(255,93,115,0.28)'
       : '1px solid rgba(255,255,255,0.12)';
   const textColor = variant === 'primary'
-    ? '#041421'
+    ? HUD_COLOR.bgDeep
     : variant === 'danger'
       ? HUD_COLOR.danger
       : HUD_COLOR.textPrimary;
-  const iconColor = variant === 'primary' ? '#041421' : textColor;
+  const iconColor = variant === 'primary' ? HUD_COLOR.bgDeep : textColor;
 
   return (
     <motion.button

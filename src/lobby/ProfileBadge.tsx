@@ -28,7 +28,7 @@ export const ProfileBadge: React.FC = () => {
           width: '30px',
           height: '30px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #38D6FF 0%, #0e9ec7 100%)',
+          background: 'linear-gradient(135deg, var(--color-volt) 0%, var(--color-primary-dim) 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -37,7 +37,7 @@ export const ProfileBadge: React.FC = () => {
           fontSize: '12px',
           color: lobby.bgDeep,
           flexShrink: 0,
-          boxShadow: '0 0 10px rgba(56,214,255,0.45)',
+          boxShadow: 'none',
         }}
       >
         {USER_DATA.level}
@@ -80,8 +80,8 @@ export const ProfileBadge: React.FC = () => {
               width: `${xpPct}%`,
               height: '100%',
               borderRadius: '2px',
-              background: 'linear-gradient(90deg, #38D6FF 0%, #7AE8FF 100%)',
-              boxShadow: '0 0 6px rgba(56,214,255,0.6)',
+              background: 'linear-gradient(90deg, var(--color-volt) 0%, var(--color-primary-dim) 100%)',
+              boxShadow: 'none',
             }}
           />
         </div>

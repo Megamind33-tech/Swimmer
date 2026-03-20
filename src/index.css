@@ -241,7 +241,7 @@ body {
 }
 
 .tap-highlight:active {
-  background-color: rgba(0, 229, 255, 0.15);
+  background-color: rgba(204, 255, 0, 0.15);
   box-shadow: var(--shadow-glow-primary);
 }
 
@@ -271,23 +271,17 @@ body {
 
 /* Aqua text glow — neon cyan, used on title "26" and active states */
 .text-glow-aqua {
-  text-shadow:
-    0 0  8px rgba(56, 214, 255, 0.70),
-    0 0 20px rgba(56, 214, 255, 0.40);
+  text-shadow: none;
 }
 
 /* Aqua box glow — buttons, cards, active tabs */
 .glow-aqua {
-  box-shadow:
-    0 0 12px rgba(56, 214, 255, 0.40),
-    0 0 28px rgba(56, 214, 255, 0.18);
+  box-shadow: none;
 }
 
 /* Gold text glow — rankings, rewards */
 .text-glow-gold-lobby {
-  text-shadow:
-    0 0  6px rgba(255, 215, 106, 0.65),
-    0 0 16px rgba(255, 215, 106, 0.30);
+  text-shadow: none;
 }
 
 /* Caustic animated underwater light refraction */
@@ -312,7 +306,7 @@ body {
   height: 220px;
   top: -60px;
   left: 8%;
-  background: radial-gradient(ellipse, rgba(56, 214, 255, 0.07) 0%, transparent 68%);
+  background: var(--lobby-venue-caustic-blob-1);
   animation-duration: 13s;
   animation-delay: 0s;
 }
@@ -322,7 +316,7 @@ body {
   height: 320px;
   top: 30%;
   right: 18%;
-  background: radial-gradient(ellipse, rgba(122, 232, 255, 0.05) 0%, transparent 68%);
+  background: var(--lobby-venue-caustic-blob-2);
   animation-duration: 19s;
   animation-delay: -7s;
 }
@@ -332,7 +326,7 @@ body {
   height: 200px;
   bottom: -40px;
   left: 38%;
-  background: radial-gradient(ellipse, rgba(56, 214, 255, 0.06) 0%, transparent 68%);
+  background: var(--lobby-venue-caustic-blob-3);
   animation-duration: 16s;
   animation-delay: -4s;
 }
@@ -342,7 +336,7 @@ body {
   background: rgba(4, 20, 33, 0.76);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 214, 255, 0.14);
+  border: 1px solid var(--lobby-panel-border);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -394,8 +388,8 @@ body {
   right: 15%;
   height: 2px;
   border-radius: 0 0 2px 2px;
-  background: #38D6FF;
-  box-shadow: 0 0 10px rgba(56, 214, 255, 0.90), 0 0 20px rgba(56, 214, 255, 0.45);
+  background: var(--color-volt);
+  box-shadow: none;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -423,16 +417,12 @@ body {
 
 /* Aqua text glow — primary interactive elements */
 .text-glow {
-  text-shadow:
-    0 0  8px rgba(0, 229, 255, 0.70),
-    0 0 20px rgba(0, 229, 255, 0.40);
+  text-shadow: none;
 }
 
 /* Gold text glow — rewards, achievements */
 .gold-glow {
-  text-shadow:
-    0 0  8px rgba(212, 168, 67, 0.65),
-    0 0 20px rgba(212, 168, 67, 0.35);
+  text-shadow: none;
 }
 
 /* Italic slant — Barlow Condensed display text transform */
@@ -485,27 +475,27 @@ body {
 }
 
 .hydro-cta-primary {
-  background: rgba(0, 229, 255, 0.15);
-  border-color: rgba(0, 229, 255, 0.50);
-  color: #00E5FF;
-  box-shadow: 0 0 12px rgba(0, 229, 255, 0.20);
+  background: rgba(204, 255, 0, 0.15);
+  border-color: rgba(204, 255, 0, 0.50);
+  color: var(--color-volt);
+  box-shadow: none;
 }
 
 .hydro-cta-primary:hover {
-  background: rgba(0, 229, 255, 0.25);
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+  background: rgba(204, 255, 0, 0.25);
+  box-shadow: none;
 }
 
 .hydro-cta-gold {
-  background: rgba(212, 168, 67, 0.15);
-  border-color: rgba(212, 168, 67, 0.50);
-  color: #D4A843;
-  box-shadow: 0 0 12px rgba(212, 168, 67, 0.20);
+  background: rgba(204, 255, 0, 0.15);
+  border-color: rgba(204, 255, 0, 0.50);
+  color: var(--color-volt);
+  box-shadow: none;
 }
 
 .hydro-cta-gold:hover {
-  background: rgba(212, 168, 67, 0.25);
-  box-shadow: 0 0 20px rgba(212, 168, 67, 0.35);
+  background: rgba(204, 255, 0, 0.25);
+  box-shadow: none;
 }
 
 .hydro-cta-neutral {
@@ -541,13 +531,13 @@ body {
 }
 
 .hydro-feature-primary:hover {
-  border-color: rgba(0, 229, 255, 0.40);
-  box-shadow: 0 8px 40px rgba(0, 229, 255, 0.15);
+  border-color: rgba(204, 255, 0, 0.40);
+  box-shadow: 0 8px 40px rgba(204, 255, 0, 0.15);
 }
 
 .hydro-feature-gold:hover {
-  border-color: rgba(212, 168, 67, 0.40);
-  box-shadow: 0 8px 40px rgba(212, 168, 67, 0.15);
+  border-color: rgba(204, 255, 0, 0.40);
+  box-shadow: 0 8px 40px rgba(204, 255, 0, 0.15);
 }
 
 .hydro-feature-neutral:hover {
@@ -651,8 +641,8 @@ body {
 }
 
 /* ─── Icon state colors ──────────────────────────────────────────────────── */
-.icon-progress-complete { color: #D4A843; }
-.icon-progress-active   { color: #00E5FF; }
+.icon-progress-complete { color: var(--color-volt); }
+.icon-progress-active   { color: var(--color-volt); }
 .icon-progress-grey     { color: rgba(255, 255, 255, 0.35); }
 
 /* ─── Menu layout grid ───────────────────────────────────────────────────── */

@@ -12,8 +12,8 @@ import {
   BadgeIcon,
 } from 'lucide-react'
 
-const AQUA = '#38D6FF'
-const GOLD = '#D4A843'
+const AQUA = 'var(--color-volt)'
+const GOLD = 'var(--color-volt)'
 const PANEL = 'rgba(4,20,33,0.76)'
 const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 
@@ -64,7 +64,7 @@ export function ProfilePage() {
               <UserIcon size={32} color={AQUA} />
             </div>
             {/* Level badge */}
-            <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', background: 'linear-gradient(135deg, #D4A843, #A37832)', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(4,20,33,0.90)' }}>
+            <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', background: 'linear-gradient(135deg, var(--color-volt), var(--color-primary-dim))', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(4,20,33,0.90)' }}>
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: '#fff', letterSpacing: '0.02em' }}>{USER_DATA.level}</span>
             </div>
           </div>
