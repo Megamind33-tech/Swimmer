@@ -30,10 +30,12 @@ interface CurrencyBadgeProps {
   value: number;
   color: string;
   onAdd?: () => void;
+  'aria-label'?: string;
 }
 
-const CurrencyBadge: React.FC<CurrencyBadgeProps> = ({ icon, value, color, onAdd }) => (
+const CurrencyBadge: React.FC<CurrencyBadgeProps> = ({ icon, value, color, onAdd, 'aria-label': ariaLabel }) => (
   <motion.div
+    aria-label={ariaLabel}
     whileTap={onAdd ? { scale: 0.95 } : undefined}
     onClick={onAdd}
     style={{
@@ -194,15 +196,18 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
       icon="🪙"
       value={USER_DATA.currencies.coins}
       color={lobby.gold}
+      aria-label={`${USER_DATA.currencies.coins} Coins`}
     />
     <CurrencyBadge
       icon="💎"
       value={USER_DATA.currencies.gems}
       color={lobby.cyanGlow}
+      aria-label={`${USER_DATA.currencies.gems} Gems`}
     />
 
     {/* Settings button */}
     <motion.button
+      aria-label="Settings"
       whileTap={{ scale: 0.88 }}
       whileHover={{ scale: 1.08 }}
       onClick={onSettings}
