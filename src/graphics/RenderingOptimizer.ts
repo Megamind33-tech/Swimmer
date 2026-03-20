@@ -6,6 +6,21 @@
 import * as BABYLON from '@babylonjs/core';
 import { logger } from '../utils';
 
+/**
+ * Internal interface to access non-public Engine properties safely
+ */
+interface EngineWithInternal extends BABYLON.Engine {
+  _doNotHandleContextLost: boolean;
+}
+
+/**
+ * Interface for mesh objects with necessary methods for performance profiling
+ */
+interface MeshWithStats {
+  isEnabled(): boolean;
+  getTotalVertices(): number;
+}
+
 export interface RenderingConfig {
   targetFPS: number;
   enableVSync: boolean;
@@ -187,7 +202,7 @@ export class RenderingOptimizer {
     this.engine.setHardwareScalingLevel(1 / (window.devicePixelRatio || 1));
 
     // Disable adaptive timeout to maintain consistent frame timing
-    (this.engine as any)._doNotHandleContextLost = false;
+    (this.engine as EngineWithInternal)._doNotHandleContextLost = false;
 
     logger.log('Render loop stabilization enabled');
   }
@@ -248,9 +263,10 @@ export class RenderingOptimizer {
     let activeVertices = 0;
 
     this.scene.meshes.forEach((mesh) => {
+      const m = mesh as unknown as MeshWithStats;
       // Check if mesh is enabled and has getTotalVertices method
-      if ((mesh as any).isEnabled?.() && mesh.getTotalVertices) {
-        activeVertices += mesh.getTotalVertices();
+      if (m.isEnabled && m.isEnabled() && m.getTotalVertices) {
+        activeVertices += m.getTotalVertices();
       }
     });
 
