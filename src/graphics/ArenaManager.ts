@@ -362,6 +362,11 @@ export class ArenaManager {
 
   public resize(): void {
     this.arenaRoot?.resize();
+
+    // Recompute camera FOV for the new viewport dimensions
+    if (this.cameraSupport && this.canvas) {
+      this.cameraSupport.updateFOV(this.canvas);
+    }
   }
 
   public isRenderingActive(): boolean {

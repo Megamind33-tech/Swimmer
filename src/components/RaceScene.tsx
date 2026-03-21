@@ -285,9 +285,19 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
 
     const handleResize = () => arena.resize();
     window.addEventListener('resize', handleResize);
+
+    // ResizeObserver as backup — catches cases window.resize misses on mobile
+    // (virtual keyboard, browser chrome show/hide, safe area changes).
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && canvasRef.current) {
+      ro = new ResizeObserver(() => arena.resize());
+      ro.observe(canvasRef.current);
+    }
+
     return () => {
       disposed = true;
       window.removeEventListener('resize', handleResize);
+      ro?.disconnect();
       arena.dispose();
       arenaRef.current = null;
     };
@@ -419,7 +429,10 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[100] bg-black overflow-hidden">
+    <div
+      className="fixed inset-0 z-[100] bg-black overflow-hidden"
+      style={{ height: '100dvh' }}
+    >
       {/* Babylon.js canvas */}
       <canvas
         ref={canvasRef}
