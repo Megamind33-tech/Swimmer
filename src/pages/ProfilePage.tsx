@@ -11,6 +11,7 @@ import {
   AwardIcon,
   BadgeIcon,
 } from 'lucide-react'
+import { PaneSwitcher } from '../ui/PaneSwitcher'
 
 const AQUA = 'var(--color-volt)'
 const GOLD = 'var(--color-volt)'
@@ -47,14 +48,8 @@ export function ProfilePage() {
 
   const xpPercent = Math.round((USER_DATA.xp / USER_DATA.maxXp) * 100)
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      style={{ position: 'absolute', inset: 0, display: 'flex', gap: '10px', padding: '10px' }}
-    >
-      {/* ── LEFT COLUMN — Identity Card ── */}
+  // ── Left column ────────────────────────────────────────────────────────────
+  const leftColumn = (
       <div style={{ width: '200px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {/* Avatar + Name */}
         <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
@@ -105,7 +100,10 @@ export function ProfilePage() {
         </div>
       </div>
 
-      {/* ── RIGHT COLUMN ── */}
+  ) // end leftColumn
+
+  // ── Right column ───────────────────────────────────────────────────────────
+  const rightColumn = (
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
         {/* Tab Bar */}
         <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
@@ -217,7 +215,43 @@ export function ProfilePage() {
           )}
         </div>
       </div>
-    </motion.div>
+  ) // end rightColumn
+
+  return (
+    <PaneSwitcher
+      panes={[
+        {
+          id: 'identity',
+          label: 'PROFILE',
+          icon: <UserIcon size={12} />,
+          content: (
+            <div style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {leftColumn.props.children}
+            </div>
+          ),
+        },
+        {
+          id: 'details',
+          label: 'DETAILS',
+          icon: <ActivityIcon size={12} />,
+          content: (
+            <div style={{ position: 'absolute', inset: 0, padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden' }}>
+              {rightColumn.props.children}
+            </div>
+          ),
+        },
+      ]}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        style={{ position: 'absolute', inset: 0, display: 'flex', gap: '10px', padding: '10px' }}
+      >
+        {leftColumn}
+        {rightColumn}
+      </motion.div>
+    </PaneSwitcher>
   )
 }
 

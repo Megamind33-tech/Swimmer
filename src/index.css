@@ -850,6 +850,96 @@ body {
   }
 }
 
+/* ── Landscape-mobile chrome compaction ──────────────────────────────────── */
+/*
+  On landscape phones (height ≤ 500px) screen estate is critical.
+  We shrink the fixed chrome bars so more vertical space reaches game content.
+*/
+
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Top utility bar: 48px → 40px */
+  .swim26-top-bar {
+    height: 40px !important;
+  }
+
+  /* Bottom icon tab bar: 60px → 44px */
+  .swim26-bottom-tab-bar {
+    height: 44px !important;
+  }
+
+  /* Centre RACE button in tab bar: tighter */
+  .swim26-race-btn {
+    width: 52px !important;
+    height: 44px !important;
+    margin-top: -6px !important;
+  }
+
+  /* Tab buttons: compress vertical padding */
+  .swim26-nav-tab {
+    padding: 2px 2px !important;
+    gap: 2px !important;
+  }
+
+  /* Tab labels: smaller text */
+  .swim26-nav-tab-label {
+    font-size: 7px !important;
+  }
+
+  /* Back button: less top offset + tighter padding */
+  .swim26-back-button {
+    top: 44px !important;
+  }
+}
+
+/* ── Landscape-mobile page layouts ───────────────────────────────────────── */
+/*
+  Pages that use multi-column flex layouts need smaller fixed-width sidebars
+  and must guarantee all panels have overflow-y: auto so content is reachable.
+*/
+
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Generic left sidebar used across Club, Career, Training, Profile */
+  .swim26-sidebar-left {
+    width: 130px !important;
+  }
+
+  /* Narrower right stats sidebar (Training) */
+  .swim26-sidebar-right {
+    width: 120px !important;
+  }
+
+  /* Any scrollable panel: ensure scroll is enabled */
+  .swim26-scroll-panel {
+    overflow-y: auto !important;
+  }
+
+  /* Column panel: must shrink with content */
+  .swim26-column-panel {
+    overflow: hidden !important;
+  }
+
+  /* Lobby: hide featured event card on very narrow landscape → more hero room */
+  .swim26-lobby-event-card {
+    display: none !important;
+  }
+
+  /* Lobby hero: take full width when event card is hidden */
+  .swim26-lobby-hero {
+    flex: 1 !important;
+    width: 100% !important;
+  }
+
+  /* Rankings header: compress */
+  .swim26-rankings-header {
+    padding: 7px 10px !important;
+  }
+
+  /* Generic section title rows in cards: tighter margin */
+  .swim26-panel-header {
+    margin-bottom: 6px !important;
+  }
+}
+
 /* ═════════════════════════════════════════════════════════════════════════════
    PREMIUM VISUAL POLISH — "Deep Ocean Tactical" design language
    ═════════════════════════════════════════════════════════════════════════════ */

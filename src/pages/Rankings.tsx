@@ -87,7 +87,7 @@ export function Rankings() {
       style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px' }}
     >
       {/* Header */}
-      <div style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.25)`, background: 'linear-gradient(135deg, rgba(28,22,8,0.92) 0%, rgba(17,13,3,0.92) 100%)', backdropFilter: 'blur(14px)', padding: '10px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="swim26-rankings-header" style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.25)`, background: 'linear-gradient(135deg, rgba(28,22,8,0.92) 0%, rgba(17,13,3,0.92) 100%)', backdropFilter: 'blur(14px)', padding: '10px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
         <TrophyIcon size={22} color={GOLD} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 10px rgba(212,168,67,0.55))`, flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: '#F3FBFF', letterSpacing: '0.06em', lineHeight: 1 }}>LEADERBOARD</div>
