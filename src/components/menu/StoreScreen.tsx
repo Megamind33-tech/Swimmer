@@ -334,7 +334,10 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             </span>
           </div>
           <motion.button
+            aria-label="Search Store"
+            title="Search Store"
             whileTap={{ scale: 0.90 }}
+            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38D6FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041421]"
             style={{
               width: '30px',
               height: '30px',
@@ -351,7 +354,10 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             <Search size={13} color="rgba(169,211,231,0.70)" />
           </motion.button>
           <motion.button
+            aria-label="Filter Options"
+            title="Filter Options"
             whileTap={{ scale: 0.90 }}
+            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38D6FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041421]"
             style={{
               width: '30px',
               height: '30px',
