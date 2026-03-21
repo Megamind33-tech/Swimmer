@@ -10,12 +10,15 @@
 import React from 'react';
 import { GameShell } from './components/GameShell';
 import { LandscapeGuard } from './ui/LandscapeGuard';
+import { A11yProvider } from './context/AccessibilityContext';
 
 export function App() {
   return (
-    <LandscapeGuard disabled>
-      <GameShell />
-    </LandscapeGuard>
+    <A11yProvider>
+      <LandscapeGuard disabled>
+        <GameShell />
+      </LandscapeGuard>
+    </A11yProvider>
   );
 }
 

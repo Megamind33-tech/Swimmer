@@ -1,56 +1,43 @@
 /**
- * AppShell — Phase 2 premium game lobby shell
+ * AppShell — Phase 3 premium game lobby shell
  *
  * Layout contract:
- *   TopUtilityBar  — 48px, absolute top   (profile, currencies, settings, championships)
- *   Content area   — fills between bars, no scroll, occupies absolute inset
- *   IconTabBar     — 60px, absolute bottom (9 tabs: 4 left | RACE | 4 right)
+ *   TopUtilityBar  — 48 px, absolute top  (profile, currencies, settings, events)
+ *   Content area   — fills between bars, respects safe areas and back button zone
+ *   IconTabBar     — 52 px (landscape) / 60 px (portrait), absolute bottom
  *
  * Navigation: flat — every main destination reachable in ≤ 2 taps.
  *   Primary tabs (IconTabBar):
  *     career | club | scouts | training | RACE | market | rankings | style | store
  *   Top bar quick-access:
- *     Profile | Rewards | Championships | Coins | Gems | Settings
+ *     Profile | Rewards | Events | Coins | Gems | Settings
  *
  * AppShell does NOT own:
  *   - PlayScreen / PreRaceSetup / RaceScene / PauseMenu / RaceResultScreen
  *     (all game-flow screens live in GameShell)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronLeft } from 'lucide-react';
 
-/** Detects landscape mobile: height ≤ 500px and orientation landscape */
-function useIsLandscapeMobile(): boolean {
-  const [v, setV] = useState(
-    () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia('(max-height: 500px) and (orientation: landscape)');
-    const handler = (e: MediaQueryListEvent) => setV(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return v;
-}
+import { useIsLandscapeMobile }     from '../hooks/useIsLandscapeMobile';
+import { CHROME, TOUCH, safeArea, BACK_BTN_TOP_OFFSET, BACK_BTN_ZONE_H } from '../ui/responsive';
+import { useA11y }                  from '../context/AccessibilityContext';
 
-// Lobby system (Phase 2)
-import { LobbyScreen }    from '../lobby/LobbyScreen';
-import { TopUtilityBar }  from '../lobby/TopUtilityBar';
+// Lobby system
+import { LobbyScreen }   from '../lobby/LobbyScreen';
+import { TopUtilityBar } from '../lobby/TopUtilityBar';
 import { IconTabBar, type LobbyTab } from '../lobby/IconTabBar';
 
 // Page content
-import { CareerMode }       from '../pages/CareerMode';
-import { Championships }    from '../pages/Championships';
-import { Rankings }         from '../pages/Rankings';
-import { ClubManagement }   from '../pages/ClubManagement';
-import { TransferMarket }   from '../pages/TransferMarket';
-import { Scouts }           from '../pages/Scouts';
-import {
-  TrainingPage,
-  SettingsPage,
-} from '../pages/UtilityPages';
+import { CareerMode }     from '../pages/CareerMode';
+import { Championships }  from '../pages/Championships';
+import { Rankings }       from '../pages/Rankings';
+import { ClubManagement } from '../pages/ClubManagement';
+import { TransferMarket } from '../pages/TransferMarket';
+import { Scouts }         from '../pages/Scouts';
+import { TrainingPage, SettingsPage } from '../pages/UtilityPages';
 import { SwimmerScreen }  from '../components/menu/SwimmerScreen';
 import { StoreScreen }    from '../components/menu/StoreScreen';
 import { ProfilePage }    from '../pages/ProfilePage';
@@ -73,7 +60,12 @@ interface AppShellProps {
 // Tab → page map
 // ─────────────────────────────────────────────────────────────────────────────
 
-function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) => void, onBack?: () => void): React.ReactNode {
+function renderTab(
+  tab: LobbyTab,
+  onPlay: () => void,
+  onNavigate: (t: string) => void,
+  onBack?: () => void,
+): React.ReactNode {
   switch (tab) {
     case 'race':     return <LobbyScreen onStartRace={onPlay} onNavigate={onNavigate} />;
     case 'career':   return <CareerMode />;
@@ -89,68 +81,67 @@ function renderTab(tab: LobbyTab, onPlay: () => void, onNavigate: (t: string) =>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tab display labels (for back button context)
-// ─────────────────────────────────────────────────────────────────────────────
-
-const TAB_LABELS: Record<LobbyTab, string> = {
-  race:     'Lobby',
-  career:   'Career',
-  club:     'Club',
-  scouts:   'Scouts',
-  market:   'Market',
-  rankings: 'Rankings',
-  training: 'Training',
-  style:    'Customise',
-  store:    'Store',
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Back button component
+// Back button
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface BackButtonProps {
-  label?: string;
-  onClick: () => void;
-  isLandscape?: boolean;
+  label:         string;
+  onClick:       () => void;
+  reducedMotion: boolean;
+  highContrast:  boolean;
 }
 
-const BackButton: React.FC<BackButtonProps> = ({ label = 'Back', onClick, isLandscape = false }) => (
+const BackButton: React.FC<BackButtonProps> = ({
+  label,
+  onClick,
+  reducedMotion,
+  highContrast,
+}) => (
   <motion.button
-    initial={{ opacity: 0, x: -10 }}
+    initial={reducedMotion ? false : { opacity: 0, x: -10 }}
     animate={{ opacity: 1, x: 0 }}
-    exit={{ opacity: 0, x: -10 }}
-    transition={{ duration: 0.18 }}
-    whileTap={{ scale: 0.90 }}
+    exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
+    transition={{ duration: reducedMotion ? 0 : 0.18 }}
+    whileTap={reducedMotion ? undefined : { scale: 0.92 }}
     onClick={onClick}
-    aria-label={`Go back from ${label}`}
+    aria-label={`Back to ${label}`}
     className="swim26-back-button"
     style={{
       position:       'absolute',
-      top:            isLandscape ? '44px' : '54px', /* just below TopUtilityBar + gap */
-      left:           '10px',
+      /* Sits just below the top bar — uses safe-area-inset-left to avoid notch */
+      top:            `${CHROME.topBar.normal + BACK_BTN_TOP_OFFSET}px`,
+      left:           `max(10px, ${safeArea.left})`,
       zIndex:         68,
       display:        'flex',
       alignItems:     'center',
-      gap:            '4px',
-      padding:        isLandscape ? '3px 9px 3px 6px' : '5px 11px 5px 8px',
+      gap:            '5px',
+      /* minHeight ensures the touch target meets the 44 px minimum */
+      minHeight:      `${TOUCH.minimum}px`,
+      paddingInline:  '12px',
       borderRadius:   '10px',
-      background:     'rgba(4,20,33,0.85)',
-      border:         '1px solid rgba(56,214,255,0.20)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
+      background:     highContrast
+        ? 'rgba(2,10,20,0.95)'
+        : 'rgba(4,20,33,0.85)',
+      border: `1px solid ${highContrast
+        ? 'rgba(56,214,255,0.45)'
+        : 'rgba(56,214,255,0.20)'}`,
+      backdropFilter:      'blur(12px)',
+      WebkitBackdropFilter:'blur(12px)',
       cursor:         'pointer',
       userSelect:     'none',
-      WebkitUserSelect: 'none',
+      WebkitUserSelect:'none',
+      /* Focus-visible ring */
+      outline:        'none',
     }}
   >
-    <ChevronLeft size={14} color="rgba(169,211,231,0.80)" />
+    <ChevronLeft size={16} color={highContrast ? '#A9D3E7' : 'rgba(169,211,231,0.80)'} />
     <span
       style={{
         fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
         fontWeight:    700,
-        fontSize:      '10px',
+        fontSize:      '11px',
         letterSpacing: '0.10em',
-        color:         'rgba(169,211,231,0.80)',
+        color:         highContrast ? '#D0EAF7' : 'rgba(169,211,231,0.80)',
         textTransform: 'uppercase',
       }}
     >
@@ -160,21 +151,21 @@ const BackButton: React.FC<BackButtonProps> = ({ label = 'Back', onClick, isLand
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AppShell component
+// AppShell
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
-  const [activeTab,    setActiveTab]    = useState<LobbyTab>('race');
-  const [overlayPage,  setOverlayPage]  = useState<OverlayPage>(null);
-  const isLandscapeMobile = useIsLandscapeMobile();
+  const [activeTab,   setActiveTab]   = useState<LobbyTab>('race');
+  const [overlayPage, setOverlayPage] = useState<OverlayPage>(null);
 
-  // Bar heights shrink in landscape to free vertical space for game content
-  const topBarH    = isLandscapeMobile ? 40 : 48;
-  const bottomBarH = isLandscapeMobile ? 44 : 60;
-  // Back button sits just below the top bar; back-button height ~28px
-  const backBtnPaddingTop = isLandscapeMobile
-    ? `${topBarH + 4}px`
-    : 'calc(env(safe-area-inset-top, 0px) + 86px)';
+  const isLandscapeMobile = useIsLandscapeMobile();
+  const { settings: a11y } = useA11y();
+  const { reducedMotion, highContrast } = a11y;
+
+  const topBarH    = CHROME.topBar.normal; // 48 px — never compressed
+  const bottomBarH = isLandscapeMobile
+    ? CHROME.bottomBar.landscape  // 52 px
+    : CHROME.bottomBar.normal;    // 60 px
 
   const handleTabChange = (tab: LobbyTab) => {
     setOverlayPage(null);
@@ -182,65 +173,60 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
   };
 
   const handleNavigate = (dest: string) => {
-    if (dest === 'championships') {
-      setOverlayPage('championships');
-      return;
-    }
+    if (dest === 'championships') { setOverlayPage('championships'); return; }
     if (['race','career','club','scouts','market','rankings','training','style','store'].includes(dest)) {
       handleTabChange(dest as LobbyTab);
     }
   };
 
-  const goToLobby           = () => handleTabChange('race');
-  const openSettings        = () => setOverlayPage('settings');
-  const openProfile         = () => setOverlayPage('profile');
-  const openRewards         = () => setOverlayPage('rewards');
-  const openChampionships   = () => setOverlayPage('championships');
-  const closeOverlay        = () => setOverlayPage(null);
+  const goToLobby         = () => handleTabChange('race');
+  const openSettings      = () => setOverlayPage('settings');
+  const openProfile       = () => setOverlayPage('profile');
+  const openRewards       = () => setOverlayPage('rewards');
+  const closeOverlay      = () => setOverlayPage(null);
 
-  // In store mode (no overlay), store owns its own back button
+  /** Store manages its own back button */
   const isStoreFullscreen = activeTab === 'store' && overlayPage === null;
-
-  // Hide header/footer chrome everywhere except the Lobby (race tab, no overlay)
-  const isLobby = activeTab === 'race' && overlayPage === null;
-  const hideChrome = !isLobby;
-
-  // Show back button when not on lobby and not in store fullscreen (store has its own back)
-  const showBack = hideChrome && !isStoreFullscreen;
+  /** Lobby tab with no overlay — show top + bottom chrome */
+  const isLobby           = activeTab === 'race' && overlayPage === null;
+  const hideChrome        = !isLobby;
+  const showBack          = hideChrome && !isStoreFullscreen;
 
   return (
     <div
       className="w-full h-full relative overflow-hidden select-none"
       style={{ background: 'var(--lobby-venue-ocean-radial)' }}
     >
-      {/* App skin (venue photo) — keep it subtle so UI stays readable */}
+      {/* Venue photo background — subtle texture */}
       <img
         src={appSkinBackground}
         alt=""
         aria-hidden
         style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          opacity: 0.12,
-          mixBlendMode: 'overlay',
-          filter: 'saturate(0.9) contrast(1.05)',
-          pointerEvents: 'none',
-          zIndex: 0,
+          position:   'absolute',
+          inset:      0,
+          width:      '100%',
+          height:     '100%',
+          objectFit:  'cover',
+          opacity:    0.12,
+          mixBlendMode:'overlay',
+          filter:     'saturate(0.9) contrast(1.05)',
+          pointerEvents:'none',
+          zIndex:     0,
         }}
       />
+      {/* Dark overlay */}
       <div
         aria-hidden
         style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'rgba(0,0,0,0.45)',
-          pointerEvents: 'none',
-          zIndex: 0,
+          position:     'absolute',
+          inset:        0,
+          background:   highContrast ? 'rgba(0,0,0,0.60)' : 'rgba(0,0,0,0.45)',
+          pointerEvents:'none',
+          zIndex:       0,
         }}
       />
+
       {/* ── Persistent top bar (lobby only) ── */}
       {!hideChrome && (
         <TopUtilityBar
@@ -251,14 +237,15 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
         />
       )}
 
-      {/* ── Back button (shown when not on race tab or in overlay) ── */}
+      {/* ── Back button ── */}
       <AnimatePresence>
         {showBack && (
           <BackButton
             key="app-back"
             label="Lobby"
             onClick={overlayPage !== null ? closeOverlay : goToLobby}
-            isLandscape={isLandscapeMobile}
+            reducedMotion={reducedMotion}
+            highContrast={highContrast}
           />
         )}
       </AnimatePresence>
@@ -267,10 +254,10 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
       <AnimatePresence mode="wait">
         <motion.div
           key={overlayPage ?? activeTab}
-          initial={{ opacity: 0 }}
+          initial={reducedMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
+          exit={reducedMotion ? false : { opacity: 0 }}
+          transition={{ duration: reducedMotion ? 0 : 0.18 }}
           style={{
             position: 'absolute',
             top:      hideChrome ? 0 : `${topBarH}px`,
@@ -278,52 +265,47 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             left:     0,
             right:    0,
             overflow: 'hidden',
-            /* Reserve space below the BackButton so it doesn't cover interactive content at the top of each page. */
-            paddingTop: showBack ? backBtnPaddingTop : undefined,
-            boxSizing: 'border-box',
+            /*
+             * When the back button is visible, reserve BACK_BTN_ZONE_H (96 px)
+             * from the top so the button never covers interactive page content.
+             * BACK_BTN_ZONE_H = topBar (48) + offset (4) + minTouchTarget (44)
+             */
+            paddingTop: showBack ? `${BACK_BTN_ZONE_H}px` : undefined,
+            boxSizing:  'border-box',
           }}
         >
-          {overlayPage === 'settings' ? (
-            <SettingsPage />
-          ) : overlayPage === 'profile' ? (
-            <ProfilePage />
-          ) : overlayPage === 'rewards' ? (
-            <RewardsPage />
-          ) : overlayPage === 'championships' ? (
-            <Championships />
-          ) : (
-            renderTab(activeTab, onPlay, handleNavigate, goToLobby)
-          )}
+          {overlayPage === 'settings'      ? <SettingsPage /> :
+           overlayPage === 'profile'       ? <ProfilePage />  :
+           overlayPage === 'rewards'       ? <RewardsPage />  :
+           overlayPage === 'championships' ? <Championships /> :
+           renderTab(activeTab, onPlay, handleNavigate, goToLobby)}
         </motion.div>
       </AnimatePresence>
 
-      {/* ── Overlay side-tap close area ── */}
+      {/* ── Overlay side-tap close area (right edge) ── */}
       {overlayPage !== null && (
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={closeOverlay}
-          style={{
-            position:   'absolute',
-            top:        0,
-            right:      0,
-            bottom:     0,
-            width:      '32px',
-            background: 'transparent',
-            border:     'none',
-            cursor:     'pointer',
-            zIndex:     65,
-          }}
           aria-label="Close overlay"
+          style={{
+            position:  'absolute',
+            top:       0,
+            right:     0,
+            bottom:    0,
+            width:     `${TOUCH.minimum}px`,
+            background:'transparent',
+            border:    'none',
+            cursor:    'pointer',
+            zIndex:    65,
+          }}
         />
       )}
 
       {/* ── Persistent bottom tab bar (lobby only) ── */}
       {!hideChrome && (
-        <IconTabBar
-          activeTab={activeTab}
-          onChange={handleTabChange}
-        />
+        <IconTabBar activeTab={activeTab} onChange={handleTabChange} />
       )}
     </div>
   );
