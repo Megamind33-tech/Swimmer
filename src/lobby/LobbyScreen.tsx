@@ -22,7 +22,7 @@
  *   ✗ No generic web typography
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Play, Target, Medal } from 'lucide-react';
 import { PrimaryButton, SecondaryButton } from './GameButtons';
@@ -30,6 +30,19 @@ import { FeaturedEventCard } from './FeaturedEventCard';
 import { lobby } from '../theme/tokens';
 import { USER_DATA } from '../utils/gameData';
 import appSkinBackground from '../designs/app_skin/venue-skin.jpg';
+
+function useIsLandscapeMobile(): boolean {
+  const [v, setV] = useState(
+    () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-height: 500px) and (orientation: landscape)');
+    const handler = (e: MediaQueryListEvent) => setV(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return v;
+}
 
 interface LobbyScreenProps {
   /** Triggers the race flow (hands off to GameShell) */
@@ -101,7 +114,9 @@ const StatItem: React.FC<StatItemProps> = ({ label, value }) => (
 // LobbyScreen
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigate }) => (
+export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigate }) => {
+  const isLandscape = useIsLandscapeMobile();
+  return (
   <div
     style={{
       position: 'absolute',
@@ -372,21 +387,24 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
         </motion.div>
       </div>
 
-      {/* ── RIGHT SECTION (40%) — Featured Event Card ── */}
-      <motion.div
-        initial={{ opacity: 0, x: 14 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.38, delay: 0.22 }}
-        style={{
-          width:      '40%',
-          flexShrink: 0,
-          height:     '100%',
-          paddingTop: '10px',
-          paddingBottom: '10px',
-        }}
-      >
-        <FeaturedEventCard onJoin={onStartRace} />
-      </motion.div>
+      {/* ── RIGHT SECTION (40%) — Featured Event Card — hidden on narrow landscape ── */}
+      {!isLandscape && (
+        <motion.div
+          initial={{ opacity: 0, x: 14 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.38, delay: 0.22 }}
+          style={{
+            width:      '40%',
+            flexShrink: 0,
+            height:     '100%',
+            paddingTop: '10px',
+            paddingBottom: '10px',
+          }}
+        >
+          <FeaturedEventCard onJoin={onStartRace} />
+        </motion.div>
+      )}
     </div>
   </div>
-);
+  );
+};

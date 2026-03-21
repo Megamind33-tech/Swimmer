@@ -17,9 +17,23 @@
  *     (all game-flow screens live in GameShell)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronLeft } from 'lucide-react';
+
+/** Detects landscape mobile: height ≤ 500px and orientation landscape */
+function useIsLandscapeMobile(): boolean {
+  const [v, setV] = useState(
+    () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-height: 500px) and (orientation: landscape)');
+    const handler = (e: MediaQueryListEvent) => setV(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return v;
+}
 
 // Lobby system (Phase 2)
 import { LobbyScreen }    from '../lobby/LobbyScreen';
@@ -97,9 +111,10 @@ const TAB_LABELS: Record<LobbyTab, string> = {
 interface BackButtonProps {
   label?: string;
   onClick: () => void;
+  isLandscape?: boolean;
 }
 
-const BackButton: React.FC<BackButtonProps> = ({ label = 'Back', onClick }) => (
+const BackButton: React.FC<BackButtonProps> = ({ label = 'Back', onClick, isLandscape = false }) => (
   <motion.button
     initial={{ opacity: 0, x: -10 }}
     animate={{ opacity: 1, x: 0 }}
@@ -108,15 +123,16 @@ const BackButton: React.FC<BackButtonProps> = ({ label = 'Back', onClick }) => (
     whileTap={{ scale: 0.90 }}
     onClick={onClick}
     aria-label={`Go back from ${label}`}
+    className="swim26-back-button"
     style={{
       position:       'absolute',
-      top:            '54px',         /* just below TopUtilityBar (48px) + 6px gap */
+      top:            isLandscape ? '44px' : '54px', /* just below TopUtilityBar + gap */
       left:           '10px',
       zIndex:         68,
       display:        'flex',
       alignItems:     'center',
       gap:            '4px',
-      padding:        '5px 11px 5px 8px',
+      padding:        isLandscape ? '3px 9px 3px 6px' : '5px 11px 5px 8px',
       borderRadius:   '10px',
       background:     'rgba(4,20,33,0.85)',
       border:         '1px solid rgba(56,214,255,0.20)',
@@ -150,6 +166,15 @@ const BackButton: React.FC<BackButtonProps> = ({ label = 'Back', onClick }) => (
 export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
   const [activeTab,    setActiveTab]    = useState<LobbyTab>('race');
   const [overlayPage,  setOverlayPage]  = useState<OverlayPage>(null);
+  const isLandscapeMobile = useIsLandscapeMobile();
+
+  // Bar heights shrink in landscape to free vertical space for game content
+  const topBarH    = isLandscapeMobile ? 40 : 48;
+  const bottomBarH = isLandscapeMobile ? 44 : 60;
+  // Back button sits just below the top bar; back-button height ~28px
+  const backBtnPaddingTop = isLandscapeMobile
+    ? `${topBarH + 4}px`
+    : 'calc(env(safe-area-inset-top, 0px) + 86px)';
 
   const handleTabChange = (tab: LobbyTab) => {
     setOverlayPage(null);
@@ -233,6 +258,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             key="app-back"
             label="Lobby"
             onClick={overlayPage !== null ? closeOverlay : goToLobby}
+            isLandscape={isLandscapeMobile}
           />
         )}
       </AnimatePresence>
@@ -247,15 +273,13 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           transition={{ duration: 0.18 }}
           style={{
             position: 'absolute',
-            top:      hideChrome ? 0 : '48px',
-            bottom:   hideChrome ? 0 : '60px',
+            top:      hideChrome ? 0 : `${topBarH}px`,
+            bottom:   hideChrome ? 0 : `${bottomBarH}px`,
             left:     0,
             right:    0,
             overflow: 'hidden',
-            /* BackButton sits at top: 54px with ~32px height — without inset, it steals taps over the left rail (Scouts, Club, etc.). */
-            paddingTop: showBack
-              ? 'calc(env(safe-area-inset-top, 0px) + 86px)'
-              : undefined,
+            /* Reserve space below the BackButton so it doesn't cover interactive content at the top of each page. */
+            paddingTop: showBack ? backBtnPaddingTop : undefined,
             boxSizing: 'border-box',
           }}
         >

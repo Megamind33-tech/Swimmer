@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { PaneSwitcher } from '../ui/PaneSwitcher'
 import {
   BellIcon,
   GiftIcon,
@@ -560,14 +561,8 @@ export function TrainingPage() {
 
   const drill = selectedDrill;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      style={{ position: 'absolute', inset: 0, display: 'flex', gap: '10px', padding: '10px' }}
-    >
-      {/* ── LEFT: Drill selector ── */}
+  // ── Drill selector (left) ──────────────────────────────────────────────────
+  const drillSelector = (
       <div style={{ width: '160px', flexShrink: 0, borderRadius: '16px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '12px 14px 8px', flexShrink: 0 }}>
           <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.06em' }}>DRILLS</div>
@@ -593,8 +588,10 @@ export function TrainingPage() {
           })}
         </div>
       </div>
+  ) // end drillSelector
 
-      {/* ── CENTER: Active drill ── */}
+  // ── Active drill view (center) ─────────────────────────────────────────────
+  const activeDrillView = (
       <div style={{ flex: 1, borderRadius: '16px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
         {/* Accent glow */}
         <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', borderRadius: '50%', background: drill.color, opacity: 0.06, filter: 'blur(60px)', pointerEvents: 'none' }} />
@@ -678,8 +675,10 @@ export function TrainingPage() {
           </motion.div>
         </AnimatePresence>
       </div>
+  ) // end activeDrillView
 
-      {/* ── RIGHT: Athlete stats ── */}
+  // ── Athlete stats (right) ──────────────────────────────────────────────────
+  const statsPanel = (
       <div style={{ width: '150px', flexShrink: 0, borderRadius: '16px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '12px 14px 8px', flexShrink: 0 }}>
           <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.06em' }}>STATS</div>
@@ -704,7 +703,53 @@ export function TrainingPage() {
           </div>
         </div>
       </div>
-    </motion.div>
+  ) // end statsPanel
+
+  return (
+    <PaneSwitcher
+      panes={[
+        {
+          id: 'drills',
+          label: 'DRILLS',
+          icon: <TargetIcon size={12} />,
+          content: (
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {drillSelector.props.children}
+            </div>
+          ),
+        },
+        {
+          id: 'session',
+          label: 'SESSION',
+          content: (
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {activeDrillView.props.children}
+            </div>
+          ),
+        },
+        {
+          id: 'stats',
+          label: 'STATS',
+          content: (
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {statsPanel.props.children}
+            </div>
+          ),
+        },
+      ]}
+    >
+      {/* Original 3-column layout for non-landscape screens */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0 }}
+        style={{ position: 'absolute', inset: 0, display: 'flex', gap: '10px', padding: '10px' }}
+      >
+        {drillSelector}
+        {activeDrillView}
+        {statsPanel}
+      </motion.div>
+    </PaneSwitcher>
   )
 }
 

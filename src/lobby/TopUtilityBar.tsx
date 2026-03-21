@@ -8,12 +8,25 @@
  * Background: deep glass with backdrop-blur and subtle aqua border-bottom
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Settings, UserRound, Gift, Trophy } from 'lucide-react';
 import { ProfileBadge } from './ProfileBadge';
 import { lobby } from '../theme/tokens';
 import { USER_DATA } from '../utils/gameData';
+
+function useIsLandscapeMobile(): boolean {
+  const [v, setV] = useState(
+    () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-height: 500px) and (orientation: landscape)');
+    const handler = (e: MediaQueryListEvent) => setV(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return v;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Currency badge
@@ -78,19 +91,27 @@ interface TopUtilityBarProps {
   onNavigate?: (tab: string) => void;
 }
 
-export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProfile, onRewards, onNavigate }) => (
+export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProfile, onRewards, onNavigate }) => {
+  const isLandscape = useIsLandscapeMobile();
+  const barH = isLandscape ? 40 : 48;
+  const btnH = isLandscape ? 26 : 30;
+  const iconSz = isLandscape ? 11 : 12;
+  const txtSz = isLandscape ? '9px' : '10px';
+
+  return (
   <div
+    className="swim26-top-bar"
     style={{
       position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
-      height: '48px',
+      height: `${barH}px`,
       display: 'flex',
       alignItems: 'center',
-      paddingLeft: '12px',
-      paddingRight: '10px',
-      gap: '8px',
+      paddingLeft: isLandscape ? '8px' : '12px',
+      paddingRight: isLandscape ? '6px' : '10px',
+      gap: isLandscape ? '5px' : '8px',
       zIndex: 70,
       background: 'rgba(4,20,33,0.88)',
       borderBottom: `1px solid ${lobby.panelBorder}`,
@@ -113,9 +134,9 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '5px',
-          height: '30px',
-          paddingInline: '10px',
+          gap: '4px',
+          height: `${btnH}px`,
+          paddingInline: isLandscape ? '7px' : '10px',
           borderRadius: '8px',
           border: '1px solid rgba(204,255,0,0.22)',
           background: 'rgba(204,255,0,0.07)',
@@ -124,13 +145,13 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
           flexShrink: 0,
           fontFamily: "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
           fontWeight: 700,
-          fontSize: '10px',
+          fontSize: txtSz,
           letterSpacing: '0.12em',
           textTransform: 'uppercase' as const,
         }}
       >
-        <Trophy size={12} />
-        Events
+        <Trophy size={iconSz} />
+        {!isLandscape && 'Events'}
       </motion.button>
     )}
 
@@ -143,9 +164,9 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '5px',
-        height: '30px',
-        paddingInline: '10px',
+        gap: '4px',
+        height: `${btnH}px`,
+        paddingInline: isLandscape ? '7px' : '10px',
         borderRadius: '8px',
         border: '1px solid rgba(204,255,0,0.22)',
         background: 'rgba(204,255,0,0.07)',
@@ -154,13 +175,13 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
         flexShrink: 0,
         fontFamily: "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
         fontWeight: 700,
-        fontSize: '10px',
+        fontSize: txtSz,
         letterSpacing: '0.12em',
         textTransform: 'uppercase' as const,
       }}
     >
-      <UserRound size={12} />
-      Profile
+      <UserRound size={iconSz} />
+      {!isLandscape && 'Profile'}
     </motion.button>
 
     {/* Rewards button */}
@@ -172,9 +193,9 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '5px',
-        height: '30px',
-        paddingInline: '10px',
+        gap: '4px',
+        height: `${btnH}px`,
+        paddingInline: isLandscape ? '7px' : '10px',
         borderRadius: '8px',
         border: '1px solid rgba(204,255,0,0.22)',
         background: 'rgba(204,255,0,0.07)',
@@ -183,13 +204,13 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
         flexShrink: 0,
         fontFamily: "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
         fontWeight: 700,
-        fontSize: '10px',
+        fontSize: txtSz,
         letterSpacing: '0.12em',
         textTransform: 'uppercase' as const,
       }}
     >
-      <Gift size={12} />
-      Rewards
+      <Gift size={iconSz} />
+      {!isLandscape && 'Rewards'}
     </motion.button>
 
     <CurrencyBadge
@@ -225,7 +246,8 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({ onSettings, onProf
         flexShrink: 0,
       }}
     >
-      <Settings size={14} />
+      <Settings size={isLandscape ? 12 : 14} />
     </motion.button>
   </div>
-);
+  );
+};

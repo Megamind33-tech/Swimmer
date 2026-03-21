@@ -6,8 +6,21 @@
  * Matches BottomNav design language used across the game.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+
+function useIsLandscapeMobile(): boolean {
+  const [v, setV] = useState(
+    () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-height: 500px) and (orientation: landscape)');
+    const handler = (e: MediaQueryListEvent) => setV(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return v;
+}
 import {
   Play,
   Medal,
@@ -61,10 +74,12 @@ function NavTab({
   tab,
   isActive,
   onChange,
+  isLandscape = false,
 }: {
   tab: TabDef;
   isActive: boolean;
   onChange: (id: LobbyTab) => void;
+  isLandscape?: boolean;
   key?: React.Key;
 }) {
   const Icon = tab.icon;
@@ -73,18 +88,19 @@ function NavTab({
       key={tab.id}
       onClick={() => onChange(tab.id)}
       whileTap={{ scale: 0.95 }}
+      className="swim26-nav-tab"
       style={{
         flex:           1,
         display:        'flex',
         flexDirection:  'column',
         alignItems:     'center',
         justifyContent: 'center',
-        gap:            '3px',
+        gap:            isLandscape ? '1px' : '3px',
         cursor:         'pointer',
         background:     isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
         border:         isActive ? '1px solid rgba(204,255,0,0.20)' : '1px solid transparent',
         borderRadius:   '10px',
-        padding:        '4px 2px',
+        padding:        isLandscape ? '2px 2px' : '4px 2px',
         position:       'relative',
         userSelect:     'none',
         WebkitUserSelect: 'none',
@@ -111,7 +127,7 @@ function NavTab({
       {/* Icon */}
       <div style={{ position: 'relative' }}>
         <Icon
-          size={15}
+          size={isLandscape ? 13 : 15}
           style={{
             color:  isActive ? '#ffffff' : 'rgba(255,255,255,0.40)',
             filter: 'none',
@@ -138,33 +154,42 @@ function NavTab({
         )}
       </div>
 
-      {/* Label */}
-      <span style={{
-        fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
-        fontWeight:    800,
-        fontSize:      '8px',
-        letterSpacing: '0.14em',
-        lineHeight:    1,
-        color:         isActive ? '#ffffff' : 'rgba(255,255,255,0.38)',
-        transition:    'color 0.18s ease',
-      }}>
-        {tab.label}
-      </span>
+      {/* Label — hidden on landscape to save space */}
+      {!isLandscape && (
+        <span className="swim26-nav-tab-label" style={{
+          fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
+          fontWeight:    800,
+          fontSize:      '8px',
+          letterSpacing: '0.14em',
+          lineHeight:    1,
+          color:         isActive ? '#ffffff' : 'rgba(255,255,255,0.38)',
+          transition:    'color 0.18s ease',
+        }}>
+          {tab.label}
+        </span>
+      )}
     </motion.button>
   );
 }
 
 export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) => {
   const raceActive = activeTab === 'race';
+  const isLandscape = useIsLandscapeMobile();
+  const barH = isLandscape ? 44 : 60;
+  const raceBtnW = isLandscape ? 52 : 60;
+  const raceBtnH = isLandscape ? 44 : 56;
+  const raceBtnMT = isLandscape ? -6 : -10;
+  const tabH = isLandscape ? 36 : 46;
 
   return (
     <div
+      className="swim26-bottom-tab-bar"
       style={{
         position:             'absolute',
         bottom:               0,
         left:                 0,
         right:                0,
-        height:               '60px',
+        height:               `${barH}px`,
         zIndex:               70,
         background:           'linear-gradient(to top, #050B14 0%, rgba(10,22,40,0.96) 100%)',
         borderTop:            '1px solid rgba(255,255,255,0.08)',
@@ -189,9 +214,9 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
       }} />
 
       {/* Left 4 tabs */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px', height: '46px' }}>
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px', height: `${tabH}px` }}>
         {LEFT_TABS.map(tab => (
-          <NavTab key={tab.id} tab={tab} isActive={activeTab === tab.id} onChange={onChange} />
+          <NavTab key={tab.id} tab={tab} isActive={activeTab === tab.id} onChange={onChange} isLandscape={isLandscape} />
         ))}
       </div>
 
@@ -200,11 +225,12 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
         onClick={() => onChange('race')}
         whileTap={{ scale: 0.92 }}
         whileHover={{ scale: 1.05 }}
+        className="swim26-race-btn"
         style={{
           position:     'relative',
-          width:        '60px',
-          height:       '56px',
-          marginTop:    '-10px',
+          width:        `${raceBtnW}px`,
+          height:       `${raceBtnH}px`,
+          marginTop:    `${raceBtnMT}px`,
           borderRadius: '14px',
           background:   raceActive
             ? 'linear-gradient(to bottom, var(--color-volt), var(--color-primary-dim))'
@@ -225,7 +251,7 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
         }}
         aria-label="Race"
       >
-        <Play size={22} fill="white" color="white" />
+        <Play size={isLandscape ? 18 : 22} fill="white" color="white" />
         <span style={{
           fontFamily:    "'Rajdhani', sans-serif",
           fontWeight:    900,
@@ -248,9 +274,9 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
       </motion.button>
 
       {/* Right 4 tabs */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px', height: '46px' }}>
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2px', height: `${tabH}px` }}>
         {RIGHT_TABS.map(tab => (
-          <NavTab key={tab.id} tab={tab} isActive={activeTab === tab.id} onChange={onChange} />
+          <NavTab key={tab.id} tab={tab} isActive={activeTab === tab.id} onChange={onChange} isLandscape={isLandscape} />
         ))}
       </div>
     </div>
