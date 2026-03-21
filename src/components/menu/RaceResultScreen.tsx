@@ -42,9 +42,9 @@ export const RaceResultScreen: React.FC<RaceResultScreenProps> = ({
   ];
 
   return (
-    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body pb-40">
+    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body pb-40 landscape:pb-28">
       {/* Cinematic Announcement Header */}
-      <div className={`p-16 max-[900px]:p-10 relative overflow-hidden flex flex-col items-center text-center ${
+      <div className={`p-16 max-[900px]:p-10 landscape:p-6 relative overflow-hidden flex flex-col items-center text-center ${
         isWinner ? 'bg-secondary/10 border-b border-secondary/20' : 'bg-primary/10 border-b border-white/5'
       }`}>
         {/* Animated Background Elements */}
@@ -242,23 +242,23 @@ export const RaceResultScreen: React.FC<RaceResultScreenProps> = ({
       </div>
 
       {/* Global Navigation Terminal */}
-      <div className="fixed bottom-0 left-0 right-0 p-8 bg-surface/80 backdrop-blur-3xl border-t border-white/5 z-50">
-         <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <button onClick={onWatchReplay} className="h-16 rounded-2xl border border-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
-                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:rotate-12 transition-transform">⏵</span>
+      <div className="fixed bottom-0 left-0 right-0 p-8 landscape:p-3 bg-surface/80 backdrop-blur-3xl border-t border-white/5 z-50">
+         <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 landscape:grid-cols-4 gap-4 landscape:gap-2">
+            <button onClick={onWatchReplay} className="h-16 landscape:h-11 rounded-2xl border border-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
+                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:rotate-12 transition-transform landscape:hidden">⏵</span>
                 Watch Replay
             </button>
-            <button onClick={onReturnHome} className="h-16 rounded-2xl border border-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
-                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:-translate-x-1 transition-transform">⌂</span>
+            <button onClick={onReturnHome} className="h-16 landscape:h-11 rounded-2xl border border-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface-variant hover:text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
+                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:-translate-x-1 transition-transform landscape:hidden">⌂</span>
                 Exit Terminal
             </button>
-            <button onClick={onRematch} className="h-16 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
-                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:rotate-180 transition-transform duration-700">↺</span>
+            <button onClick={onRematch} className="h-16 landscape:h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 font-headline font-black italic slanted uppercase text-[11px] tracking-widest text-on-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
+                <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}} className="group-hover:rotate-180 transition-transform duration-700 landscape:hidden">↺</span>
                 Request Rematch
             </button>
-            <button onClick={onContinue} className="h-16 rounded-2xl bg-primary shadow-[0_0_30px_rgba(129,236,255,0.2)] hover:shadow-[0_0_50px_rgba(129,236,255,0.4)] font-headline font-black italic slanted uppercase text-[13px] tracking-widest text-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
+            <button onClick={onContinue} className="h-16 landscape:h-11 rounded-2xl bg-primary shadow-[0_0_30px_rgba(129,236,255,0.2)] hover:shadow-[0_0_50px_rgba(129,236,255,0.4)] font-headline font-black italic slanted uppercase text-[13px] tracking-widest text-surface transition-all flex items-center justify-center gap-3 active:scale-95 group">
                 Continue Mission
-                <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="group-hover:translate-x-2 transition-transform">→</span>
+                <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="group-hover:translate-x-2 transition-transform landscape:hidden">→</span>
             </button>
          </div>
       </div>
