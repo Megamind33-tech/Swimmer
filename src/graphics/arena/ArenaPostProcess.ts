@@ -108,7 +108,15 @@ export class ArenaPostProcess {
     //              Saves 2× GPU memory vs the HDR pipeline.  Bloom operates
     //              on clamped LDR values which is slightly less accurate but
     //              completely imperceptible for our restrained bloom settings.
-    if (qualityTier !== 'LOW' && cameras.length > 0) {
+    // Guard: skip the full pipeline when the render target is very small
+    // (< 256px on either axis).  Bloom + FXAA on a tiny framebuffer wastes
+    // bandwidth, can produce artifacts, and provides no visible benefit.
+    // Image processing (contrast/exposure) still applies via scene config above.
+    const rw = scene.getEngine().getRenderWidth();
+    const rh = scene.getEngine().getRenderHeight();
+    const tooSmall = rw < 256 || rh < 256;
+
+    if (qualityTier !== 'LOW' && cameras.length > 0 && !tooSmall) {
       this._pipeline = new BABYLON.DefaultRenderingPipeline(
         'arenaPipeline',
         false,       // hdr = false: use LDR path for mobile performance

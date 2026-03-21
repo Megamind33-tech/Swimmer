@@ -34,6 +34,32 @@ export class CameraSupport {
   private cameras:     Map<CameraView, BABYLON.ArcRotateCamera> = new Map();
   private currentView: CameraView = 'DEFAULT';
 
+  /** Default FOV (radians) — Babylon.js default for ArcRotateCamera. */
+  private static readonly BASE_FOV = 0.8;
+
+  /**
+   * Compute a responsive FOV so the full pool remains visible on small or
+   * narrow screens.  Wider aspect ratios keep the base FOV; narrower ones
+   * (small phones in landscape, or portrait tablets) get a proportionally
+   * wider FOV so geometry isn't cropped.
+   *
+   * The reference aspect ratio is 16:9 (≈1.78).  Screens narrower than that
+   * receive a FOV bump.  The value is clamped to [BASE_FOV, 1.2] so it never
+   * becomes a fisheye on extremely narrow viewports.
+   */
+  public static responsiveFOV(canvas: HTMLCanvasElement): number {
+    const w = canvas.clientWidth  || 1;
+    const h = canvas.clientHeight || 1;
+    const aspect = w / h;
+    const refAspect = 16 / 9;
+
+    if (aspect >= refAspect) return CameraSupport.BASE_FOV;
+
+    // Scale FOV inversely with aspect ratio shrinkage
+    const fov = CameraSupport.BASE_FOV * (refAspect / aspect);
+    return Math.min(fov, 1.2); // cap to prevent fisheye
+  }
+
   build(
     scene:  BABYLON.Scene,
     canvas: HTMLCanvasElement,
@@ -108,6 +134,9 @@ export class CameraSupport {
       cam.minZ = def.view === 'UNDERWATER' ? 0.15 : 0.5;
       cam.maxZ = 1200;
 
+      // Responsive FOV for small / narrow screens
+      cam.fov = CameraSupport.responsiveFOV(canvas);
+
       this.cameras.set(def.view, cam);
     }
 
@@ -142,6 +171,12 @@ export class CameraSupport {
   }
 
   public getCurrentView(): CameraView { return this.currentView; }
+
+  /** Recompute FOV for all cameras after a viewport resize. */
+  public updateFOV(canvas: HTMLCanvasElement): void {
+    const fov = CameraSupport.responsiveFOV(canvas);
+    this.cameras.forEach(c => { c.fov = fov; });
+  }
 
   /** Return all built cameras — used by ArenaPostProcess to attach the pipeline. */
   public getCameras(): BABYLON.ArcRotateCamera[] {

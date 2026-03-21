@@ -242,12 +242,12 @@ export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ value }) => 
         pointerEvents:  'none',
       }}
     >
-      {/* Hard-edged countdown number — no glow */}
+      {/* Hard-edged countdown number — viewport-scaled for small screens */}
       <div
         key={label}
         style={{
           fontFamily:    HUD_FONT.impact,
-          fontSize:      isGo ? '96px' : '120px',
+          fontSize:      isGo ? 'min(96px, 18vw)' : 'min(120px, 22vw)',
           lineHeight:    1,
           color,
           letterSpacing: '0.02em',
@@ -260,7 +260,7 @@ export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ value }) => 
         style={{
           fontFamily:    HUD_FONT.label,
           fontWeight:    700,
-          fontSize:      '14px',
+          fontSize:      'min(14px, 2.5vw)',
           letterSpacing: '0.25em',
           textTransform: 'uppercase',
           color:         HUD_COLOR.grey,
@@ -277,6 +277,24 @@ export const CountdownOverlay: React.FC<CountdownOverlayProps> = ({ value }) => 
 // ─────────────────────────────────────────────────────────────────────────────
 // HUDRoot
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Small-screen detection hook
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Returns true when the viewport is too small for the full-size HUD. */
+function useIsSmallScreen(): boolean {
+  const check = () => window.innerWidth < 540 || window.innerHeight < 360;
+  const [small, setSmall] = React.useState(check);
+
+  React.useEffect(() => {
+    const handler = () => setSmall(check());
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  return small;
+}
 
 export const HUDRoot: React.FC<HUDRootProps> = ({
   elapsedMs,
@@ -300,6 +318,7 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
   const progress        = Math.min(1, distanceM / Math.max(1, totalDistanceM));
   const urgent          = progress >= 0.82;
   const criticalStamina = stamina < 25;
+  const isSmall         = useIsSmallScreen();
 
   const laneData = useMemo(
     () => buildLaneData(elapsedMs, distanceM, totalDistanceM, playerLane),
@@ -367,12 +386,14 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
           top:        0,
           left:       0,
           right:      0,
-          height:     '60px',
+          height:     isSmall ? '44px' : '60px',
           display:    'flex',
           alignItems: 'center',
-          padding:    '6px 8px',
-          gap:        '8px',
+          padding:    isSmall ? '3px 4px' : '6px 8px',
+          gap:        isSmall ? '4px' : '8px',
           pointerEvents: 'auto',
+          transform:  isSmall ? 'scale(0.82)' : undefined,
+          transformOrigin: 'top center',
         }}
       >
         {/* TOP-LEFT: Swimmer state cluster */}
@@ -383,11 +404,11 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
             display:        'flex',
             flexDirection:  'column',
             justifyContent: 'center',
-            gap:            '5px',
-            padding:        '6px 10px',
-            minWidth:       '128px',
+            gap:            isSmall ? '3px' : '5px',
+            padding:        isSmall ? '4px 6px' : '6px 10px',
+            minWidth:       isSmall ? '90px' : '128px',
             flexShrink:     0,
-            height:         '48px',
+            height:         isSmall ? '36px' : '48px',
             borderColor:    criticalStamina ? 'rgba(255,0,60,0.55)' : undefined,
           }}
         >
@@ -434,7 +455,9 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
       {/* ════════════════════════════════════════════════════════════
           RACE PROGRESS BAR
           ════════════════════════════════════════════════════════════ */}
-      <RaceProgressBar progress={progress} />
+      <div style={isSmall ? { position: 'absolute', top: '36px', left: 0, right: 0 } : undefined}>
+        <RaceProgressBar progress={progress} />
+      </div>
 
       {/* ════════════════════════════════════════════════════════════
           MID-RIGHT: Camera toggle
@@ -489,13 +512,13 @@ export const HUDRoot: React.FC<HUDRootProps> = ({
           bottom:         0,
           left:           0,
           right:          0,
-          height:         '106px',
+          height:         isSmall ? '80px' : '106px',
           display:        'flex',
           alignItems:     'flex-end',
           justifyContent: 'space-between',
-          padding:        '0 8px 8px',
+          padding:        isSmall ? '0 4px 4px' : '0 8px 8px',
           pointerEvents:  'auto',
-          transform:      `scale(${preset.hudScale})`,
+          transform:      `scale(${isSmall ? Math.min(preset.hudScale, 0.78) : preset.hudScale})`,
           transformOrigin:'bottom center',
         }}
       >
