@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { PaneSwitcher } from '../ui/PaneSwitcher'
+import { useA11y } from '../context/AccessibilityContext'
 import {
   BellIcon,
   GiftIcon,
@@ -97,11 +98,20 @@ function ToggleRow({ label, hint, value, onChange }: ToggleRowProps) {
         <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</div>
         {hint && <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: '#A9D3E7', marginTop: '2px' }}>{hint}</div>}
       </div>
+      {/* Toggle button: wrapper gives 44px touch target height around the 24px visual pill */}
       <button
         onClick={() => onChange(!value)}
-        style={{ width: '44px', height: '24px', borderRadius: '12px', background: value ? `linear-gradient(90deg, ${AQUA}, ${CYAN})` : 'rgba(255,255,255,0.10)', border: value ? 'none' : '1px solid rgba(255,255,255,0.18)', position: 'relative', cursor: 'pointer', flexShrink: 0, boxShadow: value ? `0 0 10px rgba(56,214,255,0.40)` : 'none', transition: 'background 0.2s, box-shadow 0.2s' }}
+        aria-pressed={value}
+        aria-label={label}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          minWidth: '52px', minHeight: '44px',
+          background: 'transparent', border: 'none', cursor: 'pointer', flexShrink: 0, padding: '0',
+        }}
       >
-        <div style={{ position: 'absolute', top: '3px', left: value ? 'calc(100% - 19px)' : '3px', width: '18px', height: '18px', borderRadius: '50%', background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.3)', transition: 'left 0.18s cubic-bezier(0.34,1.56,0.64,1)' }} />
+        <div style={{ width: '44px', height: '24px', borderRadius: '12px', background: value ? `linear-gradient(90deg, ${AQUA}, ${CYAN})` : 'rgba(255,255,255,0.10)', border: value ? 'none' : '1px solid rgba(255,255,255,0.18)', position: 'relative', boxShadow: value ? `0 0 10px rgba(56,214,255,0.40)` : 'none', transition: 'background 0.2s, box-shadow 0.2s', pointerEvents: 'none' }}>
+          <div style={{ position: 'absolute', top: '3px', left: value ? 'calc(100% - 19px)' : '3px', width: '18px', height: '18px', borderRadius: '50%', background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.3)', transition: 'left 0.18s cubic-bezier(0.34,1.56,0.64,1)' }} />
+        </div>
       </button>
     </div>
   )
@@ -120,7 +130,17 @@ function SegmentPicker({ options, value, onChange }: SegmentPickerProps) {
         <button
           key={opt}
           onClick={() => onChange(opt)}
-          style={{ flex: 1, height: '32px', borderRadius: '8px', cursor: 'pointer', background: value === opt ? 'rgba(56,214,255,0.20)' : 'rgba(255,255,255,0.05)', border: value === opt ? `1px solid rgba(56,214,255,0.50)` : '1px solid rgba(255,255,255,0.10)', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.10em', textTransform: 'uppercase', color: value === opt ? AQUA : '#A9D3E7', transition: 'all 0.15s' }}
+          aria-pressed={value === opt}
+          style={{
+            flex: 1,
+            height: '44px', // raised from 32 px → meets TOUCH.minimum
+            borderRadius: '8px', cursor: 'pointer',
+            background: value === opt ? 'rgba(56,214,255,0.20)' : 'rgba(255,255,255,0.05)',
+            border: value === opt ? `1px solid rgba(56,214,255,0.50)` : '1px solid rgba(255,255,255,0.10)',
+            fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px',
+            letterSpacing: '0.10em', textTransform: 'uppercase',
+            color: value === opt ? AQUA : '#A9D3E7', transition: 'all 0.15s',
+          }}
         >
           {opt}
         </button>
@@ -236,10 +256,14 @@ export function SettingsPage() {
   const [fpsTarget,   setFpsTarget]   = useState('60');
   const [vsync,       setVsync]       = useState(true);
 
-  // Accessibility state
-  const [colorblind,  setColorblind]  = useState('OFF');
-  const [fontSize,    setFontSize]    = useState('NORMAL');
-  const [subtitles,   setSubtitles]   = useState(false);
+  // Accessibility state — backed by A11yContext so changes affect the whole shell
+  const { settings: a11y, update: updateA11y } = useA11y();
+  const colorblind  = a11y.colorblind.toUpperCase();
+  const fontSize    = a11y.fontSize.toUpperCase();
+  const subtitles   = a11y.subtitles;
+  const setColorblind  = (v: string) => updateA11y('colorblind', v.toLowerCase() as typeof a11y.colorblind);
+  const setFontSize    = (v: string) => updateA11y('fontSize',   v.toLowerCase() as typeof a11y.fontSize);
+  const setSubtitles   = (v: boolean) => updateA11y('subtitles', v);
 
   const update = useCallback(<K extends keyof ControlsPreset>(key: K, val: ControlsPreset[K]) => {
     setPreset((p) => clampPreset({ ...p, [key]: val }));
@@ -377,9 +401,25 @@ export function SettingsPage() {
               </PanelBox>
             </div>
             <div>
+              <SectionLabel>Display</SectionLabel>
+              <PanelBox>
+                {/* High Contrast — now wired to A11yContext so shell immediately responds */}
+                <ToggleRow label="High Contrast" hint="Strengthen borders, backgrounds, and text for readability" value={a11y.highContrast} onChange={(v) => updateA11y('highContrast', v)} />
+              </PanelBox>
+            </div>
+            <div>
               <SectionLabel>Motion</SectionLabel>
               <PanelBox>
-                <ToggleRow label="Reduced Motion" hint="Stop caustic and pulse animations" value={perfPreset.reducedMotion} onChange={(v) => updatePerf('reducedMotion', v)} />
+                {/* Reduced Motion — synced to both perfPreset and A11yContext */}
+                <ToggleRow
+                  label="Reduced Motion"
+                  hint="Disables pulse rings, slide animations, and motion effects across the whole app"
+                  value={a11y.reducedMotion}
+                  onChange={(v) => {
+                    updateA11y('reducedMotion', v);
+                    updatePerf('reducedMotion', v);
+                  }}
+                />
                 <ToggleRow label="Show Subtitles" hint="Announcer and coach dialogue text" value={subtitles} onChange={setSubtitles} />
               </PanelBox>
             </div>
@@ -433,25 +473,46 @@ export function SettingsPage() {
             <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: '#F3FBFF', letterSpacing: '0.06em', lineHeight: 1 }}>SETTINGS</span>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={handleReset} style={{ width: '34px', height: '34px', borderRadius: '10px', cursor: 'pointer', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <RefreshCwIcon size={14} color="#A9D3E7" />
+            {/* Reset: expanded to 44px to meet minimum touch target */}
+            <button onClick={handleReset} aria-label="Reset settings" style={{ width: '44px', height: '44px', borderRadius: '10px', cursor: 'pointer', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <RefreshCwIcon size={15} color="#A9D3E7" />
             </button>
-            <button onClick={handleSave} style={{ height: '34px', paddingInline: '16px', borderRadius: '10px', cursor: 'pointer', background: saved ? 'rgba(55,226,141,0.18)' : `linear-gradient(90deg, ${AQUA}, ${CYAN})`, border: saved ? '1px solid rgba(55,226,141,0.50)' : 'none', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: saved ? '0 0 12px rgba(55,226,141,0.30)' : `0 0 14px rgba(56,214,255,0.30)`, transition: 'all 0.2s' }}>
-              {saved ? <CheckIcon size={13} color="#37E28D" /> : <SaveIcon size={13} color="var(--color-carbon)" />}
+            <button onClick={handleSave} aria-label={saved ? 'Settings saved' : 'Save settings'} style={{ height: '44px', paddingInline: '18px', borderRadius: '10px', cursor: 'pointer', background: saved ? 'rgba(55,226,141,0.18)' : `linear-gradient(90deg, ${AQUA}, ${CYAN})`, border: saved ? '1px solid rgba(55,226,141,0.50)' : 'none', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: saved ? '0 0 12px rgba(55,226,141,0.30)' : `0 0 14px rgba(56,214,255,0.30)`, transition: 'all 0.2s' }}>
+              {saved ? <CheckIcon size={14} color="#37E28D" /> : <SaveIcon size={14} color="var(--color-carbon)" />}
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: saved ? '#37E28D' : 'var(--color-carbon)' }}>{saved ? 'SAVED' : 'SAVE'}</span>
             </button>
           </div>
         </div>
 
         {/* Tab strip */}
-        <div style={{ display: 'flex', gap: '4px', padding: '10px 20px 0', flexShrink: 0 }}>
+        <div
+          role="tablist"
+          aria-label="Settings sections"
+          style={{ display: 'flex', gap: '4px', padding: '10px 20px 0', flexShrink: 0 }}
+        >
           {SETTINGS_TABS.map((tab) => {
             const active = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                role="tab"
+                aria-selected={active}
+                aria-label={tab.label}
                 onClick={() => setActiveTab(tab.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingInline: '14px', height: '34px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.16)' : 'rgba(255,255,255,0.04)', border: active ? `1px solid rgba(56,214,255,0.40)` : '1px solid transparent', color: active ? AQUA : '#A9D3E7', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', letterSpacing: '0.10em', textTransform: 'uppercase', transition: 'all 0.15s', boxShadow: active ? `0 0 10px rgba(56,214,255,0.20)` : 'none' }}
+                className="swim26-settings-tab"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  paddingInline: '14px',
+                  height: '44px', // raised from 34 px → meets TOUCH.minimum
+                  borderRadius: '8px', cursor: 'pointer',
+                  background: active ? 'rgba(56,214,255,0.16)' : 'rgba(255,255,255,0.04)',
+                  border: active ? `1px solid rgba(56,214,255,0.40)` : '1px solid transparent',
+                  color: active ? AQUA : '#A9D3E7',
+                  fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px',
+                  letterSpacing: '0.10em', textTransform: 'uppercase', transition: 'all 0.15s',
+                  boxShadow: active ? `0 0 10px rgba(56,214,255,0.20)` : 'none',
+                  outline: 'none',
+                }}
               >
                 {tab.icon}
                 {tab.label}

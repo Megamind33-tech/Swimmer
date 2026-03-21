@@ -10,98 +10,127 @@
  *
  * Usage:
  *   <PaneSwitcher panes={[
- *     { id: 'overview', label: 'OVERVIEW', icon: <ShieldIcon size={12} />, content: <LeftColumn /> },
- *     { id: 'lineup',   label: 'LINEUP',   icon: <FlagIcon size={12} />,   content: <RightColumn /> },
+ *     { id: 'overview', label: 'OVERVIEW', icon: <ShieldIcon size={14} />, content: <LeftCol /> },
+ *     { id: 'lineup',   label: 'LINEUP',   icon: <FlagIcon   size={14} />, content: <RightCol /> },
  *   ]}>
- *     {/* normal multi-column JSX shown when NOT landscape-mobile *\/}
  *     <OriginalTwoColumnLayout />
  *   </PaneSwitcher>
+ *
+ * Phase 6 improvements:
+ *   - Tab bar height: 34 → 44 px (meets TOUCH.minimum)
+ *   - Prev/Next arrows: 28 → 44 px wide (meets TOUCH.minimum)
+ *   - Visual hierarchy: active tabs have stronger contrast and larger font
+ *   - Focus-visible rings on all interactive elements
+ *   - Dot indicator moved so it does not overlap the tab buttons
+ *   - Reduced motion: pane slide disabled, instant switch instead
+ *
+ * Phase 7 improvements:
+ *   - Reads reducedMotion and highContrast from A11yContext
+ *   - High contrast: stronger borders and text
+ *
+ * Phase 8 improvements:
+ *   - role="tablist" on tab strip
+ *   - role="tab" + aria-selected on each TabBtn
+ *   - aria-label on prev/next arrows
+ *   - aria-label on the tab strip container
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// ── hook ─────────────────────────────────────────────────────────────────────
+import { useIsLandscapeMobile } from '../hooks/useIsLandscapeMobile';
+import { CHROME, TOUCH } from '../ui/responsive';
+import { useA11y } from '../context/AccessibilityContext';
 
-export function useIsLandscapeMobile(): boolean {
-  const [v, setV] = useState(
-    () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia('(max-height: 500px) and (orientation: landscape)');
-    const handler = (e: MediaQueryListEvent) => setV(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return v;
-}
+// Re-export so callers that imported the hook from here still work
+export { useIsLandscapeMobile };
 
-// ── types ─────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const VOLT         = 'var(--color-volt, #CCFF00)';
+const PANEL_BG     = 'rgba(4,20,33,0.88)';
+const PANEL_BORDER = 'rgba(56,214,255,0.14)';
+const TAB_H        = CHROME.paneBar.height; // 44 px
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface Pane {
-  id: string;
+  id:       string;
   /** Short ALL-CAPS label shown on the tab button */
-  label: string;
-  /** Small icon (16 × 16) rendered inside the tab button */
-  icon?: React.ReactNode;
-  content: React.ReactNode;
+  label:    string;
+  /** Icon rendered inside the tab button (14–16 px recommended) */
+  icon?:    React.ReactNode;
+  content:  React.ReactNode;
 }
 
 interface PaneSwitcherProps {
-  panes: Pane[];
-  /** Normal multi-column JSX shown when the screen is not landscape-mobile */
-  children: React.ReactNode;
-  /** Initial pane id (defaults to first pane) */
+  panes:       Pane[];
+  children:    React.ReactNode;
   defaultPane?: string;
 }
 
-// ── Tab button ────────────────────────────────────────────────────────────────
-
-const VOLT = 'var(--color-volt, #CCFF00)';
-const PANEL_BG = 'rgba(4,20,33,0.88)';
-const PANEL_BORDER = 'rgba(56,214,255,0.14)';
+// ─────────────────────────────────────────────────────────────────────────────
+// TabBtn
+// ─────────────────────────────────────────────────────────────────────────────
 
 function TabBtn({
   pane,
   isActive,
   onClick,
+  reducedMotion,
+  highContrast,
 }: {
-  pane: Pane;
-  isActive: boolean;
-  onClick: () => void;
+  pane:          Pane;
+  isActive:      boolean;
+  onClick:       () => void;
+  reducedMotion: boolean;
+  highContrast:  boolean;
 }) {
   return (
     <motion.button
-      whileTap={{ scale: 0.92 }}
-      onClick={onClick}
-      style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '5px',
-        height: '100%',
-        border: 'none',
-        background: isActive ? 'rgba(204,255,0,0.10)' : 'transparent',
-        borderBottom: isActive ? `2px solid ${VOLT}` : '2px solid transparent',
-        cursor: 'pointer',
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        padding: '0 4px',
-        transition: 'background 0.14s, border-color 0.14s',
-        position: 'relative',
-      }}
-      aria-pressed={isActive}
+      role="tab"
+      aria-selected={isActive}
       aria-label={pane.label}
+      whileTap={reducedMotion ? undefined : { scale: 0.93 }}
+      onClick={onClick}
+      className="swim26-pane-tab"
+      style={{
+        flex:           1,
+        display:        'flex',
+        alignItems:     'center',
+        justifyContent: 'center',
+        gap:            '5px',
+        height:         '100%',
+        border:         'none',
+        background:     isActive
+          ? (highContrast ? 'rgba(204,255,0,0.18)' : 'rgba(204,255,0,0.10)')
+          : 'transparent',
+        borderBottom:   isActive
+          ? `2px solid ${VOLT}`
+          : `2px solid ${highContrast ? 'rgba(255,255,255,0.08)' : 'transparent'}`,
+        cursor:         'pointer',
+        userSelect:     'none',
+        WebkitUserSelect:'none',
+        padding:        '0 6px',
+        transition:     reducedMotion ? 'none' : 'background 0.14s, border-color 0.14s',
+        outline:        'none',
+      }}
     >
       {pane.icon && (
         <span
+          aria-hidden
           style={{
-            color: isActive ? VOLT : 'rgba(169,211,231,0.50)',
-            display: 'flex',
+            color:      isActive
+              ? VOLT
+              : (highContrast ? 'rgba(169,211,231,0.75)' : 'rgba(169,211,231,0.50)'),
+            display:    'flex',
             alignItems: 'center',
-            transition: 'color 0.14s',
+            transition: reducedMotion ? 'none' : 'color 0.14s',
           }}
         >
           {pane.icon}
@@ -109,13 +138,16 @@ function TabBtn({
       )}
       <span
         style={{
-          fontFamily: "'Bebas Neue', 'Rajdhani', sans-serif",
-          fontWeight: 700,
-          fontSize: '11px',
+          fontFamily:    "'Bebas Neue', 'Rajdhani', sans-serif",
+          fontWeight:    isActive ? 800 : 700,
+          /* Active tabs get a slightly larger font to emphasise selection */
+          fontSize:      isActive ? '13px' : '12px',
           letterSpacing: '0.12em',
-          color: isActive ? '#F3FBFF' : 'rgba(169,211,231,0.45)',
-          transition: 'color 0.14s',
-          lineHeight: 1,
+          color:         isActive
+            ? (highContrast ? '#FFFFFF' : '#F3FBFF')
+            : (highContrast ? 'rgba(169,211,231,0.65)' : 'rgba(169,211,231,0.45)'),
+          transition:    reducedMotion ? 'none' : 'color 0.14s, font-size 0.14s',
+          lineHeight:    1,
         }}
       >
         {pane.label}
@@ -124,11 +156,16 @@ function TabBtn({
   );
 }
 
-// ── PaneSwitcher ──────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// PaneSwitcher
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps) {
-  const isLandscape = useIsLandscapeMobile();
-  const [activeId, setActiveId] = useState(defaultPane ?? panes[0]?.id ?? '');
+  const isLandscape  = useIsLandscapeMobile();
+  const { settings: a11y } = useA11y();
+  const { reducedMotion, highContrast } = a11y;
+
+  const [activeId,  setActiveId]  = useState(defaultPane ?? panes[0]?.id ?? '');
   const [direction, setDirection] = useState<1 | -1>(1);
 
   const activeIdx = panes.findIndex(p => p.id === activeId);
@@ -142,14 +179,10 @@ export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps
     [panes, activeIdx],
   );
 
-  const goPrev = () => {
-    if (activeIdx > 0) goTo(panes[activeIdx - 1].id);
-  };
-  const goNext = () => {
-    if (activeIdx < panes.length - 1) goTo(panes[activeIdx + 1].id);
-  };
+  const goPrev = () => { if (activeIdx > 0) goTo(panes[activeIdx - 1].id); };
+  const goNext = () => { if (activeIdx < panes.length - 1) goTo(panes[activeIdx + 1].id); };
 
-  // Normal viewport → show caller's layout unchanged
+  // Normal viewport — show caller's layout unchanged
   if (!isLandscape) return <>{children}</>;
 
   const active = panes[activeIdx];
@@ -157,48 +190,57 @@ export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps
   return (
     <div
       style={{
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
+        position:      'absolute',
+        inset:         0,
+        display:       'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
+        overflow:      'hidden',
       }}
     >
-      {/* ── Tab bar ── */}
+      {/* ── Tab strip ── */}
       <div
+        role="tablist"
+        aria-label="Page sections"
         style={{
-          height: '34px',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'stretch',
-          background: PANEL_BG,
-          borderBottom: `1px solid ${PANEL_BORDER}`,
-          backdropFilter: 'blur(14px)',
+          height:               `${TAB_H}px`, // 44 px — meets TOUCH.minimum
+          flexShrink:           0,
+          display:              'flex',
+          alignItems:           'stretch',
+          background:           highContrast ? 'rgba(2,10,20,0.97)' : PANEL_BG,
+          borderBottom:         `1px solid ${highContrast
+            ? 'rgba(56,214,255,0.35)'
+            : PANEL_BORDER}`,
+          backdropFilter:       'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
-          position: 'relative',
+          position:             'relative',
         }}
       >
-        {/* Prev arrow */}
+        {/* Prev arrow — 44 px wide touch target */}
         <motion.button
-          whileTap={{ scale: 0.88 }}
+          whileTap={reducedMotion ? undefined : { scale: 0.88 }}
           onClick={goPrev}
           disabled={activeIdx === 0}
-          style={{
-            width: '28px',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'transparent',
-            border: 'none',
-            borderRight: `1px solid ${PANEL_BORDER}`,
-            cursor: activeIdx === 0 ? 'not-allowed' : 'pointer',
-            opacity: activeIdx === 0 ? 0.25 : 1,
-            color: 'rgba(169,211,231,0.70)',
-          }}
           aria-label="Previous section"
+          className="swim26-pane-arrow"
+          style={{
+            width:          `${TOUCH.minimum}px`,  // 44 px (was 28 px)
+            flexShrink:     0,
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'center',
+            background:     'transparent',
+            border:         'none',
+            borderRight:    `1px solid ${PANEL_BORDER}`,
+            cursor:         activeIdx === 0 ? 'not-allowed' : 'pointer',
+            opacity:        activeIdx === 0 ? 0.25 : 1,
+            color:          highContrast
+              ? 'rgba(169,211,231,0.90)'
+              : 'rgba(169,211,231,0.70)',
+            userSelect:     'none',
+            outline:        'none',
+          }}
         >
-          <ChevronLeft size={14} />
+          <ChevronLeft size={16} />
         </motion.button>
 
         {/* Tab buttons */}
@@ -208,57 +250,64 @@ export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps
             pane={pane}
             isActive={pane.id === activeId}
             onClick={() => goTo(pane.id)}
+            reducedMotion={reducedMotion}
+            highContrast={highContrast}
           />
         ))}
 
-        {/* Next arrow */}
+        {/* Next arrow — 44 px wide touch target */}
         <motion.button
-          whileTap={{ scale: 0.88 }}
+          whileTap={reducedMotion ? undefined : { scale: 0.88 }}
           onClick={goNext}
           disabled={activeIdx === panes.length - 1}
-          style={{
-            width: '28px',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'transparent',
-            border: 'none',
-            borderLeft: `1px solid ${PANEL_BORDER}`,
-            cursor: activeIdx === panes.length - 1 ? 'not-allowed' : 'pointer',
-            opacity: activeIdx === panes.length - 1 ? 0.25 : 1,
-            color: 'rgba(169,211,231,0.70)',
-          }}
           aria-label="Next section"
-        >
-          <ChevronRight size={14} />
-        </motion.button>
-
-        {/* Pane counter dot row */}
-        <div
+          className="swim26-pane-arrow"
           style={{
-            position: 'absolute',
-            bottom: '3px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            gap: '4px',
-            pointerEvents: 'none',
+            width:          `${TOUCH.minimum}px`,  // 44 px (was 28 px)
+            flexShrink:     0,
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'center',
+            background:     'transparent',
+            border:         'none',
+            borderLeft:     `1px solid ${PANEL_BORDER}`,
+            cursor:         activeIdx === panes.length - 1 ? 'not-allowed' : 'pointer',
+            opacity:        activeIdx === panes.length - 1 ? 0.25 : 1,
+            color:          highContrast
+              ? 'rgba(169,211,231,0.90)'
+              : 'rgba(169,211,231,0.70)',
+            userSelect:     'none',
+            outline:        'none',
           }}
         >
-          {panes.map((p, i) => (
-            <span
-              key={p.id}
-              style={{
-                width: i === activeIdx ? '12px' : '4px',
-                height: '2px',
-                borderRadius: '2px',
-                background: i === activeIdx ? VOLT : 'rgba(169,211,231,0.25)',
-                transition: 'width 0.2s, background 0.2s',
-              }}
-            />
-          ))}
-        </div>
+          <ChevronRight size={16} />
+        </motion.button>
+      </div>
+
+      {/* Progress dots — below the tab strip, not overlapping it */}
+      <div
+        aria-hidden
+        style={{
+          flexShrink:    0,
+          display:       'flex',
+          justifyContent:'center',
+          gap:           '4px',
+          padding:       '4px 0 2px',
+          background:    'transparent',
+        }}
+      >
+        {panes.map((p, i) => (
+          <span
+            key={p.id}
+            style={{
+              width:        i === activeIdx ? '12px' : '4px',
+              height:       '2px',
+              borderRadius: '2px',
+              background:   i === activeIdx ? VOLT : 'rgba(169,211,231,0.25)',
+              transition:   reducedMotion ? 'none' : 'width 0.2s, background 0.2s',
+            }}
+          />
+        ))}
       </div>
 
       {/* ── Pane content ── */}
@@ -267,10 +316,10 @@ export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps
           <motion.div
             key={activeId}
             custom={direction}
-            initial={{ opacity: 0, x: direction * 24 }}
+            initial={reducedMotion ? false : { opacity: 0, x: direction * 24 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: direction * -24 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
+            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: direction * -24 }}
+            transition={{ duration: reducedMotion ? 0 : 0.18, ease: 'easeOut' }}
             style={{ position: 'absolute', inset: 0 }}
           >
             {active?.content}

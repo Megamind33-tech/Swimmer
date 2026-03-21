@@ -1166,3 +1166,84 @@ body {
   letter-spacing: 0.18em;
   color: var(--color-accent-cyan);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FOCUS-VISIBLE — keyboard and accessibility focus rings
+   Applied via :focus-visible so mouse/touch users are not affected.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Global focus-visible ring for all interactive elements */
+:focus-visible {
+  outline: 2px solid rgba(204, 255, 0, 0.85);
+  outline-offset: 2px;
+}
+
+/* Shell-specific focusable elements */
+.swim26-back-button:focus-visible,
+.swim26-nav-tab:focus-visible,
+.swim26-race-btn:focus-visible,
+.swim26-utility-btn:focus-visible,
+.swim26-pane-tab:focus-visible,
+.swim26-pane-arrow:focus-visible,
+.swim26-settings-tab:focus-visible {
+  outline: 2px solid rgba(204, 255, 0, 0.85);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ACCESSIBILITY OVERRIDES — data attributes set by A11yContext
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* ── High contrast mode ────────────────────────────────────────────────────── */
+[data-a11y-contrast="high"] .swim26-nav-tab-label {
+  color: rgba(255, 255, 255, 0.90) !important;
+}
+
+[data-a11y-contrast="high"] .swim26-top-bar {
+  border-bottom-width: 2px !important;
+}
+
+[data-a11y-contrast="high"] .swim26-bottom-tab-bar {
+  border-top-width: 2px !important;
+}
+
+/* ── Font size scaling ─────────────────────────────────────────────────────── */
+[data-a11y-font-size="large"] .swim26-nav-tab-label {
+  font-size: 9px !important;
+}
+
+[data-a11y-font-size="xl"] .swim26-nav-tab-label {
+  font-size: 10px !important;
+}
+
+[data-a11y-font-size="large"] .swim26-top-bar span,
+[data-a11y-font-size="large"] .swim26-utility-btn span {
+  font-size: 11px !important;
+}
+
+[data-a11y-font-size="xl"] .swim26-top-bar span,
+[data-a11y-font-size="xl"] .swim26-utility-btn span {
+  font-size: 12px !important;
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────────── */
+[data-a11y-motion="reduced"] .caustic-blob,
+[data-a11y-motion="reduced"] .animate-ticker,
+[data-a11y-motion="reduced"] .animate-countdown {
+  animation: none !important;
+}
+
+[data-a11y-motion="reduced"] * {
+  transition-duration: 0.001ms !important;
+}
+
+/* Keep essential UI feedback at near-zero duration (not actually 0 for accessibility) */
+[data-a11y-motion="reduced"] .swim26-nav-tab,
+[data-a11y-motion="reduced"] .swim26-race-btn,
+[data-a11y-motion="reduced"] .swim26-utility-btn,
+[data-a11y-motion="reduced"] .swim26-back-button,
+[data-a11y-motion="reduced"] .swim26-pane-tab,
+[data-a11y-motion="reduced"] .swim26-pane-arrow {
+  animation: none !important;
+}
