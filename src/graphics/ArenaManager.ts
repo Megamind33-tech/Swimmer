@@ -33,7 +33,7 @@ import {
   RaceState,
   ISwimmerRaceState,
 } from '../types';
-import { logger, isMobileDevice } from '../utils';
+import { getGraphicsCompatibilityProfile, logger, isMobileDevice } from '../utils';
 import { BroadcastCamera } from './BroadcastCamera';
 
 // Arena sub-systems
@@ -73,6 +73,7 @@ export class ArenaManager {
   private broadcastCamera: BroadcastCamera            | null = null;
   private underwaterFX:   UnderwaterEffects           | null = null;
   private postProcess:    ArenaPostProcess            | null = null;
+  private compatibility = getGraphicsCompatibilityProfile();
 
   private isBroadcastMode = false;
 
@@ -99,7 +100,7 @@ export class ArenaManager {
     }
 
     logger.log(
-      `[ArenaManager] Created (mobile: ${isMobileDevice()})`,
+      `[ArenaManager] Created (mobile: ${isMobileDevice()}, android: ${this.compatibility.isAndroid}, shaderBudget: ${this.compatibility.mobileShaderBudget})`,
     );
   }
 
