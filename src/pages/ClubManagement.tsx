@@ -28,48 +28,56 @@ export function ClubManagement() {
   const signedAthletes = useClubRoster()
   const isLandscape = useIsLandscapeMobile()
 
+  // ── Left column cards (extracted so landscape can recompose them) ───────────
+  const teamOvrCard = (
+    <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.28)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.92) 0%, rgba(26,19,8,0.90) 100%)', backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: isLandscape ? '2px' : '5px' }}>
+        <ShieldIcon size={12} color={GOLD} />
+        <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>Team OVR</span>
+      </div>
+      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '26px' : '32px', color: GOLD, letterSpacing: '0.04em', lineHeight: 1, textShadow: '0 0 16px rgba(212,168,67,0.45)' }}>{USER_DATA.clubOvr}</div>
+      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: isLandscape ? '1px' : '3px' }}>My Club</div>
+    </div>
+  )
+
+  const trainingCard = (
+    <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '8px 10px' : '12px 14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: isLandscape ? '6px' : '10px' }}>
+        <ActivityIcon size={12} color={AQUA} />
+        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>TRAINING</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <TrainingSlot name="M. Phelps" type="Speed Drill" time="45m" progress={60} />
+        <TrainingSlot name="K. Ledecky" type="Endurance" time="1h 20m" progress={30} />
+      </div>
+      <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', width: '100%', marginTop: isLandscape ? '4px' : '8px', height: isLandscape ? '28px' : '34px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(140deg, rgba(88,28,135,0.55) 0%, rgba(167,139,250,0.18) 100%)', border: '1px solid rgba(167,139,250,0.35)', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '12px', letterSpacing: '0.10em', color: '#C4B5FD', boxShadow: '0 0 8px rgba(167,139,250,0.20), 0 2px 5px rgba(0,0,0,0.45)', userSelect: 'none' }}>
+        + UNLOCK SLOT
+      </button>
+    </div>
+  )
+
+  const objectivesCard = (
+    <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '8px 10px' : '12px 14px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em', marginBottom: isLandscape ? '6px' : '10px', flexShrink: 0 }}>OBJECTIVES</div>
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+        {CLUB_OBJECTIVES.map((objective, index) => (
+          <div key={objective} style={{ borderRadius: '8px', border: `1px solid ${PANEL_BORDER}`, background: 'rgba(56,214,255,0.03)', padding: '7px 10px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+            <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(212,168,67,0.15)', border: '1px solid rgba(212,168,67,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', color: GOLD }}>{index + 1}</span>
+            </div>
+            <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.80)', lineHeight: 1.4 }}>{objective}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
   // ── Left column ────────────────────────────────────────────────────────────
   const leftColumn = (
     <div style={{ width: '170px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {/* Team OVR */}
-      <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.28)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.92) 0%, rgba(26,19,8,0.90) 100%)', backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: isLandscape ? '2px' : '5px' }}>
-          <ShieldIcon size={12} color={GOLD} />
-          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>Team OVR</span>
-        </div>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '20px' : '32px', color: GOLD, letterSpacing: '0.04em', lineHeight: 1, textShadow: '0 0 16px rgba(212,168,67,0.45)' }}>{USER_DATA.clubOvr}</div>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: isLandscape ? '1px' : '3px' }}>My Club</div>
-      </div>
-
-      {/* Active Training */}
-      <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '8px 10px' : '12px 14px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: isLandscape ? '6px' : '10px' }}>
-          <ActivityIcon size={12} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>TRAINING</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <TrainingSlot name="M. Phelps" type="Speed Drill" time="45m" progress={60} />
-          <TrainingSlot name="K. Ledecky" type="Endurance" time="1h 20m" progress={30} />
-        </div>
-        <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', width: '100%', marginTop: isLandscape ? '4px' : '8px', height: isLandscape ? '28px' : '34px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(140deg, rgba(88,28,135,0.55) 0%, rgba(167,139,250,0.18) 100%)', border: '1px solid rgba(167,139,250,0.35)', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '12px', letterSpacing: '0.10em', color: '#C4B5FD', boxShadow: '0 0 8px rgba(167,139,250,0.20), 0 2px 5px rgba(0,0,0,0.45)', userSelect: 'none' }}>
-          + UNLOCK SLOT
-        </button>
-      </div>
-
-      {/* Weekly Objectives */}
-      <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '8px 10px' : '12px 14px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em', marginBottom: isLandscape ? '6px' : '10px', flexShrink: 0 }}>OBJECTIVES</div>
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          {CLUB_OBJECTIVES.map((objective, index) => (
-            <div key={objective} style={{ borderRadius: '8px', border: `1px solid ${PANEL_BORDER}`, background: 'rgba(56,214,255,0.03)', padding: '7px 10px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-              <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'rgba(212,168,67,0.15)', border: '1px solid rgba(212,168,67,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', color: GOLD }}>{index + 1}</span>
-              </div>
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.80)', lineHeight: 1.4 }}>{objective}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      {teamOvrCard}
+      {trainingCard}
+      {objectivesCard}
     </div>
   )
 
@@ -216,17 +224,20 @@ export function ClubManagement() {
 
   // ── Pane wrappers (for landscape-mobile navigation) ────────────────────────
   const leftPaneContent = (
-    <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {/* Reuse same cards — just in scrollable single-column layout */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {leftColumn.props.children}
+    <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>
+      {/* 2-column grid: Team OVR + Training side by side, Objectives full-width below */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' }}>
+        {teamOvrCard}
+        {trainingCard}
+        <div style={{ gridColumn: '1 / -1' }}>{objectivesCard}</div>
       </div>
     </div>
   )
 
   const rightPaneContent = (
     <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
-      <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* Max-width centered so sponsor rows don't stretch edge-to-edge in landscape */}
+      <div style={{ padding: '8px', maxWidth: '640px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {rightColumn.props.children}
       </div>
     </div>
