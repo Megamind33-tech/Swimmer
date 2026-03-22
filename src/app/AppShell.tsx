@@ -89,6 +89,8 @@ interface BackButtonProps {
   onClick:       () => void;
   reducedMotion: boolean;
   highContrast:  boolean;
+  /** In landscape-mobile the back btn moves flush to the top (no topBar above it) */
+  isLandscape:   boolean;
 }
 
 const BackButton: React.FC<BackButtonProps> = ({
@@ -96,6 +98,7 @@ const BackButton: React.FC<BackButtonProps> = ({
   onClick,
   reducedMotion,
   highContrast,
+  isLandscape,
 }) => (
   <motion.button
     initial={reducedMotion ? false : { opacity: 0, x: -10 }}
@@ -108,15 +111,24 @@ const BackButton: React.FC<BackButtonProps> = ({
     className="swim26-back-button"
     style={{
       position:       'absolute',
-      /* Sits just below the top bar — uses safe-area-inset-left to avoid notch */
-      top:            `${CHROME.topBar.normal + BACK_BTN_TOP_OFFSET}px`,
+      /*
+       * Portrait / tall: sits just below the 48 px top bar.
+       * Landscape-mobile: no top bar rendered — flush to the very top of the
+       * viewport so the 44 px button shares the same horizontal band as the
+       * PaneSwitcher tab strip (content area also starts at 44 px in that mode).
+       */
+      top:            isLandscape
+        ? 0
+        : `${CHROME.topBar.normal + BACK_BTN_TOP_OFFSET}px`,
       left:           `max(10px, ${safeArea.left})`,
-      zIndex:         68,
+      zIndex:         70,
       display:        'flex',
       alignItems:     'center',
       gap:            '5px',
       /* minHeight ensures the touch target meets the 44 px minimum */
       minHeight:      `${TOUCH.minimum}px`,
+      /* Explicit height in landscape so the button exactly fills its reserved strip */
+      height:         isLandscape ? `${TOUCH.minimum}px` : undefined,
       paddingInline:  '12px',
       borderRadius:   '10px',
       background:     highContrast
@@ -246,6 +258,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             onClick={overlayPage !== null ? closeOverlay : goToLobby}
             reducedMotion={reducedMotion}
             highContrast={highContrast}
+            isLandscape={isLandscapeMobile}
           />
         )}
       </AnimatePresence>
@@ -261,15 +274,25 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           style={{
             position: 'absolute',
             /*
-             * When the back button is visible reserve BACK_BTN_ZONE_H (96 px)
-             * from the top so the button never covers interactive page content.
-             * We shift `top` rather than using paddingTop because content
-             * screens use position:absolute with inset:0 and would ignore
-             * padding entirely.
-             * BACK_BTN_ZONE_H = topBar (48) + offset (4) + minTouchTarget (44)
+             * Content area top offset:
+             *
+             * Lobby (hideChrome=false):
+             *   topBarH (48 px) — content sits under the persistent top bar.
+             *
+             * Sub-page, portrait (hideChrome=true, showBack=true):
+             *   BACK_BTN_ZONE_H (96 px) = topBar zone (48) + offset (4) + minTouch (44).
+             *   The back button lives in this reserved strip above the content.
+             *
+             * Sub-page, landscape-mobile (hideChrome=true, showBack=true):
+             *   TOUCH.minimum (44 px) — no top bar is rendered in this mode, so
+             *   we only need to clear the back button itself (also 44 px tall).
+             *   This eliminates the ~52 px of blank space that was previously
+             *   caused by reserving the phantom topBar height in landscape.
              */
             top:      hideChrome
-              ? (showBack ? `${BACK_BTN_ZONE_H}px` : 0)
+              ? (showBack
+                  ? (isLandscapeMobile ? `${TOUCH.minimum}px` : `${BACK_BTN_ZONE_H}px`)
+                  : 0)
               : `${topBarH}px`,
             bottom:   hideChrome ? 0 : `${bottomBarH}px`,
             left:     0,

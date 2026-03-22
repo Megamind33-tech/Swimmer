@@ -284,31 +284,35 @@ export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps
         </motion.button>
       </div>
 
-      {/* Progress dots — below the tab strip, not overlapping it */}
-      <div
-        aria-hidden
-        style={{
-          flexShrink:    0,
-          display:       'flex',
-          justifyContent:'center',
-          gap:           '4px',
-          padding:       '4px 0 2px',
-          background:    'transparent',
-        }}
-      >
-        {panes.map((p, i) => (
-          <span
-            key={p.id}
-            style={{
-              width:        i === activeIdx ? '12px' : '4px',
-              height:       '2px',
-              borderRadius: '2px',
-              background:   i === activeIdx ? VOLT : 'rgba(169,211,231,0.25)',
-              transition:   reducedMotion ? 'none' : 'width 0.2s, background 0.2s',
-            }}
-          />
-        ))}
-      </div>
+      {/* Progress dots — below the tab strip, not overlapping it.
+          Hidden in landscape-mobile where vertical space is precious;
+          the active-tab underline already signals position. */}
+      {!isLandscape && (
+        <div
+          aria-hidden
+          style={{
+            flexShrink:    0,
+            display:       'flex',
+            justifyContent:'center',
+            gap:           '4px',
+            padding:       '4px 0 2px',
+            background:    'transparent',
+          }}
+        >
+          {panes.map((p, i) => (
+            <span
+              key={p.id}
+              style={{
+                width:        i === activeIdx ? '12px' : '4px',
+                height:       '2px',
+                borderRadius: '2px',
+                background:   i === activeIdx ? VOLT : 'rgba(169,211,231,0.25)',
+                transition:   reducedMotion ? 'none' : 'width 0.2s, background 0.2s',
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* ── Pane content ── */}
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
