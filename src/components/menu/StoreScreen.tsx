@@ -1,17 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-
-function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState<boolean>(
-    () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false),
-  );
-  useEffect(() => {
-    const mq = window.matchMedia(query);
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, [query]);
-  return matches;
-}
+import React, { useMemo, useRef, useState } from 'react';
+import { useIsLandscapeMobile } from '../../hooks/useIsLandscapeMobile';
 import { motion } from 'motion/react';
 import { ChevronLeft, Search, SlidersHorizontal } from 'lucide-react';
 import {
@@ -194,7 +182,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
   const [activeTopCategory, setActiveTopCategory] = useState<TopCategory>('RECOMMENDED');
   const [activeSubCategory, setActiveSubCategory] = useState<SubCategory>('FEATURED');
   const subScrollRef = useRef<HTMLDivElement>(null);
-  const isMobileLandscape = useMediaQuery('(max-width: 896px) and (orientation: landscape)');
+  const isMobileLandscape = useIsLandscapeMobile();
 
   const visibleProducts = useMemo(() => {
     return products.filter((product) => {
@@ -259,6 +247,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
               alignItems: 'center',
               gap: '3px',
               padding: '5px 10px 5px 6px',
+              minHeight: '44px',
               borderRadius: '8px',
               background: 'rgba(4,20,33,0.80)',
               border: '1px solid rgba(56,214,255,0.20)',
@@ -353,8 +342,8 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             whileTap={{ scale: 0.90 }}
             className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38D6FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041421]"
             style={{
-              width: '30px',
-              height: '30px',
+              width: '44px',
+              height: '44px',
               borderRadius: '8px',
               border: '1px solid rgba(255,255,255,0.10)',
               background: 'rgba(255,255,255,0.06)',
@@ -373,8 +362,8 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
             whileTap={{ scale: 0.90 }}
             className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38D6FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041421]"
             style={{
-              width: '30px',
-              height: '30px',
+              width: '44px',
+              height: '44px',
               borderRadius: '8px',
               border: '1px solid rgba(255,255,255,0.10)',
               background: 'rgba(255,255,255,0.06)',
@@ -418,7 +407,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
                 background: 'transparent',
                 color: active ? swim26Color.text.primary : swim26Color.text.secondary,
                 minWidth: 72,
-                height: 40,
+                minHeight: 44,
                 padding: '0 12px',
                 fontSize: 11,
                 fontWeight: 700,
@@ -500,7 +489,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
               onClick={() => setActiveSubCategory(sub.id)}
               style={{
                 flexShrink: 0,
-                height: 28,
+                minHeight: 44,
                 padding: '0 11px',
                 borderRadius: swim26Boundary.radius.pill,
                 border: active

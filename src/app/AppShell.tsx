@@ -260,18 +260,22 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           transition={{ duration: reducedMotion ? 0 : 0.18 }}
           style={{
             position: 'absolute',
-            top:      hideChrome ? 0 : `${topBarH}px`,
+            /*
+             * When the back button is visible reserve BACK_BTN_ZONE_H (96 px)
+             * from the top so the button never covers interactive page content.
+             * We shift `top` rather than using paddingTop because content
+             * screens use position:absolute with inset:0 and would ignore
+             * padding entirely.
+             * BACK_BTN_ZONE_H = topBar (48) + offset (4) + minTouchTarget (44)
+             */
+            top:      hideChrome
+              ? (showBack ? `${BACK_BTN_ZONE_H}px` : 0)
+              : `${topBarH}px`,
             bottom:   hideChrome ? 0 : `${bottomBarH}px`,
             left:     0,
             right:    0,
             overflow: 'hidden',
-            /*
-             * When the back button is visible, reserve BACK_BTN_ZONE_H (96 px)
-             * from the top so the button never covers interactive page content.
-             * BACK_BTN_ZONE_H = topBar (48) + offset (4) + minTouchTarget (44)
-             */
-            paddingTop: showBack ? `${BACK_BTN_ZONE_H}px` : undefined,
-            boxSizing:  'border-box',
+            boxSizing: 'border-box',
           }}
         >
           {overlayPage === 'settings'      ? <SettingsPage /> :

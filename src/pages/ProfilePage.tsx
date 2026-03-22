@@ -114,13 +114,14 @@ export function ProfilePage() {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{
-                  height: '32px', paddingInline: '16px', borderRadius: '8px', cursor: 'pointer',
+                  minHeight: '44px', paddingInline: '16px', paddingBlock: '6px', borderRadius: '8px', cursor: 'pointer',
                   background: active ? 'rgba(56,214,255,0.12)' : 'rgba(56,214,255,0.04)',
                   border: active ? `1px solid rgba(56,214,255,0.35)` : `1px solid ${PANEL_BORDER}`,
                   fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px',
                   letterSpacing: '0.12em', textTransform: 'uppercase',
                   color: active ? AQUA : 'rgba(169,211,231,0.45)',
                   transition: 'all 0.18s ease',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
                 {tab}
@@ -139,12 +140,12 @@ export function ProfilePage() {
               style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}
             >
               {/* Stat bars */}
-              <div style={{ borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '9px' }}>
+              <div style={{ borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '9px', flexShrink: 0 }}>
                   <ActivityIcon size={12} color={AQUA} />
                   <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>ATHLETE ATTRIBUTES</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', overflowY: 'auto', flex: 1 }}>
                   {PLAYER_STATS.map((stat) => (
                     <div key={stat.label}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
@@ -236,6 +237,7 @@ export function ProfilePage() {
           icon: <ActivityIcon size={12} />,
           content: (
             <div style={{ position: 'absolute', inset: 0, padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden' }}>
+              {/* Tab bar and content — content scrolls internally per tab */}
               {rightColumn.props.children}
             </div>
           ),

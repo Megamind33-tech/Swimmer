@@ -50,7 +50,7 @@ export function ClubManagement() {
           <TrainingSlot name="M. Phelps" type="Speed Drill" time="45m" progress={60} />
           <TrainingSlot name="K. Ledecky" type="Endurance" time="1h 20m" progress={30} />
         </div>
-        <button style={{ width: '100%', marginTop: '8px', height: '28px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(56,214,255,0.05)', border: '1px dashed rgba(56,214,255,0.20)', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(169,211,231,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+        <button style={{ width: '100%', marginTop: '8px', minHeight: '44px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(56,214,255,0.05)', border: '1px dashed rgba(56,214,255,0.20)', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(169,211,231,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
           <span style={{ fontSize: '14px', lineHeight: 1 }}>+</span> UNLOCK SLOT
         </button>
       </div>
@@ -85,7 +85,7 @@ export function ClubManagement() {
               {SWIMMERS.length + signedAthletes.length} athletes
             </span>
           </div>
-          <button style={{ height: '24px', paddingInline: '10px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA }}>
+          <button style={{ minHeight: '44px', paddingInline: '10px', paddingBlock: '8px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             AUTO BUILD
           </button>
         </div>
@@ -224,8 +224,10 @@ export function ClubManagement() {
   )
 
   const rightPaneContent = (
-    <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'hidden' }}>
-      {rightColumn.props.children}
+    <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
+      <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {rightColumn.props.children}
+      </div>
     </div>
   )
 

@@ -74,14 +74,14 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
         </div>
 
         {/* Tab nav */}
-        <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflow: 'hidden' }}>
+        <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
           {TABS.map((tab) => {
             const active = tab.id === activeTab;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                style={{ width: '100%', height: '30px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.14)' : 'rgba(255,255,255,0.02)', border: active ? `1px solid rgba(56,214,255,0.38)` : '1px solid transparent', fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', letterSpacing: '0.10em', color: active ? AQUA : 'rgba(169,211,231,0.45)', textAlign: 'left', paddingInline: '10px', transition: 'all 0.14s', boxShadow: active ? '0 0 8px rgba(56,214,255,0.12)' : 'none' }}
+                style={{ width: '100%', minHeight: '44px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.14)' : 'rgba(255,255,255,0.02)', border: active ? `1px solid rgba(56,214,255,0.38)` : '1px solid transparent', fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', letterSpacing: '0.10em', color: active ? AQUA : 'rgba(169,211,231,0.45)', textAlign: 'left', paddingInline: '10px', transition: 'all 0.14s', boxShadow: active ? '0 0 8px rgba(56,214,255,0.12)' : 'none' }}
               >
                 {tab.label}
               </button>
@@ -187,7 +187,7 @@ function SkillsTab() {
                 : <span style={{ fontSize: '12px', color: 'rgba(169,211,231,0.25)' }}>🔒</span>}
             </div>
             <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', lineHeight: 1.4, marginBottom: '8px' }}>{s.desc}</div>
-            <button style={{ width: '100%', height: '24px', borderRadius: '7px', cursor: s.unlocked ? 'pointer' : 'not-allowed', background: s.unlocked ? 'rgba(56,214,255,0.08)' : 'rgba(255,255,255,0.02)', border: `1px solid ${s.unlocked ? 'rgba(56,214,255,0.20)' : 'rgba(255,255,255,0.05)'}`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.10em', color: s.unlocked ? AQUA : 'rgba(169,211,231,0.25)' }}>
+            <button style={{ width: '100%', minHeight: '44px', borderRadius: '7px', cursor: s.unlocked ? 'pointer' : 'not-allowed', background: s.unlocked ? 'rgba(56,214,255,0.08)' : 'rgba(255,255,255,0.02)', border: `1px solid ${s.unlocked ? 'rgba(56,214,255,0.20)' : 'rgba(255,255,255,0.05)'}`, fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.10em', color: s.unlocked ? AQUA : 'rgba(169,211,231,0.25)' }}>
               {s.unlocked ? 'OPTIMIZE' : 'LOCKED'}
             </button>
           </div>
@@ -225,7 +225,7 @@ function GearTab() {
             </div>
             <div style={{ borderRadius: '7px', background: 'rgba(0,0,0,0.28)', border: `1px solid ${PANEL_BORDER}`, padding: '5px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', fontWeight: 700, color: 'rgba(169,211,231,0.60)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{g.stats}</span>
-              <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: AQUA, letterSpacing: '0.10em', padding: 0 }}>SWAP</button>
+              <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: AQUA, letterSpacing: '0.10em', minHeight: '44px', minWidth: '44px', paddingInline: '8px' }}>SWAP</button>
             </div>
           </div>
         ))}
@@ -260,7 +260,7 @@ function AppearanceTab() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
         <SectionHeader label="ATHLETE VISUALS" />
         {options.map((opt) => (
-          <button key={opt.name} style={{ width: '100%', borderRadius: '9px', border: `1px solid ${PANEL_BORDER}`, background: 'rgba(56,214,255,0.03)', padding: '7px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', textAlign: 'left' }}>
+          <button key={opt.name} style={{ width: '100%', borderRadius: '9px', border: `1px solid ${PANEL_BORDER}`, background: 'rgba(56,214,255,0.03)', padding: '7px 12px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', textAlign: 'left' }}>
             <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', fontWeight: 700, color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{opt.name}</span>
             <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '12px', fontWeight: 700, color: '#F3FBFF' }}>{opt.value}</span>
           </button>

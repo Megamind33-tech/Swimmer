@@ -90,7 +90,7 @@ export function CareerMode() {
               </div>
               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1.1, marginBottom: '4px' }}>{event.name}</div>
               <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginBottom: '7px', lineHeight: 1.3 }}>{event.reward}</div>
-              <button style={{ height: '24px', paddingInline: '10px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA }}>
+              <button style={{ minHeight: '44px', paddingInline: '10px', paddingBlock: '8px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 Enter Race
               </button>
             </div>
@@ -154,8 +154,10 @@ export function CareerMode() {
           label: 'EVENTS',
           icon: <TrophyIcon size={12} />,
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px', overflow: 'hidden' }}>
-              {rightColumn.props.children}
+            <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
+              <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {rightColumn.props.children}
+              </div>
             </div>
           ),
         },
