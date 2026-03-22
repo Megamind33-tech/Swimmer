@@ -77,21 +77,23 @@ interface IconTabBarProps {
 // NavTab
 // ─────────────────────────────────────────────────────────────────────────────
 
-function NavTab({
+interface NavTabProps {
+  tab: TabDef;
+  isActive: boolean;
+  onChange: (id: LobbyTab) => void;
+  isLandscape: boolean;
+  reducedMotion: boolean;
+  highContrast: boolean;
+}
+
+const NavTab: React.FC<NavTabProps> = ({
   tab,
   isActive,
   onChange,
   isLandscape,
   reducedMotion,
   highContrast,
-}: {
-  tab:          TabDef;
-  isActive:     boolean;
-  onChange:     (id: LobbyTab) => void;
-  isLandscape:  boolean;
-  reducedMotion:boolean;
-  highContrast: boolean;
-}) {
+}) => {
   const Icon    = tab.icon;
   const iconSz  = isLandscape ? 14 : 16;
   /* Show abbreviated label in landscape to keep the tab readable but compact */
@@ -203,7 +205,7 @@ function NavTab({
       </span>
     </motion.button>
   );
-}
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // IconTabBar
