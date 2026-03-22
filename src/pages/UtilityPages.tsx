@@ -636,7 +636,7 @@ export function TrainingPage() {
               <button
                 key={d.id}
                 onClick={() => setSelectedDrill(d)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', borderRadius: '10px', cursor: 'pointer', marginBottom: '4px', background: active ? `rgba(56,214,255,0.12)` : 'rgba(255,255,255,0.03)', border: active ? `1px solid rgba(56,214,255,0.35)` : '1px solid transparent', transition: 'all 0.14s', boxShadow: active ? `0 0 10px rgba(56,214,255,0.12)` : 'none', textAlign: 'left' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', marginBottom: '4px', background: active ? `rgba(56,214,255,0.12)` : 'rgba(255,255,255,0.03)', border: active ? `1px solid rgba(56,214,255,0.35)` : '1px solid transparent', transition: 'all 0.14s', boxShadow: active ? `0 0 10px rgba(56,214,255,0.12)` : 'none', textAlign: 'left' }}
               >
                 <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{d.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -774,7 +774,7 @@ export function TrainingPage() {
           label: 'DRILLS',
           icon: <TargetIcon size={12} />,
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {drillSelector.props.children}
             </div>
           ),
@@ -783,7 +783,7 @@ export function TrainingPage() {
           id: 'session',
           label: 'SESSION',
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {activeDrillView.props.children}
             </div>
           ),

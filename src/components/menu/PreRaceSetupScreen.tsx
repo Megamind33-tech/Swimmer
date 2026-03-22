@@ -13,8 +13,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { useIsLandscapeMobile } from '../../hooks/useIsLandscapeMobile';
 
-// ─── Responsive hook ──────────────────────────────────────────────────────────
+// ─── Responsive hook (portrait-phone detection only) ─────────────────────────
+// useIsLandscapeMobile (from the shared hook) handles landscape detection.
+// This local helper stays only to detect portrait phone narrowness for the
+// distance-grid column count — a different concern from landscape orientation.
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState<boolean>(
@@ -67,6 +71,8 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
   const [selectedVenue,    setSelectedVenue]    = useState('olympic');
   const [isStarting,       setIsStarting]       = useState(false);
 
+  // Landscape mobile (height ≤ 500px): compact header, hide non-essential items
+  const isLandscape = useIsLandscapeMobile();
   // Portrait phone (≤480px): distance grid drops from 3 → 2 columns
   const isMobilePortrait = useMediaQuery('(max-width: 480px)');
 
@@ -234,11 +240,11 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
           </span>
         </div>
 
-        {/* Right — SECTOR / STABILITY tabs */}
+        {/* Right — SECTOR / STABILITY tabs — hidden in landscape to save horizontal space */}
         <div
           style={{
             flexShrink: 0,
-            display: 'flex',
+            display: isLandscape ? 'none' : 'flex',
             alignItems: 'center',
             height: '100%',
             borderLeft: '1px solid rgba(255,255,255,0.06)',
@@ -334,11 +340,11 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
           className="order-first sm:order-last sm:overflow-hidden"
           style={{ flexShrink: 0 }}
         >
-          {/* ─ Mobile strip (hidden on sm+) ─ */}
+          {/* ─ Mobile strip (hidden on sm+, i.e. landscape phones ≥640px wide) ─ */}
           <div
             className="flex sm:hidden items-center gap-3 px-4"
             style={{
-              height: '80px',
+              height: isLandscape ? '60px' : '80px',
               background: '#0d1929',
               borderBottom: '1px solid rgba(0,212,255,0.18)',
             }}

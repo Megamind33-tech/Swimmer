@@ -22,7 +22,7 @@
  *   ✗ No generic web typography
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { Play, Target, Medal } from 'lucide-react';
 import { PrimaryButton, SecondaryButton } from './GameButtons';
@@ -30,19 +30,7 @@ import { FeaturedEventCard } from './FeaturedEventCard';
 import { lobby } from '../theme/tokens';
 import { USER_DATA } from '../utils/gameData';
 import appSkinBackground from '../designs/app_skin/venue-skin.jpg';
-
-function useIsLandscapeMobile(): boolean {
-  const [v, setV] = useState(
-    () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight,
-  );
-  useEffect(() => {
-    const mq = window.matchMedia('(max-height: 500px) and (orientation: landscape)');
-    const handler = (e: MediaQueryListEvent) => setV(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return v;
-}
+import { useIsLandscapeMobile } from '../hooks/useIsLandscapeMobile';
 
 interface LobbyScreenProps {
   /** Triggers the race flow (hands off to GameShell) */

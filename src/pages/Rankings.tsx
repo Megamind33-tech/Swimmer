@@ -109,7 +109,7 @@ export function Rankings() {
               key={cat.id}
               onClick={() => setCategory(cat.id)}
               style={{
-                flex: 1, height: '34px', border: `1px solid ${active ? 'rgba(56,214,255,0.40)' : PANEL_BORDER}`,
+                flex: 1, minHeight: '44px', border: `1px solid ${active ? 'rgba(56,214,255,0.40)' : PANEL_BORDER}`,
                 borderRadius: '10px', background: active ? 'rgba(56,214,255,0.10)' : PANEL,
                 backdropFilter: 'blur(8px)', cursor: 'pointer',
                 fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.10em',

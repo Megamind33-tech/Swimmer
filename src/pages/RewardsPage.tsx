@@ -159,7 +159,7 @@ export function RewardsPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
-                height: '32px', paddingInline: '14px', borderRadius: '8px', cursor: 'pointer',
+                minHeight: '44px', paddingInline: '14px', paddingBlock: '6px', borderRadius: '8px', cursor: 'pointer',
                 background: active ? 'rgba(212,168,67,0.12)' : 'rgba(56,214,255,0.04)',
                 border: active ? `1px solid rgba(212,168,67,0.35)` : `1px solid ${PANEL_BORDER}`,
                 fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px',
@@ -190,7 +190,7 @@ export function RewardsPage() {
               {unclaimedCount > 0 && (
                 <button
                   onClick={() => setClaimed(new Set(CLAIMABLE_REWARDS.map((r) => r.id)))}
-                  style={{ alignSelf: 'flex-end', height: '30px', paddingInline: '14px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(212,168,67,0.10)', border: `1px solid rgba(212,168,67,0.30)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: GOLD, flexShrink: 0 }}
+                  style={{ alignSelf: 'flex-end', minHeight: '44px', paddingInline: '14px', paddingBlock: '8px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(212,168,67,0.10)', border: `1px solid rgba(212,168,67,0.30)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: GOLD, flexShrink: 0 }}
                 >
                   Claim All
                 </button>
@@ -229,7 +229,7 @@ export function RewardsPage() {
                     ) : (
                       <button
                         onClick={() => setClaimed((prev) => new Set([...prev, item.id]))}
-                        style={{ height: '30px', paddingInline: '16px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(90deg, rgba(212,168,67,0.22), rgba(212,168,67,0.12))', border: `1px solid rgba(212,168,67,0.35)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: GOLD, display: 'flex', alignItems: 'center', gap: '6px' }}
+                        style={{ minHeight: '44px', paddingInline: '16px', paddingBlock: '8px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(90deg, rgba(212,168,67,0.22), rgba(212,168,67,0.12))', border: `1px solid rgba(212,168,67,0.35)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: GOLD, display: 'flex', alignItems: 'center', gap: '6px' }}
                       >
                         Claim <ChevronRightIcon size={12} />
                       </button>
