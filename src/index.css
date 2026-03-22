@@ -858,9 +858,9 @@ body {
 */
 
 @media (max-height: 500px) and (orientation: landscape) {
-  /* Top utility bar: 48px → 40px */
+  /* Top utility bar: keep at 44px so the 44px buttons fit without overflow */
   .swim26-top-bar {
-    height: 40px !important;
+    height: 44px !important;
   }
 
   /* Bottom icon tab bar: 60px → 44px */
@@ -868,11 +868,12 @@ body {
     height: 44px !important;
   }
 
-  /* Centre RACE button in tab bar: tighter */
+  /* Centre RACE button: flush (no negative margin) so it stays within the bar */
   .swim26-race-btn {
-    width: 52px !important;
-    height: 44px !important;
-    margin-top: -6px !important;
+    width: 48px !important;
+    height: 40px !important;
+    margin-top: 0 !important;
+    border-radius: 10px !important;
   }
 
   /* Tab buttons: compress vertical padding */
@@ -886,9 +887,9 @@ body {
     font-size: 7px !important;
   }
 
-  /* Back button: less top offset + tighter padding */
+  /* Back button: flush to top in landscape (no top bar above it) */
   .swim26-back-button {
-    top: 44px !important;
+    top: 0 !important;
   }
 }
 
