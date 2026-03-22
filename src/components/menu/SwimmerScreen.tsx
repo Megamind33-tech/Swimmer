@@ -38,7 +38,7 @@ export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
   return (
     <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: '8px', padding: '10px' }}>
       {/* ── LEFT: Athlete card ── */}
-      <div style={{ width: '160px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ width: '160px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', scrollbarWidth: 'none' }}>
         {/* Profile */}
         <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           <div style={{ position: 'relative' }}>

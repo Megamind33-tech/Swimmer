@@ -404,13 +404,14 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
               minWidth: '240px',
               maxWidth: '340px',
               borderLeft: '1px solid rgba(255,255,255,0.06)',
-              overflowY: 'hidden',
+              overflowY: 'auto',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(0,212,255,0.25) transparent',
             }}
           >
             <div
               style={{
                 margin: '16px',
-                flex: 1,
                 borderRadius: '12px',
                 background: '#0d1929',
                 border: '1px solid rgba(0,212,255,0.20)',
@@ -418,7 +419,6 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '16px',
-                overflow: 'hidden',
               }}
             >
               {/* Avatar + name */}

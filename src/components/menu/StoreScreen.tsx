@@ -1,4 +1,17 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState<boolean>(
+    () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false),
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const handler = (e: MediaQueryListEvent) => setMatches(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [query]);
+  return matches;
+}
 import { motion } from 'motion/react';
 import { ChevronLeft, Search, SlidersHorizontal } from 'lucide-react';
 import {
@@ -181,6 +194,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
   const [activeTopCategory, setActiveTopCategory] = useState<TopCategory>('RECOMMENDED');
   const [activeSubCategory, setActiveSubCategory] = useState<SubCategory>('FEATURED');
   const subScrollRef = useRef<HTMLDivElement>(null);
+  const isMobileLandscape = useMediaQuery('(max-width: 896px) and (orientation: landscape)');
 
   const visibleProducts = useMemo(() => {
     return products.filter((product) => {
@@ -535,7 +549,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gridTemplateColumns: isMobileLandscape ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))',
               gap: '10px',
               alignContent: 'start',
             }}
