@@ -245,14 +245,15 @@ export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps
 
         {/* Tab buttons */}
         {panes.map(pane => (
+          <React.Fragment key={pane.id}>
           <TabBtn
-            key={pane.id}
             pane={pane}
             isActive={pane.id === activeId}
             onClick={() => goTo(pane.id)}
             reducedMotion={reducedMotion}
             highContrast={highContrast}
           />
+          </React.Fragment>
         ))}
 
         {/* Next arrow — 44 px wide touch target */}

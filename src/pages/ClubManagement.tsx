@@ -5,6 +5,7 @@ import { SwimmerCard } from '../components/SwimmerCard'
 import { ShieldIcon, ActivityIcon, CalendarIcon, FlagIcon, UserPlusIcon } from 'lucide-react'
 import { SponsorPanel } from './ProfilePage'
 import { useClubRoster, type SignedAthlete } from '../utils/clubRoster'
+import { getReadinessLabel } from '../utils/trainingSystem'
 import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
 
 const AQUA = 'var(--color-volt)'
@@ -19,7 +20,7 @@ function toSwimmerCard(a: SignedAthlete) {
     ovr: a.ovr,
     stroke: a.stroke as any,
     country: a.flag,
-    stats: { speed: a.ovr, stamina: a.ovr, technique: a.ovr, turn: a.ovr },
+    stats: { speed: Math.round(a.stats.speed), stamina: Math.round(a.stats.stamina), technique: Math.round(a.stats.technique), turn: Math.round(a.stats.endurance) },
     rarity: a.ovr >= 95 ? 'legendary' : a.ovr >= 88 ? 'epic' : a.ovr >= 82 ? 'rare' : 'common' as any,
   }
 }
@@ -40,6 +41,8 @@ export function ClubManagement() {
     </div>
   )
 
+  const trackedTrainingGroup = signedAthletes.slice().sort((a, b) => (b.development.sessionsCompleted ?? 0) - (a.development.sessionsCompleted ?? 0)).slice(0, 2)
+
   const trainingCard = (
     <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '8px 10px' : '12px 14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: isLandscape ? '6px' : '10px' }}>
@@ -47,12 +50,24 @@ export function ClubManagement() {
         <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>TRAINING</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <TrainingSlot name="M. Phelps" type="Speed Drill" time="45m" progress={60} />
-        <TrainingSlot name="K. Ledecky" type="Endurance" time="1h 20m" progress={30} />
+        {trackedTrainingGroup.length > 0 ? trackedTrainingGroup.map((athlete) => (
+          <React.Fragment key={athlete.id}>
+          <TrainingSlot
+            name={athlete.name}
+            type={`${athlete.development.lastFocus ?? 'RECOVERY'} • ${getReadinessLabel(athlete.development)}`}
+            time={`Load ${Math.round(athlete.development.trainingLoad)}%`}
+            progress={Math.round(athlete.development.energy)}
+          />
+          </React.Fragment>
+        )) : (
+          <div style={{ borderRadius: '10px', border: '1px dashed rgba(56,214,255,0.18)', padding: '10px', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', lineHeight: 1.45 }}>
+            Sign a swimmer, then use the Training Center to apply realistic gains, fatigue, and recovery to that exact athlete.
+          </div>
+        )}
       </div>
-      <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', width: '100%', marginTop: isLandscape ? '4px' : '8px', height: isLandscape ? '28px' : '34px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(140deg, rgba(88,28,135,0.55) 0%, rgba(167,139,250,0.18) 100%)', border: '1px solid rgba(167,139,250,0.35)', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '12px', letterSpacing: '0.10em', color: '#C4B5FD', boxShadow: '0 0 8px rgba(167,139,250,0.20), 0 2px 5px rgba(0,0,0,0.45)', userSelect: 'none' }}>
-        + UNLOCK SLOT
-      </button>
+      <div style={{ marginTop: isLandscape ? '4px' : '8px', borderRadius: '8px', padding: '8px 10px', background: 'rgba(88,28,135,0.16)', border: '1px solid rgba(167,139,250,0.24)', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: '#C4B5FD', lineHeight: 1.45 }}>
+        Hard sessions raise stats but also cut energy and race power. Recovery blocks restore readiness so club development stays believable.
+      </div>
     </div>
   )
 
@@ -172,13 +187,13 @@ export function ClubManagement() {
                     <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '12px', color: '#F3FBFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{athlete.name}</div>
                   </div>
                   <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: AQUA, textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2px' }}>{athlete.stroke} · {athlete.tier}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', marginTop: '2px' }}>Age {athlete.age} · {athlete.nationality}</div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', marginTop: '2px' }}>Age {athlete.age} · {athlete.nationality} · {getReadinessLabel(athlete.development)}</div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1 }}>{athlete.ovr}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '3px', justifyContent: 'flex-end' }}>
                     <UserPlusIcon size={8} color="rgba(54,198,144,0.80)" />
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(54,198,144,0.80)', textTransform: 'uppercase' }}>SIGNED</div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(54,198,144,0.80)', textTransform: 'uppercase' }}>POT {athlete.peakOvr}</div>
                   </div>
                 </div>
               </motion.div>
