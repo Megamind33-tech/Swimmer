@@ -30,10 +30,8 @@ import { clampPreset } from '../input/controlsSettings'
 import { loadPreset, savePreset, resetPreset } from '../input/controlsSettings'
 import type { PerformancePreset, PostProcessQuality } from '../performance/performancePreset'
 import { loadPerformancePreset, savePerformancePreset, DEFAULT_PERFORMANCE_PRESET } from '../performance/performancePreset'
-import { playerManager } from '../data/PlayerManager'
-import { getSignedAthletes, recoverSignedAthlete, trainSignedAthlete, type SignedAthlete } from '../utils/clubRoster'
-import { getNpcAcademySnapshot, getReadinessLabel, simulateNpcAcademy, TRAINING_PROGRAMS, type NpcAcademyAthlete, type TrainingFocus, type TrainingSessionResult } from '../utils/trainingSystem'
-import type { IPlayerSwimmer } from '../types'
+import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
+import { TRAINING_CYCLE_PHASES, TRAINING_DRILLS, TRAINING_DRILL_STATS } from '../utils/trainingEngineData'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design constants
@@ -542,103 +540,9 @@ export function SettingsPage() {
 // Training Page — full game-native training center
 // ─────────────────────────────────────────────────────────────────────────────
 
-type TrainingTargetMode = 'career' | 'club';
-type TrainingTarget =
-  | { id: string; label: string; kind: 'career'; athlete: IPlayerSwimmer }
-  | { id: string; label: string; kind: 'club'; athlete: SignedAthlete };
-
-interface Drill {
-  id: TrainingFocus;
-  label: string;
-  icon: React.ReactNode;
-  stat: string;
-  delta: string;
-  color: string;
-  desc: string;
-  sets: number;
-  reps: string;
-  rest: string;
-  downside: string;
-}
-
-const DRILLS: Drill[] = [
-  {
-    id: 'STARTS', label: 'STARTS', icon: <GaugeIcon size={16} />, stat: 'Reaction', delta: 'Speed focus',
-    color: AQUA, desc: 'Fast-twitch start work sharpens launch speed, but repeated explosive loading taxes race-day pop.',
-    sets: 6, reps: '×1 dive', rest: '90s', downside: 'High neural load. Expect energy and race-power drain if stacked too often.',
-  },
-  {
-    id: 'TURNS', label: 'TURNS', icon: <ActivityIcon size={16} />, stat: 'Turn Speed', delta: 'Technique focus',
-    color: '#A78BFA', desc: 'Wall timing and push-off mechanics reward technique growth without fake instant OVR jumps.',
-    sets: 8, reps: '×4 turns', rest: '60s', downside: 'Too much wall volume raises fatigue and can dull sharpness for the next race.',
-  },
-  {
-    id: 'STROKE', label: 'STROKE RATE', icon: <TimerResetIcon size={16} />, stat: 'Efficiency', delta: 'Mechanics focus',
-    color: '#34D399', desc: 'Technical rhythm sessions steadily lift stroke economy, endurance carryover, and consistency.',
-    sets: 4, reps: '200m', rest: '120s', downside: 'Lower risk than power blocks, but long sessions still cost concentration and energy.',
-  },
-  {
-    id: 'ENDURANCE', label: 'ENDURANCE', icon: <HeartPulseIcon size={16} />, stat: 'VO2 Max', delta: 'Aerobic focus',
-    color: '#F87171', desc: 'Longer threshold sets are the best way to grow stamina, but they carry the heaviest fatigue bill.',
-    sets: 3, reps: '400m', rest: '180s', downside: 'Excellent growth path, but overuse can tank energy and short-term race power.',
-  },
-  {
-    id: 'PACE', label: 'PACE', icon: <TargetIcon size={16} />, stat: 'Split Ctrl', delta: 'Mental focus',
-    color: GOLD, desc: 'Race-modeling sessions grow pacing judgement, finishing discipline, and sustainable endurance.',
-    sets: 5, reps: '100m', rest: '90s', downside: 'Moderate fatigue. Benefits flatten if the athlete is already carrying heavy training load.',
-  },
-  {
-    id: 'POWER', label: 'POWER', icon: <GaugeIcon size={16} />, stat: 'Peak Force', delta: 'Top-end focus',
-    color: '#FB923C', desc: 'Resistance work gives the fastest visible speed gains, but it is punishing when the athlete is already tired.',
-    sets: 5, reps: '50m', rest: '60s', downside: 'Largest short-term power tax. Great for upside, risky when readiness is low.',
-  },
-  {
-    id: 'RECOVERY', label: 'RECOVERY', icon: <RefreshCwIcon size={16} />, stat: 'Reset', delta: 'Absorption focus',
-    color: '#60A5FA', desc: 'Easy laps, mobility, and nervous-system reset restore the ability to benefit from future hard work.',
-    sets: 2, reps: 'Easy 20m', rest: 'Light', downside: 'Minimal raw stat growth, but it prevents unrealistic nonstop progression.',
-  },
-];
-
-function ensureCareerAthlete(): IPlayerSwimmer {
-  const loaded = playerManager.loadPlayer();
-  if (loaded) return loaded;
-  return playerManager.createPlayer('Rising Star', 'ALL_AROUND', {
-    height: 182,
-    weight: 76,
-    armSpan: 184,
-    strokeRate: 88,
-  });
-}
-
-function getTrainingTargets(mode: TrainingTargetMode, careerPlayer: IPlayerSwimmer, clubAthletes: SignedAthlete[]): TrainingTarget[] {
-  if (mode === 'club') {
-    return clubAthletes.map((athlete) => ({ id: athlete.id, label: athlete.name, kind: 'club' as const, athlete }));
-  }
-  return [{ id: careerPlayer.id, label: careerPlayer.name, kind: 'career' as const, athlete: careerPlayer }];
-}
-
-function formatSigned(value: number, suffix = ''): string {
-  return `${value > 0 ? '+' : ''}${value.toFixed(1)}${suffix}`;
-}
-
-function StatLine({ label, value, accent }: { label: string; value: string; accent?: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>
-      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(169,211,231,0.62)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{label}</span>
-      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: accent ?? '#F3FBFF', letterSpacing: '0.04em' }}>{value}</span>
-    </div>
-  )
-}
-
 export function TrainingPage() {
-  const [selectedDrill, setSelectedDrill] = useState<Drill>(DRILLS[0]);
-  const [targetMode, setTargetMode] = useState<TrainingTargetMode>('career');
-  const [careerPlayer, setCareerPlayer] = useState<IPlayerSwimmer>(() => ensureCareerAthlete());
-  const [clubAthletes, setClubAthletes] = useState<SignedAthlete[]>(() => getSignedAthletes());
-  const [npcAthletes, setNpcAthletes] = useState<NpcAcademyAthlete[]>(() => getNpcAcademySnapshot());
-  const [selectedTargetId, setSelectedTargetId] = useState<string>(() => ensureCareerAthlete().id);
-  const [minutes, setMinutes] = useState<number>(TRAINING_PROGRAMS.STARTS.recommendedMinutes);
-  const [lastResult, setLastResult] = useState<TrainingSessionResult<any> | null>(null);
+  const { selectedDrill, setSelectedDrillId, sessionActive, setSessionActive, cyclePhase, setCyclePhaseId } = useTrainingEngineState();
+
 
   const drill = selectedDrill;
 
@@ -695,10 +599,30 @@ export function TrainingPage() {
   };
 
   const drillSelector = (
-    <div style={{ width: '190px', flexShrink: 0, borderRadius: '16px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ padding: '12px 14px 8px', flexShrink: 0 }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.06em' }}>PROGRAMS</div>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Growth with tradeoffs</div>
+      <div style={{ width: '160px', flexShrink: 0, borderRadius: '16px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '12px 14px 8px', flexShrink: 0 }}>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.06em' }}>DRILLS</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Select training</div>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 12px' }}>
+          {TRAINING_DRILLS.map((d) => {
+            const active = d.id === drill.id;
+            return (
+              <button
+                key={d.id}
+                onClick={() => setSelectedDrillId(d.id)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', marginBottom: '4px', background: active ? `rgba(56,214,255,0.12)` : 'rgba(255,255,255,0.03)', border: active ? `1px solid rgba(56,214,255,0.35)` : '1px solid transparent', transition: 'all 0.14s', boxShadow: active ? `0 0 10px rgba(56,214,255,0.12)` : 'none', textAlign: 'left' }}
+              >
+                <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{d.icon}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.65)', letterSpacing: '0.06em' }}>{d.label}</div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: active ? d.color : 'rgba(169,211,231,0.35)', marginTop: '1px' }}>{d.delta}</div>
+                </div>
+                {active && <ChevronRightIcon size={12} color={AQUA} />}
+              </button>
+            );
+          })}
+        </div>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 12px' }}>
         {DRILLS.map((d) => {
@@ -826,37 +750,41 @@ export function TrainingPage() {
   )
 
   const statsPanel = (
-    <div style={{ width: '220px', flexShrink: 0, borderRadius: '16px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ padding: '12px 14px 8px', flexShrink: 0 }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.06em' }}>DEVELOPMENT</div>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Growth, costs, and AI pressure</div>
-      </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px 10px 14px', overflowY: 'auto' }}>
-        {activeTarget && (
-          <>
-            <StatLine label="Current OVR" value={String(activeTarget.athlete.ovr)} accent={drill.color} />
-            <StatLine label="Potential" value={String(activeTarget.athlete.development?.potential ?? '--')} accent={GOLD} />
-            <StatLine label="Speed" value={String(Math.round(activeTarget.athlete.stats.speed ?? 0))} />
-            <StatLine label="Stamina" value={String(Math.round(activeTarget.athlete.stats.stamina ?? 0))} />
-            <StatLine label="Technique" value={String(Math.round(activeTarget.athlete.stats.technique ?? 0))} />
-            {'endurance' in activeTarget.athlete.stats && <StatLine label="Endurance" value={String(Math.round(activeTarget.athlete.stats.endurance ?? 0))} />}
-            {'mental' in activeTarget.athlete.stats && <StatLine label="Mental" value={String(Math.round(activeTarget.athlete.stats.mental ?? 0))} />}
-          </>
-        )}
-
-        {lastResult && (
-          <div style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.05)', border: '1px solid rgba(56,214,255,0.12)' }}>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '8px' }}>Last Session</div>
-            <div style={{ display: 'grid', gap: '6px' }}>
-              <StatLine label="OVR Δ" value={formatSigned(lastResult.delta.ovr)} accent={lastResult.delta.ovr > 0 ? '#34D399' : '#F87171'} />
-              <StatLine label="Energy Δ" value={formatSigned(lastResult.delta.energy)} accent={lastResult.delta.energy >= 0 ? '#34D399' : '#F87171'} />
-              <StatLine label="Fatigue Δ" value={formatSigned(lastResult.delta.fatigue)} accent={lastResult.delta.fatigue <= 0 ? '#34D399' : '#F87171'} />
-              <StatLine label="Power Δ" value={formatSigned(lastResult.delta.racePower)} accent={lastResult.delta.racePower >= 0 ? '#34D399' : '#F87171'} />
+      <div style={{ width: '150px', flexShrink: 0, borderRadius: '16px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '12px 14px 8px', flexShrink: 0 }}>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.06em' }}>STATS</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Drill levels</div>
+        </div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', padding: '4px 10px 14px' }}>
+          <div style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '6px' }}>Cycle Phase</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {TRAINING_CYCLE_PHASES.map((phase) => {
+                const active = phase.id === cyclePhase.id;
+                return (
+                  <button
+                    key={phase.id}
+                    onClick={() => setCyclePhaseId(phase.id)}
+                    style={{
+                      width: '100%', textAlign: 'left', padding: '7px 8px', minHeight: '36px', borderRadius: '8px', cursor: 'pointer',
+                      background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)',
+                      border: active ? '1px solid rgba(56,214,255,0.28)' : '1px solid rgba(255,255,255,0.06)'
+                    }}
+                  >
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.70)', letterSpacing: '0.06em' }}>{phase.name}</div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: active ? AQUA : 'rgba(169,211,231,0.40)', marginTop: '1px' }}>{phase.readiness} readiness</div>
+                  </button>
+                );
+              })}
             </div>
-            <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-              {lastResult.summary.map((line, index) => (
-                <div key={`${line}-${index}`} style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.65)', lineHeight: 1.45 }}>{line}</div>
-              ))}
+          </div>
+          {TRAINING_DRILL_STATS.map((s) => (
+            <div key={s.label} style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                <span style={{ color: s.color }}>{s.icon}</span>
+                <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{s.label}</span>
+              </div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: s.color, letterSpacing: '0.04em', textShadow: `0 0 8px ${s.color}66` }}>{s.value}</div>
             </div>
           </div>
         )}
@@ -892,19 +820,27 @@ export function TrainingPage() {
           label: 'PROGRAMS',
           icon: <TargetIcon size={12} />,
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto', display: 'grid', gridTemplateColumns: '1fr', gap: '6px' }}>
-              {DRILLS.map((d) => {
-                const active = d.id === drill.id;
-                return (
-                  <button key={d.id} onClick={() => setSelectedDrill(d)} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px', borderRadius: '10px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', border: active ? '1px solid rgba(56,214,255,0.35)' : '1px solid rgba(255,255,255,0.06)', textAlign: 'left' }}>
-                    <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)' }}>{d.icon}</span>
-                    <div>
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: '#F3FBFF', letterSpacing: '0.06em' }}>{d.label}</div>
-                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginTop: '2px', lineHeight: 1.35 }}>{d.downside}</div>
-                    </div>
-                  </button>
-                )
-              })}
+            // 2-column grid so drill buttons don't stretch edge-to-edge in landscape
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                {TRAINING_DRILLS.map((d) => {
+                  const active = d.id === drill.id;
+                  return (
+                    <button
+                      key={d.id}
+                      onClick={() => setSelectedDrillId(d.id)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', border: active ? '1px solid rgba(56,214,255,0.35)' : '1px solid rgba(255,255,255,0.06)', transition: 'all 0.14s', boxShadow: active ? '0 0 10px rgba(56,214,255,0.12)' : 'none', textAlign: 'left' }}
+                    >
+                      <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{d.icon}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.65)', letterSpacing: '0.06em' }}>{d.label}</div>
+                        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: active ? d.color : 'rgba(169,211,231,0.35)', marginTop: '1px' }}>{d.delta}</div>
+                      </div>
+                      {active && <ChevronRightIcon size={12} color={AQUA} />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ),
         },
@@ -916,7 +852,43 @@ export function TrainingPage() {
         {
           id: 'stats',
           label: 'STATS',
-          content: <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>{statsPanel}</div>,
+          content: (
+            // 2×2 grid of stat cards so they don't stretch full width in landscape
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                {TRAINING_DRILL_STATS.map((s) => (
+                  <div key={s.label} style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+                      <span style={{ color: s.color }}>{s.icon}</span>
+                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{s.label}</span>
+                    </div>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: s.color, letterSpacing: '0.04em', textShadow: `0 0 8px ${s.color}66` }}>{s.value}</div>
+                  </div>
+                ))}
+                {/* This Week — spans both columns as a compact row */}
+                <div style={{ gridColumn: '1 / -1', padding: '8px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.10)' }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '4px' }}>Cycle Phase</div>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    {TRAINING_CYCLE_PHASES.map((phase) => {
+                      const active = phase.id === cyclePhase.id
+                      return (
+                        <button key={phase.id} onClick={() => setCyclePhaseId(phase.id)} style={{ padding: '5px 8px', minHeight: '34px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', border: active ? '1px solid rgba(56,214,255,0.28)' : '1px solid rgba(255,255,255,0.06)', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: active ? AQUA : 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                          {phase.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+                <div style={{ gridColumn: '1 / -1', padding: '8px 12px', borderRadius: '10px', background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>This Week</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: GOLD, letterSpacing: '0.04em' }}>4 / 7</div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(212,168,67,0.50)' }}>Sessions</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ),
         },
       ]}
     >

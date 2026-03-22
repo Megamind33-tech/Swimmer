@@ -1,73 +1,146 @@
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
-import { ACHIEVEMENTS, CAREER_TRACK, HOME_EVENTS, CAREER_SPONSORS } from '../utils/gameData'
-import { ProgressBar } from '../components/ProgressBar'
-import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerResetIcon, SparklesIcon, ZapIcon } from 'lucide-react'
-import { SponsorPanel } from './ProfilePage'
+import {
+  ActivityIcon,
+  ArrowRightIcon,
+  BadgeCheckIcon,
+  CalendarIcon,
+  CrownIcon,
+  FlameIcon,
+  GaugeIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  SwordsIcon,
+  TrophyIcon,
+  WavesIcon,
+  ZapIcon,
+} from 'lucide-react'
 import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
-import { storage } from '../utils'
-import type { IPlayerSwimmer } from '../types'
-import { getReadinessLabel } from '../utils/trainingSystem'
+import { ProgressBar } from '../components/ProgressBar'
+import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
+import { SponsorPanel } from './ProfilePage'
+import { CAREER_SPONSORS, USER_DATA } from '../utils/gameData'
+import {
+  PLAYER_CAREER_EVENTS,
+  PLAYER_CAREER_METRICS,
+  PLAYER_CAREER_STAGES,
+  PLAYER_RIVAL_BEATS,
+  PLAYER_SEASON_OBJECTIVES,
+  PLAYER_WEEKLY_FOCUS,
+} from '../utils/careerModeData'
+import { TRAINING_CYCLE_PHASES } from '../utils/trainingEngineData'
 
-const AQUA = 'var(--color-volt)'
-const GOLD = 'var(--color-volt)'
+const GOLD = '#D4A843'
+const AQUA = '#81ECFF'
+const SUCCESS = '#36C690'
+const ALERT = '#F87171'
 const PANEL = 'rgba(4,20,33,0.76)'
 const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 
+const panelStyle: React.CSSProperties = {
+  borderRadius: '14px',
+  border: `1px solid ${PANEL_BORDER}`,
+  background: PANEL,
+  backdropFilter: 'blur(12px)',
+}
+
 export function CareerMode() {
   const isLandscape = useIsLandscapeMobile()
-  const careerPlayer = storage.get<IPlayerSwimmer>('player_data')
-  const trainingReadiness = careerPlayer?.development ? getReadinessLabel(careerPlayer.development) : 'No profile'
+  const [selectedFocus, setSelectedFocus] = useState(PLAYER_WEEKLY_FOCUS[0]?.id ?? '')
+  const { selectedDrill, cyclePhase, setCyclePhaseId, sessionActive } = useTrainingEngineState()
 
-  // ── Left column ────────────────────────────────────────────────────────────
+  const activeFocus = useMemo(
+    () => PLAYER_WEEKLY_FOCUS.find((focus) => focus.id === selectedFocus) ?? PLAYER_WEEKLY_FOCUS[0],
+    [selectedFocus],
+  )
+
+  const currentStageIndex = PLAYER_CAREER_STAGES.findIndex((stage) => stage.status === 'current')
+  const completedStages = PLAYER_CAREER_STAGES.filter((stage) => stage.status === 'completed').length
+  const stageProgress = Math.round(((completedStages + 0.65) / PLAYER_CAREER_STAGES.length) * 100)
+
   const leftColumn = (
-    <div style={{ width: '200px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {/* Season card */}
-      <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.25)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.90) 0%, rgba(26,19,8,0.90) 100%)', backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px' }}>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: isLandscape ? '3px' : '5px' }}>Current Season</div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', marginBottom: isLandscape ? '4px' : '8px' }}>
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '18px' : '26px', color: '#F3FBFF', lineHeight: 1, letterSpacing: '0.04em' }}>S4</span>
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '10px' : '12px', color: GOLD, letterSpacing: '0.06em', marginBottom: '2px' }}>PRO LEAGUE</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isLandscape ? '3px' : '5px' }}>
-          <StatRow label="WINS"    value="142" icon={<TrophyIcon size={12} color={GOLD} />} compact={isLandscape} />
-          <StatRow label="MEDALS"  value="86"  icon={<MedalIcon  size={12} color="rgba(169,211,231,0.70)" />} compact={isLandscape} />
-          <StatRow label="RECORDS" value="12"  icon={<StarIcon   size={12} color={GOLD} />} compact={isLandscape} />
-        </div>
-      </div>
-
-      {/* Training pulse */}
-      <div style={{ borderRadius: '12px', border: '1px solid rgba(167,139,250,0.25)', background: 'linear-gradient(135deg, rgba(88,28,135,0.40) 0%, rgba(11,17,32,0.90) 100%)', backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px' }}>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(167,139,250,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: isLandscape ? '4px' : '8px' }}>Training Pulse</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: isLandscape ? '26px' : '36px', height: isLandscape ? '26px' : '36px', borderRadius: '10px', background: 'rgba(0,0,0,0.40)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <LockIcon size={isLandscape ? 11 : 15} color="rgba(255,255,255,0.35)" />
-          </div>
+    <div style={{ width: '250px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div
+        style={{
+          ...panelStyle,
+          padding: isLandscape ? '10px 12px' : '14px 16px',
+          background: 'linear-gradient(145deg, rgba(18,45,68,0.98) 0%, rgba(7,18,28,0.92) 100%)',
+          border: '1px solid rgba(129,236,255,0.18)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', color: '#F3FBFF', letterSpacing: '0.04em' }}>{careerPlayer?.name ?? 'Create career swimmer'}</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: GOLD, marginTop: '2px' }}>Readiness: {trainingReadiness}</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.55)', marginTop: '3px' }}>Energy {Math.round(careerPlayer?.development?.energy ?? 0)} • Power {Math.round(careerPlayer?.development?.racePower ?? 0)} • Potential {careerPlayer?.development?.potential ?? '--'}</div>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(129,236,255,0.72)', fontWeight: 800 }}>
+              Player Career
+            </div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '24px' : '30px', letterSpacing: '0.04em', color: '#F3FBFF', lineHeight: 1, marginTop: '4px' }}>
+              Growth Is The Game
+            </div>
           </div>
+          <div style={{ minWidth: '58px', textAlign: 'right' }}>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '26px', color: GOLD, lineHeight: 1 }}>{USER_DATA.level}</div>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(212,168,67,0.72)', fontWeight: 700 }}>Level</div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: isLandscape ? '10px' : '12px' }}>
+          <ProgressBar progress={USER_DATA.xp} max={USER_DATA.maxXp} color="bg-[#0D7C66]" showLabel />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', marginTop: isLandscape ? '10px' : '12px' }}>
+          {PLAYER_CAREER_METRICS.map((metric) => (
+            <div key={metric.label} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '9px 10px' }}>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(169,211,231,0.55)' }}>{metric.label}</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', lineHeight: 1, color: metric.accent, marginTop: '4px' }}>{metric.value}</div>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.35, color: 'rgba(169,211,231,0.62)', marginTop: '4px' }}>{metric.hint}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Roadmap */}
-      <div style={{ flex: 1, borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: isLandscape ? '5px' : '8px', flexShrink: 0 }}>
-          <CalendarIcon size={12} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>ROADMAP</span>
+      <div style={{ ...panelStyle, padding: isLandscape ? '10px 12px' : '14px 16px', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexShrink: 0 }}>
+          <WavesIcon size={13} color={AQUA} />
+          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Career Ladder</span>
+          <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: GOLD, fontWeight: 700 }}>{stageProgress}% COMPLETE</span>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          {CAREER_TRACK.map((item) => {
-            const stateColor = item.state === 'Current' ? GOLD : item.state === 'Completed' ? '#34D399' : 'rgba(255,255,255,0.25)'
+        <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '7px', paddingRight: '2px' }}>
+          {PLAYER_CAREER_STAGES.map((stage) => {
+            const isCurrent = stage.status === 'current'
+            const isDone = stage.status === 'completed'
             return (
-              <div key={item.id} style={{ borderRadius: '8px', border: `1px solid ${PANEL_BORDER}`, background: 'rgba(56,214,255,0.03)', padding: '6px 8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', color: '#F3FBFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.event}</div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.10em', marginTop: '1px' }}>{item.week} · {item.stage}</div>
+              <div
+                key={stage.id}
+                style={{
+                  borderRadius: '10px',
+                  border: isCurrent
+                    ? '1px solid rgba(212,168,67,0.34)'
+                    : isDone
+                      ? '1px solid rgba(54,198,144,0.28)'
+                      : `1px solid ${PANEL_BORDER}`,
+                  background: isCurrent
+                    ? 'linear-gradient(135deg, rgba(212,168,67,0.14) 0%, rgba(255,255,255,0.03) 100%)'
+                    : isDone
+                      ? 'rgba(54,198,144,0.06)'
+                      : 'rgba(255,255,255,0.03)',
+                  padding: '9px 10px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: isCurrent ? 'rgba(212,168,67,0.18)' : isDone ? 'rgba(54,198,144,0.14)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: isCurrent ? GOLD : isDone ? SUCCESS : 'rgba(255,255,255,0.38)' }}>{stage.order}</span>
                   </div>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', color: stateColor, letterSpacing: '0.10em', flexShrink: 0 }}>{item.state.toUpperCase()}</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{stage.name}</span>
+                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', letterSpacing: '0.12em', color: isCurrent ? GOLD : isDone ? SUCCESS : 'rgba(169,211,231,0.35)' }}>{stage.tierLabel.toUpperCase()}</span>
+                    </div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.35, color: 'rgba(169,211,231,0.60)', marginTop: '3px' }}>{stage.summary}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gap: '4px', marginTop: '8px' }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: AQUA }}><strong style={{ color: '#F3FBFF' }}>Pressure:</strong> {stage.pressure}</div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.68)' }}><strong style={{ color: '#F3FBFF' }}>Growth reward:</strong> {stage.growthReward}</div>
                 </div>
               </div>
             )
@@ -77,68 +150,208 @@ export function CareerMode() {
     </div>
   )
 
-  // ── Right column ───────────────────────────────────────────────────────────
   const rightColumn = (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
-      {/* Featured events */}
-      <div style={{ borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
-          <TrophyIcon size={12} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>FEATURED EVENTS</span>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-          {HOME_EVENTS.map((event) => (
-            <div key={event.id} style={{ borderRadius: '10px', border: `1px solid ${PANEL_BORDER}`, background: 'linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)', padding: '9px 11px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', color: GOLD, letterSpacing: '0.14em' }}>{event.status}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                  <TimerResetIcon size={10} color={GOLD} />
-                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(169,211,231,0.70)' }}>{event.time}</span>
-                </div>
-              </div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1.1, marginBottom: '4px' }}>{event.name}</div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginBottom: '6px', lineHeight: 1.3 }}>{event.reward}</div>
-              <button style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', height: isLandscape ? '26px' : '30px', paddingInline: '10px', borderRadius: '8px', border: 'none', background: 'linear-gradient(140deg, rgba(56,214,255,0.92) 0%, rgba(20,160,240,0.88) 100%)', color: '#041421', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', letterSpacing: '0.08em', cursor: 'pointer', boxShadow: '0 0 10px rgba(56,214,255,0.38), 0 2px 6px rgba(0,0,0,0.50)', userSelect: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                <ZapIcon size={10} />&nbsp;RACE
-              </button>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0 }}>
+      <div style={{ ...panelStyle, padding: isLandscape ? '10px 12px' : '14px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '10px', color: GOLD, textTransform: 'uppercase', letterSpacing: '0.16em' }}>Current pressure zone</div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '22px' : '28px', letterSpacing: '0.04em', color: '#F3FBFF', lineHeight: 1 }}>Regional Age-Group Beast Run</div>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '12px', lineHeight: 1.45, color: 'rgba(169,211,231,0.72)', marginTop: '6px', maxWidth: '760px' }}>
+              This is not a bland ladder anymore: every week now asks you to peak intelligently, protect readiness, and convert momentum into selection leverage.
             </div>
-          ))}
+          </div>
+          <div style={{ display: 'grid', gap: '6px', minWidth: isLandscape ? '160px' : '210px' }}>
+            <div style={{ borderRadius: '10px', border: '1px solid rgba(212,168,67,0.24)', background: 'rgba(212,168,67,0.08)', padding: '8px 10px' }}>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(212,168,67,0.72)', fontWeight: 800 }}>Current stage</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: GOLD, lineHeight: 1, marginTop: '2px' }}>{PLAYER_CAREER_STAGES[currentStageIndex]?.name ?? 'Regional Age-Group'}</div>
+            </div>
+            <div style={{ borderRadius: '10px', border: '1px solid rgba(54,198,144,0.22)', background: 'rgba(54,198,144,0.06)', padding: '8px 10px' }}>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(54,198,144,0.80)', fontWeight: 800 }}>Growth trigger</div>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: '#F3FBFF', lineHeight: 1.4, marginTop: '3px' }}>Hit the B cut and win the relay-anchor vote.</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Sponsors */}
-      <SponsorPanel sponsors={CAREER_SPONSORS} title="CAREER SPONSORS" compact />
+      <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.85fr', gap: '10px', minHeight: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, minHeight: 0 }}>
+          <div style={{ ...panelStyle, padding: isLandscape ? '10px 12px' : '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+              <GaugeIcon size={13} color={AQUA} />
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Weekly Growth Focus</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: isLandscape ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: '8px' }}>
+              {PLAYER_WEEKLY_FOCUS.map((focus) => {
+                const active = focus.id === activeFocus.id
+                return (
+                  <button
+                    key={focus.id}
+                    onClick={() => setSelectedFocus(focus.id)}
+                    style={{
+                      textAlign: 'left',
+                      borderRadius: '10px',
+                      border: active ? '1px solid rgba(129,236,255,0.36)' : '1px solid rgba(255,255,255,0.07)',
+                      background: active ? 'linear-gradient(135deg, rgba(129,236,255,0.12) 0%, rgba(255,255,255,0.04) 100%)' : 'rgba(255,255,255,0.03)',
+                      padding: '10px 11px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{focus.title}</div>
+                      {active && <BadgeCheckIcon size={14} color={AQUA} />}
+                    </div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.35, color: 'rgba(169,211,231,0.66)', marginTop: '5px' }}>{focus.effect}</div>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.10em', color: SUCCESS, marginTop: '8px' }}>{focus.gain.toUpperCase()}</div>
+                  </button>
+                )
+              })}
+            </div>
 
-      {/* Milestones */}
-      <div style={{ flex: 1, borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px', flexShrink: 0 }}>
-          <StarIcon size={12} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>MILESTONES</span>
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {ACHIEVEMENTS.map((ach, i) => (
-            <motion.div
-              key={ach.id}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              style={{ padding: '8px 10px', borderRadius: '9px', border: ach.completed ? '1px solid rgba(52,211,153,0.25)' : `1px solid ${PANEL_BORDER}`, background: ach.completed ? 'rgba(52,211,153,0.06)' : 'rgba(56,214,255,0.03)', display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
-              <div style={{ width: '30px', height: '30px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: ach.completed ? 'rgba(52,211,153,0.15)' : 'rgba(0,0,0,0.35)', border: ach.completed ? '1px solid rgba(52,211,153,0.30)' : '1px solid rgba(255,255,255,0.06)' }}>
-                {ach.completed
-                  ? <SparklesIcon size={13} color="#34D399" />
-                  : <StarIcon   size={13} color="rgba(255,255,255,0.30)" />}
+            <div style={{ marginTop: '10px', borderRadius: '10px', border: '1px solid rgba(248,113,113,0.20)', background: 'rgba(248,113,113,0.05)', padding: '10px 11px', display: 'grid', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <FlameIcon size={13} color={ALERT} />
+                <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: '#F3FBFF' }}>Chosen risk profile</span>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '3px' }}>
-                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '12px', color: '#F3FBFF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ach.title}</span>
-                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: GOLD, background: 'rgba(212,168,67,0.10)', padding: '1px 6px', borderRadius: '4px', flexShrink: 0 }}>{ach.reward}</span>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.74)' }}>{activeFocus.risk}</div>
+            </div>
+
+            <div style={{ marginTop: '10px', borderRadius: '10px', border: '1px solid rgba(56,214,255,0.18)', background: 'rgba(56,214,255,0.05)', padding: '10px 11px', display: 'grid', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: '#F3FBFF' }}>Training Engine Sync</div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: AQUA, marginTop: '2px' }}>{selectedDrill.label} · {cyclePhase.name}</div>
                 </div>
-                <p style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginBottom: '5px', lineHeight: 1.3 }}>{ach.desc}</p>
-                <ProgressBar progress={ach.progress} max={ach.max} color={ach.completed ? 'bg-[#0D7C66]' : 'bg-[#D4A843]'} showLabel />
+                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: sessionActive ? SUCCESS : GOLD, letterSpacing: '0.10em' }}>{sessionActive ? 'SESSION LIVE' : 'PLAN READY'}</span>
               </div>
-            </motion.div>
-          ))}
+              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                {TRAINING_CYCLE_PHASES.map((phase) => {
+                  const active = phase.id === cyclePhase.id
+                  return (
+                    <button key={phase.id} onClick={() => setCyclePhaseId(phase.id)} style={{ padding: '5px 8px', minHeight: '34px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', border: active ? '1px solid rgba(56,214,255,0.28)' : '1px solid rgba(255,255,255,0.06)', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: active ? AQUA : 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      {phase.name}
+                    </button>
+                  )
+                })}
+              </div>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.68)' }}>{cyclePhase.focus}</div>
+            </div>
+          </div>
+
+          <div style={{ ...panelStyle, padding: isLandscape ? '10px 12px' : '14px 16px', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+              <CalendarIcon size={13} color={GOLD} />
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Pressure Meet Chain</span>
+            </div>
+            <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '7px', paddingRight: '2px' }}>
+              {PLAYER_CAREER_EVENTS.map((event, index) => {
+                const isCurrent = index === 3
+                const isUnlocked = index <= 4
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    style={{
+                      borderRadius: '10px',
+                      border: isCurrent ? '1px solid rgba(212,168,67,0.32)' : isUnlocked ? '1px solid rgba(129,236,255,0.16)' : '1px solid rgba(255,255,255,0.06)',
+                      background: isCurrent ? 'linear-gradient(135deg, rgba(212,168,67,0.12) 0%, rgba(255,255,255,0.03) 100%)' : isUnlocked ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.015)',
+                      padding: '10px 11px',
+                      opacity: isUnlocked ? 1 : 0.58,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{event.name}</span>
+                          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', color: isCurrent ? GOLD : AQUA, letterSpacing: '0.10em' }}>TIER {event.tier}</span>
+                        </div>
+                        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.35, color: 'rgba(169,211,231,0.66)', marginTop: '4px' }}>{event.description}</div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF' }}>{event.distance}M</div>
+                        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: GOLD, fontWeight: 700 }}>XP {event.rewards.xp}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '7px', marginTop: '8px' }}>
+                      <MiniPill icon={<ZapIcon size={11} color={SUCCESS} />} label={`Diff ${event.difficulty}/10`} />
+                      <MiniPill icon={<ShieldCheckIcon size={11} color={AQUA} />} label={`${event.opponents.length} rivals`} />
+                      <MiniPill icon={<ArrowRightIcon size={11} color={GOLD} />} label={isCurrent ? 'Current gate' : isUnlocked ? 'Unlocked' : 'Locked'} />
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: 0, minHeight: 0 }}>
+          <div style={{ ...panelStyle, padding: isLandscape ? '10px 12px' : '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+              <TrophyIcon size={13} color={GOLD} />
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Cardinal Growth Objectives</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {PLAYER_SEASON_OBJECTIVES.map((objective) => (
+                <div key={objective.id} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '10px 11px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{objective.title}</div>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.64)', marginTop: '4px' }}>{objective.targetLabel}</div>
+                    </div>
+                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: GOLD, letterSpacing: '0.08em' }}>{objective.reward}</span>
+                  </div>
+                  <div style={{ marginTop: '8px' }}>
+                    <ProgressBar progress={objective.progress} max={100} color="bg-[#D4A843]" showLabel />
+                  </div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: AQUA, marginTop: '5px' }}>{objective.pressure}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ ...panelStyle, padding: isLandscape ? '10px 12px' : '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+              <SwordsIcon size={13} color={ALERT} />
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Rivals & Story Pressure</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {PLAYER_RIVAL_BEATS.map((rival) => (
+                <div key={rival.id} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '10px 11px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                    <div>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{rival.rival}</div>
+                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.10em', color: rival.intensity === 'peak' ? GOLD : rival.intensity === 'heated' ? ALERT : AQUA }}>{rival.title.toUpperCase()}</div>
+                    </div>
+                    <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{rival.intensity}</span>
+                  </div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.68)', lineHeight: 1.4, marginTop: '5px' }}>{rival.note}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <SponsorPanel sponsors={CAREER_SPONSORS} title="PLAYER CAREER SPONSORS" compact />
+
+          <div style={{ ...panelStyle, padding: isLandscape ? '10px 12px' : '14px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+              <CrownIcon size={13} color={GOLD} />
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Why this career feels addictive now</span>
+            </div>
+            <div style={{ display: 'grid', gap: '6px' }}>
+              {[
+                'Every meet advances at least one long-loop axis: cuts, rankings, rivalry, trust, or sponsorship.',
+                'Failure no longer kills momentum — it reroutes you into last-chance qualifiers, relay races, and revenge arcs.',
+                'Growth is visible every week through readiness, trust, momentum, and stage progression rather than only raw XP.',
+              ].map((line) => (
+                <div key={line} style={{ display: 'flex', alignItems: 'flex-start', gap: '7px' }}>
+                  <SparklesIcon size={12} color={SUCCESS} style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.70)', lineHeight: 1.45 }}>{line}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -148,34 +361,24 @@ export function CareerMode() {
     <PaneSwitcher
       panes={[
         {
-          id: 'season',
-          label: 'SEASON',
-          icon: <CalendarIcon size={12} />,
-          content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {leftColumn.props.children}
-            </div>
-          ),
+          id: 'ladder',
+          label: 'LADDER',
+          icon: <ActivityIcon size={12} />,
+          content: <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>{leftColumn}</div>,
         },
         {
-          id: 'events',
-          label: 'EVENTS',
-          icon: <TrophyIcon size={12} />,
-          content: (
-            <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
-              <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {rightColumn.props.children}
-              </div>
-            </div>
-          ),
+          id: 'grind',
+          label: 'GRIND',
+          icon: <FlameIcon size={12} />,
+          content: <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>{rightColumn}</div>,
         },
       ]}
     >
       <motion.div
-        initial={{ opacity: 0, x: 50 }}
+        initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -50 }}
-        style={{ position: 'absolute', inset: 0, display: 'flex', gap: '8px', padding: '8px' }}
+        exit={{ opacity: 0, x: -40 }}
+        style={{ position: 'absolute', inset: 0, display: 'flex', gap: '10px', padding: '10px', minHeight: 0 }}
       >
         {leftColumn}
         {rightColumn}
@@ -184,14 +387,11 @@ export function CareerMode() {
   )
 }
 
-function StatRow({ label, value, icon, compact }: { label: string; value: string; icon: React.ReactNode; compact?: boolean }) {
+function MiniPill({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', background: 'rgba(0,0,0,0.25)', padding: compact ? '3px 6px' : '5px 8px', borderRadius: '7px', border: '1px solid rgba(255,255,255,0.04)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-        {icon}
-        <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(255,255,255,0.70)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{label}</span>
-      </div>
-      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: compact ? '13px' : '16px', color: '#F3FBFF', letterSpacing: '0.04em' }}>{value}</span>
+    <div style={{ borderRadius: '999px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.20)', padding: '4px 8px', display: 'inline-flex', alignItems: 'center', gap: '5px', justifyContent: 'center' }}>
+      {icon}
+      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.70)', fontWeight: 700 }}>{label}</span>
     </div>
   )
 }
