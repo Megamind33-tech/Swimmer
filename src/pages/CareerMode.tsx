@@ -5,6 +5,9 @@ import { ProgressBar } from '../components/ProgressBar'
 import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerResetIcon, SparklesIcon, ZapIcon } from 'lucide-react'
 import { SponsorPanel } from './ProfilePage'
 import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
+import { storage } from '../utils'
+import type { IPlayerSwimmer } from '../types'
+import { getReadinessLabel } from '../utils/trainingSystem'
 
 const AQUA = 'var(--color-volt)'
 const GOLD = 'var(--color-volt)'
@@ -13,6 +16,8 @@ const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 
 export function CareerMode() {
   const isLandscape = useIsLandscapeMobile()
+  const careerPlayer = storage.get<IPlayerSwimmer>('player_data')
+  const trainingReadiness = careerPlayer?.development ? getReadinessLabel(careerPlayer.development) : 'No profile'
 
   // ── Left column ────────────────────────────────────────────────────────────
   const leftColumn = (
@@ -31,16 +36,17 @@ export function CareerMode() {
         </div>
       </div>
 
-      {/* Next unlock */}
+      {/* Training pulse */}
       <div style={{ borderRadius: '12px', border: '1px solid rgba(167,139,250,0.25)', background: 'linear-gradient(135deg, rgba(88,28,135,0.40) 0%, rgba(11,17,32,0.90) 100%)', backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px' }}>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(167,139,250,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: isLandscape ? '4px' : '8px' }}>Next Unlock</div>
+        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(167,139,250,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: isLandscape ? '4px' : '8px' }}>Training Pulse</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: isLandscape ? '26px' : '36px', height: isLandscape ? '26px' : '36px', borderRadius: '10px', background: 'rgba(0,0,0,0.40)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <LockIcon size={isLandscape ? 11 : 15} color="rgba(255,255,255,0.35)" />
           </div>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', color: '#F3FBFF', letterSpacing: '0.04em' }}>Olympic Pool</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: GOLD, marginTop: '2px' }}>Unlocks at Level 35</div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', color: '#F3FBFF', letterSpacing: '0.04em' }}>{careerPlayer?.name ?? 'Create career swimmer'}</div>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: GOLD, marginTop: '2px' }}>Readiness: {trainingReadiness}</div>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.55)', marginTop: '3px' }}>Energy {Math.round(careerPlayer?.development?.energy ?? 0)} • Power {Math.round(careerPlayer?.development?.racePower ?? 0)} • Potential {careerPlayer?.development?.potential ?? '--'}</div>
           </div>
         </div>
       </div>
