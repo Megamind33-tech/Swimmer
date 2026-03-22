@@ -616,27 +616,6 @@ export function TrainingPage() {
           })}
         </div>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 12px' }}>
-        {DRILLS.map((d) => {
-          const active = d.id === drill.id;
-          return (
-            <button
-              key={d.id}
-              onClick={() => setSelectedDrill(d)}
-              style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '9px 10px', minHeight: '58px', borderRadius: '10px', cursor: 'pointer', marginBottom: '4px', background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', border: active ? '1px solid rgba(56,214,255,0.35)' : '1px solid transparent', transition: 'all 0.14s', boxShadow: active ? '0 0 10px rgba(56,214,255,0.12)' : 'none', textAlign: 'left' }}
-            >
-              <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s', marginTop: '2px' }}>{d.icon}</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.65)', letterSpacing: '0.06em' }}>{d.label}</div>
-                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: active ? d.color : 'rgba(169,211,231,0.35)', marginTop: '1px' }}>{d.delta}</div>
-                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.40)', marginTop: '4px', lineHeight: 1.35 }}>{d.downside}</div>
-              </div>
-              {active && <ChevronRightIcon size={12} color={AQUA} />}
-            </button>
-          )
-        })}
-      </div>
-    </div>
   )
 
   const activeDrillView = (
@@ -720,8 +699,9 @@ export function TrainingPage() {
                       />
                     </div>
                   </div>
-                </button>
-              ))}
+                )
+              })}
+
               {targetMode === 'club' && targets.length === 0 && (
                 <div style={{ padding: '10px 12px', borderRadius: '10px', border: '1px dashed rgba(56,214,255,0.18)', color: 'rgba(169,211,231,0.60)', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px' }}>
                   Sign swimmers in Transfer Market to target them here one by one.
@@ -801,8 +781,7 @@ export function TrainingPage() {
               </div>
               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: s.color, letterSpacing: '0.04em', textShadow: `0 0 8px ${s.color}66` }}>{s.value}</div>
             </div>
-          </div>
-        )}
+          ))}
 
         <div style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.15)' }}>
           <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '6px' }}>AI Development Watch</div>
