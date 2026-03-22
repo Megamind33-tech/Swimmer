@@ -544,14 +544,6 @@ export function TrainingPage() {
   const { selectedDrill, setSelectedDrillId, sessionActive, setSessionActive, cyclePhase, setCyclePhaseId } = useTrainingEngineState();
 
 
-  const drill = selectedDrill;
-
-  const refreshAll = useCallback(() => {
-    setCareerPlayer(ensureCareerAthlete());
-    setClubAthletes(getSignedAthletes());
-    setNpcAthletes(getNpcAcademySnapshot());
-  }, []);
-
   useEffect(() => {
     refreshAll();
   }, [refreshAll]);
@@ -694,16 +686,39 @@ export function TrainingPage() {
                 </button>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {targets.map((target) => (
-                <button
-                  key={target.id}
-                  onClick={() => setSelectedTargetId(target.id)}
-                  style={{ padding: '8px 12px', borderRadius: '10px', border: selectedTargetId === target.id ? `1px solid ${drill.color}` : '1px solid rgba(255,255,255,0.08)', background: selectedTargetId === target.id ? `${drill.color}18` : 'rgba(255,255,255,0.03)', color: '#F3FBFF', cursor: 'pointer', textAlign: 'left', minWidth: '140px' }}
-                >
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.05em' }}>{target.label}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.60)', marginTop: '2px' }}>
-                    OVR {target.athlete.ovr} • {getReadinessLabel(target.athlete.development!)} • POT {target.athlete.development?.potential}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '18px' }}>
+              <div style={{ padding: '9px 11px', borderRadius: '10px', border: '1px solid rgba(56,214,255,0.12)', background: 'rgba(56,214,255,0.04)' }}>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '4px' }}>Cycle Focus</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: AQUA, letterSpacing: '0.05em', marginBottom: '4px' }}>{cyclePhase.name}</div>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.4, color: 'rgba(169,211,231,0.68)' }}>{cyclePhase.focus}</div>
+              </div>
+              <div style={{ padding: '9px 11px', borderRadius: '10px', border: '1px solid rgba(248,113,113,0.12)', background: 'rgba(248,113,113,0.05)' }}>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '4px' }}>Cycle Risk</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F87171', letterSpacing: '0.05em', marginBottom: '4px' }}>{cyclePhase.load}</div>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.4, color: 'rgba(169,211,231,0.68)' }}>{cyclePhase.risk}</div>
+              </div>
+            </div>
+
+            {/* Stat impact bars */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(169,211,231,0.50)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '10px' }}>Stat Impact</div>
+              {drill.impact.map((s) => {
+                const pct = (s.value / s.max) * 100;
+                return (
+                  <div key={s.label} style={{ marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: '11px', color: '#A9D3E7', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</span>
+                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: drill.color }}>{s.value}/{s.max}</span>
+                    </div>
+                    <div style={{ height: '4px', borderRadius: '2px', background: 'rgba(56,214,255,0.10)', overflow: 'hidden' }}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                        style={{ height: '100%', borderRadius: '2px', background: `linear-gradient(90deg, ${drill.color}, ${drill.color}88)`, boxShadow: `0 0 6px ${drill.color}66` }}
+                      />
+                    </div>
                   </div>
                 </button>
               ))}
