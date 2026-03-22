@@ -181,21 +181,106 @@ export function isMobileDevice(): boolean {
   );
 }
 
+export interface GraphicsCompatibilityProfile {
+  isAndroid: boolean;
+  supportsWebGL2: boolean;
+  maxTextureSize: number;
+  maxVaryingVectors: number;
+  maxFragmentUniformVectors: number;
+  mobileShaderBudget: 'strict' | 'balanced' | 'full';
+  recommendedQualityTier: 'LOW' | 'MEDIUM' | 'HIGH';
+  enableAdvancedWater: boolean;
+  enablePostProcessPipeline: boolean;
+  enableEnvironmentProbe: boolean;
+  maxPbrLights: number;
+  antialias: boolean;
+}
+
+let cachedGraphicsProfile: GraphicsCompatibilityProfile | null = null;
+
+export function getGraphicsCompatibilityProfile(): GraphicsCompatibilityProfile {
+  if (cachedGraphicsProfile) return cachedGraphicsProfile;
+
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const canvas = document.createElement('canvas');
+  const webgl2 = canvas.getContext('webgl2');
+  const webgl1 = webgl2 ?? canvas.getContext('webgl');
+
+  if (!webgl1) {
+    cachedGraphicsProfile = {
+      isAndroid,
+      supportsWebGL2: false,
+      maxTextureSize: 0,
+      maxVaryingVectors: 0,
+      maxFragmentUniformVectors: 0,
+      mobileShaderBudget: 'strict',
+      recommendedQualityTier: 'LOW',
+      enableAdvancedWater: false,
+      enablePostProcessPipeline: false,
+      enableEnvironmentProbe: false,
+      maxPbrLights: 2,
+      antialias: false,
+    };
+    return cachedGraphicsProfile;
+  }
+
+  const gl = webgl1 as WebGLRenderingContext | WebGL2RenderingContext;
+  const supportsWebGL2 = !!webgl2;
+  const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
+  const maxVaryingVectors = gl.getParameter(gl.MAX_VARYING_VECTORS) as number;
+  const maxFragmentUniformVectors = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS) as number;
+
+  const mobileShaderBudget: 'strict' | 'balanced' | 'full' =
+    isAndroid && (!supportsWebGL2 || maxVaryingVectors < 12 || maxFragmentUniformVectors < 224)
+      ? 'strict'
+      : isAndroid && (maxTextureSize < 8192 || maxVaryingVectors < 16 || maxFragmentUniformVectors < 320)
+        ? 'balanced'
+        : 'full';
+
+  const recommendedQualityTier: 'LOW' | 'MEDIUM' | 'HIGH' =
+    !supportsWebGL2
+      ? 'LOW'
+      : mobileShaderBudget === 'strict'
+        ? 'LOW'
+        : mobileShaderBudget === 'balanced'
+          ? 'MEDIUM'
+          : maxTextureSize >= 8192 && maxVaryingVectors >= 24
+            ? 'HIGH'
+            : 'MEDIUM';
+
+  const stableAdvancedPipeline =
+    supportsWebGL2 &&
+    mobileShaderBudget !== 'strict' &&
+    maxTextureSize >= 4096 &&
+    maxVaryingVectors >= 16 &&
+    maxFragmentUniformVectors >= 256;
+
+  cachedGraphicsProfile = {
+    isAndroid,
+    supportsWebGL2,
+    maxTextureSize,
+    maxVaryingVectors,
+    maxFragmentUniformVectors,
+    mobileShaderBudget,
+    recommendedQualityTier,
+    enableAdvancedWater: stableAdvancedPipeline && (!isAndroid || mobileShaderBudget === 'full'),
+    enablePostProcessPipeline: stableAdvancedPipeline,
+    enableEnvironmentProbe: stableAdvancedPipeline && (!isAndroid || mobileShaderBudget === 'full'),
+    maxPbrLights:
+      mobileShaderBudget === 'strict' ? 3
+      : mobileShaderBudget === 'balanced' ? 4
+      : isAndroid ? 6 : 8,
+    antialias: !isAndroid && recommendedQualityTier === 'HIGH',
+  };
+
+  return cachedGraphicsProfile;
+}
+
 /**
  * Get device quality tier based on capabilities
  */
 export function getDeviceQualityTier(): 'LOW' | 'MEDIUM' | 'HIGH' {
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl2');
-
-  if (!gl) return 'LOW';
-
-  const maxTexture = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-  const maxVarying = gl.getParameter(gl.MAX_VARYING_VECTORS);
-
-  if (maxTexture >= 4096 && maxVarying >= 16) return 'HIGH';
-  if (maxTexture >= 2048 && maxVarying >= 8) return 'MEDIUM';
-  return 'LOW';
+  return getGraphicsCompatibilityProfile().recommendedQualityTier;
 }
 
 /**

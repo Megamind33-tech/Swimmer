@@ -31,7 +31,7 @@
 
 import * as BABYLON from '@babylonjs/core';
 import { IArenaConfig, TimeOfDay } from '../../types';
-import { logger } from '../../utils';
+import { getGraphicsCompatibilityProfile, logger } from '../../utils';
 
 interface TimeConfig {
   ambientDiffuse:    BABYLON.Color3;
@@ -110,6 +110,7 @@ export class ArenaLighting {
 
   private allLights: BABYLON.Light[] = [];
   private _qualityTier: 'LOW' | 'MEDIUM' | 'HIGH' = 'LOW';
+  private _compatibility = getGraphicsCompatibilityProfile();
 
   // ─────────────────────────────────────────────────────────────────────────
   // Build
@@ -148,29 +149,43 @@ export class ArenaLighting {
     // Enabled on MEDIUM and HIGH; halved on LOW via applyQualityPreset().
     if (qualityTier !== 'LOW') {
       const floodY = AH - 6; // position a little below ceiling for realistic hang
-      const floodXs = [-W * 0.41, -W * 0.15, W * 0.15, W * 0.41];
-      const floodZs = [-L * 0.25,  L * 0.25];
+      const floodPositions =
+        this._compatibility.mobileShaderBudget === 'balanced'
+          ? [
+              new BABYLON.Vector3(-W * 0.30, floodY, -L * 0.25),
+              new BABYLON.Vector3( W * 0.30, floodY, -L * 0.25),
+              new BABYLON.Vector3(-W * 0.30, floodY,  L * 0.25),
+              new BABYLON.Vector3( W * 0.30, floodY,  L * 0.25),
+            ]
+          : [
+              new BABYLON.Vector3(-W * 0.41, floodY, -L * 0.25),
+              new BABYLON.Vector3(-W * 0.15, floodY, -L * 0.25),
+              new BABYLON.Vector3( W * 0.15, floodY, -L * 0.25),
+              new BABYLON.Vector3( W * 0.41, floodY, -L * 0.25),
+              new BABYLON.Vector3(-W * 0.41, floodY,  L * 0.25),
+              new BABYLON.Vector3(-W * 0.15, floodY,  L * 0.25),
+              new BABYLON.Vector3( W * 0.15, floodY,  L * 0.25),
+              new BABYLON.Vector3( W * 0.41, floodY,  L * 0.25),
+            ];
 
-      for (const fz of floodZs) {
-        for (const fx of floodXs) {
-          const spot = new BABYLON.SpotLight(
-            `flood_${fx.toFixed(0)}_${fz.toFixed(0)}`,
-            new BABYLON.Vector3(fx, floodY, fz),
-            new BABYLON.Vector3(0, -1, 0),   // straight down
-            Math.PI / 3,    // 60° cone (tighter than Phase 3's 82°)
-            2.5,            // sharper falloff inside cone (was 1.4)
-            scene,
-          );
-          this.floodLights.push(spot);
-          this.allLights.push(spot);
-        }
+      for (const pos of floodPositions) {
+        const spot = new BABYLON.SpotLight(
+          `flood_${pos.x.toFixed(0)}_${pos.z.toFixed(0)}`,
+          pos,
+          new BABYLON.Vector3(0, -1, 0),   // straight down
+          Math.PI / 3,    // 60° cone (tighter than Phase 3's 82°)
+          2.5,            // sharper falloff inside cone (was 1.4)
+          scene,
+        );
+        this.floodLights.push(spot);
+        this.allLights.push(spot);
       }
     }
 
     // ── 4. Side-bleacher bounce PointLights (HIGH only) ──────────────────
     // Low intensity, wide range — fills under-bleacher shadow and prevents
     // the pool sides from being fully unlit.
-    if (qualityTier === 'HIGH') {
+    if (qualityTier === 'HIGH' && this._compatibility.mobileShaderBudget === 'full') {
       const sideX = W * 0.5 + 18;  // well into bleacher zone
       const sideY = AH * 0.28;
       const sidePositions = [
@@ -190,7 +205,7 @@ export class ArenaLighting {
     // ── 5. Ceiling indirect bounce PointLight (MEDIUM / HIGH) ────────────
     // Simulates light reflected back from the white ceiling — provides top-
     // down soft fill that keeps the upper halves of columns / walls readable.
-    if (qualityTier !== 'LOW') {
+    if (qualityTier !== 'LOW' && this._compatibility.mobileShaderBudget !== 'strict') {
       this.ceilBouncePoint = new BABYLON.PointLight(
         'ceilBounce',
         new BABYLON.Vector3(0, AH * 0.88, 0),
@@ -206,13 +221,13 @@ export class ArenaLighting {
     // Larger maps and better filtering than Phase 3.
     // On HIGH: BESM (Blur Exponential Shadow Map) — soft, film-like.
     // On MEDIUM: Poisson PCF — lighter, still soft.
-    if (qualityTier === 'HIGH') {
+    if (qualityTier === 'HIGH' && this._compatibility.mobileShaderBudget === 'full') {
       this.shadowGenerator = new BABYLON.ShadowGenerator(2048, this.keyLight);
       this.shadowGenerator.useBlurExponentialShadowMap = true;
       this.shadowGenerator.blurKernel  = 24;
       this.shadowGenerator.bias        = 0.00004;
       this.shadowGenerator.normalBias  = 0.004;
-    } else if (qualityTier === 'MEDIUM') {
+    } else if (qualityTier === 'MEDIUM' || this._compatibility.mobileShaderBudget === 'balanced') {
       this.shadowGenerator = new BABYLON.ShadowGenerator(1024, this.keyLight);
       this.shadowGenerator.usePoissonSampling = true;
       this.shadowGenerator.bias               = 0.00005;
@@ -272,7 +287,7 @@ export class ArenaLighting {
     scene:        BABYLON.Scene,
     excludeMeshes: BABYLON.AbstractMesh[],
   ): BABYLON.BaseTexture | null {
-    if (this._qualityTier === 'LOW') return null;
+    if (this._qualityTier === 'LOW' || !this._compatibility.enableEnvironmentProbe) return null;
 
     const res   = this._qualityTier === 'HIGH' ? 128 : 64;
     this.envProbe = new BABYLON.ReflectionProbe('arenaProbe', res, scene);

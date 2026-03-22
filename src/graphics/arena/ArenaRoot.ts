@@ -6,7 +6,7 @@
  */
 
 import * as BABYLON from '@babylonjs/core';
-import { logger } from '../../utils';
+import { getGraphicsCompatibilityProfile, logger } from '../../utils';
 
 export class ArenaRoot {
   private engine: BABYLON.Engine;
@@ -21,11 +21,16 @@ export class ArenaRoot {
   private onRenderCallbacks: Array<(deltaMs: number) => void> = [];
 
   constructor(canvas: HTMLCanvasElement, qualityTier: 'LOW' | 'MEDIUM' | 'HIGH') {
+    const compatibility = getGraphicsCompatibilityProfile();
     this.engine = new BABYLON.Engine(canvas, true, {
-      antialias: qualityTier === 'HIGH',
+      antialias: qualityTier === 'HIGH' && compatibility.antialias,
       adaptToDeviceRatio: true,
       preserveDrawingBuffer: false,
     });
+
+    if (compatibility.isAndroid && compatibility.mobileShaderBudget !== 'full') {
+      this.engine.setHardwareScalingLevel(qualityTier === 'LOW' ? 1.4 : 1.15);
+    }
 
     this.scene = new BABYLON.Scene(this.engine);
 
