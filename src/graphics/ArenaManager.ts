@@ -33,7 +33,7 @@ import {
   RaceState,
   ISwimmerRaceState,
 } from '../types';
-import { logger, isMobileDevice } from '../utils';
+import { getGraphicsCompatibilityProfile, logger, isMobileDevice } from '../utils';
 import { BroadcastCamera } from './BroadcastCamera';
 
 // Arena sub-systems
@@ -73,6 +73,7 @@ export class ArenaManager {
   private broadcastCamera: BroadcastCamera            | null = null;
   private underwaterFX:   UnderwaterEffects           | null = null;
   private postProcess:    ArenaPostProcess            | null = null;
+  private compatibility = getGraphicsCompatibilityProfile();
 
   private isBroadcastMode = false;
 
@@ -99,7 +100,7 @@ export class ArenaManager {
     }
 
     logger.log(
-      `[ArenaManager] Created (mobile: ${isMobileDevice()})`,
+      `[ArenaManager] Created (mobile: ${isMobileDevice()}, android: ${this.compatibility.isAndroid}, shaderBudget: ${this.compatibility.mobileShaderBudget})`,
     );
   }
 
@@ -200,6 +201,10 @@ export class ArenaManager {
     // ── 15. Broadcast camera (dormant until enableBroadcastMode) ─────────
     this.broadcastCamera = new BroadcastCamera(scene, this.canvas);
     this.broadcastCamera.initialize();
+    const broadcastCameraInstance = this.broadcastCamera.getCameraInstance();
+    if (broadcastCameraInstance) {
+      this.postProcess.addCamera(broadcastCameraInstance);
+    }
 
     // ── 16. Apply initial theme ───────────────────────────────────────────
     this._applyThemeInternal(this.arenaConfig.theme);
@@ -286,13 +291,14 @@ export class ArenaManager {
   public enableBroadcastMode(): void {
     if (!this.broadcastCamera || !this.arenaRoot) return;
     this.isBroadcastMode = true;
-    // Let the broadcast camera set scene.activeCamera on next update tick
+    this.broadcastCamera.activate();
     logger.log('[ArenaManager] Broadcast mode enabled');
   }
 
   public disableBroadcastMode(): void {
     if (!this.arenaRoot || !this.cameraSupport || !this.canvas) return;
     this.isBroadcastMode = false;
+    this.broadcastCamera?.deactivate();
     // Restore the static camera that was active before broadcast
     this.cameraSupport.setCamera(
       this.cameraSupport.getCurrentView(),

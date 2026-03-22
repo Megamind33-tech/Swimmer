@@ -42,11 +42,12 @@
  */
 
 import * as BABYLON from '@babylonjs/core';
-import { logger } from '../../utils';
+import { getGraphicsCompatibilityProfile, logger } from '../../utils';
 
 export class ArenaPostProcess {
 
   private _pipeline: BABYLON.DefaultRenderingPipeline | null = null;
+  private _compatibility = getGraphicsCompatibilityProfile();
 
   // ─────────────────────────────────────────────────────────────────────────
   // Build
@@ -116,7 +117,12 @@ export class ArenaPostProcess {
     const rh = scene.getEngine().getRenderHeight();
     const tooSmall = rw < 256 || rh < 256;
 
-    if (qualityTier !== 'LOW' && cameras.length > 0 && !tooSmall) {
+    if (
+      qualityTier !== 'LOW' &&
+      cameras.length > 0 &&
+      !tooSmall &&
+      this._compatibility.enablePostProcessPipeline
+    ) {
       this._pipeline = new BABYLON.DefaultRenderingPipeline(
         'arenaPipeline',
         false,       // hdr = false: use LDR path for mobile performance
