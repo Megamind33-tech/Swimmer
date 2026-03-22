@@ -116,14 +116,24 @@ export function ProfilePage() {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{
-                  minHeight: '44px', paddingInline: '16px', paddingBlock: '6px', borderRadius: '8px', cursor: 'pointer',
-                  background: active ? 'rgba(56,214,255,0.12)' : 'rgba(56,214,255,0.04)',
-                  border: active ? `1px solid rgba(56,214,255,0.35)` : `1px solid ${PANEL_BORDER}`,
-                  fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px',
-                  letterSpacing: '0.12em', textTransform: 'uppercase',
-                  color: active ? AQUA : 'rgba(169,211,231,0.45)',
-                  transition: 'all 0.18s ease',
+                  height: isLandscape ? '30px' : '36px',
+                  paddingInline: isLandscape ? '12px' : '16px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: active
+                    ? 'linear-gradient(140deg, rgba(56,214,255,0.20) 0%, rgba(56,214,255,0.08) 100%)'
+                    : 'rgba(56,214,255,0.04)',
+                  border: active
+                    ? `1px solid rgba(56,214,255,0.45)`
+                    : `1px solid ${PANEL_BORDER}`,
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: isLandscape ? '12px' : '14px',
+                  letterSpacing: '0.12em',
+                  color: active ? '#F3FBFF' : 'rgba(169,211,231,0.45)',
+                  boxShadow: active ? '0 0 8px rgba(56,214,255,0.22)' : 'none',
+                  transition: 'all 0.15s ease',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  userSelect: 'none',
                 }}
               >
                 {tab}

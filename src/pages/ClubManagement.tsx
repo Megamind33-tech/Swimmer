@@ -51,8 +51,8 @@ export function ClubManagement() {
           <TrainingSlot name="M. Phelps" type="Speed Drill" time="45m" progress={60} />
           <TrainingSlot name="K. Ledecky" type="Endurance" time="1h 20m" progress={30} />
         </div>
-        <button style={{ width: '100%', marginTop: isLandscape ? '4px' : '8px', minHeight: isLandscape ? '32px' : '44px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(56,214,255,0.05)', border: '1px dashed rgba(56,214,255,0.20)', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(169,211,231,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-          <span style={{ fontSize: '14px', lineHeight: 1 }}>+</span> UNLOCK SLOT
+        <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', width: '100%', marginTop: isLandscape ? '4px' : '8px', height: isLandscape ? '28px' : '34px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(140deg, rgba(88,28,135,0.55) 0%, rgba(167,139,250,0.18) 100%)', border: '1px solid rgba(167,139,250,0.35)', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '12px', letterSpacing: '0.10em', color: '#C4B5FD', boxShadow: '0 0 8px rgba(167,139,250,0.20), 0 2px 5px rgba(0,0,0,0.45)', userSelect: 'none' }}>
+          + UNLOCK SLOT
         </button>
       </div>
 
@@ -86,7 +86,7 @@ export function ClubManagement() {
               {SWIMMERS.length + signedAthletes.length} athletes
             </span>
           </div>
-          <button style={{ minHeight: '44px', paddingInline: '10px', paddingBlock: '8px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', height: isLandscape ? '26px' : '30px', paddingInline: '10px', borderRadius: '8px', border: 'none', background: 'linear-gradient(140deg, var(--color-volt) 0%, var(--color-primary-dim) 100%)', color: 'var(--color-carbon)', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', letterSpacing: '0.08em', cursor: 'pointer', boxShadow: '0 0 10px rgba(204,255,0,0.30), 0 2px 6px rgba(0,0,0,0.50)', userSelect: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
             AUTO BUILD
           </button>
         </div>

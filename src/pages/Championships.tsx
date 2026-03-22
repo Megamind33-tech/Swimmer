@@ -48,8 +48,8 @@ function FeaturedCard() {
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isLandscape ? '4px' : '8px', flexShrink: 0 }}>
           <TrophyIcon size={isLandscape ? 26 : 44} color={GOLD} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 14px rgba(212,168,67,0.55))` }} />
-          <button style={{ minHeight: '36px', paddingInline: isLandscape ? '10px' : '16px', paddingBlock: isLandscape ? '4px' : '8px', borderRadius: '8px', cursor: 'pointer', background: '#F3FBFF', border: 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', letterSpacing: '0.10em', color: 'var(--color-carbon)', boxShadow: '0 0 14px rgba(243,251,255,0.25)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            ENTER TOURNAMENT
+          <button style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px', height: isLandscape ? '30px' : '38px', paddingInline: isLandscape ? '10px' : '16px', borderRadius: '9px', cursor: 'pointer', border: 'none', background: 'linear-gradient(140deg, rgba(212,168,67,0.97) 0%, rgba(195,120,10,0.92) 100%)', color: '#1A0D00', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '12px' : '14px', letterSpacing: '0.10em', boxShadow: '0 0 16px rgba(212,168,67,0.55), 0 3px 8px rgba(0,0,0,0.55)', whiteSpace: 'nowrap', userSelect: 'none', flexShrink: 0 }}>
+            <TrophyIcon size={isLandscape ? 11 : 13} /> ENTER TOURNAMENT
           </button>
         </div>
       </div>

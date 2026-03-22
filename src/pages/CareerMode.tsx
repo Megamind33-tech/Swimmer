@@ -2,7 +2,7 @@ import React from 'react'
 import { motion } from 'motion/react'
 import { ACHIEVEMENTS, CAREER_TRACK, HOME_EVENTS, CAREER_SPONSORS } from '../utils/gameData'
 import { ProgressBar } from '../components/ProgressBar'
-import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerResetIcon, SparklesIcon } from 'lucide-react'
+import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerResetIcon, SparklesIcon, ZapIcon } from 'lucide-react'
 import { SponsorPanel } from './ProfilePage'
 import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
 
@@ -91,9 +91,9 @@ export function CareerMode() {
                 </div>
               </div>
               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1.1, marginBottom: '4px' }}>{event.name}</div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginBottom: '7px', lineHeight: 1.3 }}>{event.reward}</div>
-              <button style={{ minHeight: '44px', paddingInline: '10px', paddingBlock: '8px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                Enter Race
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginBottom: '6px', lineHeight: 1.3 }}>{event.reward}</div>
+              <button style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', height: isLandscape ? '26px' : '30px', paddingInline: '10px', borderRadius: '8px', border: 'none', background: 'linear-gradient(140deg, rgba(56,214,255,0.92) 0%, rgba(20,160,240,0.88) 100%)', color: '#041421', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', letterSpacing: '0.08em', cursor: 'pointer', boxShadow: '0 0 10px rgba(56,214,255,0.38), 0 2px 6px rgba(0,0,0,0.50)', userSelect: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                <ZapIcon size={10} />&nbsp;RACE
               </button>
             </div>
           ))}

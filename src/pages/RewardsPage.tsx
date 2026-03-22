@@ -159,14 +159,23 @@ export function RewardsPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
-                minHeight: '44px', paddingInline: '14px', paddingBlock: '6px', borderRadius: '8px', cursor: 'pointer',
-                background: active ? 'rgba(212,168,67,0.12)' : 'rgba(56,214,255,0.04)',
-                border: active ? `1px solid rgba(212,168,67,0.35)` : `1px solid ${PANEL_BORDER}`,
-                fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px',
-                letterSpacing: '0.12em', textTransform: 'uppercase',
-                color: active ? GOLD : 'rgba(169,211,231,0.45)',
-                display: 'flex', alignItems: 'center', gap: '6px',
-                transition: 'all 0.18s ease',
+                height: '34px',
+                paddingInline: '12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                background: active
+                  ? 'linear-gradient(140deg, rgba(212,168,67,0.30) 0%, rgba(212,168,67,0.12) 100%)'
+                  : 'rgba(56,214,255,0.04)',
+                border: active ? `1px solid rgba(212,168,67,0.50)` : `1px solid ${PANEL_BORDER}`,
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: '13px',
+                letterSpacing: '0.12em',
+                color: active ? '#F3FBFF' : 'rgba(169,211,231,0.45)',
+                display: 'flex', alignItems: 'center', gap: '5px',
+                boxShadow: active ? '0 0 8px rgba(212,168,67,0.25)' : 'none',
+                transition: 'all 0.15s ease',
+                userSelect: 'none',
+                flexShrink: 0,
               }}
             >
               <span style={{ color: active ? GOLD : 'rgba(169,211,231,0.40)' }}>{icons[tab]}</span>
@@ -190,9 +199,9 @@ export function RewardsPage() {
               {unclaimedCount > 0 && (
                 <button
                   onClick={() => setClaimed(new Set(CLAIMABLE_REWARDS.map((r) => r.id)))}
-                  style={{ alignSelf: 'flex-end', minHeight: '44px', paddingInline: '14px', paddingBlock: '8px', borderRadius: '8px', cursor: 'pointer', background: 'rgba(212,168,67,0.10)', border: `1px solid rgba(212,168,67,0.30)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: GOLD, flexShrink: 0 }}
+                  style={{ alignSelf: 'flex-end', display: 'inline-flex', alignItems: 'center', gap: '5px', height: '32px', paddingInline: '14px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(140deg, rgba(212,168,67,0.95) 0%, rgba(195,120,10,0.90) 100%)', border: 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.10em', color: '#1A0D00', boxShadow: '0 0 12px rgba(212,168,67,0.40), 0 2px 6px rgba(0,0,0,0.45)', userSelect: 'none', flexShrink: 0 }}
                 >
-                  Claim All
+                  CLAIM ALL
                 </button>
               )}
               {CLAIMABLE_REWARDS.map((item, i) => {
@@ -229,9 +238,9 @@ export function RewardsPage() {
                     ) : (
                       <button
                         onClick={() => setClaimed((prev) => new Set([...prev, item.id]))}
-                        style={{ minHeight: '44px', paddingInline: '16px', paddingBlock: '8px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(90deg, rgba(212,168,67,0.22), rgba(212,168,67,0.12))', border: `1px solid rgba(212,168,67,0.35)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: GOLD, display: 'flex', alignItems: 'center', gap: '6px' }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '32px', paddingInline: '14px', borderRadius: '8px', cursor: 'pointer', background: 'linear-gradient(140deg, rgba(212,168,67,0.95) 0%, rgba(195,120,10,0.90) 100%)', border: 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.10em', color: '#1A0D00', boxShadow: '0 0 10px rgba(212,168,67,0.38), 0 2px 6px rgba(0,0,0,0.45)', userSelect: 'none' }}
                       >
-                        Claim <ChevronRightIcon size={12} />
+                        CLAIM <ChevronRightIcon size={11} />
                       </button>
                     )}
                   </motion.div>
