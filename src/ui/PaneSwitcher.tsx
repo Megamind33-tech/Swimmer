@@ -78,19 +78,21 @@ interface PaneSwitcherProps {
 // TabBtn
 // ─────────────────────────────────────────────────────────────────────────────
 
-function TabBtn({
+interface TabBtnProps {
+  pane: Pane;
+  isActive: boolean;
+  onClick: () => void;
+  reducedMotion: boolean;
+  highContrast: boolean;
+}
+
+const TabBtn: React.FC<TabBtnProps> = ({
   pane,
   isActive,
   onClick,
   reducedMotion,
   highContrast,
-}: {
-  pane:          Pane;
-  isActive:      boolean;
-  onClick:       () => void;
-  reducedMotion: boolean;
-  highContrast:  boolean;
-}) {
+}) => {
   return (
     <motion.button
       role="tab"
@@ -154,7 +156,7 @@ function TabBtn({
       </span>
     </motion.button>
   );
-}
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PaneSwitcher

@@ -22,6 +22,7 @@ import {
   ICareerEvent,
 } from '../types';
 import { EventEmitter, logger } from '../utils';
+import { playerManager } from '../data/PlayerManager';
 
 // Event types that GameManager can emit
 export interface IGameManagerEvents {
@@ -446,9 +447,7 @@ export class GameManager {
    * Get career event at index
    */
   private getCareerEventAt(index: number): ICareerEvent | null {
-    // TODO: Load from career events database
-    // For now, return null as placeholder
-    return null;
+    return playerManager.getCareerEvent(index);
   }
 
   /**
