@@ -5,7 +5,7 @@
 
 import * as BABYLON from '@babylonjs/core';
 import { IArenaConfig } from '../../types';
-import { logger } from '../../utils';
+import { getGraphicsCompatibilityProfile, logger } from '../../utils';
 
 // PoolTheme colour table — same palette as ArenaAtmosphere uses
 const THEME_WATER_COLORS: Record<string, BABYLON.Color3> = {
@@ -57,6 +57,7 @@ export class ArenaMaterialLibrary {
   // ── Internal ───────────────────────────────────────────────────────────────
   private _allMaterials: BABYLON.PBRMaterial[] = [];
   private _textures:     BABYLON.BaseTexture[] = [];
+  private _compatibility = getGraphicsCompatibilityProfile();
 
   // ─────────────────────────────────────────────────────────────────────────
   // Build
@@ -467,6 +468,7 @@ export class ArenaMaterialLibrary {
     mat.metallic             = opts.metallic;
     mat.roughness            = opts.roughness;
     mat.environmentIntensity = opts.environmentIntensity ?? 0;
+    mat.maxSimultaneousLights = this._compatibility.maxPbrLights;
 
     if (opts.backFaceCulling !== undefined) {
       mat.backFaceCulling = opts.backFaceCulling;

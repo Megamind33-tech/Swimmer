@@ -40,7 +40,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { WaterMaterial } from '@babylonjs/materials';
 import { IArenaConfig } from '../../types';
-import { logger } from '../../utils';
+import { getGraphicsCompatibilityProfile, logger } from '../../utils';
 
 const BASIN_DEPTH    = 3.0;   // m  (matches PoolStructure.BASIN_DEPTH)
 const WALL_THICKNESS = 0.4;   // m  (matches PoolStructure.WALL_THICKNESS)
@@ -73,6 +73,7 @@ export class PoolWater {
   // ── State ─────────────────────────────────────────────────────────────────
   private _tier: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
   private _themeColor = new BABYLON.Color3(0.0, 0.40, 0.80); // OLYMPIC default
+  private _compatibility = getGraphicsCompatibilityProfile();
 
   // ─────────────────────────────────────────────────────────────────────────
   // Build
@@ -83,10 +84,15 @@ export class PoolWater {
     config:      IArenaConfig,
     qualityTier: 'LOW' | 'MEDIUM' | 'HIGH',
   ): BABYLON.Mesh {
-    this._tier = qualityTier;
+    const effectiveTier =
+      qualityTier !== 'LOW' && !this._compatibility.enableAdvancedWater
+        ? 'LOW'
+        : qualityTier;
+
+    this._tier = effectiveTier;
 
     // Surface mesh — subdivisions give WaterMaterial vertex geometry to work with
-    const subs = qualityTier === 'HIGH' ? 48 : qualityTier === 'MEDIUM' ? 24 : 12;
+    const subs = effectiveTier === 'HIGH' ? 48 : effectiveTier === 'MEDIUM' ? 24 : 12;
     this.waterMesh = BABYLON.MeshBuilder.CreateGround('poolWater', {
       width:        config.poolWidth,
       height:       config.poolLength,
@@ -96,19 +102,19 @@ export class PoolWater {
     this.waterMesh.position.y = 0.02;
     this.waterMesh.isPickable = false;
 
-    if (qualityTier === 'LOW') {
+    if (effectiveTier === 'LOW') {
       this._buildLow(scene);
     } else {
-      this._buildMedHigh(scene, qualityTier);
+      this._buildMedHigh(scene, effectiveTier);
     }
 
     // Caustic overlay: MED/HIGH — visible pool-floor light refraction pattern.
     // MEDIUM uses reduced alpha for performance; HIGH uses full brightness.
-    if (qualityTier !== 'LOW') {
-      this._buildCausticOverlay(scene, config, qualityTier);
+    if (effectiveTier !== 'LOW') {
+      this._buildCausticOverlay(scene, config, effectiveTier);
     }
 
-    logger.log(`[PoolWater] Built Phase 4 (${qualityTier})`);
+    logger.log(`[PoolWater] Built Phase 4 (${effectiveTier})`);
     return this.waterMesh;
   }
 

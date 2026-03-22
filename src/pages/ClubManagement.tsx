@@ -19,6 +19,7 @@ import { SwimmerCard } from '../components/SwimmerCard'
 import { SponsorPanel } from './ProfilePage'
 import { CLUB_SPONSORS, SWIMMERS, USER_DATA, type Swimmer } from '../utils/gameData'
 import { useClubRoster, type SignedAthlete } from '../utils/clubRoster'
+import { getReadinessLabel } from '../utils/trainingSystem'
 import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
 import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
 import {
