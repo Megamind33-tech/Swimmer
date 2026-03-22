@@ -50,9 +50,10 @@ function formatCurrency(n: number): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface CurrencyBadgeProps {
-  icon:         string;
-  value:        number;
-  color:        string;
+  icon:          string;
+  value:         number;
+  color:         string;
+  compact?:      boolean;
   'aria-label'?: string;
 }
 
@@ -60,6 +61,7 @@ const CurrencyBadge: React.FC<CurrencyBadgeProps> = ({
   icon,
   value,
   color,
+  compact = false,
   'aria-label': ariaLabel,
 }) => (
   <div
@@ -73,25 +75,27 @@ const CurrencyBadge: React.FC<CurrencyBadgeProps> = ({
       background:  'rgba(4,20,33,0.65)',
       border:      '1px solid rgba(255,255,255,0.09)',
       borderRadius:'100px',
-      padding:     '3px 10px 3px 6px',
+      padding:     compact ? '3px 6px' : '3px 10px 3px 6px',
       flexShrink:  0,
       userSelect:  'none',
     }}
   >
-    <span style={{ fontSize: '14px', lineHeight: 1 }}>{icon}</span>
-    <span
-      style={{
-        fontFamily:          "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
-        fontWeight:          700,
-        fontSize:            '12px',
-        color,
-        fontVariantNumeric:  'tabular-nums',
-        letterSpacing:       '0.02em',
-        lineHeight:          1,
-      }}
-    >
-      {formatCurrency(value)}
-    </span>
+    <span style={{ fontSize: compact ? '12px' : '14px', lineHeight: 1 }}>{icon}</span>
+    {!compact && (
+      <span
+        style={{
+          fontFamily:          "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
+          fontWeight:          700,
+          fontSize:            '12px',
+          color,
+          fontVariantNumeric:  'tabular-nums',
+          letterSpacing:       '0.02em',
+          lineHeight:          1,
+        }}
+      >
+        {formatCurrency(value)}
+      </span>
+    )}
   </div>
 );
 
@@ -164,6 +168,7 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({
         paddingRight:         `max(10px, ${safeArea.right})`,
         gap:                  isLandscape ? '5px' : '8px',
         zIndex:               70,
+        overflow:             'hidden',
         background:           highContrast
           ? 'rgba(2,10,20,0.97)'
           : 'rgba(4,20,33,0.88)',
@@ -220,17 +225,19 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({
         <span>{isLandscape ? 'RWRD' : 'Rewards'}</span>
       </motion.button>
 
-      {/* Currency displays */}
+      {/* Currency displays — icon-only in landscape to save horizontal space */}
       <CurrencyBadge
         icon="🪙"
         value={USER_DATA.currencies.coins}
         color={lobby.gold}
+        compact={isLandscape}
         aria-label={`${USER_DATA.currencies.coins} Coins`}
       />
       <CurrencyBadge
         icon="💎"
         value={USER_DATA.currencies.gems}
         color={lobby.cyanGlow}
+        compact={isLandscape}
         aria-label={`${USER_DATA.currencies.gems} Gems`}
       />
 
