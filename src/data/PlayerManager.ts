@@ -26,6 +26,7 @@ import {
   ICloudSyncData,
 } from '../types';
 import { storage, logger, levelFromXp, deepClone } from '../utils';
+import { applyTrainingSession, createDevelopmentProfile, ensureDevelopment, recoverAthlete, type TrainingFocus, type TrainingSessionResult } from '../utils/trainingSystem';
 
 // Default stats for each specialty
 const SPECIALTY_STAT_BONUSES: Record<SwimmerSpecialty, Partial<ISwimmerStats>> = {
@@ -156,6 +157,44 @@ function initializeCareerEvents() {
 
 initializeCareerEvents();
 
+function calculatePlayerOvr(stats: ISwimmerStats): number {
+  return Math.round(
+    stats.speed * 4.8 +
+      stats.stamina * 4.6 +
+      stats.technique * 4.4 +
+      stats.endurance * 3.8 +
+      stats.mental * 2.4
+  );
+}
+
+function ensureDevelopmentPlayer(player: IPlayerSwimmer): IPlayerSwimmer {
+  const normalized = ensureDevelopment({
+    id: player.id,
+    name: player.name,
+    ovr: calculatePlayerOvr(player.stats),
+    stats: {
+      speed: player.stats.speed * 5,
+      stamina: player.stats.stamina * 5,
+      technique: player.stats.technique * 5,
+      endurance: player.stats.endurance * 5,
+      mental: player.stats.mental * 5,
+    },
+    development: player.development,
+  }, player.development?.age ?? 18);
+
+  return {
+    ...player,
+    stats: {
+      speed: Math.round(normalized.stats.speed) / 5,
+      stamina: Math.round(normalized.stats.stamina) / 5,
+      technique: Math.round(normalized.stats.technique) / 5,
+      endurance: Math.round(normalized.stats.endurance) / 5,
+      mental: Math.round(normalized.stats.mental) / 5,
+    },
+    development: normalized.development,
+  };
+}
+
 export class PlayerManager {
   private player: IPlayerSwimmer | null = null;
   private cosmetics: Map<string, IEquipment> = new Map();
@@ -217,6 +256,7 @@ export class PlayerManager {
       careerEventIndex: 0,
       reputation: 0,
       fame: 0,
+      development: createDevelopmentProfile(18, calculatePlayerOvr(stats)),
       createdAt: Date.now(),
     };
 
@@ -232,7 +272,7 @@ export class PlayerManager {
   public loadPlayer(): IPlayerSwimmer | null {
     const saved = storage.get<IPlayerSwimmer>('player_data');
     if (saved) {
-      this.player = saved;
+      this.player = ensureDevelopmentPlayer(saved);
       logger.log('Player loaded:', this.player.name);
       return deepClone(this.player);
     }
@@ -251,7 +291,16 @@ export class PlayerManager {
    */
   private savePlayer(): void {
     if (!this.player) return;
+    this.player = ensureDevelopmentPlayer(this.player);
     storage.set('player_data', this.player);
+  }
+
+  /**
+   * Set current player state directly
+   */
+  public setPlayer(player: IPlayerSwimmer): void {
+    this.player = ensureDevelopmentPlayer(player);
+    this.savePlayer();
   }
 
   // ============================================================================
@@ -326,6 +375,80 @@ export class PlayerManager {
     player.stats.technique = Math.min(maxTechnique, Math.max(1, player.stats.technique));
     player.stats.endurance = Math.min(18, Math.max(1, player.stats.endurance));
     player.stats.mental = Math.min(15, Math.max(1, player.stats.mental));
+  }
+
+
+  /**
+   * Apply a focused training session to the current player
+   */
+  public applyTrainingBlock(focus: TrainingFocus, minutes: number): TrainingSessionResult<any> | null {
+    if (!this.player) return null;
+
+    const normalizedPlayer = ensureDevelopmentPlayer(this.player);
+    const result = applyTrainingSession({
+      id: normalizedPlayer.id,
+      name: normalizedPlayer.name,
+      ovr: calculatePlayerOvr(normalizedPlayer.stats),
+      stats: {
+        speed: normalizedPlayer.stats.speed * 5,
+        stamina: normalizedPlayer.stats.stamina * 5,
+        technique: normalizedPlayer.stats.technique * 5,
+        endurance: normalizedPlayer.stats.endurance * 5,
+        mental: normalizedPlayer.stats.mental * 5,
+      },
+      development: normalizedPlayer.development,
+    }, focus, minutes);
+
+    this.player = ensureDevelopmentPlayer({
+      ...normalizedPlayer,
+      stats: {
+        speed: result.athlete.stats.speed / 5,
+        stamina: result.athlete.stats.stamina / 5,
+        technique: result.athlete.stats.technique / 5,
+        endurance: result.athlete.stats.endurance / 5,
+        mental: result.athlete.stats.mental / 5,
+      },
+      development: result.athlete.development,
+    });
+    this.savePlayer();
+
+    return { ...result, athlete: deepClone(this.player) };
+  }
+
+  /**
+   * Recover the current player between sessions/races
+   */
+  public recoverPlayer(hours: number): IPlayerSwimmer | null {
+    if (!this.player) return null;
+
+    const normalizedPlayer = ensureDevelopmentPlayer(this.player);
+    const recovered = recoverAthlete({
+      id: normalizedPlayer.id,
+      name: normalizedPlayer.name,
+      ovr: calculatePlayerOvr(normalizedPlayer.stats),
+      stats: {
+        speed: normalizedPlayer.stats.speed * 5,
+        stamina: normalizedPlayer.stats.stamina * 5,
+        technique: normalizedPlayer.stats.technique * 5,
+        endurance: normalizedPlayer.stats.endurance * 5,
+        mental: normalizedPlayer.stats.mental * 5,
+      },
+      development: normalizedPlayer.development,
+    }, hours);
+
+    this.player = ensureDevelopmentPlayer({
+      ...normalizedPlayer,
+      stats: {
+        speed: recovered.stats.speed / 5,
+        stamina: recovered.stats.stamina / 5,
+        technique: recovered.stats.technique / 5,
+        endurance: recovered.stats.endurance / 5,
+        mental: recovered.stats.mental / 5,
+      },
+      development: recovered.development,
+    });
+    this.savePlayer();
+    return deepClone(this.player);
   }
 
   // ============================================================================
