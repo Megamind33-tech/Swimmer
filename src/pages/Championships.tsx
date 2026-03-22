@@ -1,7 +1,7 @@
 import React from 'react'
 import { motion } from 'motion/react'
 import { TrophyIcon, CalendarIcon, UsersIcon } from 'lucide-react'
-import { PaneSwitcher } from '../ui/PaneSwitcher'
+import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
 
 const AQUA = 'var(--color-volt)'
 const GOLD = 'var(--color-volt)'
@@ -17,21 +17,24 @@ const UPCOMING_EVENTS = [
 // ── Shared featured championship card ──────────────────────────────────────
 
 function FeaturedCard() {
+  const isLandscape = useIsLandscapeMobile()
   return (
-    <div style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.30)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.92) 0%, rgba(17,13,3,0.92) 100%)', backdropFilter: 'blur(14px)', padding: '12px 16px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.30)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.92) 0%, rgba(17,13,3,0.92) 100%)', backdropFilter: 'blur(14px)', padding: isLandscape ? '8px 12px' : '12px 16px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
       {/* Gold glow */}
-      <div style={{ position: 'absolute', right: 0, top: 0, width: '160px', height: '160px', borderRadius: '50%', background: GOLD, opacity: 0.08, filter: 'blur(50px)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', right: 0, top: 0, width: isLandscape ? '80px' : '160px', height: isLandscape ? '80px' : '160px', borderRadius: '50%', background: GOLD, opacity: 0.08, filter: 'blur(50px)', pointerEvents: 'none' }} />
 
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px' }}>
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: isLandscape ? '8px' : '14px' }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ display: 'inline-block', background: '#C41E3A', color: '#fff', fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.14em', padding: '2px 8px', borderRadius: '5px', marginBottom: '6px', animation: 'countdown-pulse 1.8s ease-in-out infinite' }}>
+          <div style={{ display: 'inline-block', background: '#C41E3A', color: '#fff', fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.14em', padding: '2px 8px', borderRadius: '5px', marginBottom: isLandscape ? '3px' : '6px', animation: 'countdown-pulse 1.8s ease-in-out infinite' }}>
             LIVE NOW
           </div>
-          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1, marginBottom: '5px' }}>GLOBAL CUP '26</h2>
-          <p style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(232,224,208,0.75)', marginBottom: '8px', lineHeight: 1.4 }}>
-            Compete against the top 100 clubs worldwide for exclusive legendary rewards.
-          </p>
-          <div style={{ display: 'flex', gap: '14px' }}>
+          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '16px' : '22px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1, marginBottom: isLandscape ? '3px' : '5px' }}>GLOBAL CUP '26</h2>
+          {!isLandscape && (
+            <p style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(232,224,208,0.75)', marginBottom: '8px', lineHeight: 1.4 }}>
+              Compete against the top 100 clubs worldwide for exclusive legendary rewards.
+            </p>
+          )}
+          <div style={{ display: 'flex', gap: isLandscape ? '8px' : '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <UsersIcon size={12} color={GOLD} />
               <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', color: 'rgba(255,255,255,0.80)' }}>64 / 100 Joined</span>
@@ -43,9 +46,9 @@ function FeaturedCard() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <TrophyIcon size={44} color={GOLD} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 14px rgba(212,168,67,0.55))` }} />
-          <button style={{ minHeight: '44px', paddingInline: '16px', paddingBlock: '8px', borderRadius: '8px', cursor: 'pointer', background: '#F3FBFF', border: 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.10em', color: 'var(--color-carbon)', boxShadow: '0 0 14px rgba(243,251,255,0.25)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isLandscape ? '4px' : '8px', flexShrink: 0 }}>
+          <TrophyIcon size={isLandscape ? 26 : 44} color={GOLD} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 14px rgba(212,168,67,0.55))` }} />
+          <button style={{ minHeight: '36px', paddingInline: isLandscape ? '10px' : '16px', paddingBlock: isLandscape ? '4px' : '8px', borderRadius: '8px', cursor: 'pointer', background: '#F3FBFF', border: 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', letterSpacing: '0.10em', color: 'var(--color-carbon)', boxShadow: '0 0 14px rgba(243,251,255,0.25)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             ENTER TOURNAMENT
           </button>
         </div>
