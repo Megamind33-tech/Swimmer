@@ -190,7 +190,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
           display:       'flex',
           flexDirection: 'column',
           justifyContent:'center',
-          gap:           '10px',
+          gap:           isLandscape ? '6px' : '10px',
         }}
       >
         {/* Live season badge */}
@@ -204,10 +204,10 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
               display:       'inline-flex',
               alignItems:    'center',
               gap:           '6px',
-              padding:       '3px 11px',
+              padding:       isLandscape ? '2px 8px' : '3px 11px',
               borderRadius:  '100px',
-                background:    'rgba(204,255,0,0.09)',
-                border:        '1px solid rgba(204,255,0,0.28)',
+              background:    'rgba(204,255,0,0.09)',
+              border:        '1px solid rgba(204,255,0,0.28)',
               color:         lobby.aqua,
               fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
               fontWeight:    700,
@@ -242,46 +242,43 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
           <div
             style={{
               fontFamily:    "'Bebas Neue', Impact, 'Arial Narrow', sans-serif",
-              fontSize:      'clamp(34px, 6vw, 50px)',
+              fontSize:      isLandscape ? 'clamp(26px, 5vw, 38px)' : 'clamp(34px, 6vw, 50px)',
               lineHeight:    0.88,
               letterSpacing: '0.02em',
               color:         lobby.textPrimary,
             }}
           >
             SWIM{' '}
-            <span
+            <span style={{ color: lobby.aqua, textShadow: 'none' }}>26</span>
+          </div>
+
+          {/* Series subtitle — hidden in landscape to save vertical space */}
+          {!isLandscape && (
+            <div
               style={{
-                color:      lobby.aqua,
-                textShadow: 'none',
+                fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
+                fontWeight:    600,
+                fontSize:      '11px',
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color:         lobby.textSecondary,
+                marginTop:     '5px',
               }}
             >
-              26
-            </span>
-          </div>
-
-          {/* Series subtitle */}
-          <div
-            style={{
-              fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
-              fontWeight:    600,
-              fontSize:      '11px',
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color:         lobby.textSecondary,
-              marginTop:     '5px',
-            }}
-          >
-            World Championship Series
-          </div>
+              World Championship Series
+            </div>
+          )}
         </motion.div>
 
-        {/* Separator */}
-        <div
-          style={{
-            height:     '1px',
-            background: 'linear-gradient(90deg, rgba(204,255,0,0.28) 0%, transparent 65%)',
-          }}
-        />
+        {/* Separator — hidden in landscape */}
+        {!isLandscape && (
+          <div
+            style={{
+              height:     '1px',
+              background: 'linear-gradient(90deg, rgba(204,255,0,0.28) 0%, transparent 65%)',
+            }}
+          />
+        )}
 
         {/* CTA buttons */}
         <motion.div
@@ -302,77 +299,76 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({ onStartRace, onNavigat
           />
         </motion.div>
 
-        {/* Quick-access strip: Career + Rankings shortcuts */}
-        <motion.div
-          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.38, delay: 0.26 }}
-        >
-          <button
-            onClick={() => onNavigate('career')}
-            style={{
-              display:       'flex',
-              alignItems:    'center',
-              gap:           '4px',
-              padding:       '3px 9px',
-              borderRadius:  '6px',
-              background:    'rgba(204,255,0,0.08)',
-              border:        '1px solid rgba(204,255,0,0.20)',
-              color:         lobby.gold,
-              fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
-              fontWeight:    700,
-              fontSize:      '10px',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              cursor:        'pointer',
-            }}
+        {/* Quick-access strip — hidden in landscape */}
+        {!isLandscape && (
+          <motion.div
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.38, delay: 0.26 }}
           >
-            <Medal size={10} /> CAREER
-          </button>
-        </motion.div>
+            <button
+              onClick={() => onNavigate('career')}
+              style={{
+                display:       'flex',
+                alignItems:    'center',
+                gap:           '4px',
+                padding:       '3px 9px',
+                borderRadius:  '6px',
+                background:    'rgba(204,255,0,0.08)',
+                border:        '1px solid rgba(204,255,0,0.20)',
+                color:         lobby.gold,
+                fontFamily:    "'Rajdhani', 'Segoe UI', system-ui, sans-serif",
+                fontWeight:    700,
+                fontSize:      '10px',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                cursor:        'pointer',
+              }}
+            >
+              <Medal size={10} /> CAREER
+            </button>
+          </motion.div>
+        )}
 
-        {/* Player quick stats */}
-        <motion.div
-          style={{
-            display:    'flex',
-            alignItems: 'center',
-            gap:        '10px',
-            flexWrap:   'wrap',
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.38, delay: 0.32 }}
-        >
-          <StatItem
-            label="OVR"
-            value={<span style={{ color: lobby.aqua }}>94</span>}
-          />
-          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px' }}>·</span>
-          <StatItem
-            label="W/L"
-            value={
-              <>
-                <span style={{ color: lobby.textPrimary }}>847</span>
-                <span style={{ color: 'rgba(255,255,255,0.50)' }}>/231</span>
-              </>
-            }
-          />
-          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px' }}>·</span>
-          <StatItem
-            label="RANK"
-            value={
-              <span
-                style={{
-                  color:      lobby.gold,
-                  textShadow: 'none',
-                }}
-              >
-                #{USER_DATA.level > 20 ? 4 : 12}
-              </span>
-            }
-          />
-        </motion.div>
+        {/* Player quick stats — hidden in landscape */}
+        {!isLandscape && (
+          <motion.div
+            style={{
+              display:    'flex',
+              alignItems: 'center',
+              gap:        '10px',
+              flexWrap:   'wrap',
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.38, delay: 0.32 }}
+          >
+            <StatItem
+              label="OVR"
+              value={<span style={{ color: lobby.aqua }}>94</span>}
+            />
+            <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px' }}>·</span>
+            <StatItem
+              label="W/L"
+              value={
+                <>
+                  <span style={{ color: lobby.textPrimary }}>847</span>
+                  <span style={{ color: 'rgba(255,255,255,0.50)' }}>/231</span>
+                </>
+              }
+            />
+            <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px' }}>·</span>
+            <StatItem
+              label="RANK"
+              value={
+                <span style={{ color: lobby.gold, textShadow: 'none' }}>
+                  #{USER_DATA.level > 20 ? 4 : 12}
+                </span>
+              }
+            />
+          </motion.div>
+        )}
       </div>
 
       {/* ── RIGHT SECTION (40%) — Featured Event Card — hidden on narrow landscape ── */}
