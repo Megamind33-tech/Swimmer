@@ -116,6 +116,8 @@ export interface IAISwimmer {
   rivalLevel?: number;    // How many times player raced them
 }
 
+import type { AthleteDevelopmentProfile } from '../utils/trainingSystem';
+
 export interface IPlayerSwimmer {
   id: string;
   name: string;
@@ -129,6 +131,7 @@ export interface IPlayerSwimmer {
   careerEventIndex: number; // 0-49 (which event in career)
   reputation: number;     // 0-1000
   fame: number;           // 0-500
+  development?: AthleteDevelopmentProfile;
   createdAt: number;      // timestamp
 }
 

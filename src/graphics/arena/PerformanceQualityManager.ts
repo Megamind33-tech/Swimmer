@@ -20,12 +20,13 @@
  */
 
 import * as BABYLON from '@babylonjs/core';
-import { getDeviceQualityTier, logger } from '../../utils';
+import { getDeviceQualityTier, getGraphicsCompatibilityProfile, logger } from '../../utils';
 
 export type QualityPreset = 'high' | 'medium' | 'low';
 
 export class PerformanceQualityManager {
   private qualityTier: 'LOW' | 'MEDIUM' | 'HIGH';
+  private compatibility = getGraphicsCompatibilityProfile();
 
   constructor() {
     this.qualityTier = getDeviceQualityTier();
@@ -66,7 +67,9 @@ export class PerformanceQualityManager {
 
       case 'medium':
         this.qualityTier = 'MEDIUM';
-        engine.setHardwareScalingLevel(1);
+        engine.setHardwareScalingLevel(
+          this.compatibility.isAndroid && this.compatibility.mobileShaderBudget !== 'full' ? 1.15 : 1,
+        );
         scene.shadowsEnabled   = true;
         scene.particlesEnabled = true;
         logger.log('[PerformanceQualityManager] → medium');
@@ -74,7 +77,9 @@ export class PerformanceQualityManager {
 
       case 'low':
         this.qualityTier = 'LOW';
-        engine.setHardwareScalingLevel(2);  // halve pixel count — biggest GPU win
+        engine.setHardwareScalingLevel(
+          this.compatibility.isAndroid ? 1.4 : 2,
+        );
         scene.shadowsEnabled   = false;
         scene.particlesEnabled = false;
         logger.log('[PerformanceQualityManager] → low');
