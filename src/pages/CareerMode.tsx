@@ -2,9 +2,9 @@ import React from 'react'
 import { motion } from 'motion/react'
 import { ACHIEVEMENTS, CAREER_TRACK, HOME_EVENTS, CAREER_SPONSORS } from '../utils/gameData'
 import { ProgressBar } from '../components/ProgressBar'
-import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerResetIcon, SparklesIcon } from 'lucide-react'
+import { TrophyIcon, MedalIcon, StarIcon, LockIcon, CalendarIcon, TimerResetIcon, SparklesIcon, ZapIcon } from 'lucide-react'
 import { SponsorPanel } from './ProfilePage'
-import { PaneSwitcher } from '../ui/PaneSwitcher'
+import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
 
 const AQUA = 'var(--color-volt)'
 const GOLD = 'var(--color-volt)'
@@ -12,40 +12,42 @@ const PANEL = 'rgba(4,20,33,0.76)'
 const PANEL_BORDER = 'rgba(56,214,255,0.13)'
 
 export function CareerMode() {
+  const isLandscape = useIsLandscapeMobile()
+
   // ── Left column ────────────────────────────────────────────────────────────
   const leftColumn = (
     <div style={{ width: '200px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {/* Season card */}
-      <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.25)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.90) 0%, rgba(26,19,8,0.90) 100%)', backdropFilter: 'blur(12px)', padding: '10px 12px' }}>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '5px' }}>Current Season</div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', marginBottom: '8px' }}>
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '26px', color: '#F3FBFF', lineHeight: 1, letterSpacing: '0.04em' }}>S4</span>
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: GOLD, letterSpacing: '0.06em', marginBottom: '2px' }}>PRO LEAGUE</span>
+      <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.25)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.90) 0%, rgba(26,19,8,0.90) 100%)', backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px' }}>
+        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: isLandscape ? '3px' : '5px' }}>Current Season</div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', marginBottom: isLandscape ? '4px' : '8px' }}>
+          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '18px' : '26px', color: '#F3FBFF', lineHeight: 1, letterSpacing: '0.04em' }}>S4</span>
+          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '10px' : '12px', color: GOLD, letterSpacing: '0.06em', marginBottom: '2px' }}>PRO LEAGUE</span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <StatRow label="WINS"    value="142" icon={<TrophyIcon size={12} color={GOLD} />} />
-          <StatRow label="MEDALS"  value="86"  icon={<MedalIcon  size={12} color="rgba(169,211,231,0.70)" />} />
-          <StatRow label="RECORDS" value="12"  icon={<StarIcon   size={12} color={GOLD} />} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isLandscape ? '3px' : '5px' }}>
+          <StatRow label="WINS"    value="142" icon={<TrophyIcon size={12} color={GOLD} />} compact={isLandscape} />
+          <StatRow label="MEDALS"  value="86"  icon={<MedalIcon  size={12} color="rgba(169,211,231,0.70)" />} compact={isLandscape} />
+          <StatRow label="RECORDS" value="12"  icon={<StarIcon   size={12} color={GOLD} />} compact={isLandscape} />
         </div>
       </div>
 
       {/* Next unlock */}
-      <div style={{ borderRadius: '12px', border: '1px solid rgba(167,139,250,0.25)', background: 'linear-gradient(135deg, rgba(88,28,135,0.40) 0%, rgba(11,17,32,0.90) 100%)', backdropFilter: 'blur(12px)', padding: '10px 12px' }}>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(167,139,250,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '8px' }}>Next Unlock</div>
+      <div style={{ borderRadius: '12px', border: '1px solid rgba(167,139,250,0.25)', background: 'linear-gradient(135deg, rgba(88,28,135,0.40) 0%, rgba(11,17,32,0.90) 100%)', backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px' }}>
+        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(167,139,250,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: isLandscape ? '4px' : '8px' }}>Next Unlock</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(0,0,0,0.40)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <LockIcon size={15} color="rgba(255,255,255,0.35)" />
+          <div style={{ width: isLandscape ? '26px' : '36px', height: isLandscape ? '26px' : '36px', borderRadius: '10px', background: 'rgba(0,0,0,0.40)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <LockIcon size={isLandscape ? 11 : 15} color="rgba(255,255,255,0.35)" />
           </div>
           <div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.04em' }}>Olympic Pool</div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', color: '#F3FBFF', letterSpacing: '0.04em' }}>Olympic Pool</div>
             <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: GOLD, marginTop: '2px' }}>Unlocks at Level 35</div>
           </div>
         </div>
       </div>
 
       {/* Roadmap */}
-      <div style={{ flex: 1, borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px', flexShrink: 0 }}>
+      <div style={{ flex: 1, borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '7px 8px' : '10px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: isLandscape ? '5px' : '8px', flexShrink: 0 }}>
           <CalendarIcon size={12} color={GOLD} />
           <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em' }}>ROADMAP</span>
         </div>
@@ -89,9 +91,9 @@ export function CareerMode() {
                 </div>
               </div>
               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1.1, marginBottom: '4px' }}>{event.name}</div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginBottom: '7px', lineHeight: 1.3 }}>{event.reward}</div>
-              <button style={{ minHeight: '44px', paddingInline: '10px', paddingBlock: '8px', borderRadius: '6px', cursor: 'pointer', background: 'rgba(56,214,255,0.08)', border: `1px solid rgba(56,214,255,0.20)`, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: AQUA, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                Enter Race
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginBottom: '6px', lineHeight: 1.3 }}>{event.reward}</div>
+              <button style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', height: isLandscape ? '26px' : '30px', paddingInline: '10px', borderRadius: '8px', border: 'none', background: 'linear-gradient(140deg, rgba(56,214,255,0.92) 0%, rgba(20,160,240,0.88) 100%)', color: '#041421', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '11px' : '13px', letterSpacing: '0.08em', cursor: 'pointer', boxShadow: '0 0 10px rgba(56,214,255,0.38), 0 2px 6px rgba(0,0,0,0.50)', userSelect: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                <ZapIcon size={10} />&nbsp;RACE
               </button>
             </div>
           ))}
@@ -176,14 +178,14 @@ export function CareerMode() {
   )
 }
 
-function StatRow({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+function StatRow({ label, value, icon, compact }: { label: string; value: string; icon: React.ReactNode; compact?: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', background: 'rgba(0,0,0,0.25)', padding: '5px 8px', borderRadius: '7px', border: '1px solid rgba(255,255,255,0.04)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', background: 'rgba(0,0,0,0.25)', padding: compact ? '3px 6px' : '5px 8px', borderRadius: '7px', border: '1px solid rgba(255,255,255,0.04)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
         {icon}
         <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(255,255,255,0.70)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{label}</span>
       </div>
-      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.04em' }}>{value}</span>
+      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: compact ? '13px' : '16px', color: '#F3FBFF', letterSpacing: '0.04em' }}>{value}</span>
     </div>
   )
 }

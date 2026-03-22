@@ -858,11 +858,6 @@ body {
 */
 
 @media (max-height: 500px) and (orientation: landscape) {
-  /* Top utility bar: keep at 44px so the 44px buttons fit without overflow */
-  .swim26-top-bar {
-    height: 44px !important;
-  }
-
   /* Bottom icon tab bar: 60px → 44px */
   .swim26-bottom-tab-bar {
     height: 44px !important;

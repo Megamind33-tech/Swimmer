@@ -109,11 +109,23 @@ export function Rankings() {
               key={cat.id}
               onClick={() => setCategory(cat.id)}
               style={{
-                flex: 1, minHeight: '44px', border: `1px solid ${active ? 'rgba(56,214,255,0.40)' : PANEL_BORDER}`,
-                borderRadius: '10px', background: active ? 'rgba(56,214,255,0.10)' : PANEL,
-                backdropFilter: 'blur(8px)', cursor: 'pointer',
-                fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.10em',
-                color: active ? AQUA : 'rgba(169,211,231,0.55)',
+                height: '34px',
+                paddingInline: '14px',
+                border: active ? 'none' : `1px solid ${PANEL_BORDER}`,
+                borderRadius: '9px',
+                background: active
+                  ? 'linear-gradient(140deg, rgba(56,214,255,0.88) 0%, rgba(20,160,240,0.82) 100%)'
+                  : PANEL,
+                backdropFilter: 'blur(8px)',
+                cursor: 'pointer',
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: '13px',
+                letterSpacing: '0.10em',
+                color: active ? '#041421' : 'rgba(169,211,231,0.55)',
+                boxShadow: active ? '0 0 12px rgba(56,214,255,0.40), 0 2px 6px rgba(0,0,0,0.45)' : 'none',
+                userSelect: 'none',
+                transition: 'all 0.15s ease',
+                flexShrink: 0,
               }}
             >
               {cat.label}

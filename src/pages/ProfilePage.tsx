@@ -11,7 +11,7 @@ import {
   AwardIcon,
   BadgeIcon,
 } from 'lucide-react'
-import { PaneSwitcher } from '../ui/PaneSwitcher'
+import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
 
 const AQUA = 'var(--color-volt)'
 const GOLD = 'var(--color-volt)'
@@ -45,6 +45,7 @@ type ProfileTab = typeof PROFILE_TABS[number]
 
 export function ProfilePage() {
   const [activeTab, setActiveTab] = useState<ProfileTab>('STATS')
+  const isLandscape = useIsLandscapeMobile()
 
   const xpPercent = Math.round((USER_DATA.xp / USER_DATA.maxXp) * 100)
 
@@ -52,38 +53,39 @@ export function ProfilePage() {
   const leftColumn = (
       <div style={{ width: '200px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {/* Avatar + Name */}
-        <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+        <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '8px 10px' : '16px', display: 'flex', flexDirection: isLandscape ? 'row' : 'column', alignItems: 'center', gap: isLandscape ? '10px' : '12px' }}>
           {/* Avatar circle */}
-          <div style={{ position: 'relative' }}>
-            <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(56,214,255,0.20) 0%, rgba(56,214,255,0.06) 100%)', border: `2px solid rgba(56,214,255,0.35)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 24px rgba(56,214,255,0.20)` }}>
-              <UserIcon size={32} color={AQUA} />
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{ width: isLandscape ? '40px' : '72px', height: isLandscape ? '40px' : '72px', borderRadius: '50%', background: 'linear-gradient(135deg, rgba(56,214,255,0.20) 0%, rgba(56,214,255,0.06) 100%)', border: `2px solid rgba(56,214,255,0.35)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 24px rgba(56,214,255,0.20)` }}>
+              <UserIcon size={isLandscape ? 18 : 32} color={AQUA} />
             </div>
             {/* Level badge */}
-            <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', background: 'linear-gradient(135deg, var(--color-volt), var(--color-primary-dim))', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(4,20,33,0.90)' }}>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: '#fff', letterSpacing: '0.02em' }}>{USER_DATA.level}</span>
+            <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', background: 'linear-gradient(135deg, var(--color-volt), var(--color-primary-dim))', borderRadius: '50%', width: isLandscape ? '16px' : '22px', height: isLandscape ? '16px' : '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `${isLandscape ? '1px' : '2px'} solid rgba(4,20,33,0.90)` }}>
+              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '9px' : '11px', color: '#fff', letterSpacing: '0.02em' }}>{USER_DATA.level}</span>
             </div>
           </div>
 
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: '#F3FBFF', letterSpacing: '0.06em', lineHeight: 1 }}>{USER_DATA.username}</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(212,168,67,0.70)', textTransform: 'uppercase', letterSpacing: '0.16em', marginTop: '4px' }}>Level {USER_DATA.level} Elite</div>
-          </div>
-
-          {/* XP Bar */}
-          <div style={{ width: '100%' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>XP</span>
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)' }}>{USER_DATA.xp.toLocaleString()} / {USER_DATA.maxXp.toLocaleString()}</span>
-            </div>
-            <div style={{ height: '4px', borderRadius: '3px', background: 'rgba(0,0,0,0.40)', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${xpPercent}%`, background: `linear-gradient(90deg, ${AQUA}, rgba(56,214,255,0.70))`, boxShadow: `0 0 8px rgba(56,214,255,0.50)`, borderRadius: '3px' }} />
+          <div style={{ textAlign: isLandscape ? 'left' : 'center', minWidth: 0 }}>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '14px' : '20px', color: '#F3FBFF', letterSpacing: '0.06em', lineHeight: 1 }}>{USER_DATA.username}</div>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(212,168,67,0.70)', textTransform: 'uppercase', letterSpacing: '0.16em', marginTop: '3px' }}>Level {USER_DATA.level} Elite</div>
+            {/* XP Bar — inline in landscape to save vertical space */}
+            <div style={{ marginTop: isLandscape ? '4px' : '0px', width: isLandscape ? '100%' : undefined }}>
+              {!isLandscape && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>XP</span>
+                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)' }}>{USER_DATA.xp.toLocaleString()} / {USER_DATA.maxXp.toLocaleString()}</span>
+                </div>
+              )}
+              <div style={{ height: '3px', borderRadius: '3px', background: 'rgba(0,0,0,0.40)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${xpPercent}%`, background: `linear-gradient(90deg, ${AQUA}, rgba(56,214,255,0.70))`, boxShadow: `0 0 8px rgba(56,214,255,0.50)`, borderRadius: '3px' }} />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '14px 16px' }}>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em', marginBottom: '10px' }}>QUICK STATS</div>
+        <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: isLandscape ? '8px 10px' : '14px 16px' }}>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.06em', marginBottom: isLandscape ? '6px' : '10px' }}>QUICK STATS</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <QuickStatRow icon={<TrophyIcon size={12} color={GOLD} />}   label="World Rank"  value="#4"       />
             <QuickStatRow icon={<StarIcon   size={12} color={AQUA} />}   label="Season"      value="S4 PRO"   />
@@ -93,10 +95,10 @@ export function ProfilePage() {
         </div>
 
         {/* Sponsor count pill */}
-        <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.20)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.80), rgba(26,19,8,0.80))', backdropFilter: 'blur(12px)', padding: '9px 12px', textAlign: 'center' }}>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: '4px' }}>Active Sponsors</div>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '24px', color: GOLD, lineHeight: 1, textShadow: '0 0 14px rgba(212,168,67,0.40)' }}>{PLAYER_SPONSORS.length}</div>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', marginTop: '3px' }}>personal deals</div>
+        <div style={{ borderRadius: '12px', border: `1px solid rgba(212,168,67,0.20)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.80), rgba(26,19,8,0.80))', backdropFilter: 'blur(12px)', padding: isLandscape ? '5px 10px' : '9px 12px', textAlign: 'center' }}>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: isLandscape ? '1px' : '4px' }}>Active Sponsors</div>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '16px' : '24px', color: GOLD, lineHeight: 1, textShadow: '0 0 14px rgba(212,168,67,0.40)' }}>{PLAYER_SPONSORS.length}</div>
+          {!isLandscape && <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', marginTop: '3px' }}>personal deals</div>}
         </div>
       </div>
 
@@ -114,14 +116,24 @@ export function ProfilePage() {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{
-                  minHeight: '44px', paddingInline: '16px', paddingBlock: '6px', borderRadius: '8px', cursor: 'pointer',
-                  background: active ? 'rgba(56,214,255,0.12)' : 'rgba(56,214,255,0.04)',
-                  border: active ? `1px solid rgba(56,214,255,0.35)` : `1px solid ${PANEL_BORDER}`,
-                  fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px',
-                  letterSpacing: '0.12em', textTransform: 'uppercase',
-                  color: active ? AQUA : 'rgba(169,211,231,0.45)',
-                  transition: 'all 0.18s ease',
+                  height: isLandscape ? '30px' : '36px',
+                  paddingInline: isLandscape ? '12px' : '16px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  background: active
+                    ? 'linear-gradient(140deg, rgba(56,214,255,0.20) 0%, rgba(56,214,255,0.08) 100%)'
+                    : 'rgba(56,214,255,0.04)',
+                  border: active
+                    ? `1px solid rgba(56,214,255,0.45)`
+                    : `1px solid ${PANEL_BORDER}`,
+                  fontFamily: "'Bebas Neue', sans-serif",
+                  fontSize: isLandscape ? '12px' : '14px',
+                  letterSpacing: '0.12em',
+                  color: active ? '#F3FBFF' : 'rgba(169,211,231,0.45)',
+                  boxShadow: active ? '0 0 8px rgba(56,214,255,0.22)' : 'none',
+                  transition: 'all 0.15s ease',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  userSelect: 'none',
                 }}
               >
                 {tab}
