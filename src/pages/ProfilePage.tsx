@@ -272,6 +272,7 @@ export function ProfilePage() {
 // ─── Shared sponsor panel ──────────────────────────────────────────────────────
 
 export function SponsorPanel({ sponsors, title, compact }: { sponsors: Sponsor[]; title: string; compact?: boolean }) {
+  const isLandscape = useIsLandscapeMobile()
   return (
     <div style={{ borderRadius: '12px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', ...(compact ? { flexShrink: 0 } : { flex: 1 }) }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px', flexShrink: 0 }}>
@@ -281,7 +282,8 @@ export function SponsorPanel({ sponsors, title, compact }: { sponsors: Sponsor[]
           {sponsors.length} ACTIVE
         </div>
       </div>
-      <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '5px', ...(compact ? {} : { flex: 1 }) }}>
+      {/* In landscape use a 2-column grid so cards don't stretch full width */}
+      <div style={{ overflowY: 'auto', display: isLandscape ? 'grid' : 'flex', gridTemplateColumns: isLandscape ? 'repeat(2, 1fr)' : undefined, flexDirection: isLandscape ? undefined : 'column', gap: '5px', ...(compact ? {} : { flex: 1 }) }}>
         {sponsors.map((s, i) => {
           const colors = TIER_COLORS[s.tier]
           return (

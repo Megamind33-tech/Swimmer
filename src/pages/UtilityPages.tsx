@@ -774,8 +774,27 @@ export function TrainingPage() {
           label: 'DRILLS',
           icon: <TargetIcon size={12} />,
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-              {drillSelector.props.children}
+            // 2-column grid so drill buttons don't stretch edge-to-edge in landscape
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
+                {DRILLS.map((d) => {
+                  const active = d.id === drill.id;
+                  return (
+                    <button
+                      key={d.id}
+                      onClick={() => setSelectedDrill(d)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', border: active ? '1px solid rgba(56,214,255,0.35)' : '1px solid rgba(255,255,255,0.06)', transition: 'all 0.14s', boxShadow: active ? '0 0 10px rgba(56,214,255,0.12)' : 'none', textAlign: 'left' }}
+                    >
+                      <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{d.icon}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.65)', letterSpacing: '0.06em' }}>{d.label}</div>
+                        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: active ? d.color : 'rgba(169,211,231,0.35)', marginTop: '1px' }}>{d.delta}</div>
+                      </div>
+                      {active && <ChevronRightIcon size={12} color={AQUA} />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ),
         },
@@ -783,8 +802,55 @@ export function TrainingPage() {
           id: 'session',
           label: 'SESSION',
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '8px', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-              {activeDrillView.props.children}
+            // 2-column split: identity+protocol left | stat impact+CTA right
+            <div style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '5fr 4fr', gap: '10px', alignItems: 'start' }}>
+                {/* Left: drill identity, description, protocol chips */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: drill.color }}>{drill.icon}</span>
+                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: drill.color, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Active Drill</span>
+                  </div>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '28px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1 }}>{drill.label}</div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.75)', lineHeight: 1.5 }}>{drill.desc}</div>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {[{ label: 'Sets', value: `${drill.sets}` }, { label: 'Reps', value: drill.reps }, { label: 'Rest', value: drill.rest }].map(({ label, value }) => (
+                      <div key={label} style={{ padding: '5px 11px', borderRadius: '8px', background: 'rgba(56,214,255,0.06)', border: '1px solid rgba(56,214,255,0.15)' }}>
+                        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{label}</div>
+                        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: AQUA, letterSpacing: '0.04em' }}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Right: stat impact bars + stat boost badge + CTA */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.50)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Stat Impact</div>
+                  {drill.impact.map((s) => {
+                    const pct = (s.value / s.max) * 100;
+                    return (
+                      <div key={s.label}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                          <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: '10px', color: '#A9D3E7', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</span>
+                          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: drill.color }}>{s.value}/{s.max}</span>
+                        </div>
+                        <div style={{ height: '4px', borderRadius: '2px', background: 'rgba(56,214,255,0.10)', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, ${drill.color}, ${drill.color}88)`, borderRadius: '2px', boxShadow: `0 0 6px ${drill.color}66` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 8px', borderRadius: '7px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.10)' }}>
+                    <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{drill.stat}</span>
+                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: drill.color, textShadow: `0 0 10px ${drill.color}88` }}>{drill.delta}</span>
+                  </div>
+                  <button
+                    onClick={() => setSessionActive((v) => !v)}
+                    style={{ width: '100%', height: '40px', borderRadius: '10px', cursor: 'pointer', background: sessionActive ? 'rgba(239,68,68,0.18)' : `linear-gradient(90deg, ${drill.color}, ${drill.color}BB)`, border: sessionActive ? '1px solid rgba(239,68,68,0.40)' : 'none', fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.10em', color: sessionActive ? '#F87171' : 'var(--color-carbon)', boxShadow: sessionActive ? 'none' : `0 0 16px ${drill.color}55`, transition: 'all 0.2s' }}
+                  >
+                    {sessionActive ? 'END SESSION' : 'START SESSION'}
+                  </button>
+                </div>
+              </div>
             </div>
           ),
         },
@@ -792,8 +858,27 @@ export function TrainingPage() {
           id: 'stats',
           label: 'STATS',
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {statsPanel.props.children}
+            // 2×2 grid of stat cards so they don't stretch full width in landscape
+            <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                {DRILL_STATS.map((s) => (
+                  <div key={s.label} style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+                      <span style={{ color: s.color }}>{s.icon}</span>
+                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{s.label}</span>
+                    </div>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: s.color, letterSpacing: '0.04em', textShadow: `0 0 8px ${s.color}66` }}>{s.value}</div>
+                  </div>
+                ))}
+                {/* This Week — spans both columns as a compact row */}
+                <div style={{ gridColumn: '1 / -1', padding: '8px 12px', borderRadius: '10px', background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>This Week</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: GOLD, letterSpacing: '0.04em' }}>4 / 7</div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(212,168,67,0.50)' }}>Sessions</div>
+                  </div>
+                </div>
+              </div>
             </div>
           ),
         },
