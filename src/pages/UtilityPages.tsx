@@ -30,6 +30,8 @@ import { clampPreset } from '../input/controlsSettings'
 import { loadPreset, savePreset, resetPreset } from '../input/controlsSettings'
 import type { PerformancePreset, PostProcessQuality } from '../performance/performancePreset'
 import { loadPerformancePreset, savePerformancePreset, DEFAULT_PERFORMANCE_PRESET } from '../performance/performancePreset'
+import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
+import { TRAINING_CYCLE_PHASES, TRAINING_DRILLS, TRAINING_DRILL_STATS } from '../utils/trainingEngineData'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design constants
@@ -538,89 +540,35 @@ export function SettingsPage() {
 // Training Page — full game-native training center
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface Drill {
-  id:      string;
-  label:   string;
-  icon:    React.ReactNode;
-  stat:    string;
-  delta:   string;
-  color:   string;
-  desc:    string;
-  sets:    number;
-  reps:    string;
-  rest:    string;
-  impact:  { label: string; value: number; max: number }[];
-}
-
-const DRILLS: Drill[] = [
-  {
-    id: 'starts', label: 'STARTS', icon: <GaugeIcon size={16} />, stat: 'Reaction', delta: '+0.8%',
-    color: AQUA, desc: 'Explosive block departure. Trains fast-twitch fibers for sub-0.6s entry.',
-    sets: 6, reps: '×1 dive', rest: '90s',
-    impact: [
-      { label: 'Start Reaction', value: 18, max: 20 },
-      { label: 'Underwater Power', value: 14, max: 20 },
-    ],
-  },
-  {
-    id: 'turns', label: 'TURNS', icon: <ActivityIcon size={16} />, stat: 'Turn Speed', delta: '+1.2%',
-    color: '#A78BFA', desc: 'Flip-turn mechanics with flip angle optimization and push-off power.',
-    sets: 8, reps: '×4 turns', rest: '60s',
-    impact: [
-      { label: 'Turn Speed', value: 16, max: 20 },
-      { label: 'Endurance',  value: 12, max: 20 },
-    ],
-  },
-  {
-    id: 'stroke', label: 'STROKE RATE', icon: <TimerResetIcon size={16} />, stat: 'Efficiency', delta: '+0.6%',
-    color: '#34D399', desc: 'Stroke cycle drills with cadence metronome. Target 48–52 strokes/min.',
-    sets: 4, reps: '200m', rest: '120s',
-    impact: [
-      { label: 'Endurance',   value: 17, max: 20 },
-      { label: 'Mental Comp', value: 14, max: 20 },
-    ],
-  },
-  {
-    id: 'endurance', label: 'ENDURANCE', icon: <HeartPulseIcon size={16} />, stat: 'VO2 Max', delta: '+2.1%',
-    color: '#F87171', desc: 'Lactate threshold sets. Builds aerobic base for 400m+ events.',
-    sets: 3, reps: '400m', rest: '180s',
-    impact: [
-      { label: 'Endurance',    value: 17, max: 20 },
-      { label: 'Finish Burst', value: 15, max: 20 },
-    ],
-  },
-  {
-    id: 'pace', label: 'PACE', icon: <TargetIcon size={16} />, stat: 'Split Ctrl', delta: '+1.4%',
-    color: GOLD, desc: 'Even-split and negative-split strategy. Trains race-day pacing judgment.',
-    sets: 5, reps: '100m', rest: '90s',
-    impact: [
-      { label: 'Mental Comp', value: 16, max: 20 },
-      { label: 'Endurance',   value: 13, max: 20 },
-    ],
-  },
-  {
-    id: 'power', label: 'POWER', icon: <GaugeIcon size={16} />, stat: 'Peak Force', delta: '+1.7%',
-    color: '#FB923C', desc: 'Resistance band + pull-buoy sets for peak propulsion force.',
-    sets: 5, reps: '50m', rest: '60s',
-    impact: [
-      { label: 'Underwater Power', value: 17, max: 20 },
-      { label: 'Finish Burst',     value: 18, max: 20 },
-    ],
-  },
-];
-
-const DRILL_STATS = [
-  { label: 'SPEED DRILL',  icon: <GaugeIcon size={12} />,    value: 'Lv. 7', color: AQUA },
-  { label: 'TECHNIQUE',    icon: <TargetIcon size={12} />, value: 'Lv. 6', color: '#A78BFA' },
-  { label: 'ENDURANCE',    icon: <HeartPulseIcon size={12} />,  value: 'Lv. 8', color: '#F87171' },
-  { label: 'POWER',        icon: <GaugeIcon size={12} />,  value: 'Lv. 5', color: '#FB923C' },
-];
-
 export function TrainingPage() {
-  const [selectedDrill, setSelectedDrill] = useState<Drill>(DRILLS[0]);
-  const [sessionActive, setSessionActive] = useState(false);
+  const { selectedDrill, setSelectedDrillId, sessionActive, setSessionActive, cyclePhase, setCyclePhaseId } = useTrainingEngineState();
+
 
   const drill = selectedDrill;
+
+  const drillButtons = TRAINING_DRILLS.map((item) => {
+    const active = item.id === drill.id
+    return (
+      <button
+        key={item.id}
+        onClick={() => setSelectedDrillId(item.id)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', marginBottom: '4px', background: active ? `rgba(56,214,255,0.12)` : 'rgba(255,255,255,0.03)', border: active ? `1px solid rgba(56,214,255,0.35)` : '1px solid transparent', transition: 'all 0.14s', boxShadow: active ? `0 0 10px rgba(56,214,255,0.12)` : 'none', textAlign: 'left' }}
+      >
+        <span style={{ color: active ? item.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{item.icon}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.65)', letterSpacing: '0.06em' }}>{item.label}</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: active ? item.color : 'rgba(169,211,231,0.35)', marginTop: '1px' }}>{item.delta}</div>
+        </div>
+        {active && <ChevronRightIcon size={12} color={AQUA} />}
+      </button>
+    )
+  })
+
+  const protocolChips = [
+    { label: 'Sets', value: `${drill.sets}` },
+    { label: 'Reps', value: drill.reps },
+    { label: 'Rest', value: drill.rest },
+  ]
 
   // ── Drill selector (left) ──────────────────────────────────────────────────
   const drillSelector = (
@@ -630,23 +578,7 @@ export function TrainingPage() {
           <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Select training</div>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 12px' }}>
-          {DRILLS.map((d) => {
-            const active = d.id === drill.id;
-            return (
-              <button
-                key={d.id}
-                onClick={() => setSelectedDrill(d)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', marginBottom: '4px', background: active ? `rgba(56,214,255,0.12)` : 'rgba(255,255,255,0.03)', border: active ? `1px solid rgba(56,214,255,0.35)` : '1px solid transparent', transition: 'all 0.14s', boxShadow: active ? `0 0 10px rgba(56,214,255,0.12)` : 'none', textAlign: 'left' }}
-              >
-                <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{d.icon}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.65)', letterSpacing: '0.06em' }}>{d.label}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: active ? d.color : 'rgba(169,211,231,0.35)', marginTop: '1px' }}>{d.delta}</div>
-                </div>
-                {active && <ChevronRightIcon size={12} color={AQUA} />}
-              </button>
-            );
-          })}
+          {drillButtons}
         </div>
       </div>
   ) // end drillSelector
@@ -688,16 +620,25 @@ export function TrainingPage() {
 
             {/* Protocol chips */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-              {[
-                { label: 'Sets', value: `${drill.sets}` },
-                { label: 'Reps', value: drill.reps },
-                { label: 'Rest', value: drill.rest },
-              ].map(({ label, value }) => (
+              {protocolChips.map(({ label, value }) => (
                 <div key={label} style={{ padding: '7px 14px', borderRadius: '8px', background: 'rgba(56,214,255,0.06)', border: '1px solid rgba(56,214,255,0.15)' }}>
                   <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{label}</div>
                   <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '17px', color: AQUA, letterSpacing: '0.04em' }}>{value}</div>
                 </div>
               ))}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '18px' }}>
+              <div style={{ padding: '9px 11px', borderRadius: '10px', border: '1px solid rgba(56,214,255,0.12)', background: 'rgba(56,214,255,0.04)' }}>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '4px' }}>Cycle Focus</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: AQUA, letterSpacing: '0.05em', marginBottom: '4px' }}>{cyclePhase.name}</div>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.4, color: 'rgba(169,211,231,0.68)' }}>{cyclePhase.focus}</div>
+              </div>
+              <div style={{ padding: '9px 11px', borderRadius: '10px', border: '1px solid rgba(248,113,113,0.12)', background: 'rgba(248,113,113,0.05)' }}>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '4px' }}>Cycle Risk</div>
+                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F87171', letterSpacing: '0.05em', marginBottom: '4px' }}>{cyclePhase.load}</div>
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.4, color: 'rgba(169,211,231,0.68)' }}>{cyclePhase.risk}</div>
+              </div>
             </div>
 
             {/* Stat impact bars */}
@@ -746,7 +687,29 @@ export function TrainingPage() {
           <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Drill levels</div>
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', padding: '4px 10px 14px' }}>
-          {DRILL_STATS.map((s) => (
+          <div style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '6px' }}>Cycle Phase</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {TRAINING_CYCLE_PHASES.map((phase) => {
+                const active = phase.id === cyclePhase.id;
+                return (
+                  <button
+                    key={phase.id}
+                    onClick={() => setCyclePhaseId(phase.id)}
+                    style={{
+                      width: '100%', textAlign: 'left', padding: '7px 8px', minHeight: '36px', borderRadius: '8px', cursor: 'pointer',
+                      background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)',
+                      border: active ? '1px solid rgba(56,214,255,0.28)' : '1px solid rgba(255,255,255,0.06)'
+                    }}
+                  >
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.70)', letterSpacing: '0.06em' }}>{phase.name}</div>
+                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: active ? AQUA : 'rgba(169,211,231,0.40)', marginTop: '1px' }}>{phase.readiness} readiness</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {TRAINING_DRILL_STATS.map((s) => (
             <div key={s.label} style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
                 <span style={{ color: s.color }}>{s.icon}</span>
@@ -777,12 +740,12 @@ export function TrainingPage() {
             // 2-column grid so drill buttons don't stretch edge-to-edge in landscape
             <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                {DRILLS.map((d) => {
+                {TRAINING_DRILLS.map((d) => {
                   const active = d.id === drill.id;
                   return (
                     <button
                       key={d.id}
-                      onClick={() => setSelectedDrill(d)}
+                      onClick={() => setSelectedDrillId(d.id)}
                       style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', border: active ? '1px solid rgba(56,214,255,0.35)' : '1px solid rgba(255,255,255,0.06)', transition: 'all 0.14s', boxShadow: active ? '0 0 10px rgba(56,214,255,0.12)' : 'none', textAlign: 'left' }}
                     >
                       <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{d.icon}</span>
@@ -861,7 +824,7 @@ export function TrainingPage() {
             // 2×2 grid of stat cards so they don't stretch full width in landscape
             <div style={{ position: 'absolute', inset: 0, padding: '8px', overflowY: 'auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                {DRILL_STATS.map((s) => (
+                {TRAINING_DRILL_STATS.map((s) => (
                   <div key={s.label} style={{ padding: '10px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
                       <span style={{ color: s.color }}>{s.icon}</span>
@@ -871,6 +834,19 @@ export function TrainingPage() {
                   </div>
                 ))}
                 {/* This Week — spans both columns as a compact row */}
+                <div style={{ gridColumn: '1 / -1', padding: '8px 12px', borderRadius: '10px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.10)' }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: '4px' }}>Cycle Phase</div>
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    {TRAINING_CYCLE_PHASES.map((phase) => {
+                      const active = phase.id === cyclePhase.id
+                      return (
+                        <button key={phase.id} onClick={() => setCyclePhaseId(phase.id)} style={{ padding: '5px 8px', minHeight: '34px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', border: active ? '1px solid rgba(56,214,255,0.28)' : '1px solid rgba(255,255,255,0.06)', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: active ? AQUA : 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                          {phase.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
                 <div style={{ gridColumn: '1 / -1', padding: '8px 12px', borderRadius: '10px', background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(212,168,67,0.60)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>This Week</div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
