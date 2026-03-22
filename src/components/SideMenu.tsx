@@ -43,7 +43,8 @@ export function SideMenu({ onSelect }: SideMenuProps) {
             whileHover={{ scale: 1.05, x: 5 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onSelect(menu.id)}
-            className="relative w-full aspect-square bg-gradient-to-br from-[#1B2838]/80 to-[#0A1628]/90 border border-white/10 rounded-xl flex flex-col items-center justify-center gap-1 shadow-lg backdrop-blur-sm group overflow-hidden"
+            aria-label={menu.label}
+            className="relative w-full aspect-square bg-gradient-to-br from-[#1B2838]/80 to-[#0A1628]/90 border border-white/10 rounded-xl flex flex-col items-center justify-center gap-1 shadow-lg backdrop-blur-sm group overflow-hidden focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none"
           >
             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <Icon size={24} className={`${menu.color} drop-shadow-md`} />
