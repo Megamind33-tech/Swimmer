@@ -201,6 +201,10 @@ export class ArenaManager {
     // ── 15. Broadcast camera (dormant until enableBroadcastMode) ─────────
     this.broadcastCamera = new BroadcastCamera(scene, this.canvas);
     this.broadcastCamera.initialize();
+    const broadcastCameraInstance = this.broadcastCamera.getCameraInstance();
+    if (broadcastCameraInstance) {
+      this.postProcess.addCamera(broadcastCameraInstance);
+    }
 
     // ── 16. Apply initial theme ───────────────────────────────────────────
     this._applyThemeInternal(this.arenaConfig.theme);
@@ -287,13 +291,14 @@ export class ArenaManager {
   public enableBroadcastMode(): void {
     if (!this.broadcastCamera || !this.arenaRoot) return;
     this.isBroadcastMode = true;
-    // Let the broadcast camera set scene.activeCamera on next update tick
+    this.broadcastCamera.activate();
     logger.log('[ArenaManager] Broadcast mode enabled');
   }
 
   public disableBroadcastMode(): void {
     if (!this.arenaRoot || !this.cameraSupport || !this.canvas) return;
     this.isBroadcastMode = false;
+    this.broadcastCamera?.deactivate();
     // Restore the static camera that was active before broadcast
     this.cameraSupport.setCamera(
       this.cameraSupport.getCurrentView(),

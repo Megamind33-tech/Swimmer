@@ -107,21 +107,42 @@ export class BroadcastCamera {
       this.scene
     );
 
-    this.currentCamera.attachControl(this.canvas, true);
-
     // Disable user input - critical for broadcast camera
     this.currentCamera.inertia = 0;
     this.currentCamera.angularSensibilityX = Number.MAX_VALUE;
     this.currentCamera.angularSensibilityY = Number.MAX_VALUE;
     this.currentCamera.wheelPrecision = Number.MAX_VALUE;
     this.currentCamera.pinchPrecision = Number.MAX_VALUE;
-
-    this.scene.activeCamera = this.currentCamera;
+    this.currentCamera.detachControl();
 
     const packageInfo = this.packageManager.getPackageInfo();
     logger.log(
       `BroadcastCamera initialized: ${packageInfo.package} package (${packageInfo.totalAvailable} cameras available)`
     );
+  }
+
+  /**
+   * Activate the broadcast camera only when broadcast mode is explicitly enabled.
+   */
+  public activate(): void {
+    if (!this.scene || !this.currentCamera) return;
+    this.currentCamera.detachControl();
+    this.scene.activeCamera = this.currentCamera;
+  }
+
+  /**
+   * Deactivate any broadcast-camera control bindings.
+   */
+  public deactivate(): void {
+    this.currentCamera?.detachControl();
+  }
+
+  /**
+   * Expose the underlying Babylon camera so ArenaManager can register it with
+   * post-processing pipelines without activating it.
+   */
+  public getCameraInstance(): BABYLON.ArcRotateCamera | null {
+    return this.currentCamera;
   }
 
   /**
