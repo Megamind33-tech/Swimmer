@@ -14,6 +14,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  min-width: 0;
 }
 
 html,
@@ -112,7 +113,7 @@ body {
 
   /* ── Typography — font families ─────────────────────────────────────── */
   --font-display: 'Barlow Condensed', sans-serif;
-  --font-body:    'Barlow', sans-serif;
+  --font-body:    'Rajdhani', sans-serif;
 
   /* ── Typography — type scale ─────────────────────────────────────────── */
   --text-xs:   10px;   /* tracked labels */
@@ -177,7 +178,7 @@ body,
    ───────────────────────────────────────────────────────────────────────────── */
 
 body {
-  font-family: var(--font-body), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-body), 'Rajdhani', sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: var(--color-text-primary);
@@ -188,12 +189,12 @@ body {
 
 /* Headline utility class — italic black condensed */
 .font-headline {
-  font-family: var(--font-display), "Arial Narrow", Impact, system-ui, sans-serif;
+  font-family: var(--font-display), 'Barlow Condensed', sans-serif;
 }
 
 /* Body utility class */
 .font-body {
-  font-family: var(--font-body), "Inter", system-ui, sans-serif;
+  font-family: var(--font-body), 'Rajdhani', sans-serif;
 }
 
 /* Bebas Neue — impact display headings for lobby titles, scores, season branding */
@@ -203,7 +204,7 @@ body {
 
 /* Rajdhani — tabs, labels, telemetry, menu labels, HUD readouts */
 .font-rajdhani {
-  font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Rajdhani', sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1302,4 +1303,427 @@ body {
 [data-a11y-motion="reduced"] .swim26-pane-tab,
 [data-a11y-motion="reduced"] .swim26-pane-arrow {
   animation: none !important;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SWIM26 MOBILE LANDSCAPE UI SYSTEM
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.swim26-page-shell {
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+}
+
+.swim26-pane-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.swim26-column-stack,
+.swim26-stack-sm,
+.swim26-list-stack,
+.swim26-choice-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.swim26-column-stack { gap: 12px; }
+.swim26-stack-sm { gap: 10px; }
+.swim26-list-stack { gap: 8px; }
+.swim26-choice-stack { gap: 8px; }
+
+.swim26-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 12px;
+}
+
+.swim26-card-grid--compact {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+}
+
+.club-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 12px;
+}
+
+.swim26-card,
+.club-card,
+.race-card {
+  position: relative;
+  background: #0C1B2D;
+  border: 1px solid #1E3A57;
+  overflow: visible;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.swim26-card,
+.club-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 164px;
+  padding: 14px;
+}
+
+.swim26-card::before,
+.club-card::before,
+.race-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 18px, rgba(30,58,87,0.22) 18px, rgba(30,58,87,0.22) 19px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.swim26-card--hero { min-height: 196px; }
+.swim26-card--aqua { border-top: 2px solid #18C8F0; }
+.swim26-card--gold { border-top: 2px solid #FFB800; }
+.swim26-card--neutral { border-top: 2px solid #1E3A57; }
+.swim26-card--danger { border-top: 2px solid #FF5A5F; }
+.club-card { border-top: 2px solid var(--card-accent, #18C8F0); min-height: 180px; }
+
+.card-content,
+.swim26-card-content,
+.race-card-content {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.cta-band,
+.race-card-cta {
+  padding-top: 10px;
+  min-height: 58px;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  z-index: 3;
+}
+
+.race-card {
+  min-height: 176px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 12px;
+  border-top: 2px solid #18C8F0;
+}
+
+.race-card-ghost,
+.card-ghost-num {
+  position: absolute;
+  right: -8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 96px;
+  color: rgba(24,200,240,0.05);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  line-height: 1;
+}
+
+.race-card-ghost { bottom: 58px; }
+.card-ghost-num { bottom: -12px; }
+
+.swim26-race-art {
+  position: absolute;
+  inset: 0;
+  opacity: 0.32;
+}
+
+.swim26-race-middle {
+  display: grid;
+  grid-template-columns: minmax(120px, 168px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.swim26-race-pb {
+  padding: 10px 12px;
+  border: 1px solid rgba(255,184,0,0.22);
+  background: rgba(7,17,30,0.58);
+}
+
+.rival-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(30,58,87,0.5);
+  min-width: 0;
+}
+
+.rival-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #9EB2C7;
+}
+
+.rival-time {
+  flex-shrink: 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #F3F7FC;
+}
+
+.swim26-readiness-strip,
+.swim26-chip-group,
+.swim26-meta-line {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.swim26-meta-line {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9EB2C7;
+}
+
+.swim26-meta-line--nowrap {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.swim26-inline-split,
+.swim26-goal-row,
+.swim26-choice-header,
+.swim26-section-head,
+.swim26-calendar-top,
+.swim26-split-row,
+.swim26-transfer-feature,
+.swim26-status-row,
+.swim26-versus-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.swim26-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 176px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.swim26-overline,
+.swim26-muted-label,
+.swim26-overline-row {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9EB2C7;
+}
+
+.swim26-overline-row { color: #71859C; }
+
+.swim26-hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 0.96;
+  color: #F3F7FC;
+}
+
+.swim26-card-title,
+.swim26-tile-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  line-height: 0.98;
+  color: #F3F7FC;
+  letter-spacing: 0.04em;
+}
+
+.swim26-card-title--lg { font-size: clamp(26px, 4vw, 34px); }
+
+.swim26-hero-value,
+.swim26-hero-value-sm {
+  font-family: 'Bebas Neue', sans-serif;
+  line-height: 0.95;
+  color: #F3F7FC;
+}
+
+.swim26-hero-value { font-size: clamp(40px, 6vw, 56px); }
+.swim26-hero-value-sm { font-size: 28px; }
+
+.swim26-list-row__title,
+.swim26-goal-title,
+.swim26-status-row,
+.swim26-phase-card__title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #F3F7FC;
+  text-transform: uppercase;
+}
+
+.swim26-list-row__meta,
+.swim26-muted-line,
+.swim26-goal-reward,
+.swim26-choice-meta,
+.swim26-phase-card__meta,
+.swim26-phase-card__copy,
+.swim26-copy-strip p,
+.swim26-split-row span {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  color: #9EB2C7;
+}
+
+.swim26-copy-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.swim26-goal-block,
+.swim26-list-row,
+.swim26-choice-card,
+.swim26-phase-card,
+.swim26-calendar-card,
+.swim26-portrait-tile,
+.swim26-facility-row,
+.swim26-mini-stat,
+.swim26-stat-chip,
+.swim26-status-row,
+.swim26-transfer-feature {
+  position: relative;
+  border: 1px solid rgba(30,58,87,0.85);
+  background: rgba(7,17,30,0.54);
+}
+
+.swim26-goal-block,
+.swim26-list-row,
+.swim26-choice-card,
+.swim26-phase-card,
+.swim26-calendar-card,
+.swim26-facility-row,
+.swim26-status-row,
+.swim26-transfer-feature { padding: 10px 12px; }
+
+.swim26-choice-card,
+.swim26-phase-card,
+.swim26-btn { cursor: pointer; }
+.swim26-choice-card.is-active,
+.swim26-phase-card.is-active,
+.swim26-calendar-card.is-current { border-color: rgba(24,200,240,0.42); background: rgba(16,36,58,0.92); }
+.swim26-calendar-card.is-done { border-color: rgba(63,224,152,0.28); }
+
+.swim26-mini-stat-grid { display: grid; gap: 8px; }
+.swim26-mini-stat-grid--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.swim26-mini-stat-grid--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.swim26-mini-stat { padding: 8px; text-align: center; }
+.swim26-mini-stat__value { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; }
+.swim26-mini-stat__label,
+.swim26-stat-chip__label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #71859C; }
+.swim26-stat-chip__value { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; }
+.swim26-stat-chip { min-width: 92px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
+
+.swim26-meter { width: 100%; height: 10px; border: 1px solid rgba(30,58,87,0.85); background: rgba(7,17,30,0.96); overflow: hidden; }
+.swim26-meter__fill { height: 100%; }
+
+.swim26-value-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+
+.swim26-btn {
+  min-width: 138px;
+  min-height: 50px;
+  padding: 0 18px;
+  border-radius: 0;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 16px rgba(0,0,0,0.28);
+}
+
+.swim26-btn:active { transform: scale(0.97); filter: brightness(0.88); transition: transform 0.06s, filter 0.06s; }
+.swim26-btn-primary { background: #C8FF00; color: #08111A; }
+.swim26-btn-secondary { background: #10243A; color: #F3F7FC; border: 1px solid #1E3A57; }
+.swim26-btn-ghost { background: transparent; color: #18C8F0; border: 1px solid #18C8F0; min-height: 44px; min-width: 110px; font-size: 13px; }
+.swim26-btn--full { width: 100%; }
+
+.swim26-img-container { position: relative; overflow: hidden; width: 100%; background: linear-gradient(135deg, #0C1B2D 0%, #10243A 100%); }
+.swim26-img-container.landscape { aspect-ratio: 16 / 7; }
+.swim26-img-container.portrait { aspect-ratio: 3 / 4; }
+.swim26-img-container.square { aspect-ratio: 1 / 1; }
+.swim26-img-container.widescreen { aspect-ratio: 21 / 9; }
+.swim26-img-container img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; pointer-events: none; z-index: 0; }
+.swim26-img-container.env img { object-position: center center; }
+.swim26-athlete-frame { min-height: 100%; }
+
+.img-overlay-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 70%; background: linear-gradient(to top, rgba(7,17,30,0.96) 0%, rgba(7,17,30,0.55) 50%, transparent 100%); pointer-events: none; z-index: 1; }
+.img-overlay-full { position: absolute; inset: 0; background: rgba(7,17,30,0.55); pointer-events: none; z-index: 1; }
+.img-text-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; z-index: 2; min-width: 0; word-break: break-word; }
+
+.swim26-status-pill {
+  padding: 4px 8px;
+  border: 1px solid;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(7,17,30,0.68);
+}
+
+.swim26-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: 10px;
+}
+
+.swim26-transfer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 12px;
+}
+
+.swim26-portrait-tile { display: grid; grid-template-rows: auto auto; min-width: 0; }
+.swim26-tile-body { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; }
+.swim26-versus-score { display: inline-flex; align-items: center; gap: 6px; font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #F3F7FC; }
+.swim26-facility-upgrade { display: inline-flex; align-items: center; gap: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #3FE098; text-transform: uppercase; }
+
+@media (max-width: 980px) {
+  .swim26-page-shell { grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .swim26-page-shell { grid-template-columns: 1fr; }
+  .swim26-hero-grid,
+  .swim26-race-middle { grid-template-columns: 1fr; }
+  .swim26-mini-stat-grid--five { grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); }
+  .swim26-mini-stat-grid--four { grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); }
 }
