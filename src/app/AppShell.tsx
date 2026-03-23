@@ -45,10 +45,9 @@ const RAIL_ITEMS: NavItem[] = [
 ];
 
 const HUD_LINKS: UtilityLink[] = [
-  { id: 'championships', label: 'CHAMPIONSHIPS' },
+  { id: 'championships', label: 'CHAMPS' },
   { id: 'scouts', label: 'SCOUTS' },
-  { id: 'rankings', label: 'RANKINGS' },
-  { id: 'store', label: 'STORE' },
+  { id: 'rankings', label: 'RANK' },
 ];
 
 function InlineIcon({ name, size = 16, strokeWidth = 1.8 }: { name: IconName; size?: number; strokeWidth?: number }) {
@@ -140,24 +139,20 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
     switch (currentScreen) {
       case 'career':
         return [
-          { label: 'READINESS', value: readiness, accent: '#3FE098' },
-          { label: 'XP', value: `${athleteState.xp}`, accent: '#FFB800' },
+          { label: 'READY', value: readiness, accent: '#3FE098' },
         ];
       case 'club':
       case 'training':
         return [
           { label: 'BUDGET', value: budget, accent: '#FFB800' },
-          { label: 'PRESTIGE', value: `${clubState.prestige}`, accent: '#18C8F0' },
         ];
       case 'market':
         return [
-          { label: 'BUDGET', value: budget, accent: '#FFB800' },
           { label: 'TARGETS', value: `${clubState.transferTargets.length}`, accent: '#3FE098' },
         ];
       default:
         return [
           { label: 'COINS', value: formatCompactNumber(USER_DATA.currencies.coins), accent: '#FFB800' },
-          { label: 'GEMS', value: `${USER_DATA.currencies.gems}`, accent: '#18C8F0' },
         ];
     }
   }, [athleteState.readiness, athleteState.xp, clubState.budget, clubState.prestige, clubState.transferTargets.length, currentScreen]);
@@ -241,13 +236,21 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
         </div>
 
         <div className="swim26-hud-actions">
-          <button className={`swim26-hud-utility ${currentScreen === 'rewards' ? 'is-active' : ''}`} onClick={() => setUtilityPage('rewards')}>
+          <button
+            className={`swim26-hud-utility ${currentScreen === 'rewards' ? 'is-active' : ''}`}
+            onClick={() => setUtilityPage('rewards')}
+            aria-label="Rewards"
+            title="Rewards"
+          >
             <InlineIcon name="rewards" />
-            <span>REWARDS</span>
           </button>
-          <button className={`swim26-hud-utility ${currentScreen === 'profile' ? 'is-active' : ''}`} onClick={() => setUtilityPage('profile')}>
+          <button
+            className={`swim26-hud-utility ${currentScreen === 'profile' ? 'is-active' : ''}`}
+            onClick={() => setUtilityPage('profile')}
+            aria-label="Profile"
+            title="Profile"
+          >
             <InlineIcon name="profile" />
-            <span>PROFILE</span>
           </button>
           {rightChips.map((chip) => (
             <div className="hud-chip" key={chip.label}>
