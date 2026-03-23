@@ -11,13 +11,16 @@ import React from 'react';
 import { GameShell } from './components/GameShell';
 import { LandscapeGuard } from './ui/LandscapeGuard';
 import { A11yProvider } from './context/AccessibilityContext';
+import { CareerSaveProvider } from './context/CareerSaveContext';
 
 export function App() {
   return (
     <A11yProvider>
-      <LandscapeGuard disabled>
-        <GameShell />
-      </LandscapeGuard>
+      <CareerSaveProvider>
+        <LandscapeGuard disabled>
+          <GameShell />
+        </LandscapeGuard>
+      </CareerSaveProvider>
     </A11yProvider>
   );
 }
