@@ -1479,6 +1479,162 @@ body {
   background: rgba(200,255,0,0.08);
 }
 
+.swim26-page-shell--single { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.swim26-champs-hero { min-height: 0; }
+.swim26-champs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.swim26-market-page { min-height: 100%; }
+.swim26-market-hero { min-height: 0; }
+.swim26-market-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  min-height: 40px;
+  border: 1px solid rgba(30,58,87,0.85);
+  background: rgba(7,17,30,0.54);
+}
+.swim26-market-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #F3F7FC;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.swim26-market-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(6px, 1vw, 10px);
+}
+.swim26-market-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.swim26-market-filter {
+  min-height: 40px;
+  border: 1px solid rgba(30,58,87,0.85);
+  background: rgba(7,17,30,0.54);
+  color: #9EB2C7;
+  display: grid;
+  gap: 2px;
+  place-items: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.swim26-market-filter strong {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: #F3F7FC;
+  line-height: 1;
+}
+.swim26-market-filter.is-active {
+  border-color: rgba(200,255,0,0.35);
+  background: rgba(200,255,0,0.08);
+  color: #C8FF00;
+}
+.swim26-market-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(8px, 1vw, 12px);
+}
+.swim26-market-card {
+  position: relative;
+  background: #0C1B2D;
+  border: 1px solid #1E3A57;
+  border-top: 2px solid #FFB800;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 12px;
+  min-height: 0;
+}
+.swim26-market-card.is-signed { border-top-color: #3FE098; }
+.swim26-market-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 18px, rgba(30,58,87,0.2) 18px, rgba(30,58,87,0.2) 19px);
+  pointer-events: none;
+}
+.swim26-market-card__art {
+  position: relative;
+  height: 110px;
+  overflow: hidden;
+  border: 1px solid rgba(30,58,87,0.8);
+  margin-bottom: 10px;
+}
+.swim26-market-card__emoji {
+  position: absolute;
+  right: 8px;
+  bottom: -2px;
+  font-size: 56px;
+  opacity: 0.82;
+}
+.swim26-market-card__ovr,
+.swim26-market-card__flag,
+.swim26-market-card__status {
+  position: absolute;
+  z-index: 2;
+}
+.swim26-market-card__ovr {
+  top: 8px;
+  left: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  line-height: 1;
+}
+.swim26-market-card__flag { top: 10px; right: 8px; }
+.swim26-market-card__status {
+  left: 8px;
+  bottom: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.swim26-market-sort-wrap { position: relative; }
+.swim26-market-sort-trigger {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #1E3A57;
+  background: #10243A;
+  color: #F3F7FC;
+  font-size: 18px;
+}
+.swim26-market-sort-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 180px;
+  border: 1px solid #1E3A57;
+  background: #0C1B2D;
+  z-index: 30;
+}
+.swim26-market-sort-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  color: #9EB2C7;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.swim26-market-sort-option.is-active {
+  color: #C8FF00;
+  background: rgba(200,255,0,0.08);
+}
+
 .swim26-pane-scroll {
   min-height: 0;
   overflow-y: auto;
