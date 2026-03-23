@@ -12,7 +12,6 @@ import { SwimmerScreen } from '../components/menu/SwimmerScreen';
 import { StoreScreen } from '../components/menu/StoreScreen';
 import { ProfilePage } from '../pages/ProfilePage';
 import { RewardsPage } from '../pages/RewardsPage';
-import { USER_DATA } from '../utils/gameData';
 import { useAthleteCareer, useClubCareer } from '../context/CareerSaveContext';
 
 type MainTab = 'club' | 'race' | 'career' | 'market' | 'training';
@@ -152,10 +151,10 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
         ];
       default:
         return [
-          { label: 'COINS', value: formatCompactNumber(USER_DATA.currencies.coins), accent: '#FFB800' },
+          { label: 'COINS', value: formatCompactNumber(athleteState.coins), accent: '#FFB800' },
         ];
     }
-  }, [athleteState.readiness, athleteState.xp, clubState.budget, clubState.prestige, clubState.transferTargets.length, currentScreen]);
+  }, [athleteState.coins, athleteState.readiness, clubState.budget, clubState.transferTargets.length, currentScreen]);
 
   const handleBack = () => {
     if (utilityPage) {

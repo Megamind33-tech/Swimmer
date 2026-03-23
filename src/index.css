@@ -1479,6 +1479,162 @@ body {
   background: rgba(200,255,0,0.08);
 }
 
+.swim26-page-shell--single { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.swim26-champs-hero { min-height: 0; }
+.swim26-champs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.swim26-market-page { min-height: 100%; }
+.swim26-market-hero { min-height: 0; }
+.swim26-market-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  min-height: 40px;
+  border: 1px solid rgba(30,58,87,0.85);
+  background: rgba(7,17,30,0.54);
+}
+.swim26-market-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #F3F7FC;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.swim26-market-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(6px, 1vw, 10px);
+}
+.swim26-market-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.swim26-market-filter {
+  min-height: 40px;
+  border: 1px solid rgba(30,58,87,0.85);
+  background: rgba(7,17,30,0.54);
+  color: #9EB2C7;
+  display: grid;
+  gap: 2px;
+  place-items: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.swim26-market-filter strong {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: #F3F7FC;
+  line-height: 1;
+}
+.swim26-market-filter.is-active {
+  border-color: rgba(200,255,0,0.35);
+  background: rgba(200,255,0,0.08);
+  color: #C8FF00;
+}
+.swim26-market-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(8px, 1vw, 12px);
+}
+.swim26-market-card {
+  position: relative;
+  background: #0C1B2D;
+  border: 1px solid #1E3A57;
+  border-top: 2px solid #FFB800;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 12px;
+  min-height: 0;
+}
+.swim26-market-card.is-signed { border-top-color: #3FE098; }
+.swim26-market-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 18px, rgba(30,58,87,0.2) 18px, rgba(30,58,87,0.2) 19px);
+  pointer-events: none;
+}
+.swim26-market-card__art {
+  position: relative;
+  height: 110px;
+  overflow: hidden;
+  border: 1px solid rgba(30,58,87,0.8);
+  margin-bottom: 10px;
+}
+.swim26-market-card__emoji {
+  position: absolute;
+  right: 8px;
+  bottom: -2px;
+  font-size: 56px;
+  opacity: 0.82;
+}
+.swim26-market-card__ovr,
+.swim26-market-card__flag,
+.swim26-market-card__status {
+  position: absolute;
+  z-index: 2;
+}
+.swim26-market-card__ovr {
+  top: 8px;
+  left: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  line-height: 1;
+}
+.swim26-market-card__flag { top: 10px; right: 8px; }
+.swim26-market-card__status {
+  left: 8px;
+  bottom: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.swim26-market-sort-wrap { position: relative; }
+.swim26-market-sort-trigger {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #1E3A57;
+  background: #10243A;
+  color: #F3F7FC;
+  font-size: 18px;
+}
+.swim26-market-sort-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 180px;
+  border: 1px solid #1E3A57;
+  background: #0C1B2D;
+  z-index: 30;
+}
+.swim26-market-sort-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  color: #9EB2C7;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.swim26-market-sort-option.is-active {
+  color: #C8FF00;
+  background: rgba(200,255,0,0.08);
+}
+
 .swim26-pane-scroll {
   min-height: 0;
   overflow-y: auto;
@@ -1905,6 +2061,74 @@ body {
   .swim26-mini-stat-grid--four { grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); }
 }
 
+@media (max-height: 430px) {
+  .swim26-page-shell {
+    inset: 8px;
+    grid-template-columns: minmax(200px, 0.82fr) minmax(0, 1.18fr);
+    gap: 8px;
+  }
+
+  .swim26-page-shell--single,
+  .swim26-champs-grid,
+  .swim26-market-stats,
+  .swim26-market-filters,
+  .swim26-market-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .swim26-card-grid,
+  .club-card-grid,
+  .swim26-calendar-grid,
+  .swim26-transfer-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+  }
+
+  .card,
+  .swim26-card,
+  .club-card,
+  .race-card,
+  .swim26-market-card {
+    min-height: 0;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .card-content,
+  .swim26-card-content,
+  .race-card-content {
+    min-height: 0;
+  }
+
+  .cta-band,
+  .race-card-cta {
+    min-height: 42px;
+    padding-top: 6px;
+  }
+
+  .swim26-card-title,
+  .swim26-tile-title {
+    font-size: 20px;
+  }
+
+  .swim26-card-title--lg {
+    font-size: clamp(22px, 6vh, 28px);
+  }
+
+  .swim26-hero-title {
+    font-size: clamp(24px, 7vh, 34px);
+  }
+
+  .swim26-market-card__art {
+    height: 88px;
+    margin-bottom: 8px;
+  }
+
+  .swim26-market-card__emoji {
+    font-size: 48px;
+  }
+}
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
    SWIM26 CANONICAL FRAME SHELL
@@ -2237,30 +2461,63 @@ body {
   animation: fadeUp 0.5s ease-out both;
 }
 
-.swim26-lobby-grid {
+.swim26-lobby-board {
   display: grid;
-  grid-template-columns: minmax(0, 62%) minmax(0, 38%);
-  grid-template-rows: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.92fr);
+  grid-template-rows: minmax(0, auto) minmax(0, 1fr);
   gap: var(--shell-gap);
   min-height: 100%;
+  align-content: stretch;
+}
+
+.swim26-lobby-hero,
+.swim26-lobby-side-card,
+.swim26-lobby-card {
+  min-height: 0;
+  height: 100%;
+  padding: 12px;
 }
 
 .swim26-lobby-hero {
-  grid-row: 1 / span 2;
-  min-height: 0;
+  min-height: clamp(300px, 50vh, 380px);
 }
 
-.swim26-lobby-side {
+.swim26-lobby-side-card {
+  min-height: clamp(300px, 50vh, 380px);
+}
+
+.swim26-lobby-hero .card-content,
+.swim26-lobby-side-card .card-content,
+.swim26-lobby-card .card-content {
+  gap: 8px;
+}
+
+.swim26-lobby-hero .cta-band,
+.swim26-lobby-side-card .cta-band,
+.swim26-lobby-card .cta-band {
+  min-height: 48px;
+  padding-top: 8px;
+}
+
+.swim26-lobby-lower-grid {
+  grid-column: 1 / -1;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) minmax(0, 0.78fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--shell-gap);
 }
-
-.swim26-lobby-card { min-height: 0; }
 
 .swim26-lobby-title {
   font-size: clamp(28px, 4.8vw, 40px);
   letter-spacing: 0.03em;
+  max-width: min(100%, 12ch);
+}
+
+.swim26-copy-strip--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.swim26-copy-strip--two > :last-child {
+  grid-column: 1 / -1;
 }
 
 .swim26-lobby-cta-row {
@@ -2270,8 +2527,11 @@ body {
   flex-wrap: wrap;
 }
 
-.swim26-lobby-swimmer--streamline { right: 28px; top: 34px; opacity: 0.22; }
-.swim26-lobby-swimmer--freestyle { right: 18px; bottom: 18px; opacity: 0.22; }
+.swim26-lobby-swimmer--streamline {
+  right: 28px;
+  top: 34px;
+  opacity: 0.22;
+}
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(6px); }
@@ -2312,15 +2572,45 @@ body {
     font-size: 16px;
   }
 
-  .swim26-lobby-grid {
-    grid-template-columns: 58% 42%;
+  .swim26-lobby-board {
+    grid-template-columns: minmax(0, 1.22fr) minmax(220px, 0.86fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 0.56fr);
   }
 
-  .swim26-lobby-swimmer--freestyle {
-    right: 8px;
-    bottom: 8px;
-    transform: scale(0.84);
-    transform-origin: bottom right;
+  .swim26-lobby-lower-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .swim26-lobby-hero,
+  .swim26-lobby-side-card,
+  .swim26-lobby-card {
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .swim26-lobby-title {
+    font-size: clamp(24px, 7vh, 32px);
+  }
+
+  .swim26-lobby-hero .card-content,
+  .swim26-lobby-side-card .card-content,
+  .swim26-lobby-card .card-content {
+    gap: 6px;
+  }
+
+  .swim26-lobby-hero .cta-band,
+  .swim26-lobby-side-card .cta-band,
+  .swim26-lobby-card .cta-band {
+    min-height: 42px;
+    padding-top: 6px;
+  }
+
+  .swim26-lobby-hero .swim26-mini-stat {
+    padding: 6px;
+  }
+
+  .swim26-lobby-hero .swim26-mini-stat__value {
+    font-size: 18px;
   }
 }
 
@@ -2333,29 +2623,35 @@ body {
     gap: 6px;
   }
 
-  .swim26-lobby-grid {
+  .swim26-lobby-board,
+  .swim26-lobby-lower-grid,
+  .swim26-copy-strip,
+  .swim26-copy-strip--two {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: repeat(4, minmax(0, auto));
   }
 
-  .swim26-lobby-hero {
-    grid-row: auto;
+  .swim26-lobby-hero,
+  .swim26-lobby-side-card {
+    min-height: 0;
   }
 
-  .swim26-lobby-side {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto;
-  }
-
-  .swim26-copy-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .swim26-copy-strip--two > :last-child {
+    grid-column: auto;
   }
 }
 
 @media (max-width: 700px), (max-height: 390px) {
+  .swim26-page-shell,
   .swim26-market-grid,
   .swim26-market-stats,
   .swim26-market-filters,
   .swim26-champs-grid,
   .swim26-page-shell--single { grid-template-columns: 1fr; }
+
+  .swim26-card-grid,
+  .club-card-grid,
+  .swim26-calendar-grid,
+  .swim26-transfer-grid {
+    grid-template-columns: 1fr;
+  }
 }
