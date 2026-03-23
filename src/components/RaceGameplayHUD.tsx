@@ -34,7 +34,7 @@ export const RaceGameplayHUD: React.FC<RaceGameplayHUDProps> = ({
   const [showControls, setShowControls] = useState(true);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 flex flex-col justify-between p-3 sm:p-6">
+    <div className="fixed inset-0 pointer-events-none z-50 flex flex-col justify-between p-3 sm:p-6 pb-8 sm:pb-10">
 
       {/* ── TOP HUD: Progress & Race Info ─────────────────────────────────── */}
       <div className="flex justify-between items-start gap-2 sm:gap-4 pointer-events-auto">
