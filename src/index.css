@@ -641,6 +641,66 @@ body {
   transform: skewX(-12deg);
 }
 
+/* ─── MediaPrimitives image treatment system ─────────────────────────────── */
+/* Wrapper containers — overflow:hidden is permitted here only */
+.media-frame {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.media-hero {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.media-feature {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.media-athlete-portrait {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.media-thumbnail {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+/* Image fill — always object-fit: cover, never distorted */
+.media-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.media-image-cover {
+  object-fit: cover;
+}
+
+.media-image-contain {
+  object-fit: contain;
+  padding: 8px;
+}
+
+/* Overlay — sits above image, below text content */
+.media-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* ─── Icon state colors ──────────────────────────────────────────────────── */
 .icon-progress-complete { color: var(--color-volt); }
 .icon-progress-active   { color: var(--color-volt); }
