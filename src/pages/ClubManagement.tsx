@@ -1,94 +1,70 @@
 import React, { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import {
-  ActivityIcon,
-  ArrowRightIcon,
   ArrowUpIcon,
   BadgeDollarSignIcon,
   Building2Icon,
-  CalendarIcon,
   CheckCircle2Icon,
-  ChevronRightIcon,
   CrownIcon,
   DumbbellIcon,
   FlameIcon,
   HandshakeIcon,
-  LockIcon,
-  PlusIcon,
   ShieldIcon,
-  StarIcon,
   TargetIcon,
   TrendingUpIcon,
   UserPlusIcon,
   Users2Icon,
   WavesIcon,
-  XCircleIcon,
   ZapIcon,
 } from 'lucide-react'
-import { SwimmerCard } from '../components/SwimmerCard'
-import { CLUB_SPONSORS, SWIMMERS, USER_DATA, type Swimmer } from '../utils/gameData'
-import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
+import { PaneSwitcher } from '../ui/PaneSwitcher'
 import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
 import { CLUB_PHILOSOPHIES, CLUB_PROJECTS } from '../utils/careerModeData'
 import { CLUB_TRAINING_GROUPS } from '../utils/trainingEngineData'
 import { useClubCareer } from '../context/CareerSaveContext'
-import { ProgressBar } from '../components/ProgressBar'
+import { CLUB_SPONSORS, USER_DATA } from '../utils/gameData'
+import poolBackdrop from '../designs/championship-pool-bg.jpg'
+import athletePortrait from '../designs/custom_models/athlete-06.png'
 
-const AQUA = '#81ECFF'
-const GOLD = '#D4A843'
+const AQUA = '#18C8F0'
+const VOLT = '#C8FF00'
+const GOLD = '#FFB800'
+const GREEN = '#3FE098'
 const SUCCESS = '#36C690'
-const ALERT = '#F87171'
-const PANEL = 'rgba(4,20,33,0.82)'
-const PANEL_BORDER = 'rgba(56,214,255,0.13)'
+const ALERT = '#FF5A5F'
 
-const panelStyle: React.CSSProperties = {
-  borderRadius: '14px',
-  border: `1px solid ${PANEL_BORDER}`,
-  background: PANEL,
-  backdropFilter: 'blur(12px)',
-}
-
-// Board expectations for the season
 const BOARD_TARGETS = [
-  { id: 'bt1', label: 'Finish top 4 in Regional Cup', met: true },
-  { id: 'bt2', label: 'Qualify at least 1 athlete for National Trials', met: true },
-  { id: 'bt3', label: 'Academy: promote 1 prospect to senior squad', met: false },
-  { id: 'bt4', label: 'Secure at least 2 active sponsor deals', met: false },
+  { id: 'bt1', label: 'FINISH TOP 4 IN REGIONAL CUP', met: true, progress: 100 },
+  { id: 'bt2', label: 'QUALIFY 1 ATHLETE FOR NATIONAL TRIALS', met: true, progress: 100 },
+  { id: 'bt3', label: 'PROMOTE 1 ACADEMY PROSPECT', met: false, progress: 62 },
+  { id: 'bt4', label: 'SECURE 2 ACTIVE SPONSOR DEALS', met: false, progress: 54 },
 ]
 
 export function ClubManagement() {
   const { state: clubState, dispatch: clubDispatch } = useClubCareer()
-  const isLandscape = useIsLandscapeMobile()
   const [selectedPhilosophyId, setSelectedPhilosophyId] = useState(clubState.philosophyId ?? CLUB_PHILOSOPHIES[0]?.id ?? '')
-  const [enteredComps, setEnteredComps] = useState<Set<string>>(new Set(
-    clubState.competitions.filter((c) => c.entered).map((c) => c.id)
-  ))
-  const { selectedDrill, cyclePhase, sessionActive } = useTrainingEngineState()
+  const [enteredComps, setEnteredComps] = useState<Set<string>>(new Set(clubState.competitions.filter((comp) => comp.entered).map((comp) => comp.id)))
+  const { cyclePhase } = useTrainingEngineState()
 
   const selectedPhilosophy = useMemo(
     () => CLUB_PHILOSOPHIES.find((item) => item.id === selectedPhilosophyId) ?? CLUB_PHILOSOPHIES[0],
     [selectedPhilosophyId],
   )
 
-  const rosterAsSwimmers: Swimmer[] = useMemo(() =>
-    clubState.roster.map((a) => ({
-      id: a.id,
-      name: a.name,
-      ovr: a.ovr,
-      stroke: a.stroke as any,
-      country: a.country,
-      stats: { speed: a.speed, stamina: a.stamina, technique: a.technique, turn: a.turns },
-      rarity: a.ovr >= 90 ? 'legendary' as const : a.ovr >= 83 ? 'epic' as const : a.ovr >= 76 ? 'rare' as const : 'common' as const,
-    })), [clubState.roster])
-
-  const clubOvr = rosterAsSwimmers.length > 0
-    ? Math.round(rosterAsSwimmers.reduce((sum, s) => sum + s.ovr, 0) / rosterAsSwimmers.length)
+  const roster = clubState.roster
+  const clubOvr = roster.length > 0
+    ? Math.round(roster.reduce((sum, swimmer) => sum + swimmer.ovr, 0) / roster.length)
     : USER_DATA.clubOvr
 
   const weeklyBalance = clubState.weeklyIncome - clubState.weeklyWages
-  const academyAthletes = useMemo(() => clubState.roster.filter((a) => a.isAcademy), [clubState.roster])
-  const hiredStaff = useMemo(() => clubState.staff.filter((s) => s.hired), [clubState.staff])
-  const availableStaff = useMemo(() => clubState.staff.filter((s) => !s.hired), [clubState.staff])
+  const academyAthletes = roster.filter((athlete) => athlete.isAcademy)
+  const activeRoster = roster.filter((athlete) => !athlete.isAcademy)
+  const fatiguedCount = roster.filter((athlete) => athlete.readiness < 70).length
+  const injuredCount = roster.filter((athlete) => athlete.form === 'cold').length
+  const availableStaff = clubState.staff.filter((staff) => !staff.hired)
+  const hiredStaff = clubState.staff.filter((staff) => staff.hired)
+  const activeTargets = clubState.transferTargets.filter((target) => target.available)
+  const nextCompetition = clubState.competitions.find((comp) => enteredComps.has(comp.id)) ?? clubState.competitions[0]
 
   const toggleComp = (id: string) => {
     setEnteredComps((prev) => {
@@ -99,433 +75,407 @@ export function ClubManagement() {
     })
   }
 
-  // ─── HQ PANE ─────────────────────────────────────────────────────────────
-  const hqPane = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-
-      {/* Club header */}
-      <div style={{
-        ...panelStyle, padding: '14px 16px',
-        background: 'linear-gradient(145deg, rgba(31,30,15,0.98) 0%, rgba(8,17,28,0.92) 100%)',
-        border: '1px solid rgba(212,168,67,0.22)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-          <div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(212,168,67,0.70)', fontWeight: 800 }}>Club / Coaching Career</div>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '26px', color: '#F3FBFF', lineHeight: 1, marginTop: '3px' }}>{clubState.clubName || 'Aqua FC'}</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.58)', marginTop: '3px' }}>
-              Season {clubState.season} · Week {clubState.currentWeek}/{clubState.totalWeeks}
-            </div>
-          </div>
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '36px', color: GOLD, lineHeight: 1 }}>{clubOvr}</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(212,168,67,0.65)', fontWeight: 700 }}>CLUB OVR</div>
-          </div>
-        </div>
-
-        {/* 4-stat row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginTop: '12px' }}>
-          {[
-            { label: 'Prestige', value: clubState.prestige, color: GOLD },
-            { label: 'Budget', value: `$${(clubState.budget / 1000).toFixed(0)}K`, color: SUCCESS },
-            { label: 'Balance', value: `${weeklyBalance >= 0 ? '+' : ''}${weeklyBalance.toLocaleString()}`, color: weeklyBalance >= 0 ? SUCCESS : ALERT },
-            { label: 'Roster', value: clubState.roster.length, color: AQUA },
-          ].map((m) => (
-            <div key={m.label} style={{ background: 'rgba(0,0,0,0.30)', borderRadius: '9px', padding: '8px', textAlign: 'center' }}>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: m.color, lineHeight: 1 }}>{m.value}</div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.48)', textTransform: 'uppercase', letterSpacing: '0.10em', fontWeight: 700, marginTop: '2px' }}>{m.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Board expectations */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <TargetIcon size={13} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Board Expectations</span>
-          <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', fontWeight: 700 }}>
-            {BOARD_TARGETS.filter((t) => t.met).length}/{BOARD_TARGETS.length} MET
-          </span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          {BOARD_TARGETS.map((target) => (
-            <div key={target.id} style={{
-              display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 9px', borderRadius: '8px',
-              background: target.met ? 'rgba(54,198,144,0.06)' : 'rgba(255,255,255,0.02)',
-              border: target.met ? '1px solid rgba(54,198,144,0.18)' : '1px solid rgba(255,255,255,0.05)',
-            }}>
-              {target.met ? <CheckCircle2Icon size={13} color={SUCCESS} /> : <XCircleIcon size={13} color="rgba(248,113,113,0.55)" />}
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', fontWeight: target.met ? 700 : 400, color: target.met ? '#F3FBFF' : 'rgba(169,211,231,0.60)' }}>{target.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Club philosophy */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <FlameIcon size={13} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Club Doctrine</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {CLUB_PHILOSOPHIES.map((philosophy) => {
-            const active = philosophy.id === selectedPhilosophy.id
-            return (
-              <button
-                key={philosophy.id}
-                onClick={() => { setSelectedPhilosophyId(philosophy.id); clubDispatch({ type: 'CLUB_SET_PHILOSOPHY', philosophyId: philosophy.id as any }) }}
-                style={{
-                  textAlign: 'left', borderRadius: '10px', padding: '10px 11px', cursor: 'pointer',
-                  border: active ? '1px solid rgba(129,236,255,0.34)' : '1px solid rgba(255,255,255,0.06)',
-                  background: active ? 'linear-gradient(135deg, rgba(129,236,255,0.10) 0%, rgba(0,0,0,0) 100%)' : 'rgba(255,255,255,0.02)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.60)' }}>{philosophy.title}</span>
-                  {active && <CheckCircle2Icon size={13} color={AQUA} />}
+  const overviewPane = (
+    <div className="swim26-column-stack">
+      <section className="swim26-card swim26-card--gold swim26-card--hero">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-hero-grid">
+            <div className="swim26-img-container landscape env">
+              <img src={poolBackdrop} alt="Club pool backdrop" />
+              <div className="img-overlay-bottom" />
+              <div className="img-text-content">
+                <div className="swim26-overline">CLUB MANAGEMENT</div>
+                <div className="swim26-hero-title">{clubState.clubName}</div>
+                <div className="swim26-meta-line">
+                  <span>SEASON {clubState.season}</span>
+                  <span>WEEK {clubState.currentWeek}/{clubState.totalWeeks}</span>
                 </div>
-                {active && (
-                  <>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: SUCCESS, marginTop: '4px' }}>{philosophy.upside}</div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginTop: '2px' }}>{philosophy.tradeoff}</div>
-                  </>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+              </div>
+            </div>
 
-      {/* Facilities */}
-      {clubState.facilities.length > 0 && (
-        <div style={{ ...panelStyle, padding: '12px 14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-            <Building2Icon size={13} color={GOLD} />
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Facilities</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {clubState.facilities.map((fac) => (
-              <div key={fac.type} style={{ borderRadius: '9px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)', padding: '9px 11px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                  <div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: '#F3FBFF', textTransform: 'capitalize' }}>{fac.type}</div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginTop: '2px' }}>{fac.effect}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                    <div style={{ display: 'flex', gap: '2px' }}>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} style={{ width: '8px', height: '8px', borderRadius: '2px', background: i < fac.level ? GOLD : 'rgba(255,255,255,0.12)' }} />
-                      ))}
-                    </div>
-                    <button style={{
-                      padding: '5px 8px', borderRadius: '7px', cursor: 'pointer',
-                      background: 'rgba(129,236,255,0.08)', border: '1px solid rgba(129,236,255,0.22)',
-                      fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: AQUA, letterSpacing: '0.08em',
-                      display: 'flex', alignItems: 'center', gap: '3px',
-                    }}>
-                      <ArrowUpIcon size={10} />
-                      ${(fac.upgradeCost / 1000).toFixed(0)}K
-                    </button>
-                  </div>
+            <div className="swim26-stack-sm">
+              <div className="swim26-inline-split">
+                <div>
+                  <div className="swim26-overline">CLUB OVR</div>
+                  <div className="swim26-hero-value" style={{ color: GOLD }}>{clubOvr}</div>
                 </div>
+                <div className="swim26-chip-group">
+                  <StatChip label="BUDGET" value={`$${Math.round(clubState.budget / 1000)}K`} accent={SUCCESS} />
+                  <StatChip label="BALANCE" value={`${weeklyBalance >= 0 ? '+' : ''}${Math.round(weeklyBalance / 1000)}K`} accent={weeklyBalance >= 0 ? GREEN : ALERT} />
+                </div>
+              </div>
+
+              <div className="swim26-mini-stat-grid swim26-mini-stat-grid--four">
+                <div className="swim26-mini-stat"><div className="swim26-mini-stat__value" style={{ color: GOLD }}>{clubState.prestige}</div><div className="swim26-mini-stat__label">PRESTIGE</div></div>
+                <div className="swim26-mini-stat"><div className="swim26-mini-stat__value" style={{ color: AQUA }}>{activeRoster.length}</div><div className="swim26-mini-stat__label">ACTIVE</div></div>
+                <div className="swim26-mini-stat"><div className="swim26-mini-stat__value" style={{ color: GREEN }}>{hiredStaff.length}</div><div className="swim26-mini-stat__label">STAFF</div></div>
+                <div className="swim26-mini-stat"><div className="swim26-mini-stat__value" style={{ color: VOLT }}>{clubState.pendingDecisions.length}</div><div className="swim26-mini-stat__label">URGENT</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span className="card-ghost-num">{clubOvr}</span>
+      </section>
+
+      <section className="swim26-card swim26-card--gold">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">BOARD CONFIDENCE</div>
+              <div className="swim26-card-title">MANDATE</div>
+            </div>
+            <TargetIcon size={16} color={GOLD} />
+          </div>
+          <div className="swim26-list-stack">
+            {BOARD_TARGETS.map((target) => (
+              <div key={target.id} className="swim26-goal-block">
+                <div className="swim26-goal-row">
+                  <span className="swim26-goal-title">{target.label}</span>
+                  {target.met ? <CheckCircle2Icon size={14} color={SUCCESS} /> : <span className="swim26-goal-reward">{target.progress}%</span>}
+                </div>
+                <Meter value={target.progress} max={100} accent={target.met ? SUCCESS : GOLD} />
               </div>
             ))}
           </div>
         </div>
-      )}
+      </section>
 
-      {/* Academy */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <WavesIcon size={13} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Academy</span>
-          <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: AQUA, fontWeight: 700 }}>{academyAthletes.length} PROSPECTS</span>
-        </div>
-        {academyAthletes.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {academyAthletes.map((prospect) => (
-              <div key={prospect.id} style={{ borderRadius: '9px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)', padding: '9px 11px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                  <div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: '#F3FBFF' }}>{prospect.name}</div>
-                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.08em', marginTop: '1px' }}>AGE {prospect.age} · {prospect.stroke}</div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: AQUA, lineHeight: 1 }}>{prospect.ovr}</div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.45)', fontWeight: 700 }}>→{prospect.potential}</div>
-                  </div>
-                </div>
-                <div style={{ marginTop: '6px' }}>
-                  <ProgressBar progress={Math.round(prospect.developmentProgress)} max={100} color="bg-[#36C690]" showLabel />
-                </div>
-                {prospect.readiness >= 80 && (
-                  <button style={{
-                    marginTop: '6px', width: '100%', padding: '6px', borderRadius: '7px', cursor: 'pointer',
-                    background: 'rgba(54,198,144,0.10)', border: '1px solid rgba(54,198,144,0.30)',
-                    fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: SUCCESS, letterSpacing: '0.08em',
-                  }}>PROMOTE TO SENIOR SQUAD</button>
-                )}
-              </div>
-            ))}
+      <section className="swim26-card swim26-card--neutral">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">NEXT FIXTURE</div>
+              <div className="swim26-card-title">RACE WEEK</div>
+            </div>
+            <CrownIcon size={16} color={AQUA} />
           </div>
-        ) : (
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.40)', textAlign: 'center', padding: '10px' }}>No academy prospects. Scout to recruit young talent.</div>
-        )}
-      </div>
+          <div className="swim26-copy-strip">
+            <div>
+              <span className="swim26-muted-label">EVENT</span>
+              <p>{nextCompetition?.name ?? 'REGIONAL CUP HEAT'}</p>
+            </div>
+            <div>
+              <span className="swim26-muted-label">STAKES</span>
+              <p>{nextCompetition?.stakes ?? 'PRESTIGE · SPONSOR EXPOSURE'}</p>
+            </div>
+          </div>
+          <div className="swim26-meta-line">
+            <span>WEEK {nextCompetition?.week ?? clubState.currentWeek}</span>
+            <span>{enteredComps.has(nextCompetition?.id ?? '') ? 'ENTERED' : 'NOT ENTERED'}</span>
+            <span>{cyclePhase.name.toUpperCase()}</span>
+          </div>
+        </div>
+        <div className="cta-band">
+          <button className="swim26-btn swim26-btn-primary">OPEN CLUB</button>
+        </div>
+      </section>
     </div>
   )
 
-  // ─── DYNASTY PANE ────────────────────────────────────────────────────────
   const dynastyPane = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className="swim26-column-stack">
+      <div className="club-card-grid">
+        <section className="club-card" style={{ ['--card-accent' as any]: GOLD }}>
+          <div className="card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">CLUB OVERVIEW</div>
+                <div className="swim26-card-title">{clubState.clubName}</div>
+              </div>
+              <ShieldIcon size={16} color={GOLD} />
+            </div>
+            <div className="swim26-inline-split">
+              <div className="swim26-hero-value" style={{ color: GOLD }}>{clubOvr}</div>
+              <div className="swim26-value-stack">
+                <span className="swim26-muted-label">RECORD</span>
+                <span className="swim26-list-row__title">12 / 3 / 2</span>
+              </div>
+            </div>
+            <Meter value={78} max={100} accent={GOLD} />
+            <div className="swim26-muted-line">BOARD CONFIDENCE · STRONG SPONSOR MOMENTUM</div>
+          </div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-secondary">OPEN CLUB</button></div>
+        </section>
 
-      {/* Transfer market */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <UserPlusIcon size={13} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Transfer Market</span>
-          <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', fontWeight: 700 }}>{clubState.transferTargets?.filter((t) => t.available).length ?? 0} AVAILABLE</span>
-        </div>
-        {(clubState.transferTargets?.filter((t) => t.available) ?? []).length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {(clubState.transferTargets?.filter((t) => t.available) ?? []).map((target) => (
-              <div key={target.id} style={{
-                borderRadius: '10px', border: '1px solid rgba(129,236,255,0.14)', background: 'rgba(255,255,255,0.02)', padding: '10px 11px',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{target.name}</span>
-                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase' }}>Age {target.age}</span>
-                    </div>
-                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: AQUA, letterSpacing: '0.08em', marginTop: '2px' }}>{target.stroke.toUpperCase()}</div>
+        <section className="club-card" style={{ ['--card-accent' as any]: AQUA }}>
+          <div className="card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">SQUAD DEPTH</div>
+                <div className="swim26-card-title">ACTIVE UNIT</div>
+              </div>
+              <Users2Icon size={16} color={AQUA} />
+            </div>
+            <StatusRow label="AVAILABLE" value={activeRoster.length} accent={AQUA} />
+            <StatusRow label="FATIGUED" value={fatiguedCount} accent={GOLD} />
+            <StatusRow label="INJURED" value={injuredCount} accent={ALERT} />
+          </div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-secondary">VIEW SQUAD</button></div>
+        </section>
+
+        <section className="club-card" style={{ ['--card-accent' as any]: VOLT }}>
+          <div className="card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">TRANSFER MARKET</div>
+                <div className="swim26-card-title">FEATURED RECRUIT</div>
+              </div>
+              <UserPlusIcon size={16} color={VOLT} />
+            </div>
+            {activeTargets[0] ? (
+              <>
+                <div className="swim26-transfer-feature">
+                  <div>
+                    <div className="swim26-list-row__title">{activeTargets[0].name}</div>
+                    <div className="swim26-list-row__meta">{activeTargets[0].stroke.toUpperCase()} · AGE {activeTargets[0].age}</div>
                   </div>
-                  <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: target.ovr >= 80 ? GOLD : AQUA, lineHeight: 1 }}>{target.ovr}</div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.45)', fontWeight: 700 }}>OVR</div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: SUCCESS }}>${(target.price / 1000).toFixed(0)}K</div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.45)' }}>${(target.weeklyWage / 1000).toFixed(1)}K/wk</div>
+                  <div className="swim26-hero-value-sm" style={{ color: GOLD }}>{activeTargets[0].ovr}</div>
+                </div>
+                <div className="swim26-meta-line"><span>${Math.round(activeTargets[0].price / 1000)}K</span><span>${Math.round(activeTargets[0].weeklyWage / 1000)}K/WK</span><span>{activeTargets.length} LIVE</span></div>
+              </>
+            ) : <div className="swim26-muted-line">NO LIVE TARGETS</div>}
+          </div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-primary">SCOUT / SIGN</button></div>
+        </section>
+
+        <section className="club-card" style={{ ['--card-accent' as any]: GREEN }}>
+          <div className="card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">FACILITIES</div>
+                <div className="swim26-card-title">UPGRADE LANES</div>
+              </div>
+              <Building2Icon size={16} color={GREEN} />
+            </div>
+            {clubState.facilities.slice(0, 3).map((facility) => (
+              <div key={facility.type} className="swim26-facility-row">
+                <div>
+                  <div className="swim26-list-row__title">{facility.type.toUpperCase()}</div>
+                  <div className="swim26-list-row__meta">{facility.effect}</div>
+                </div>
+                <div className="swim26-facility-upgrade">
+                  <span>L{facility.level}</span>
+                  <ArrowUpIcon size={14} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-secondary">UPGRADE</button></div>
+        </section>
+
+        <section className="club-card" style={{ ['--card-accent' as any]: GOLD }}>
+          <div className="card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">BOARD TARGETS</div>
+                <div className="swim26-card-title">PRESSURE BOARD</div>
+              </div>
+              <TargetIcon size={16} color={GOLD} />
+            </div>
+            {BOARD_TARGETS.slice(0, 3).map((target) => (
+              <div key={target.id} className="swim26-goal-block">
+                <div className="swim26-goal-row"><span className="swim26-goal-title">{target.label}</span><span className="swim26-goal-reward">{target.progress}%</span></div>
+                <Meter value={target.progress} max={100} accent={target.met ? SUCCESS : GOLD} />
+              </div>
+            ))}
+          </div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-secondary">REVIEW TARGETS</button></div>
+        </section>
+
+        <section className="club-card" style={{ ['--card-accent' as any]: '#1E3A57' }}>
+          <div className="card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">TRAINING PHILOSOPHY</div>
+                <div className="swim26-card-title">{selectedPhilosophy.title}</div>
+              </div>
+              <FlameIcon size={16} color={AQUA} />
+            </div>
+            <div className="swim26-copy-strip">
+              <div><span className="swim26-muted-label">UPSIDE</span><p>{selectedPhilosophy.upside}</p></div>
+              <div><span className="swim26-muted-label">TRADEOFF</span><p>{selectedPhilosophy.tradeoff}</p></div>
+            </div>
+          </div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-ghost">ADJUST</button></div>
+        </section>
+      </div>
+
+      <section className="swim26-card swim26-card--aqua">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">TRANSFER BOARD</div>
+              <div className="swim26-card-title">RECRUIT LANE</div>
+            </div>
+            <UserPlusIcon size={16} color={VOLT} />
+          </div>
+          <div className="swim26-transfer-grid">
+            {activeTargets.slice(0, 4).map((target) => (
+              <article key={target.id} className="swim26-portrait-tile">
+                <div className="swim26-img-container portrait">
+                  <img src={athletePortrait} alt={`${target.name} recruit portrait`} />
+                  <div className="img-overlay-bottom" />
+                  <div className="img-text-content">
+                    <div className="swim26-tile-title">{target.name}</div>
+                    <div className="swim26-meta-line swim26-meta-line--nowrap"><span>{target.stroke.toUpperCase()}</span><span>OVR {target.ovr}</span></div>
                   </div>
                 </div>
+                <div className="swim26-tile-body">
+                  <div className="swim26-meta-line"><span>AGE {target.age}</span><span>${Math.round(target.price / 1000)}K</span></div>
+                  <button className="swim26-btn swim26-btn-primary swim26-btn--full">SIGN</button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="swim26-card swim26-card--neutral">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">CLUB DOCTRINE</div>
+              <div className="swim26-card-title">SELECT IDENTITY</div>
+            </div>
+            <ZapIcon size={16} color={AQUA} />
+          </div>
+          <div className="swim26-card-grid swim26-card-grid--compact">
+            {CLUB_PHILOSOPHIES.map((philosophy) => {
+              const active = philosophy.id === selectedPhilosophy.id
+              return (
                 <button
-                  disabled={clubState.budget < target.price}
-                  style={{
-                    marginTop: '8px', width: '100%', padding: '8px', borderRadius: '8px', cursor: clubState.budget >= target.price ? 'pointer' : 'not-allowed',
-                    background: clubState.budget >= target.price ? 'rgba(129,236,255,0.10)' : 'rgba(255,255,255,0.04)',
-                    border: clubState.budget >= target.price ? '1px solid rgba(129,236,255,0.30)' : '1px solid rgba(255,255,255,0.08)',
-                    fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', letterSpacing: '0.08em',
-                    color: clubState.budget >= target.price ? AQUA : 'rgba(169,211,231,0.35)',
+                  key={philosophy.id}
+                  type="button"
+                  className={`swim26-phase-card ${active ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setSelectedPhilosophyId(philosophy.id)
+                    clubDispatch({ type: 'CLUB_SET_PHILOSOPHY', philosophyId: philosophy.id as any })
                   }}
                 >
-                  {clubState.budget >= target.price ? `SIGN FOR $${(target.price / 1000).toFixed(0)}K` : 'INSUFFICIENT BUDGET'}
+                  <div className="swim26-phase-card__title">{philosophy.title}</div>
+                  <div className="swim26-phase-card__meta">{philosophy.doctrine}</div>
+                  <div className="swim26-phase-card__copy">{philosophy.upside}</div>
                 </button>
-              </div>
-            ))}
+              )
+            })}
           </div>
-        ) : (
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.40)', textAlign: 'center', padding: '10px' }}>No transfer targets available. Scout for new signings.</div>
-        )}
-      </div>
+        </div>
+      </section>
 
-      {/* Core squad */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <ShieldIcon size={13} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Squad</span>
-          <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', fontWeight: 700 }}>{rosterAsSwimmers.length} ATHLETES</span>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-          {(rosterAsSwimmers.length > 0 ? rosterAsSwimmers : SWIMMERS.slice(0, 5)).map((swimmer, i) => (
-            <motion.div key={swimmer.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} style={{ flexShrink: 0 }}>
-              <SwimmerCard swimmer={swimmer} size="sm" />
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Staff */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <Users2Icon size={13} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Staff</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {hiredStaff.map((staff) => (
-            <div key={staff.id} style={{ borderRadius: '9px', border: '1px solid rgba(54,198,144,0.18)', background: 'rgba(54,198,144,0.04)', padding: '9px 11px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                <div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: '#F3FBFF' }}>{staff.name}</div>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.08em', marginTop: '1px' }}>{staff.role.toUpperCase()} · LVL {staff.level}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: SUCCESS, marginTop: '3px' }}>{staff.boost}: +{staff.boostValue}</div>
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)' }}>{staff.salary.toLocaleString()}/wk</div>
-                  <button style={{
-                    marginTop: '5px', padding: '5px 9px', borderRadius: '7px', cursor: 'pointer',
-                    background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.24)',
-                    fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.06em',
-                    display: 'flex', alignItems: 'center', gap: '3px',
-                  }}>
-                    <ArrowUpIcon size={9} /> UPGRADE
+      <section className="swim26-card swim26-card--gold">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">COMPETITIONS</div>
+              <div className="swim26-card-title">ENTRY BOARD</div>
+            </div>
+            <WavesIcon size={16} color={GOLD} />
+          </div>
+          <div className="swim26-calendar-grid">
+            {clubState.competitions.map((event) => {
+              const entered = enteredComps.has(event.id)
+              return (
+                <div key={event.id} className={`swim26-calendar-card ${entered ? 'is-current' : ''}`}>
+                  <div className="swim26-calendar-top">
+                    {entered ? <CheckCircle2Icon size={14} color={SUCCESS} /> : <BadgeDollarSignIcon size={14} color={GOLD} />}
+                    <span>W{event.week}</span>
+                  </div>
+                  <div className="swim26-list-row__title">{event.name}</div>
+                  <div className="swim26-list-row__meta">{event.stakes}</div>
+                  <button className="swim26-btn swim26-btn-ghost swim26-btn--full" onClick={() => toggleComp(event.id)}>
+                    {entered ? 'WITHDRAW' : 'ENTER HEAT'}
                   </button>
                 </div>
-              </div>
-            </div>
-          ))}
-          {availableStaff.slice(0, 2).map((staff) => (
-            <div key={staff.id} style={{ borderRadius: '9px', border: '1px dashed rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.01)', padding: '9px 11px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                <div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: 'rgba(169,211,231,0.60)' }}>{staff.name}</div>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: 'rgba(212,168,67,0.50)', letterSpacing: '0.08em', marginTop: '1px' }}>{staff.role.toUpperCase()}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.45)', marginTop: '3px' }}>{staff.salary.toLocaleString()}/wk</div>
-                </div>
-                <button style={{
-                  padding: '7px 11px', borderRadius: '8px', cursor: 'pointer',
-                  background: 'rgba(129,236,255,0.08)', border: '1px solid rgba(129,236,255,0.28)',
-                  fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: AQUA, letterSpacing: '0.08em',
-                  display: 'flex', alignItems: 'center', gap: '4px',
-                }}>
-                  <PlusIcon size={11} /> HIRE
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Training groups */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-          <DumbbellIcon size={13} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Training Groups</span>
-          <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: sessionActive ? SUCCESS : GOLD, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em' }}>
-            {sessionActive ? '● SESSION LIVE' : '○ PLAN READY'}
-          </span>
-        </div>
-        <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: AQUA, marginBottom: '8px' }}>{selectedDrill.label} · {cyclePhase.name}</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {CLUB_TRAINING_GROUPS.map((group) => (
-            <div key={group.id} style={{ borderRadius: '9px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)', padding: '9px 11px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{group.name}</span>
-                <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: AQUA, textTransform: 'uppercase', letterSpacing: '0.10em' }}>{group.currentLoad}</span>
-              </div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.60)', marginTop: '4px' }}>{group.purpose}</div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: SUCCESS, marginTop: '3px' }}>{group.payoff}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Meet calendar */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <CalendarIcon size={13} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Meet Calendar</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
-          {clubState.competitions.map((event) => {
-            const entered = enteredComps.has(event.id)
-            return (
-              <div key={event.id} style={{
-                borderRadius: '10px',
-                border: entered ? '1px solid rgba(54,198,144,0.28)' : '1px solid rgba(255,255,255,0.07)',
-                background: entered ? 'rgba(54,198,144,0.05)' : 'rgba(255,255,255,0.02)',
-                padding: '10px 11px',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{event.name}</div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: GOLD, marginTop: '2px' }}>{event.stakes}</div>
-                    {entered && (
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', color: SUCCESS, letterSpacing: '0.10em', marginTop: '4px' }}>
-                        ✓ ENTERED · {event.lineup?.length ?? 0} ATHLETES
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', marginBottom: '5px' }}>W{event.week}</div>
-                    <button
-                      onClick={() => toggleComp(event.id)}
-                      style={{
-                        padding: '6px 10px', borderRadius: '8px', cursor: 'pointer',
-                        background: entered ? 'rgba(248,113,113,0.08)' : 'rgba(54,198,144,0.10)',
-                        border: entered ? '1px solid rgba(248,113,113,0.28)' : '1px solid rgba(54,198,144,0.28)',
-                        fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', letterSpacing: '0.08em',
-                        color: entered ? ALERT : SUCCESS,
-                      }}
-                    >
-                      {entered ? 'WITHDRAW' : 'ENTER'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Active club sponsors */}
-      {CLUB_SPONSORS.length > 0 && (
-        <div style={{ ...panelStyle, padding: '12px 14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-            <HandshakeIcon size={13} color={SUCCESS} />
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Partners & Sponsors</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-            {CLUB_SPONSORS.slice(0, 4).map((sp) => (
-              <div key={sp.id} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
-                padding: '8px 10px', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
-              }}>
-                <div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: '#F3FBFF' }}>{sp.name}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.50)' }}>{sp.category}</div>
-                </div>
-                <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: sp.tier === 'Title' ? GOLD : sp.tier === 'Gold' ? '#FCD34D' : AQUA }}>{sp.value}</div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
-      )}
+      </section>
 
-      {/* Growth projects */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <TrendingUpIcon size={13} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Club Projects</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {CLUB_PROJECTS.map((project) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                borderRadius: '9px',
-                border: project.status === 'ahead' ? '1px solid rgba(54,198,144,0.24)' : project.status === 'risk' ? '1px solid rgba(248,113,113,0.22)' : '1px solid rgba(255,255,255,0.06)',
-                background: project.status === 'ahead' ? 'rgba(54,198,144,0.05)' : project.status === 'risk' ? 'rgba(248,113,113,0.04)' : 'rgba(255,255,255,0.02)',
-                padding: '9px 11px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: '#F3FBFF' }}>{project.title}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.50)', marginTop: '2px' }}>{project.owner} · {project.eta}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.65)', marginTop: '4px', lineHeight: 1.35 }}>{project.impact}</div>
-                </div>
-                <span style={{
-                  fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.10em', flexShrink: 0,
-                  color: project.status === 'ahead' ? SUCCESS : project.status === 'risk' ? ALERT : AQUA,
-                }}>{project.status.toUpperCase()}</span>
+      <div className="swim26-card-grid">
+        <section className="swim26-card swim26-card--gold">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">PARTNERS</div>
+                <div className="swim26-card-title">SPONSOR TRACK</div>
               </div>
-            </motion.div>
-          ))}
-        </div>
+              <HandshakeIcon size={16} color={SUCCESS} />
+            </div>
+            <div className="swim26-list-stack">
+              {CLUB_SPONSORS.slice(0, 4).map((sponsor) => (
+                <div key={sponsor.id} className="swim26-split-row">
+                  <span>{sponsor.name}</span>
+                  <strong>{sponsor.value}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="swim26-card swim26-card--aqua">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">STAFF ROOM</div>
+                <div className="swim26-card-title">SPECIALISTS</div>
+              </div>
+              <DumbbellIcon size={16} color={AQUA} />
+            </div>
+            <div className="swim26-list-stack">
+              {clubState.staff.slice(0, 4).map((staff) => (
+                <div key={staff.id} className="swim26-versus-row">
+                  <div>
+                    <div className="swim26-list-row__title">{staff.name}</div>
+                    <div className="swim26-list-row__meta">{staff.role} · {staff.boost}</div>
+                  </div>
+                  <div className="swim26-versus-score"><span>L{staff.level}</span></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-secondary">ADJUST</button></div>
+        </section>
+
+        <section className="swim26-card swim26-card--danger">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">PROJECTS</div>
+                <div className="swim26-card-title">GROWTH TRACK</div>
+              </div>
+              <TrendingUpIcon size={16} color={ALERT} />
+            </div>
+            <div className="swim26-list-stack">
+              {CLUB_PROJECTS.map((project) => (
+                <div key={project.id} className="swim26-goal-block">
+                  <div className="swim26-goal-row"><span className="swim26-goal-title">{project.title}</span><span className="swim26-goal-reward">{project.status.toUpperCase()}</span></div>
+                  <div className="swim26-muted-line">{project.owner} · {project.eta}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="swim26-card swim26-card--neutral">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">GROUP LOAD</div>
+                <div className="swim26-card-title">TRAINING UNITS</div>
+              </div>
+              <FlameIcon size={16} color={AQUA} />
+            </div>
+            <div className="swim26-list-stack">
+              {CLUB_TRAINING_GROUPS.map((group) => (
+                <div key={group.id} className="swim26-goal-block">
+                  <div className="swim26-goal-row"><span className="swim26-goal-title">{group.name}</span><span className="swim26-goal-reward">{group.currentLoad}</span></div>
+                  <div className="swim26-muted-line">{group.payoff}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   )
@@ -537,13 +487,13 @@ export function ClubManagement() {
           id: 'hq',
           label: 'HQ',
           icon: <Building2Icon size={12} />,
-          content: <div style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto' }}>{hqPane}</div>,
+          content: <div className="swim26-pane-scroll">{overviewPane}</div>,
         },
         {
           id: 'dynasty',
           label: 'DYNASTY',
           icon: <CrownIcon size={12} />,
-          content: <div style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto' }}>{dynastyPane}</div>,
+          content: <div className="swim26-pane-scroll">{dynastyPane}</div>,
         },
       ]}
     >
@@ -551,15 +501,38 @@ export function ClubManagement() {
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 1.02 }}
-        style={{
-          position: 'absolute', inset: 0,
-          display: 'grid', gridTemplateColumns: '300px 1fr',
-          gap: '10px', padding: '10px', minHeight: 0, overflow: 'hidden',
-        }}
+        className="swim26-page-shell"
       >
-        <div style={{ overflowY: 'auto' }}>{hqPane}</div>
-        <div style={{ overflowY: 'auto' }}>{dynastyPane}</div>
+        <div className="swim26-pane-scroll">{overviewPane}</div>
+        <div className="swim26-pane-scroll">{dynastyPane}</div>
       </motion.div>
     </PaneSwitcher>
+  )
+}
+
+function Meter({ value, max, accent }: { value: number; max: number; accent: string }) {
+  const pct = Math.max(0, Math.min(100, Math.round((value / max) * 100)))
+  return (
+    <div className="swim26-meter">
+      <div className="swim26-meter__fill" style={{ width: `${pct}%`, background: accent }} />
+    </div>
+  )
+}
+
+function StatChip({ label, value, accent }: { label: string; value: string; accent: string }) {
+  return (
+    <div className="swim26-stat-chip">
+      <span className="swim26-stat-chip__label">{label}</span>
+      <strong className="swim26-stat-chip__value" style={{ color: accent }}>{value}</strong>
+    </div>
+  )
+}
+
+function StatusRow({ label, value, accent }: { label: string; value: number; accent: string }) {
+  return (
+    <div className="swim26-status-row">
+      <span>{label}</span>
+      <strong style={{ color: accent }}>{value}</strong>
+    </div>
   )
 }

@@ -2,17 +2,13 @@ import React, { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import {
   ActivityIcon,
-  ArrowRightIcon,
   BadgeCheckIcon,
   CalendarIcon,
   CheckCircle2Icon,
-  ChevronRightIcon,
   CircleIcon,
-  CrownIcon,
   FlameIcon,
   GaugeIcon,
   LockIcon,
-  ShieldCheckIcon,
   StarIcon,
   SwordsIcon,
   TimerIcon,
@@ -21,8 +17,7 @@ import {
   WavesIcon,
   ZapIcon,
 } from 'lucide-react'
-import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
-import { ProgressBar } from '../components/ProgressBar'
+import { PaneSwitcher } from '../ui/PaneSwitcher'
 import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
 import {
   PLAYER_CAREER_EVENTS,
@@ -32,49 +27,44 @@ import {
 } from '../utils/careerModeData'
 import { TRAINING_CYCLE_PHASES } from '../utils/trainingEngineData'
 import { useAthleteCareer } from '../context/CareerSaveContext'
+import athletePortrait from '../designs/custom_models/athlete-01.png'
+import poolBackdrop from '../designs/championship-pool-bg.jpg'
 
-const GOLD = '#D4A843'
-const AQUA = '#81ECFF'
+const AQUA = '#18C8F0'
+const VOLT = '#C8FF00'
+const GOLD = '#FFB800'
 const SUCCESS = '#36C690'
-const ALERT = '#F87171'
-const PANEL = 'rgba(4,20,33,0.82)'
-const PANEL_BORDER = 'rgba(56,214,255,0.13)'
-
-const panelStyle: React.CSSProperties = {
-  borderRadius: '14px',
-  border: `1px solid ${PANEL_BORDER}`,
-  background: PANEL,
-  backdropFilter: 'blur(12px)',
-}
+const ALERT = '#FF5A5F'
 
 const FORM_COLOR: Record<string, string> = {
-  peak: '#D4A843',
-  hot: '#36C690',
-  normal: '#81ECFF',
-  cold: '#F87171',
+  peak: GOLD,
+  hot: SUCCESS,
+  normal: AQUA,
+  cold: ALERT,
 }
 
-// Personal best times per event for display
 const PERSONAL_BESTS: Record<string, string> = {
-  '50m Freestyle': '22.41',
-  '100m Freestyle': '48.94',
-  '200m Freestyle': '1:47.82',
+  '50M FREE': '22.41',
+  '100M FREE': '48.94',
+  '200M FREE': '1:47.82',
 }
 
 export function CareerMode() {
-  const isLandscape = useIsLandscapeMobile()
   const { state: athleteState, dispatch: athleteDispatch } = useAthleteCareer()
   const [selectedFocus, setSelectedFocus] = useState(athleteState.trainingFocusId ?? PLAYER_WEEKLY_FOCUS[0]?.id ?? '')
   const [focusConfirmed, setFocusConfirmed] = useState(false)
-  const { selectedDrill, cyclePhase, setCyclePhaseId, sessionActive } = useTrainingEngineState()
+  const { cyclePhase, setCyclePhaseId, selectedDrill, sessionActive } = useTrainingEngineState()
 
   const activeFocus = useMemo(
     () => PLAYER_WEEKLY_FOCUS.find((focus) => focus.id === selectedFocus) ?? PLAYER_WEEKLY_FOCUS[0],
     [selectedFocus],
   )
 
+  const nextEvent = PLAYER_CAREER_EVENTS[athleteState.currentEventIdx] ?? PLAYER_CAREER_EVENTS[0]
+  const formColor = FORM_COLOR[athleteState.form] ?? AQUA
+
   const stagesWithStatus = useMemo(() => {
-    const stageOrder = PLAYER_CAREER_STAGES.map((s) => s.id)
+    const stageOrder = PLAYER_CAREER_STAGES.map((stage) => stage.id)
     const currentIdx = stageOrder.indexOf(athleteState.careerStageId)
     return PLAYER_CAREER_STAGES.map((stage, idx) => ({
       ...stage,
@@ -82,15 +72,10 @@ export function CareerMode() {
     }))
   }, [athleteState.careerStageId])
 
-  const currentStageIndex = stagesWithStatus.findIndex((s) => s.status === 'current')
-  const currentStage = stagesWithStatus[currentStageIndex]
-  const completedCount = stagesWithStatus.filter((s) => s.status === 'completed').length
+  const currentStage = stagesWithStatus.find((stage) => stage.status === 'current') ?? stagesWithStatus[0]
+  const completedCount = stagesWithStatus.filter((stage) => stage.status === 'completed').length
   const stageProgress = Math.round(((completedCount + 0.65) / stagesWithStatus.length) * 100)
 
-  const nextEvent = PLAYER_CAREER_EVENTS[athleteState.currentEventIdx] ?? PLAYER_CAREER_EVENTS[0]
-  const formColor = FORM_COLOR[athleteState.form] ?? AQUA
-
-  // Stats for athlete profile
   const statsRow = [
     { label: 'SPD', value: athleteState.speed },
     { label: 'STM', value: athleteState.stamina },
@@ -99,405 +84,356 @@ export function CareerMode() {
     { label: 'TRN', value: athleteState.turns },
   ]
 
-  // ─── LADDER PANE ────────────────────────────────────────────────────────────
-  const ladderPane = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+  const rivals = athleteState.rivals.slice(0, 3)
+  const sponsorCards = athleteState.sponsors.filter((sponsor) => sponsor.status === 'active' || sponsor.status === 'offered').slice(0, 3)
+  const raceCalendar = PLAYER_CAREER_EVENTS.slice(0, 6)
 
-      {/* Player card */}
-      <div style={{
-        ...panelStyle,
-        padding: '14px 16px',
-        background: 'linear-gradient(145deg, rgba(18,45,68,0.98) 0%, rgba(7,18,28,0.92) 100%)',
-        border: '1px solid rgba(129,236,255,0.18)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '44px', height: '44px', borderRadius: '50%',
-              background: 'rgba(129,236,255,0.10)',
-              border: `2px solid ${formColor}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}>
-              <UserIcon size={22} color={formColor} />
+  const overviewPane = (
+    <div className="swim26-column-stack">
+      <section className="swim26-card swim26-card--aqua swim26-card--hero">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-hero-grid">
+            <div className="swim26-img-container portrait swim26-athlete-frame">
+              <img src={athletePortrait} alt="Career athlete portrait" />
+              <div className="img-overlay-bottom" />
+              <div className="img-text-content">
+                <div className="swim26-overline">ATHLETE CAREER</div>
+                <div className="swim26-hero-title">YOUR ATHLETE</div>
+                <div className="swim26-meta-line">
+                  <span style={{ color: formColor }}>{athleteState.form.toUpperCase()} FORM</span>
+                  <span>WEEK {athleteState.currentWeek}/{athleteState.totalWeeks}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="swim26-stack-sm">
+              <div className="swim26-inline-split">
+                <div>
+                  <div className="swim26-overline">LEVEL</div>
+                  <div className="swim26-hero-value" style={{ color: GOLD }}>{Math.floor(athleteState.xp / 500) + 1}</div>
+                </div>
+                <div className="swim26-chip-group">
+                  <StatChip label="READINESS" value={`${athleteState.readiness}%`} accent={athleteState.readiness >= 80 ? SUCCESS : GOLD} />
+                  <StatChip label="TRUST" value={`${athleteState.coachTrust}`} accent={AQUA} />
+                </div>
+              </div>
+
+              <div className="swim26-progress-block">
+                <div className="swim26-inline-split swim26-overline-row">
+                  <span>XP TO NEXT LEVEL</span>
+                  <span>{athleteState.xp % 500}/500</span>
+                </div>
+                <Meter value={athleteState.xp % 500} max={500} accent={GOLD} />
+              </div>
+
+              <div className="swim26-mini-stat-grid swim26-mini-stat-grid--five">
+                {statsRow.map((stat) => (
+                  <div key={stat.label} className="swim26-mini-stat">
+                    <div className="swim26-mini-stat__value" style={{ color: stat.value >= 80 ? SUCCESS : stat.value >= 65 ? AQUA : '#9EB2C7' }}>{stat.value}</div>
+                    <div className="swim26-mini-stat__label">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <span className="card-ghost-num">{Math.floor(athleteState.xp / 500) + 1}</span>
+      </section>
+
+      <section className="swim26-card swim26-card--gold">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">CAREER PATH</div>
+              <div className="swim26-card-title">{currentStage.name}</div>
+            </div>
+            <div className="swim26-value-stack">
+              <span className="swim26-hero-value-sm" style={{ color: GOLD }}>{stageProgress}%</span>
+              <span className="swim26-muted-label">LADDER</span>
+            </div>
+          </div>
+
+          <div className="swim26-copy-strip">
+            <div>
+              <span className="swim26-muted-label">PRESSURE</span>
+              <p>{currentStage.pressure}</p>
             </div>
             <div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(129,236,255,0.65)', fontWeight: 800 }}>Player Career</div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: '#F3FBFF', lineHeight: 1 }}>Your Athlete</div>
-              <div style={{ display: 'flex', gap: '6px', marginTop: '4px', alignItems: 'center' }}>
-                <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', fontWeight: 800, color: formColor, textTransform: 'uppercase', letterSpacing: '0.10em' }}>{athleteState.form.toUpperCase()} FORM</span>
-                <span style={{ color: 'rgba(129,236,255,0.3)' }}>·</span>
-                <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.65)' }}>Week {athleteState.currentWeek}/{athleteState.totalWeeks}</span>
-              </div>
+              <span className="swim26-muted-label">FOCUS</span>
+              <p>{currentStage.focus}</p>
             </div>
           </div>
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '34px', color: GOLD, lineHeight: 1 }}>{Math.floor(athleteState.xp / 500) + 1}</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(212,168,67,0.70)', fontWeight: 700 }}>LEVEL</div>
+
+          <div className="swim26-list-stack">
+            {stagesWithStatus.map((stage) => {
+              const tone = stage.status === 'current' ? GOLD : stage.status === 'completed' ? SUCCESS : '#71859C'
+              return (
+                <div key={stage.id} className="swim26-list-row">
+                  <div className="swim26-list-row__icon">
+                    {stage.status === 'completed' ? <CheckCircle2Icon size={14} color={SUCCESS} /> : stage.status === 'current' ? <FlameIcon size={14} color={GOLD} /> : <LockIcon size={13} color="#71859C" />}
+                  </div>
+                  <div className="swim26-list-row__body">
+                    <div className="swim26-list-row__title" style={{ color: tone }}>{stage.name}</div>
+                    <div className="swim26-list-row__meta">{stage.tierLabel} · {stage.growthReward}</div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
+      </section>
 
-        {/* XP bar */}
-        <div style={{ marginTop: '10px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-            <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.55)', fontWeight: 700, textTransform: 'uppercase' }}>XP</span>
-            <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: GOLD }}>{athleteState.xp % 500} / 500</span>
-          </div>
-          <ProgressBar progress={athleteState.xp % 500} max={500} color="bg-[#D4A843]" />
-        </div>
-
-        {/* Attribute stats */}
-        <div style={{ display: 'flex', gap: '6px', marginTop: '10px' }}>
-          {statsRow.map((stat) => (
-            <div key={stat.label} style={{ flex: 1, background: 'rgba(0,0,0,0.25)', borderRadius: '8px', padding: '6px 4px', textAlign: 'center' }}>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: stat.value >= 80 ? SUCCESS : stat.value >= 65 ? AQUA : 'rgba(169,211,231,0.60)', lineHeight: 1 }}>{stat.value}</div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.50)', fontWeight: 700, letterSpacing: '0.08em', marginTop: '2px' }}>{stat.label}</div>
+      <section className="swim26-card swim26-card--aqua">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">PERSONAL BESTS</div>
+              <div className="swim26-card-title">PB BOARD</div>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Key metrics row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
-        {[
-          { label: 'Readiness', value: `${athleteState.readiness}%`, color: athleteState.readiness >= 80 ? SUCCESS : GOLD },
-          { label: 'Trust', value: `${athleteState.coachTrust}`, color: AQUA },
-          { label: 'Momentum', value: athleteState.momentum >= 0 ? `+${athleteState.momentum}` : `${athleteState.momentum}`, color: athleteState.momentum >= 0 ? SUCCESS : ALERT },
-          { label: 'Rep', value: `${athleteState.reputation}`, color: GOLD },
-        ].map((m) => (
-          <div key={m.label} style={{ ...panelStyle, padding: '8px', textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: m.color, lineHeight: 1 }}>{m.value}</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.10em', fontWeight: 700, marginTop: '3px' }}>{m.label}</div>
+            <TimerIcon size={16} color={AQUA} />
           </div>
-        ))}
-      </div>
-
-      {/* Personal bests */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <TimerIcon size={13} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Personal Bests</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          {Object.entries(PERSONAL_BESTS).map(([event, time]) => (
-            <div key={event} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 8px', borderRadius: '7px', background: 'rgba(129,236,255,0.04)' }}>
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.75)', fontWeight: 700 }}>{event}</span>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: AQUA, letterSpacing: '0.06em' }}>{time}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Career path */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <WavesIcon size={13} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Career Path</span>
-          <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: GOLD, fontWeight: 700 }}>{stageProgress}%</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          {stagesWithStatus.map((stage) => {
-            const isCurrent = stage.status === 'current'
-            const isDone = stage.status === 'completed'
-            return (
-              <div key={stage.id} style={{
-                display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 9px',
-                borderRadius: '9px',
-                border: isCurrent ? '1px solid rgba(212,168,67,0.32)' : isDone ? '1px solid rgba(54,198,144,0.18)' : '1px solid rgba(255,255,255,0.04)',
-                background: isCurrent ? 'rgba(212,168,67,0.08)' : isDone ? 'rgba(54,198,144,0.05)' : 'transparent',
-                opacity: isDone || isCurrent ? 1 : 0.55,
-              }}>
-                <div style={{ flexShrink: 0 }}>
-                  {isDone ? <CheckCircle2Icon size={14} color={SUCCESS} /> : isCurrent ? <FlameIcon size={14} color={GOLD} /> : <CircleIcon size={14} color="rgba(169,211,231,0.25)" />}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: isCurrent ? GOLD : isDone ? SUCCESS : 'rgba(169,211,231,0.55)' }}>{stage.name}</span>
-                    <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.35)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>{stage.tierLabel}</span>
-                  </div>
-                </div>
-                {isCurrent && <ChevronRightIcon size={12} color={GOLD} />}
-                {stage.status === 'locked' && <LockIcon size={11} color="rgba(169,211,231,0.25)" />}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </div>
-  )
-
-  // ─── GRIND PANE ─────────────────────────────────────────────────────────────
-  const grindPane = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-
-      {/* Next race card */}
-      {nextEvent && (
-        <div style={{
-          ...panelStyle,
-          padding: '14px 16px',
-          background: 'linear-gradient(135deg, rgba(212,168,67,0.12) 0%, rgba(4,20,33,0.90) 100%)',
-          border: '1px solid rgba(212,168,67,0.30)',
-        }}>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: GOLD, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.16em', marginBottom: '4px' }}>
-            Next Race · Tier {nextEvent.tier}
-          </div>
-          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '22px', color: '#F3FBFF', lineHeight: 1, letterSpacing: '0.04em' }}>{nextEvent.name}</div>
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.72)', marginTop: '5px', lineHeight: 1.4 }}>{nextEvent.description}</div>
-
-          <div style={{ display: 'flex', gap: '6px', marginTop: '10px', flexWrap: 'wrap' }}>
-            <StatChip icon={<WavesIcon size={11} color={AQUA} />} label={`${nextEvent.distance}m ${nextEvent.stroke.toLowerCase()}`} />
-            <StatChip icon={<ZapIcon size={11} color={GOLD} />} label={`Diff ${nextEvent.difficulty}/10`} />
-            <StatChip icon={<TrophyIcon size={11} color={SUCCESS} />} label={`${nextEvent.rewards.xp} XP`} />
-            <StatChip icon={<SwordsIcon size={11} color={ALERT} />} label={`${nextEvent.opponents.length} rivals`} />
-          </div>
-
-          <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-            <button style={{
-              flex: 1, padding: '10px', borderRadius: '10px', cursor: 'pointer',
-              background: GOLD, border: 'none',
-              fontFamily: "'Bebas Neue', sans-serif", fontSize: '15px', color: '#0A1628', letterSpacing: '0.08em',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            }}>
-              <ZapIcon size={14} color="#0A1628" />
-              RACE NOW
-            </button>
-            <button style={{
-              padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)',
-              fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.70)', fontWeight: 700,
-            }}>
-              WARM UP
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Season objectives */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <TrophyIcon size={13} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Season Objectives</span>
-          <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', fontWeight: 700 }}>W{athleteState.currentWeek}/{athleteState.totalWeeks}</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {PLAYER_SEASON_OBJECTIVES.map((obj) => {
-            const done = obj.progress >= 100
-            return (
-              <div key={obj.id} style={{
-                borderRadius: '10px',
-                border: done ? '1px solid rgba(54,198,144,0.28)' : obj.progress >= 75 ? '1px solid rgba(212,168,67,0.24)' : '1px solid rgba(255,255,255,0.06)',
-                background: done ? 'rgba(54,198,144,0.06)' : 'rgba(255,255,255,0.03)',
-                padding: '10px 11px',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {done ? <CheckCircle2Icon size={12} color={SUCCESS} /> : <ActivityIcon size={12} color={GOLD} />}
-                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: '#F3FBFF' }}>{obj.title}</span>
-                    </div>
-                    <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.60)', marginTop: '3px' }}>{obj.targetLabel}</div>
-                  </div>
-                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: GOLD, fontWeight: 800, textAlign: 'right', flexShrink: 0, lineHeight: 1.3 }}>{obj.reward}</span>
-                </div>
-                <div style={{ marginTop: '8px' }}>
-                  <ProgressBar progress={obj.progress} max={100} color={done ? 'bg-[#36C690]' : 'bg-[#D4A843]'} showLabel />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Weekly training focus */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <GaugeIcon size={13} color={AQUA} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>This Week's Focus</span>
-          {focusConfirmed && (
-            <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: SUCCESS, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.10em' }}>
-              ✓ LOCKED IN
-            </span>
-          )}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {PLAYER_WEEKLY_FOCUS.map((focus) => {
-            const active = focus.id === activeFocus.id
-            return (
-              <button
-                key={focus.id}
-                onClick={() => { setSelectedFocus(focus.id); setFocusConfirmed(false); athleteDispatch({ type: 'ATHLETE_SET_TRAINING_FOCUS', focusId: focus.id as any }) }}
-                style={{
-                  textAlign: 'left', borderRadius: '10px', padding: '9px 11px', cursor: 'pointer',
-                  border: active ? '1px solid rgba(129,236,255,0.36)' : '1px solid rgba(255,255,255,0.07)',
-                  background: active ? 'linear-gradient(135deg, rgba(129,236,255,0.10) 0%, rgba(0,0,0,0) 100%)' : 'rgba(255,255,255,0.02)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.60)' }}>{focus.title}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: SUCCESS, letterSpacing: '0.08em' }}>{focus.gain}</span>
-                    {active && <BadgeCheckIcon size={13} color={AQUA} />}
-                  </div>
-                </div>
-                {active && (
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.65)', marginTop: '4px', lineHeight: 1.35 }}>{focus.effect}</div>
-                )}
-              </button>
-            )
-          })}
-        </div>
-        <button
-          onClick={() => setFocusConfirmed(true)}
-          disabled={focusConfirmed}
-          style={{
-            width: '100%', marginTop: '10px', padding: '10px', borderRadius: '10px', cursor: focusConfirmed ? 'default' : 'pointer',
-            background: focusConfirmed ? 'rgba(54,198,144,0.12)' : 'rgba(129,236,255,0.10)',
-            border: focusConfirmed ? '1px solid rgba(54,198,144,0.30)' : '1px solid rgba(129,236,255,0.30)',
-            fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.10em',
-            color: focusConfirmed ? SUCCESS : AQUA,
-          }}
-        >
-          {focusConfirmed ? '✓ FOCUS CONFIRMED' : 'CONFIRM THIS WEEK\'S FOCUS'}
-        </button>
-
-        {/* Training phase chips */}
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '8px' }}>
-          {TRAINING_CYCLE_PHASES.map((phase) => {
-            const active = phase.id === cyclePhase.id
-            return (
-              <button key={phase.id} onClick={() => setCyclePhaseId(phase.id)} style={{
-                padding: '4px 8px', borderRadius: '6px', cursor: 'pointer',
-                background: active ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)',
-                border: active ? '1px solid rgba(56,214,255,0.28)' : '1px solid rgba(255,255,255,0.06)',
-                fontFamily: "'Rajdhani', sans-serif", fontSize: '9px',
-                color: active ? AQUA : 'rgba(169,211,231,0.40)', textTransform: 'uppercase', letterSpacing: '0.08em',
-              }}>
-                {phase.name}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Rivals */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <SwordsIcon size={13} color={ALERT} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Rivals</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
-          {athleteState.rivals.map((rival) => (
-            <div key={rival.id} style={{
-              borderRadius: '10px', padding: '10px 11px',
-              border: rival.intensity === 'peak' ? '1px solid rgba(212,168,67,0.28)' : rival.intensity === 'heated' ? '1px solid rgba(248,113,113,0.22)' : '1px solid rgba(255,255,255,0.06)',
-              background: 'rgba(255,255,255,0.02)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                <div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{rival.name}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.55)', marginTop: '1px' }}>{rival.title}</div>
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: SUCCESS, lineHeight: 1 }}>{rival.wins}</div>
-                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.45)', fontWeight: 700 }}>W</div>
-                    </div>
-                    <div style={{ color: 'rgba(129,236,255,0.3)', fontFamily: "'Bebas Neue', sans-serif" }}>-</div>
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: ALERT, lineHeight: 1 }}>{rival.losses}</div>
-                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.45)', fontWeight: 700 }}>L</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {rival.lastResult && (
-                <div style={{ marginTop: '5px', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: rival.lastResult === 'won' ? SUCCESS : ALERT }}>
-                  Last meet: {rival.lastResult === 'won' ? '✓ Beat them' : '✗ Lost to them'}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Active sponsors */}
-      {athleteState.sponsors.filter((s) => s.status === 'active' || s.status === 'offered').length > 0 && (
-        <div style={{ ...panelStyle, padding: '12px 14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-            <StarIcon size={13} color={GOLD} />
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Sponsors</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {athleteState.sponsors.filter((s) => s.status === 'active' || s.status === 'offered').map((sp) => (
-              <div key={sp.id} style={{
-                borderRadius: '10px', padding: '9px 11px',
-                border: sp.status === 'offered' ? '1px solid rgba(212,168,67,0.30)' : '1px solid rgba(54,198,144,0.20)',
-                background: 'rgba(255,255,255,0.02)',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
-              }}>
-                <div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{sp.brand}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.58)', marginTop: '2px' }}>{sp.condition}</div>
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: sp.status === 'offered' ? GOLD : SUCCESS }}>{sp.valueCoins.toLocaleString()}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '8px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase' }}>
-                    {sp.status === 'offered' ? 'OFFERED' : `${sp.weeksLeft}w left`}
-                  </div>
-                </div>
-                {sp.status === 'offered' && (
-                  <button style={{
-                    padding: '6px 10px', borderRadius: '8px', cursor: 'pointer',
-                    background: GOLD, border: 'none',
-                    fontFamily: "'Bebas Neue', sans-serif", fontSize: '11px', color: '#0A1628', letterSpacing: '0.06em',
-                  }}>ACCEPT</button>
-                )}
+          <div className="swim26-list-stack">
+            {Object.entries(PERSONAL_BESTS).map(([event, time]) => (
+              <div key={event} className="swim26-split-row">
+                <span>{event}</span>
+                <strong>{time}</strong>
               </div>
             ))}
           </div>
         </div>
+      </section>
+    </div>
+  )
+
+  const racePane = (
+    <div className="swim26-column-stack">
+      {nextEvent && (
+        <section className="race-card swim26-race-card">
+          <div className="swim26-img-container landscape env swim26-race-art">
+            <img src={poolBackdrop} alt="Championship pool backdrop" />
+            <div className="img-overlay-full" />
+          </div>
+          <span className="race-card-ghost">{nextEvent.distance}</span>
+          <div className="race-card-content swim26-stack-sm">
+            <div>
+              <div className="swim26-overline">NEXT RACE</div>
+              <div className="swim26-card-title swim26-card-title--lg">{nextEvent.distance}M {nextEvent.stroke}</div>
+              <div className="swim26-meta-line swim26-meta-line--nowrap">
+                <span>WEEK {athleteState.currentWeek}</span>
+                <span>HEAT 1</span>
+                <span>LANE 4</span>
+                <span>TIER {nextEvent.tier}</span>
+              </div>
+            </div>
+
+            <div className="swim26-race-middle">
+              <div className="swim26-race-pb">
+                <div className="swim26-overline">PLAYER PB</div>
+                <div className="swim26-hero-value" style={{ color: GOLD }}>{PERSONAL_BESTS['100M FREE'] ?? '48.94'}</div>
+                <div className="swim26-muted-line">Readiness {athleteState.readiness}% · Momentum {athleteState.momentum >= 0 ? '+' : ''}{athleteState.momentum}</div>
+              </div>
+              <div className="swim26-list-stack">
+                {rivals.map((rival) => (
+                  <div key={rival.id} className="rival-row">
+                    <span className="rival-name">{rival.name}</span>
+                    <span className="rival-time">{49 + rival.losses}.{(30 + rival.wins * 2).toString().padStart(2, '0')}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="swim26-readiness-strip">
+                <StatusPill label={cyclePhase.name.toUpperCase()} accent={AQUA} />
+                <StatusPill label={selectedDrill?.label ?? 'PACE SET'} accent={VOLT} />
+                <StatusPill label={sessionActive ? 'SESSION LIVE' : 'READY'} accent={sessionActive ? ALERT : SUCCESS} />
+              </div>
+            </div>
+          </div>
+          <div className="race-card-cta">
+            <button className="swim26-btn swim26-btn-primary primary-cta">RACE NOW</button>
+          </div>
+        </section>
       )}
 
-      {/* Race chain */}
-      <div style={{ ...panelStyle, padding: '12px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
-          <CalendarIcon size={13} color={GOLD} />
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Race Calendar</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {PLAYER_CAREER_EVENTS.slice(0, 6).map((event, index) => {
-            const isDone = index < athleteState.currentEventIdx
-            const isCurrent = index === athleteState.currentEventIdx
-            const isLocked = index > athleteState.currentEventIdx
-            return (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.04 }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                  padding: '8px 10px', borderRadius: '9px',
-                  border: isCurrent ? '1px solid rgba(212,168,67,0.30)' : isDone ? '1px solid rgba(54,198,144,0.16)' : '1px solid rgba(255,255,255,0.04)',
-                  background: isCurrent ? 'rgba(212,168,67,0.07)' : 'rgba(255,255,255,0.02)',
-                  opacity: isLocked ? 0.55 : 1,
-                }}
-              >
-                <div style={{ flexShrink: 0 }}>
-                  {isDone ? <CheckCircle2Icon size={14} color={SUCCESS} /> : isCurrent ? <ZapIcon size={14} color={GOLD} /> : <LockIcon size={13} color="rgba(169,211,231,0.25)" />}
+      <div className="swim26-card-grid">
+        <section className="swim26-card swim26-card--gold">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">SEASON TARGETS</div>
+                <div className="swim26-card-title">OBJECTIVES</div>
+              </div>
+              <TrophyIcon size={16} color={GOLD} />
+            </div>
+            <div className="swim26-list-stack">
+              {PLAYER_SEASON_OBJECTIVES.map((objective) => (
+                <div key={objective.id} className="swim26-goal-block">
+                  <div className="swim26-goal-row">
+                    <span className="swim26-goal-title">{objective.title}</span>
+                    <span className="swim26-goal-reward">{objective.reward}</span>
+                  </div>
+                  <div className="swim26-muted-line">{objective.targetLabel}</div>
+                  <Meter value={objective.progress} max={100} accent={objective.progress >= 100 ? SUCCESS : GOLD} />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '11px', color: isCurrent ? '#F3FBFF' : isDone ? SUCCESS : 'rgba(169,211,231,0.55)' }}>{event.name}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', marginTop: '1px' }}>{event.distance}m · Tier {event.tier}</div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="swim26-card swim26-card--aqua">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">TRAINING PHILOSOPHY</div>
+                <div className="swim26-card-title">THIS WEEK</div>
+              </div>
+              <GaugeIcon size={16} color={AQUA} />
+            </div>
+
+            <div className="swim26-choice-stack">
+              {PLAYER_WEEKLY_FOCUS.map((focus) => {
+                const active = focus.id === activeFocus.id
+                return (
+                  <button
+                    key={focus.id}
+                    type="button"
+                    className={`swim26-choice-card ${active ? 'is-active' : ''}`}
+                    onClick={() => {
+                      setSelectedFocus(focus.id)
+                      setFocusConfirmed(false)
+                      athleteDispatch({ type: 'ATHLETE_SET_TRAINING_FOCUS', focusId: focus.id as any })
+                    }}
+                  >
+                    <div className="swim26-choice-header">
+                      <span>{focus.title}</span>
+                      {active ? <BadgeCheckIcon size={14} color={AQUA} /> : <CircleIcon size={12} color="#71859C" />}
+                    </div>
+                    <div className="swim26-choice-meta">{focus.gain} · {focus.risk}</div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          <div className="cta-band">
+            <button
+              className={`swim26-btn ${focusConfirmed ? 'swim26-btn-secondary' : 'swim26-btn-primary'} primary-cta`}
+              onClick={() => setFocusConfirmed(true)}
+              disabled={focusConfirmed}
+            >
+              {focusConfirmed ? 'FOCUS LOCKED' : 'CONFIRM FOCUS'}
+            </button>
+          </div>
+        </section>
+
+        <section className="swim26-card swim26-card--danger">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">RIVAL PRESSURE</div>
+                <div className="swim26-card-title">LANE THREATS</div>
+              </div>
+              <SwordsIcon size={16} color={ALERT} />
+            </div>
+            <div className="swim26-list-stack">
+              {athleteState.rivals.map((rival) => (
+                <div key={rival.id} className="swim26-versus-row">
+                  <div>
+                    <div className="swim26-list-row__title">{rival.name}</div>
+                    <div className="swim26-list-row__meta">{rival.title}</div>
+                  </div>
+                  <div className="swim26-versus-score">
+                    <span>{rival.wins}</span>
+                    <span>-</span>
+                    <span>{rival.losses}</span>
+                  </div>
                 </div>
-                {isCurrent && (
-                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.08em', flexShrink: 0 }}>NEXT</span>
-                )}
-              </motion.div>
-            )
-          })}
-        </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="swim26-card swim26-card--gold">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">SPONSOR TRACK</div>
+                <div className="swim26-card-title">ACTIVE DEALS</div>
+              </div>
+              <StarIcon size={16} color={GOLD} />
+            </div>
+            <div className="swim26-list-stack">
+              {sponsorCards.map((sponsor) => (
+                <div key={sponsor.id} className="swim26-goal-block">
+                  <div className="swim26-goal-row">
+                    <span className="swim26-goal-title">{sponsor.brand}</span>
+                    <span className="swim26-goal-reward">{sponsor.valueCoins.toLocaleString()}</span>
+                  </div>
+                  <div className="swim26-muted-line">{sponsor.condition}</div>
+                  <Meter value={sponsor.conditionProgress} max={100} accent={sponsor.status === 'offered' ? GOLD : SUCCESS} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
+
+      <section className="swim26-card swim26-card--neutral">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">RACE CALENDAR</div>
+              <div className="swim26-card-title">QUALIFYING CHAIN</div>
+            </div>
+            <CalendarIcon size={16} color={AQUA} />
+          </div>
+          <div className="swim26-calendar-grid">
+            {raceCalendar.map((event, index) => {
+              const done = index < athleteState.currentEventIdx
+              const isCurrent = index === athleteState.currentEventIdx
+              return (
+                <div key={event.id} className={`swim26-calendar-card ${isCurrent ? 'is-current' : ''} ${done ? 'is-done' : ''}`}>
+                  <div className="swim26-calendar-top">
+                    {done ? <CheckCircle2Icon size={14} color={SUCCESS} /> : isCurrent ? <ZapIcon size={14} color={GOLD} /> : <LockIcon size={13} color="#71859C" />}
+                    <span>W{athleteState.currentWeek + index}</span>
+                  </div>
+                  <div className="swim26-list-row__title">{event.name}</div>
+                  <div className="swim26-list-row__meta">{event.distance}M · TIER {event.tier}</div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+        <div className="cta-band">
+          <button className="swim26-btn swim26-btn-ghost">ENTER HEAT</button>
+        </div>
+      </section>
+
+      <section className="swim26-card swim26-card--aqua">
+        <div className="swim26-card-content swim26-stack-sm">
+          <div className="swim26-section-head">
+            <div>
+              <div className="swim26-overline">TRAINING BLOCK</div>
+              <div className="swim26-card-title">CYCLE PHASES</div>
+            </div>
+            <ActivityIcon size={16} color={AQUA} />
+          </div>
+          <div className="swim26-card-grid swim26-card-grid--compact">
+            {TRAINING_CYCLE_PHASES.map((phase) => {
+              const active = phase.id === cyclePhase.id
+              return (
+                <button
+                  key={phase.id}
+                  type="button"
+                  className={`swim26-phase-card ${active ? 'is-active' : ''}`}
+                  onClick={() => setCyclePhaseId(phase.id)}
+                >
+                  <div className="swim26-phase-card__title">{phase.name}</div>
+                  <div className="swim26-phase-card__meta">{phase.load}</div>
+                  <div className="swim26-phase-card__copy">{phase.focus}</div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </section>
     </div>
   )
 
@@ -505,46 +441,50 @@ export function CareerMode() {
     <PaneSwitcher
       panes={[
         {
-          id: 'ladder',
+          id: 'overview',
           label: 'LADDER',
           icon: <WavesIcon size={12} />,
-          content: <div style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto' }}>{ladderPane}</div>,
+          content: <div className="swim26-pane-scroll">{overviewPane}</div>,
         },
         {
-          id: 'grind',
+          id: 'race',
           label: 'GRIND',
           icon: <FlameIcon size={12} />,
-          content: <div style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto' }}>{grindPane}</div>,
+          content: <div className="swim26-pane-scroll">{racePane}</div>,
         },
       ]}
     >
       <motion.div
-        initial={{ opacity: 0, x: 30 }}
+        initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -30 }}
-        style={{
-          position: 'absolute', inset: 0,
-          display: 'grid', gridTemplateColumns: '300px 1fr',
-          gap: '10px', padding: '10px', minHeight: 0, overflow: 'hidden',
-        }}
+        exit={{ opacity: 0, x: -20 }}
+        className="swim26-page-shell"
       >
-        <div style={{ overflowY: 'auto' }}>{ladderPane}</div>
-        <div style={{ overflowY: 'auto' }}>{grindPane}</div>
+        <div className="swim26-pane-scroll">{overviewPane}</div>
+        <div className="swim26-pane-scroll">{racePane}</div>
       </motion.div>
     </PaneSwitcher>
   )
 }
 
-function StatChip({ icon, label }: { icon: React.ReactNode; label: string }) {
+function Meter({ value, max, accent }: { value: number; max: number; accent: string }) {
+  const pct = Math.max(0, Math.min(100, Math.round((value / max) * 100)))
   return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: '4px',
-      padding: '4px 8px', borderRadius: '999px',
-      border: '1px solid rgba(255,255,255,0.08)',
-      background: 'rgba(0,0,0,0.25)',
-    }}>
-      {icon}
-      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.75)', fontWeight: 700 }}>{label}</span>
+    <div className="swim26-meter">
+      <div className="swim26-meter__fill" style={{ width: `${pct}%`, background: accent }} />
     </div>
   )
+}
+
+function StatChip({ label, value, accent }: { label: string; value: string; accent: string }) {
+  return (
+    <div className="swim26-stat-chip">
+      <span className="swim26-stat-chip__label">{label}</span>
+      <strong className="swim26-stat-chip__value" style={{ color: accent }}>{value}</strong>
+    </div>
+  )
+}
+
+function StatusPill({ label, accent }: { label: string; accent: string }) {
+  return <span className="swim26-status-pill" style={{ borderColor: `${accent}66`, color: accent }}>{label}</span>
 }
