@@ -320,7 +320,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))',
                 gap: swim26Space.md,
               }}
             >
@@ -330,7 +330,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   onClick={() => setActiveSubPage(feature.id)}
                   style={{
                     ...subPanelStyle,
-                    overflow: 'hidden',
+                    overflow: 'visible',
                     padding: 0,
                     minHeight: 320,
                     position: 'relative',
@@ -339,6 +339,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     cursor: 'pointer',
                   }}
                 >
+                  {/* Image wrapper — overflow:hidden contained here only, never on card root */}
+                  <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
                   <FeatureCardMedia
                     src={feature.image}
                     alt={feature.title}
@@ -346,6 +348,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     overlayClassName="absolute inset-0"
                     focalPoint={feature.focalPoint}
                   />
+                  </div>
                   <div
                     style={{
                       position: 'absolute',
