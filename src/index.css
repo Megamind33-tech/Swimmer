@@ -864,19 +864,32 @@ body {
   grid-template-rows:    repeat(2, 1fr);
   gap: clamp(4px, 0.9vw, 8px);
   flex: 1;
+  min-height: 0;
   overflow: hidden;
   padding: 10px 12px 6px;
 }
 
-/* Portrait phone: 2 × 4 */
+/* Portrait phone: 2 × 4, allow vertical scroll if cards don't fit */
 @media (max-width: 480px) {
   .swim26-lineup-grid {
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows:    repeat(4, 1fr);
+    grid-template-rows:    repeat(4, minmax(0, 1fr));
+    overflow-y:            auto;
+    padding:               8px 8px 4px;
   }
 }
 
 /* ── RaceGameplayHUD ──────────────────────────────────────────────────────── */
+
+/* Base definitions — default (tablet / desktop) sizes */
+.swim26-stroke-zone {
+  height: 140px;
+}
+
+.swim26-stroke-btn {
+  min-width: 72px;
+  width: clamp(72px, 12vw, 192px);
+}
 
 /* Portrait phone: compress the bottom stroke-control panels */
 @media (max-width: 480px) {
@@ -885,7 +898,8 @@ body {
   }
 
   .swim26-stroke-btn {
-    width: 72px !important;
+    width: 76px !important;
+    min-width: 72px !important;
   }
 
   .swim26-controls-gap {
@@ -911,6 +925,7 @@ body {
 
   .swim26-stroke-btn {
     width: 100px !important;
+    min-width: 72px !important;
   }
 }
 

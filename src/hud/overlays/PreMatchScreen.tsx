@@ -236,7 +236,7 @@ const CountdownRing: React.FC<{ remaining: number; total: number }> = ({ remaini
 // Swimmer card
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SwimmerCard: React.FC<{ swimmer: SwimmerEntry; index: number }> = ({ swimmer, index }) => {
+const SwimmerCard: React.FC<{ swimmer: SwimmerEntry; index: number; isMobile?: boolean }> = ({ swimmer, index, isMobile }) => {
   const isPlayer = swimmer.isPlayer;
   const accent   = swimmer.accentColor;
 
@@ -259,7 +259,7 @@ const SwimmerCard: React.FC<{ swimmer: SwimmerEntry; index: number }> = ({ swimm
           ? `0 0 24px rgba(56,214,255,0.20), 0 4px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)`
           : `0 2px 12px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03)`,
         overflow:    'hidden',
-        padding:     '10px 12px 10px',
+        padding:     isMobile ? '7px 8px' : '10px 12px 10px',
       }}
     >
       {/* Top accent stripe */}
@@ -297,7 +297,7 @@ const SwimmerCard: React.FC<{ swimmer: SwimmerEntry; index: number }> = ({ swimm
       )}
 
       {/* Lane + Name row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '5px' : '8px', marginBottom: isMobile ? '4px' : '6px' }}>
         {/* Lane bubble */}
         <div
           style={{
@@ -338,7 +338,7 @@ const SwimmerCard: React.FC<{ swimmer: SwimmerEntry; index: number }> = ({ swimm
                 overflow:      'hidden',
                 whiteSpace:    'nowrap',
                 textOverflow:  'ellipsis',
-                maxWidth:      '110px',
+                maxWidth:      isMobile ? '80px' : '110px',
               }}
             >
               {swimmer.name}
@@ -398,7 +398,7 @@ const SwimmerCard: React.FC<{ swimmer: SwimmerEntry; index: number }> = ({ swimm
         style={{
           height:     '1px',
           background: isPlayer ? 'rgba(56,214,255,0.18)' : 'rgba(56,214,255,0.07)',
-          margin:     '0 0 6px',
+          margin:     isMobile ? '0 0 3px' : '0 0 6px',
         }}
       />
 
@@ -619,18 +619,19 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
 
         {/* ── SWIMMER GRID ── */}
         {/*
-          Portrait phones (≤480px): 2 × 4 grid — narrower cards, still readable
+          Portrait phones (≤480px): 2 × 4 grid — narrower cards, scrollable if needed
           Landscape / tablet / desktop: 4 × 2 grid — original broadcast layout
         */}
         <div
           className="swim26-lineup-grid"
           style={{
             gridTemplateColumns: isMobilePortrait ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
-            gridTemplateRows:    isMobilePortrait ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
+            gridTemplateRows:    isMobilePortrait ? 'repeat(4, minmax(0, 1fr))' : 'repeat(2, 1fr)',
+            overflowY:           isMobilePortrait ? 'auto' : 'hidden',
           }}
         >
           {ROSTER.map((swimmer, i) => (
-            <SwimmerCard key={swimmer.lane} swimmer={swimmer} index={i} />
+            <SwimmerCard key={swimmer.lane} swimmer={swimmer} index={i} isMobile={isMobilePortrait} />
           ))}
         </div>
 
