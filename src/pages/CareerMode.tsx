@@ -19,16 +19,14 @@ import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
 import { ProgressBar } from '../components/ProgressBar'
 import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
 import { SponsorPanel } from './ProfilePage'
-import { CAREER_SPONSORS, USER_DATA } from '../utils/gameData'
 import {
   PLAYER_CAREER_EVENTS,
-  PLAYER_CAREER_METRICS,
   PLAYER_CAREER_STAGES,
-  PLAYER_RIVAL_BEATS,
   PLAYER_SEASON_OBJECTIVES,
   PLAYER_WEEKLY_FOCUS,
 } from '../utils/careerModeData'
 import { TRAINING_CYCLE_PHASES } from '../utils/trainingEngineData'
+import { useAthleteCareer } from '../context/CareerSaveContext'
 
 const GOLD = '#D4A843'
 const AQUA = '#81ECFF'
@@ -46,7 +44,8 @@ const panelStyle: React.CSSProperties = {
 
 export function CareerMode() {
   const isLandscape = useIsLandscapeMobile()
-  const [selectedFocus, setSelectedFocus] = useState(PLAYER_WEEKLY_FOCUS[0]?.id ?? '')
+  const { state: athleteState, dispatch: athleteDispatch } = useAthleteCareer()
+  const [selectedFocus, setSelectedFocus] = useState(athleteState.trainingFocusId ?? PLAYER_WEEKLY_FOCUS[0]?.id ?? '')
   const { selectedDrill, cyclePhase, setCyclePhaseId, sessionActive } = useTrainingEngineState()
 
   const activeFocus = useMemo(
@@ -54,9 +53,27 @@ export function CareerMode() {
     [selectedFocus],
   )
 
-  const currentStageIndex = PLAYER_CAREER_STAGES.findIndex((stage) => stage.status === 'current')
-  const completedStages = PLAYER_CAREER_STAGES.filter((stage) => stage.status === 'completed').length
-  const stageProgress = Math.round(((completedStages + 0.65) / PLAYER_CAREER_STAGES.length) * 100)
+  // Derive career stages status from live state
+  const stagesWithStatus = useMemo(() => {
+    const stageOrder = PLAYER_CAREER_STAGES.map((s) => s.id)
+    const currentIdx = stageOrder.indexOf(athleteState.careerStageId)
+    return PLAYER_CAREER_STAGES.map((stage, idx) => ({
+      ...stage,
+      status: idx < currentIdx ? 'completed' as const : idx === currentIdx ? 'current' as const : 'locked' as const,
+    }))
+  }, [athleteState.careerStageId])
+
+  // Derive live career metrics from athlete state
+  const liveCareerMetrics = useMemo(() => [
+    { label: 'Readiness', value: `${athleteState.readiness}%`, accent: '#36C690', hint: athleteState.readiness >= 80 ? 'Peak lane-feel window.' : 'Build up before your next race.' },
+    { label: 'Coach Trust', value: `${athleteState.coachTrust}`, accent: '#81ECFF', hint: athleteState.coachTrust >= 80 ? 'Unlocks tactical freedom and first-choice event selection.' : 'Complete training sessions to build trust.' },
+    { label: 'Momentum', value: athleteState.momentum >= 0 ? `+${athleteState.momentum}` : `${athleteState.momentum}`, accent: athleteState.momentum >= 0 ? '#D4A843' : '#F87171', hint: athleteState.momentum > 10 ? 'Positive streak amplifying performance.' : athleteState.momentum < 0 ? 'Negative run — refocus on recovery.' : 'Stable form baseline.' },
+    { label: 'Reputation', value: `${athleteState.reputation}`, accent: '#D4A843', hint: 'Federation and media visibility score.' },
+  ], [athleteState])
+
+  const currentStageIndex = stagesWithStatus.findIndex((stage) => stage.status === 'current')
+  const completedStages = stagesWithStatus.filter((stage) => stage.status === 'completed').length
+  const stageProgress = Math.round(((completedStages + 0.65) / stagesWithStatus.length) * 100)
 
   const leftColumn = (
     <div style={{ width: '250px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -78,17 +95,17 @@ export function CareerMode() {
             </div>
           </div>
           <div style={{ minWidth: '58px', textAlign: 'right' }}>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '26px', color: GOLD, lineHeight: 1 }}>{USER_DATA.level}</div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '26px', color: GOLD, lineHeight: 1 }}>{Math.floor(athleteState.xp / 500) + 1}</div>
             <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(212,168,67,0.72)', fontWeight: 700 }}>Level</div>
           </div>
         </div>
 
         <div style={{ marginTop: isLandscape ? '10px' : '12px' }}>
-          <ProgressBar progress={USER_DATA.xp} max={USER_DATA.maxXp} color="bg-[#0D7C66]" showLabel />
+          <ProgressBar progress={athleteState.xp % 500} max={500} color="bg-[#0D7C66]" showLabel />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', marginTop: isLandscape ? '10px' : '12px' }}>
-          {PLAYER_CAREER_METRICS.map((metric) => (
+          {liveCareerMetrics.map((metric) => (
             <div key={metric.label} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '9px 10px' }}>
               <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(169,211,231,0.55)' }}>{metric.label}</div>
               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', lineHeight: 1, color: metric.accent, marginTop: '4px' }}>{metric.value}</div>
@@ -105,7 +122,7 @@ export function CareerMode() {
           <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: GOLD, fontWeight: 700 }}>{stageProgress}% COMPLETE</span>
         </div>
         <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '7px', paddingRight: '2px' }}>
-          {PLAYER_CAREER_STAGES.map((stage) => {
+          {stagesWithStatus.map((stage) => {
             const isCurrent = stage.status === 'current'
             const isDone = stage.status === 'completed'
             return (
@@ -164,7 +181,7 @@ export function CareerMode() {
           <div style={{ display: 'grid', gap: '6px', minWidth: isLandscape ? '160px' : '210px' }}>
             <div style={{ borderRadius: '10px', border: '1px solid rgba(212,168,67,0.24)', background: 'rgba(212,168,67,0.08)', padding: '8px 10px' }}>
               <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(212,168,67,0.72)', fontWeight: 800 }}>Current stage</div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: GOLD, lineHeight: 1, marginTop: '2px' }}>{PLAYER_CAREER_STAGES[currentStageIndex]?.name ?? 'Regional Age-Group'}</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '18px', color: GOLD, lineHeight: 1, marginTop: '2px' }}>{stagesWithStatus[currentStageIndex]?.name ?? 'Regional Age-Group'}</div>
             </div>
             <div style={{ borderRadius: '10px', border: '1px solid rgba(54,198,144,0.22)', background: 'rgba(54,198,144,0.06)', padding: '8px 10px' }}>
               <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(54,198,144,0.80)', fontWeight: 800 }}>Growth trigger</div>
@@ -187,7 +204,7 @@ export function CareerMode() {
                 return (
                   <button
                     key={focus.id}
-                    onClick={() => setSelectedFocus(focus.id)}
+                    onClick={() => { setSelectedFocus(focus.id); athleteDispatch({ type: 'ATHLETE_SET_TRAINING_FOCUS', focusId: focus.id as any }) }}
                     style={{
                       textAlign: 'left',
                       borderRadius: '10px',
@@ -317,22 +334,34 @@ export function CareerMode() {
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Rivals & Story Pressure</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {PLAYER_RIVAL_BEATS.map((rival) => (
+              {athleteState.rivals.map((rival) => (
                 <div key={rival.id} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '10px 11px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                     <div>
-                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{rival.rival}</div>
+                      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{rival.name}</div>
                       <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.10em', color: rival.intensity === 'peak' ? GOLD : rival.intensity === 'heated' ? ALERT : AQUA }}>{rival.title.toUpperCase()}</div>
                     </div>
                     <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{rival.intensity}</span>
                   </div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.68)', lineHeight: 1.4, marginTop: '5px' }}>{rival.note}</div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.68)', lineHeight: 1.4, marginTop: '5px' }}>{rival.taunt ?? `W${rival.wins} / L${rival.losses}`}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <SponsorPanel sponsors={CAREER_SPONSORS} title="PLAYER CAREER SPONSORS" compact />
+          <SponsorPanel
+            sponsors={athleteState.sponsors.filter(s => s.status === 'active' || s.status === 'offered').map(s => ({
+              id: s.id,
+              name: s.brand,
+              logo: '🤝',
+              tier: s.valueCoins >= 10000 ? 'Title' as const : s.valueCoins >= 6000 ? 'Gold' as const : 'Silver' as const,
+              value: `${s.valueCoins.toLocaleString()} coins`,
+              category: s.status === 'offered' ? 'Pending offer' : 'Active',
+              bonus: s.condition,
+            }))}
+            title="PLAYER CAREER SPONSORS"
+            compact
+          />
 
           <div style={{ ...panelStyle, padding: isLandscape ? '10px 12px' : '14px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>

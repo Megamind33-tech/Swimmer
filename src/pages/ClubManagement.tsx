@@ -18,19 +18,14 @@ import {
 import { SwimmerCard } from '../components/SwimmerCard'
 import { SponsorPanel } from './ProfilePage'
 import { CLUB_SPONSORS, SWIMMERS, USER_DATA, type Swimmer } from '../utils/gameData'
-import { useClubRoster, type SignedAthlete } from '../utils/clubRoster'
-import { getReadinessLabel } from '../utils/trainingSystem'
 import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
 import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
 import {
-  CLUB_ACADEMY_WAVE,
-  CLUB_COMPETITION_CALENDAR,
-  CLUB_GROWTH_METRICS,
   CLUB_PHILOSOPHIES,
   CLUB_PROJECTS,
-  CLUB_STAFF_UNITS,
 } from '../utils/careerModeData'
 import { CLUB_TRAINING_GROUPS } from '../utils/trainingEngineData'
+import { useClubCareer } from '../context/CareerSaveContext'
 
 const AQUA = '#81ECFF'
 const GOLD = '#D4A843'
@@ -46,28 +41,49 @@ const panelStyle: React.CSSProperties = {
   backdropFilter: 'blur(12px)',
 }
 
-function toSwimmerCard(a: SignedAthlete): Swimmer {
-  return {
-    id: a.id,
-    name: a.name,
-    ovr: a.ovr,
-    stroke: a.stroke as any,
-    country: a.flag,
-    stats: { speed: a.ovr, stamina: a.ovr, technique: a.ovr, turn: a.ovr },
-    rarity: a.ovr >= 95 ? 'legendary' : a.ovr >= 88 ? 'epic' : a.ovr >= 82 ? 'rare' : 'common' as const,
-  }
-}
-
 export function ClubManagement() {
-  const signedAthletes = useClubRoster()
+  const { state: clubState, dispatch: clubDispatch } = useClubCareer()
   const isLandscape = useIsLandscapeMobile()
-  const [selectedPhilosophyId, setSelectedPhilosophyId] = useState(CLUB_PHILOSOPHIES[0]?.id ?? '')
+  const [selectedPhilosophyId, setSelectedPhilosophyId] = useState(clubState.philosophyId ?? CLUB_PHILOSOPHIES[0]?.id ?? '')
   const { selectedDrill, cyclePhase, sessionActive } = useTrainingEngineState()
 
   const selectedPhilosophy = useMemo(
     () => CLUB_PHILOSOPHIES.find((item) => item.id === selectedPhilosophyId) ?? CLUB_PHILOSOPHIES[0],
     [selectedPhilosophyId],
   )
+
+  // Compute live club metrics from context state
+  const liveClubMetrics = useMemo(() => {
+    const avgOvr = clubState.roster.length > 0
+      ? Math.round(clubState.roster.reduce((sum, a) => sum + a.ovr, 0) / clubState.roster.length)
+      : 0
+    const weeklyBalance = clubState.weeklyIncome - clubState.weeklyWages
+    return [
+      { label: 'Club OVR', value: `${avgOvr}`, accent: '#81ECFF', hint: 'Average squad rating across all rostered athletes.' },
+      { label: 'Prestige', value: `${clubState.prestige}`, accent: '#D4A843', hint: 'Club prestige affects recruitment and sponsor interest.' },
+      { label: 'Budget', value: `$${(clubState.budget / 1000).toFixed(0)}K`, accent: '#36C690', hint: `Weekly balance: ${weeklyBalance >= 0 ? '+' : ''}${weeklyBalance.toLocaleString()} coins` },
+      { label: 'Season', value: `W${clubState.currentWeek}/${clubState.totalWeeks}`, accent: '#D4A843', hint: `Season ${clubState.season} — ${clubState.pendingDecisions.length} decisions pending.` },
+    ]
+  }, [clubState])
+
+  // Live academy athletes from roster
+  const academyAthletes = useMemo(() => clubState.roster.filter(a => a.isAcademy), [clubState.roster])
+
+  // Live roster as SwimmerCard data
+  const rosterAsSwimmers: Swimmer[] = useMemo(() =>
+    clubState.roster.map(a => ({
+      id: a.id,
+      name: a.name,
+      ovr: a.ovr,
+      stroke: a.stroke as any,
+      country: a.country,
+      stats: { speed: a.speed, stamina: a.stamina, technique: a.technique, turn: a.turns },
+      rarity: a.ovr >= 90 ? 'legendary' as const : a.ovr >= 83 ? 'epic' as const : a.ovr >= 76 ? 'rare' as const : 'common' as const,
+    })), [clubState.roster])
+
+  const clubOvr = rosterAsSwimmers.length > 0
+    ? Math.round(rosterAsSwimmers.reduce((sum, s) => sum + s.ovr, 0) / rosterAsSwimmers.length)
+    : USER_DATA.clubOvr
 
   const relayScore = selectedPhilosophy.id === 'relay-factory' ? '94%' : selectedPhilosophy.id === 'sprint-lab' ? '86%' : '88%'
   const academyBias = selectedPhilosophy.id === 'endurance-engine' ? 'Distance wave' : selectedPhilosophy.id === 'relay-factory' ? 'Balanced relay wave' : 'Explosive sprint wave'
@@ -92,13 +108,13 @@ export function ClubManagement() {
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '28px', color: GOLD, lineHeight: 1 }}>{USER_DATA.clubOvr}</div>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '28px', color: GOLD, lineHeight: 1 }}>{clubOvr}</div>
             <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(212,168,67,0.72)', fontWeight: 700 }}>Club OVR</div>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px', marginTop: isLandscape ? '10px' : '12px' }}>
-          {CLUB_GROWTH_METRICS.map((metric) => (
+          {liveClubMetrics.map((metric) => (
             <div key={metric.label} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '9px 10px' }}>
               <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(169,211,231,0.55)' }}>{metric.label}</div>
               <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', lineHeight: 1, color: metric.accent, marginTop: '4px' }}>{metric.value}</div>
@@ -119,7 +135,7 @@ export function ClubManagement() {
             return (
               <button
                 key={philosophy.id}
-                onClick={() => setSelectedPhilosophyId(philosophy.id)}
+                onClick={() => { setSelectedPhilosophyId(philosophy.id); clubDispatch({ type: 'CLUB_SET_PHILOSOPHY', philosophyId: philosophy.id as any }) }}
                 style={{
                   textAlign: 'left',
                   borderRadius: '10px',
@@ -149,18 +165,22 @@ export function ClubManagement() {
           <span style={{ marginLeft: 'auto', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: AQUA, fontWeight: 700 }}>{academyBias}</span>
         </div>
         <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', paddingRight: '2px' }}>
-          {CLUB_ACADEMY_WAVE.map((prospect) => (
-            <div key={prospect.name} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '10px 11px' }}>
+          {academyAthletes.length > 0 ? academyAthletes.map((prospect) => (
+            <div key={prospect.id} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '10px 11px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                 <div>
                   <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{prospect.name}</div>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.10em' }}>AGE {prospect.age}</div>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.10em' }}>AGE {prospect.age} · {prospect.stroke}</div>
                 </div>
-                <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: SUCCESS, textTransform: 'uppercase', letterSpacing: '0.12em' }}>{prospect.readiness}</span>
+                <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: SUCCESS, textTransform: 'uppercase', letterSpacing: '0.12em' }}>{prospect.readiness}% ready</span>
               </div>
-              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.4, color: 'rgba(169,211,231,0.68)', marginTop: '5px' }}>{prospect.profile}</div>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', lineHeight: 1.4, color: 'rgba(169,211,231,0.68)', marginTop: '5px' }}>
+                OVR {prospect.ovr} → potential {prospect.potential} · Dev {Math.round(prospect.developmentProgress)}%
+              </div>
             </div>
-          ))}
+          )) : (
+            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(169,211,231,0.45)', padding: '10px', textAlign: 'center' }}>No academy athletes on roster</div>
+          )}
         </div>
       </div>
     </div>
@@ -192,12 +212,12 @@ export function ClubManagement() {
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Staff Engine</span>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: isLandscape ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: '8px' }}>
-              {CLUB_STAFF_UNITS.map((staff) => (
+              {clubState.staff.filter(s => s.hired).map((staff) => (
                 <div key={staff.id} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '10px 11px' }}>
                   <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{staff.name}</div>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.10em', marginTop: '2px' }}>{staff.role.toUpperCase()}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: SUCCESS, marginTop: '6px', lineHeight: 1.35 }}>{staff.boost}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.66)', marginTop: '5px', lineHeight: 1.35 }}>{staff.chemistry}</div>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: GOLD, letterSpacing: '0.10em', marginTop: '2px' }}>{staff.role.toUpperCase()} · LVL {staff.level}</div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: SUCCESS, marginTop: '6px', lineHeight: 1.35 }}>{staff.boost}: +{staff.boostValue}</div>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.66)', marginTop: '5px', lineHeight: 1.35 }}>{staff.salary.toLocaleString()} coins/week</div>
                 </div>
               ))}
             </div>
@@ -266,14 +286,9 @@ export function ClubManagement() {
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Core Squad & New Signings</span>
             </div>
             <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '6px' }}>
-              {SWIMMERS.slice(0, 4).map((swimmer, i) => (
+              {(rosterAsSwimmers.length > 0 ? rosterAsSwimmers : SWIMMERS.slice(0, 4)).map((swimmer, i) => (
                 <motion.div key={swimmer.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} style={{ flexShrink: 0 }}>
                   <SwimmerCard swimmer={swimmer} size="sm" />
-                </motion.div>
-              ))}
-              {signedAthletes.map((athlete, i) => (
-                <motion.div key={athlete.id} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }} style={{ flexShrink: 0 }}>
-                  <SwimmerCard swimmer={toSwimmerCard(athlete)} size="sm" />
                 </motion.div>
               ))}
             </div>
@@ -287,14 +302,24 @@ export function ClubManagement() {
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', letterSpacing: '0.08em', color: '#F3FBFF' }}>Meet Calendar Decisions</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {CLUB_COMPETITION_CALENDAR.map((event) => (
-                <div key={event.id} style={{ borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.03)', padding: '10px 11px' }}>
+              {clubState.competitions.map((event) => (
+                <div key={event.id} style={{
+                  borderRadius: '10px',
+                  border: event.entered ? '1px solid rgba(54,198,144,0.28)' : '1px solid rgba(255,255,255,0.06)',
+                  background: event.entered ? 'rgba(54,198,144,0.06)' : 'rgba(255,255,255,0.03)',
+                  padding: '10px 11px',
+                }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                     <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 800, fontSize: '12px', color: '#F3FBFF' }}>{event.name}</div>
-                    <ArrowUpRightIcon size={14} color={AQUA} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase' }}>W{event.week}</span>
+                      <ArrowUpRightIcon size={14} color={AQUA} />
+                    </div>
                   </div>
                   <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: GOLD, marginTop: '4px' }}>{event.stakes}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.68)', marginTop: '5px', lineHeight: 1.4 }}>{event.decision}</div>
+                  {event.entered && (
+                    <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '9px', color: SUCCESS, letterSpacing: '0.10em', marginTop: '5px' }}>ENTERED · {event.lineup.length} athletes selected</div>
+                  )}
                 </div>
               ))}
             </div>
