@@ -168,7 +168,7 @@ export const ChampionshipScreen: React.FC = () => {
             padding: `0 ${swim26Space.md}px`,
           }}
         >
-          <button style={{ ...utilityButtonStyle, width: 48, color: swim26Color.text.primary }}>←</button>
+          <button aria-label="Back" title="Back" className="focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none" style={{ ...utilityButtonStyle, width: 48, color: swim26Color.text.primary }}>←</button>
 
           <div style={{ display: 'grid', rowGap: 4, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: swim26Space.sm, flexWrap: 'wrap' }}>
@@ -232,7 +232,7 @@ export const ChampionshipScreen: React.FC = () => {
               { label: 'Bracket Alerts', icon: '◉', alert: true },
               { label: 'Settings', icon: '⚙' },
             ].map((item) => (
-              <button key={item.label} aria-label={item.label} style={{ ...utilityButtonStyle, position: 'relative' }}>
+              <button key={item.label} aria-label={item.label} title={item.label} className="focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none" style={{ ...utilityButtonStyle, position: 'relative' }}>
                 <span style={{ fontSize: swim26Size.icon.md }}>{item.icon}</span>
                 {item.alert ? (
                   <span
@@ -593,7 +593,7 @@ export const ChampionshipScreen: React.FC = () => {
               padding: swim26Space.sm,
             }}
           >
-            <button style={{ ...utilityButtonStyle, width: 52, height: 52, color: swim26Color.text.primary }}>＋</button>
+            <button aria-label="Add" title="Add" className="focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none" style={{ ...utilityButtonStyle, width: 52, height: 52, color: swim26Color.text.primary }}>＋</button>
             <div
               style={{
                 minHeight: 52,
