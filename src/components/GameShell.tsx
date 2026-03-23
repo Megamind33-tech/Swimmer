@@ -14,7 +14,7 @@
  *   racing        → RaceScene (Babylon canvas + HUD)
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { AppShell } from '../app/AppShell';
 import { PlayScreen } from './menu/PlayScreen';
@@ -85,6 +85,30 @@ const OverlayShell: React.FC<OverlayShellProps> = ({
 
 export function GameShell() {
   const [phase,        setPhase]        = useState<GamePhase>('home');
+  const [frameScale, setFrameScale] = useState(1);
+
+  useEffect(() => {
+    const W = 896;
+    const H = 414;
+
+    const scaleFrame = () => {
+      const nextScale = Math.min(window.innerWidth / W, window.innerHeight / H, 1);
+      setFrameScale(nextScale);
+    };
+
+    scaleFrame();
+    window.addEventListener('resize', scaleFrame);
+    return () => window.removeEventListener('resize', scaleFrame);
+  }, []);
+
+  const frameOuterStyle = useMemo(() => ({
+    width: `${896 * frameScale}px`,
+    height: `${414 * frameScale}px`,
+  }), [frameScale]);
+
+  const frameStyle = useMemo(() => ({
+    transform: `scale(${frameScale})`,
+  }), [frameScale]);
   const [selectedMode, setSelectedMode] = useState<string>('quick-race');
   const [raceConfig,   setRaceConfig]   = useState<RaceConfig>({
     distance: '100M',
@@ -222,11 +246,15 @@ export function GameShell() {
   };
 
   return (
-    <>
-      {renderPhase()}
+    <div className="swim26-frame-stage">
+      <div className="swim26-frame-outer" style={frameOuterStyle}>
+        <div className="gf swim26-game-frame" style={frameStyle}>
+          {renderPhase()}
+        </div>
+      </div>
 
       {/* Full-screen dark fade — shows between phase transitions */}
       {fading && <div className="phase-fade-cover" aria-hidden />}
-    </>
+    </div>
   );
 }
