@@ -1,135 +1,157 @@
-import React from 'react'
-import { motion } from 'motion/react'
-import { TrophyIcon, CalendarIcon, UsersIcon } from 'lucide-react'
-import { PaneSwitcher, useIsLandscapeMobile } from '../ui/PaneSwitcher'
+import React, { useMemo } from 'react'
+import { useClubCareer } from '../context/CareerSaveContext'
+import { PaneSwitcher } from '../ui/PaneSwitcher'
 
-const AQUA = 'var(--color-volt)'
-const GOLD = 'var(--color-volt)'
-const PANEL = 'rgba(4,20,33,0.76)'
-const PANEL_BORDER = 'rgba(56,214,255,0.13)'
-
-const UPCOMING_EVENTS = [
-  { title: 'Sprint Series',   type: 'Freestyle Only', req: 'OVR 100+',   time: 'Starts in 5h',  accent: AQUA, border: 'rgba(56,214,255,0.25)' },
-  { title: 'Endurance Test',  type: 'Medley',         req: 'Level 20+',  time: 'Tomorrow',      accent: '#A78BFA', border: 'rgba(167,139,250,0.25)' },
-  { title: 'Rookie Cup',      type: 'All Strokes',    req: 'Max OVR 90', time: 'Starts in 3d',  accent: '#34D399', border: 'rgba(52,211,153,0.25)' },
-]
-
-// ── Shared featured championship card ──────────────────────────────────────
-
-function FeaturedCard() {
-  const isLandscape = useIsLandscapeMobile()
-  return (
-    <div style={{ borderRadius: '14px', border: `1px solid rgba(212,168,67,0.30)`, background: 'linear-gradient(135deg, rgba(42,31,12,0.92) 0%, rgba(17,13,3,0.92) 100%)', backdropFilter: 'blur(14px)', padding: isLandscape ? '8px 12px' : '12px 16px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-      {/* Gold glow */}
-      <div style={{ position: 'absolute', right: 0, top: 0, width: isLandscape ? '80px' : '160px', height: isLandscape ? '80px' : '160px', borderRadius: '50%', background: GOLD, opacity: 0.08, filter: 'blur(50px)', pointerEvents: 'none' }} />
-
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: isLandscape ? '8px' : '14px' }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: 'inline-block', background: '#C41E3A', color: '#fff', fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', letterSpacing: '0.14em', padding: '2px 8px', borderRadius: '5px', marginBottom: isLandscape ? '3px' : '6px', animation: 'countdown-pulse 1.8s ease-in-out infinite' }}>
-            LIVE NOW
-          </div>
-          <h2 style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '16px' : '22px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1, marginBottom: isLandscape ? '3px' : '5px' }}>GLOBAL CUP '26</h2>
-          {!isLandscape && (
-            <p style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '11px', color: 'rgba(232,224,208,0.75)', marginBottom: '8px', lineHeight: 1.4 }}>
-              Compete against the top 100 clubs worldwide for exclusive legendary rewards.
-            </p>
-          )}
-          <div style={{ display: 'flex', gap: isLandscape ? '8px' : '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <UsersIcon size={12} color={GOLD} />
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', color: 'rgba(255,255,255,0.80)' }}>64 / 100 Joined</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <CalendarIcon size={12} color={GOLD} />
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '11px', color: 'rgba(255,255,255,0.80)' }}>Ends in 2d 14h</span>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isLandscape ? '4px' : '8px', flexShrink: 0 }}>
-          <TrophyIcon size={isLandscape ? 26 : 44} color={GOLD} strokeWidth={1.5} style={{ filter: `drop-shadow(0 0 14px rgba(212,168,67,0.55))` }} />
-          <button style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px', height: isLandscape ? '30px' : '38px', paddingInline: isLandscape ? '10px' : '16px', borderRadius: '9px', cursor: 'pointer', border: 'none', background: 'linear-gradient(140deg, rgba(212,168,67,0.97) 0%, rgba(195,120,10,0.92) 100%)', color: '#1A0D00', fontFamily: "'Bebas Neue', sans-serif", fontSize: isLandscape ? '12px' : '14px', letterSpacing: '0.10em', boxShadow: '0 0 16px rgba(212,168,67,0.55), 0 3px 8px rgba(0,0,0,0.55)', whiteSpace: 'nowrap', userSelect: 'none', flexShrink: 0 }}>
-            <TrophyIcon size={isLandscape ? 11 : 13} /> ENTER TOURNAMENT
-          </button>
-        </div>
-      </div>
-    </div>
-  )
+function competitionTag(currentWeek: number, week: number, entered: boolean) {
+  if (entered) return 'ENTERED'
+  if (week <= currentWeek) return 'LIVE NOW'
+  return 'UP NEXT'
 }
 
-// ── Shared upcoming events list ─────────────────────────────────────────────
+export function Championships() {
+  const { state: clubState, dispatch } = useClubCareer()
 
-function UpcomingEvents() {
-  return (
-    <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(14px)', padding: '10px 14px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '14px', color: '#F3FBFF', letterSpacing: '0.06em', marginBottom: '8px', flexShrink: 0 }}>
-        UPCOMING EVENTS
+  const competitions = useMemo(
+    () => [...clubState.competitions].sort((a, b) => a.week - b.week),
+    [clubState.competitions],
+  )
+
+  const primary = competitions.find((competition) => !competition.entered) ?? competitions[0]
+  const supportEvents = competitions.filter((competition) => competition.id !== primary?.id).slice(0, 2)
+  const upcomingEvents = competitions.slice(0, 4)
+  const defaultLineup = clubState.roster.slice(0, 4).map((athlete) => athlete.id)
+
+  const enterCompetition = (compId: string) => {
+    const competition = clubState.competitions.find((entry) => entry.id === compId)
+    if (!competition) return
+    if (competition.lineup.length === 0 && defaultLineup.length > 0) {
+      dispatch({ type: 'CLUB_SET_COMPETITION_LINEUP', compId, lineup: defaultLineup })
+    }
+    if (!competition.entered) {
+      dispatch({ type: 'CLUB_ENTER_COMPETITION', compId })
+    }
+  }
+
+  const featuredContent = (
+    <div className="swim26-pane-scroll swim26-column-stack">
+      {primary && (
+        <section className="swim26-card swim26-card--gold swim26-champs-hero">
+          <div className="card-content swim26-stack-sm">
+            <div className="swim26-chip-group">
+              <span className="swim26-status-pill" style={{ borderColor: 'rgba(255,90,95,0.45)', color: '#FF5A5F' }}>{competitionTag(clubState.currentWeek, primary.week, primary.entered)}</span>
+              <span className="swim26-status-pill" style={{ borderColor: 'rgba(200,255,0,0.35)', color: '#C8FF00' }}>CLUB SCHEDULE</span>
+            </div>
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">CHAMPIONSHIPS</div>
+                <div className="swim26-card-title swim26-card-title--lg">{primary.name}</div>
+              </div>
+              <div className="swim26-hero-value-sm" style={{ color: '#FFB800' }}>🏆</div>
+            </div>
+            <div className="swim26-copy-strip">
+              <div>
+                <span className="swim26-muted-label">LINEUP</span>
+                <p>{primary.lineup.length}/4 swimmers locked for this meet.</p>
+              </div>
+              <div>
+                <span className="swim26-muted-label">WINDOW</span>
+                <p>Week {primary.week} · Season {clubState.season}</p>
+              </div>
+              <div>
+                <span className="swim26-muted-label">REWARD</span>
+                <p>{primary.stakes}</p>
+              </div>
+            </div>
+          </div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-primary" onClick={() => enterCompetition(primary.id)}>{primary.entered ? 'ENTERED' : 'ENTER HEAT'}</button></div>
+        </section>
+      )}
+
+      <div className="swim26-card-grid swim26-card-grid--compact">
+        {supportEvents.map((event) => (
+          <section key={event.id} className="swim26-card swim26-card--aqua">
+            <div className="swim26-card-content swim26-stack-sm">
+              <div className="swim26-section-head">
+                <div>
+                  <div className="swim26-overline">EVENT CARD</div>
+                  <div className="swim26-card-title">{event.name}</div>
+                </div>
+                <span className="swim26-goal-reward">W{event.week}</span>
+              </div>
+              <div className="swim26-goal-block">
+                <div className="swim26-goal-row"><span className="swim26-goal-title">STATUS</span><span className="swim26-goal-reward">{competitionTag(clubState.currentWeek, event.week, event.entered)}</span></div>
+                <div className="swim26-muted-line">{event.stakes}</div>
+              </div>
+            </div>
+            <div className="cta-band"><button className="swim26-btn swim26-btn-secondary" onClick={() => enterCompetition(event.id)}>{event.entered ? 'ENTERED' : 'ENTER HEAT'}</button></div>
+          </section>
+        ))}
       </div>
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', minHeight: 0 }}>
-        {UPCOMING_EVENTS.map((ev) => (
-          <motion.div
-            key={ev.title}
-            whileTap={{ scale: 0.98 }}
-            style={{ borderRadius: '10px', border: `1px solid ${ev.border}`, background: `linear-gradient(135deg, rgba(56,214,255,0.06) 0%, rgba(4,20,33,0.70) 100%)`, padding: '10px 12px', cursor: 'pointer', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden', position: 'relative' }}
-          >
-            {/* Time tag */}
-            <div style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(0,0,0,0.50)', fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(255,255,255,0.65)', padding: '3px 8px', borderBottomLeftRadius: '8px', letterSpacing: '0.08em' }}>
-              {ev.time}
-            </div>
 
-            <div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '17px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1, marginTop: '14px', marginBottom: '3px' }}>{ev.title}</div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: ev.accent, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{ev.type}</div>
+      <div className="swim26-card-grid swim26-champs-grid">
+        {upcomingEvents.map((event) => (
+          <section key={event.id} className="swim26-card swim26-card--neutral">
+            <div className="swim26-card-content swim26-stack-sm">
+              <div className="swim26-section-head">
+                <div>
+                  <div className="swim26-overline">UPCOMING</div>
+                  <div className="swim26-card-title">{event.name}</div>
+                </div>
+                <span className="swim26-goal-reward">W{event.week}</span>
+              </div>
+              <div className="swim26-goal-block">
+                <div className="swim26-goal-row"><span className="swim26-goal-title">STATUS</span><span className="swim26-goal-reward">{competitionTag(clubState.currentWeek, event.week, event.entered)}</span></div>
+                <div className="swim26-muted-line">{event.stakes}</div>
+              </div>
+              <div className="swim26-goal-block">
+                <div className="swim26-goal-row"><span className="swim26-goal-title">ENTRY</span><span className="swim26-goal-reward">{event.lineup.length}/4</span></div>
+              </div>
             </div>
-
-            <div style={{ marginTop: '8px', padding: '5px 10px', borderRadius: '7px', background: 'rgba(0,0,0,0.28)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: '9px', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>REQ</span>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '13px', color: '#F3FBFF', letterSpacing: '0.04em' }}>{ev.req}</span>
-            </div>
-          </motion.div>
+            <div className="cta-band"><button className="swim26-btn swim26-btn-ghost" onClick={() => enterCompetition(event.id)}>{event.entered ? 'ENTERED' : 'ENTER HEAT'}</button></div>
+          </section>
         ))}
       </div>
     </div>
   )
-}
 
-export function Championships() {
+  const upcomingContent = (
+    <div className="swim26-pane-scroll swim26-column-stack">
+      <div className="swim26-card-grid swim26-champs-grid">
+        {upcomingEvents.map((event) => (
+          <section key={event.id} className="swim26-card swim26-card--neutral">
+            <div className="swim26-card-content swim26-stack-sm">
+              <div className="swim26-section-head">
+                <div>
+                  <div className="swim26-overline">SEASON BOARD</div>
+                  <div className="swim26-card-title">{event.name}</div>
+                </div>
+                <span className="swim26-goal-reward">W{event.week}</span>
+              </div>
+              <div className="swim26-goal-block">
+                <div className="swim26-goal-row"><span className="swim26-goal-title">LINEUP</span><span className="swim26-goal-reward">{event.lineup.length}/4</span></div>
+                <div className="swim26-muted-line">{event.stakes}</div>
+              </div>
+            </div>
+            <div className="cta-band"><button className="swim26-btn swim26-btn-secondary" onClick={() => enterCompetition(event.id)}>{event.entered ? 'ENTERED' : 'ENTER HEAT'}</button></div>
+          </section>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <PaneSwitcher
       panes={[
-        {
-          id: 'featured',
-          label: 'FEATURED',
-          icon: <TrophyIcon size={12} />,
-          content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto' }}>
-              <FeaturedCard />
-            </div>
-          ),
-        },
-        {
-          id: 'upcoming',
-          label: 'UPCOMING',
-          icon: <CalendarIcon size={12} />,
-          content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '10px', display: 'flex', flexDirection: 'column' }}>
-              {/* Reuse UpcomingEvents — it fills available height with internal scroll */}
-              <UpcomingEvents />
-            </div>
-          ),
-        },
+        { id: 'featured', label: 'FEATURED', icon: <span aria-hidden>🏆</span>, content: featuredContent },
+        { id: 'upcoming', label: 'UPCOMING', icon: <span aria-hidden>🗓</span>, content: upcomingContent },
       ]}
     >
-      {/* Normal (non-landscape) two-section layout */}
-      <motion.div
-        initial={{ opacity: 0, scale: 1.03 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.97 }}
-        style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px' }}
-      >
-        <FeaturedCard />
-        <UpcomingEvents />
-      </motion.div>
+      <div className="swim26-page-shell swim26-page-shell--single">
+        <div className="swim26-pane-scroll swim26-column-stack">{featuredContent}</div>
+        <div className="swim26-pane-scroll swim26-column-stack">{upcomingContent}</div>
+      </div>
     </PaneSwitcher>
   )
 }
+
+export default Championships
