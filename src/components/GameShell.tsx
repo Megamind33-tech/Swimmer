@@ -14,7 +14,7 @@
  *   racing        → RaceScene (Babylon canvas + HUD)
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { AppShell } from '../app/AppShell';
 import { PlayScreen } from './menu/PlayScreen';
