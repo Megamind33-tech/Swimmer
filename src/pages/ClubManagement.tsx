@@ -76,7 +76,7 @@ export function ClubManagement() {
   }
 
   const overviewPane = (
-    <div className="swim26-column-stack">
+    <div className="hq-overview-grid">
       <section className="swim26-card swim26-card--gold swim26-card--hero">
         <div className="swim26-card-content swim26-stack-sm">
           <div className="swim26-hero-grid">
@@ -117,58 +117,60 @@ export function ClubManagement() {
         <span className="card-ghost-num">{clubOvr}</span>
       </section>
 
-      <section className="swim26-card swim26-card--gold">
-        <div className="swim26-card-content swim26-stack-sm">
-          <div className="swim26-section-head">
-            <div>
-              <div className="swim26-overline">BOARD CONFIDENCE</div>
-              <div className="swim26-card-title">MANDATE</div>
-            </div>
-            <TargetIcon size={16} color={GOLD} />
-          </div>
-          <div className="swim26-list-stack">
-            {BOARD_TARGETS.map((target) => (
-              <div key={target.id} className="swim26-goal-block">
-                <div className="swim26-goal-row">
-                  <span className="swim26-goal-title">{target.label}</span>
-                  {target.met ? <CheckCircle2Icon size={14} color={SUCCESS} /> : <span className="swim26-goal-reward">{target.progress}%</span>}
-                </div>
-                <Meter value={target.progress} max={100} accent={target.met ? SUCCESS : GOLD} />
+      <div className="swim26-column-stack">
+        <section className="swim26-card swim26-card--gold">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">BOARD CONFIDENCE</div>
+                <div className="swim26-card-title">MANDATE</div>
               </div>
-            ))}
+              <TargetIcon size={16} color={GOLD} />
+            </div>
+            <div className="swim26-list-stack">
+              {BOARD_TARGETS.map((target) => (
+                <div key={target.id} className="swim26-goal-block">
+                  <div className="swim26-goal-row">
+                    <span className="swim26-goal-title">{target.label}</span>
+                    {target.met ? <CheckCircle2Icon size={14} color={SUCCESS} /> : <span className="swim26-goal-reward">{target.progress}%</span>}
+                  </div>
+                  <Meter value={target.progress} max={100} accent={target.met ? SUCCESS : GOLD} />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="swim26-card swim26-card--neutral">
-        <div className="swim26-card-content swim26-stack-sm">
-          <div className="swim26-section-head">
-            <div>
-              <div className="swim26-overline">NEXT FIXTURE</div>
-              <div className="swim26-card-title">RACE WEEK</div>
+        <section className="swim26-card swim26-card--neutral">
+          <div className="swim26-card-content swim26-stack-sm">
+            <div className="swim26-section-head">
+              <div>
+                <div className="swim26-overline">NEXT FIXTURE</div>
+                <div className="swim26-card-title">RACE WEEK</div>
+              </div>
+              <CrownIcon size={16} color={AQUA} />
             </div>
-            <CrownIcon size={16} color={AQUA} />
-          </div>
-          <div className="swim26-copy-strip">
-            <div>
-              <span className="swim26-muted-label">EVENT</span>
-              <p>{nextCompetition?.name ?? 'REGIONAL CUP HEAT'}</p>
+            <div className="swim26-copy-strip">
+              <div>
+                <span className="swim26-muted-label">EVENT</span>
+                <p>{nextCompetition?.name ?? 'REGIONAL CUP HEAT'}</p>
+              </div>
+              <div>
+                <span className="swim26-muted-label">STAKES</span>
+                <p>{nextCompetition?.stakes ?? 'PRESTIGE · SPONSOR EXPOSURE'}</p>
+              </div>
             </div>
-            <div>
-              <span className="swim26-muted-label">STAKES</span>
-              <p>{nextCompetition?.stakes ?? 'PRESTIGE · SPONSOR EXPOSURE'}</p>
+            <div className="swim26-meta-line">
+              <span>WEEK {nextCompetition?.week ?? clubState.currentWeek}</span>
+              <span>{enteredComps.has(nextCompetition?.id ?? '') ? 'ENTERED' : 'NOT ENTERED'}</span>
+              <span>{cyclePhase.name.toUpperCase()}</span>
             </div>
           </div>
-          <div className="swim26-meta-line">
-            <span>WEEK {nextCompetition?.week ?? clubState.currentWeek}</span>
-            <span>{enteredComps.has(nextCompetition?.id ?? '') ? 'ENTERED' : 'NOT ENTERED'}</span>
-            <span>{cyclePhase.name.toUpperCase()}</span>
+          <div className="cta-band">
+            <button className="swim26-btn swim26-btn-primary">OPEN CLUB</button>
           </div>
-        </div>
-        <div className="cta-band">
-          <button className="swim26-btn swim26-btn-primary">OPEN CLUB</button>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   )
 
