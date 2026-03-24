@@ -1,10 +1,10 @@
 /**
  * App — root component
  *
- * All screens (lobby, mode-select, pre-race, pre-match, race) are responsive
- * and fully interactive in both portrait and landscape on all target devices.
- * LandscapeGuard is disabled: portrait is no longer blocked at the CSS or JS
- * level so menus and the race scene can adapt to any orientation.
+ * SWIM26 is a landscape-first mobile game.
+ * LandscapeGuard enforces landscape orientation on mobile:
+ *   - Portrait → "Rotate your device" overlay (game paused)
+ *   - Landscape → full game, all interactions enabled
  */
 
 import React from 'react';
@@ -17,7 +17,7 @@ export function App() {
   return (
     <A11yProvider>
       <CareerSaveProvider>
-        <LandscapeGuard disabled>
+        <LandscapeGuard>
           <GameShell />
         </LandscapeGuard>
       </CareerSaveProvider>
