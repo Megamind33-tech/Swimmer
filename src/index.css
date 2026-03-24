@@ -1669,6 +1669,13 @@ body {
 .swim26-list-stack { gap: 8px; }
 .swim26-choice-stack { gap: 8px; }
 
+.hq-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
 .swim26-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
