@@ -213,7 +213,12 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
   return (
     <div className="swim26-shell-frame">
       <header className="hud swim26-hud-shell">
-        <button className="back-btn" onClick={handleBack}>
+        <button
+          className="back-btn"
+          onClick={handleBack}
+          aria-label={`Go back to ${backLabel}`}
+          title={`Go back to ${backLabel}`}
+        >
           <span aria-hidden>‹</span>
           <span>{backLabel}</span>
         </button>
