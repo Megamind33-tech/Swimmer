@@ -1255,6 +1255,7 @@ body {
 }
 
 /* Shell-specific focusable elements */
+.back-btn:focus-visible,
 .swim26-back-button:focus-visible,
 .swim26-nav-tab:focus-visible,
 .swim26-race-btn:focus-visible,
