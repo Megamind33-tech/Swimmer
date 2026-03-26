@@ -83,11 +83,19 @@ export default {
         "surface-tint": "#0f62fe",
 
         // Broadcast Standard Colors — SWIM26 FC26 aesthetic
-        "volt":           "#CCFF00",         // High-vis accent
-        "broadcast-red":  "#FF003C",         // Flat danger red
-        "carbon":         "#0A0A0A",         // Deepest surface
-        "graphite":       "#1A1A1A",         // Elevated surface
-        "broadcast-white":"#FFFFFF",
+        "volt":              "#CCFF00",      // High-vis accent (primary CTA fill)
+        "volt-dim":          "#AADD00",      // Volt pressed / dimmed state
+        "broadcast-red":     "#FF003C",      // Flat stark danger
+        "broadcast-gold":    "#FFB800",      // Scoreboard gold (stats, rankings)
+        "carbon":            "#0A0A0A",      // Deepest surface
+        "graphite":          "#1A1A1A",      // Elevated panel
+        "graphite-high":     "#222222",      // Raised element
+        "broadcast-white":   "#FFFFFF",
+        // Game-blue — broadcast-standard navy palette for backgrounds/rails
+        "game-blue":         "#07111E",      // Game frame background
+        "game-blue-mid":     "#0C1B2D",      // Card / panel surface
+        "game-blue-raised":  "#10243A",      // Raised element / back-btn
+        "game-blue-border":  "#1E3A57",      // Structural border
       },
       fontFamily: {
         "headline": ["IBM Plex Sans", "sans-serif"],
