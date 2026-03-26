@@ -92,7 +92,11 @@ const EventCategories = [
   { id: 'SPECIAL', label: 'Special', color: 'text-purple-400' },
 ];
 
+import { useIsLandscapeMobile } from '../../hooks/useIsLandscapeMobile';
+import { PaneSwitcher } from '../../ui/PaneSwitcher';
+
 export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelect }) => {
+  const isLandscapeMobile = useIsLandscapeMobile();
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | null>(null);
 
   const filteredEvents = selectedCategory
@@ -102,9 +106,68 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
   const featuredEvent = LiveEvents.find((e) => e.featured);
 
   return (
-    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      {/* Cinematic Header */}
-      <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
+    <div className={`hydro-page-shell flex-1 relative w-full h-full font-body ${isLandscapeMobile ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <PaneSwitcher
+        panes={[
+          {
+            id: 'FEATURED',
+            label: 'FEATURED',
+            icon: <span>🔥</span>,
+            content: (
+              <div className="p-6 h-full overflow-y-auto pb-20 scrollbar-hide">
+                {featuredEvent && (
+                  <div className="rounded-[32px] overflow-hidden bg-gradient-to-br from-secondary/40 to-surface p-8 border border-white/10 mb-6 transition-all game-tap-feedback cursor-pointer" onClick={() => onEventSelect?.(featuredEvent.id)}>
+                    <h2 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">{featuredEvent.title}</h2>
+                    <p className="text-[11px] font-black uppercase tracking-widest text-on-surface-variant mb-6 opacity-60 leading-relaxed">{featuredEvent.description}</p>
+                    <div className="flex items-center justify-between">
+                       <span className="text-secondary font-black italic slanted text-xl gold-glow">{featuredEvent.timeLeft}</span>
+                       <span style={{fontSize:'24px'}}>➔</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          },
+          {
+            id: 'DAILY',
+            label: 'DAILY',
+            icon: <span>📅</span>,
+            content: (
+              <div className="p-6 h-full overflow-y-auto pb-20 scrollbar-hide space-y-4">
+                <h3 className="font-headline text-xl font-black italic slanted uppercase tracking-widest text-primary px-2 opacity-60">Daily Objectives</h3>
+                {LiveEvents.filter(e => e.category === 'DAILY').map(e => (
+                  <div key={e.id} onClick={() => onEventSelect?.(e.id)} className="p-5 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-between game-tap-feedback cursor-pointer">
+                     <span className="font-headline text-lg font-black italic slanted uppercase text-on-surface">{e.title}</span>
+                     <span className="text-primary font-black italic slanted">{e.timeLeft}</span>
+                  </div>
+                ))}
+              </div>
+            )
+          },
+          {
+            id: 'CIRCUITS',
+            label: 'CIRCUITS',
+            icon: <span>🏆</span>,
+            content: (
+              <div className="p-6 h-full overflow-y-auto pb-20 scrollbar-hide space-y-4">
+                <h3 className="font-headline text-xl font-black italic slanted uppercase tracking-widest text-secondary px-2 opacity-60">Global Heats</h3>
+                {LiveEvents.filter(e => e.category !== 'DAILY' && !e.featured).map(e => (
+                  <div key={e.id} onClick={() => onEventSelect?.(e.id)} className="p-5 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-between game-tap-feedback cursor-pointer">
+                     <div>
+                       <span className="font-headline text-lg font-black italic slanted uppercase text-on-surface block">{e.title}</span>
+                       <span className="text-[9px] font-black text-on-surface-variant uppercase tracking-widest opacity-60 tracking-wider">{e.category}</span>
+                     </div>
+                     <span className="text-secondary font-black italic slanted">{e.timeLeft}</span>
+                  </div>
+                ))}
+              </div>
+            )
+          }
+        ]}
+      >
+        <div className="flex flex-col flex-1">
+          {/* Cinematic Header */}
+          <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
         
         <div className="relative z-10 flex items-center justify-between gap-8 flex-wrap">
@@ -267,8 +330,9 @@ export const LiveEventsScreen: React.FC<LiveEventsScreenProps> = ({ onEventSelec
                </div>
             </div>
           ))}
-        </div>
       </div>
+        </div>
+      </PaneSwitcher>
     </div>
   );
 };

@@ -4,6 +4,8 @@ import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.
 import p2pQuickMatchImage from '../../designs/doh9161_copy.width_800.jpg/screen.png';
 import { FeatureCardMedia } from '../ui/MediaPrimitives';
 import { GameIcon } from '../../ui/GameIcon';
+import { useIsLandscapeMobile } from '../../hooks/useIsLandscapeMobile';
+import { PaneSwitcher } from '../../ui/PaneSwitcher';
 import {
   swim26Boundary,
   swim26Color,
@@ -155,10 +157,12 @@ const subPageContent: Record<Exclude<HomeSubPage, null>, {
 };
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
+  player,
   onPlayClick,
   onCareerClick,
   onSocialClick,
 }) => {
+  const isLandscapeMobile = useIsLandscapeMobile();
   const [activeSubPage, setActiveSubPage] = useState<HomeSubPage>(null);
 
   const activeFeature = useMemo(
@@ -173,23 +177,83 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   return (
-    <div
-      style={{
-        height: '100%',
-        color: swim26Color.text.primary,
-        background: `radial-gradient(circle at 18% 16%, rgba(74, 201, 214, 0.10), transparent 22%), radial-gradient(circle at 78% 18%, rgba(214, 180, 90, 0.10), transparent 18%), linear-gradient(180deg, rgba(9, 21, 30, 0.78) 0%, rgba(7, 19, 28, 0.82) 100%)`,
-        overflowY: 'auto',
-      }}
-    >
-      <div
-        style={{
-          padding: `${swim26Layout.safe.top}px ${swim26Layout.safe.right}px ${swim26Layout.safe.bottom}px`,
-          display: 'grid',
-          gap: swim26Space.md,
-          minHeight: '100%',
-          boxSizing: 'border-box',
-        }}
+    <div className={`hydro-page-shell flex-1 relative w-full h-full font-body ${isLandscapeMobile ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <PaneSwitcher
+        panes={[
+          {
+            id: 'COMMAND',
+            label: 'COMMAND',
+            icon: <GameIcon name="speed" size={20} />,
+            content: (
+              <div className="p-6 space-y-6 overflow-y-auto h-full pb-20 scrollbar-hide">
+                <div className="relative rounded-[32px] overflow-hidden bg-linear-to-br from-primary/20 to-surface p-8 border border-white/10">
+                  <h2 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">Tactical Command</h2>
+                  <p className="text-[11px] font-black uppercase tracking-widest text-on-surface-variant mb-8 opacity-60 italic">Athlete Authorization Required</p>
+                  <button onClick={onPlayClick} className="w-full h-20 rounded-[24px] bg-primary border-b-4 border-primary-dark active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-4 group/btn">
+                     <span className="font-headline text-2xl font-black italic slanted uppercase text-surface">Launch Heat</span>
+                     <span style={{fontSize:'30px', lineHeight:1}} className="group-hover:translate-x-2 transition-transform">→</span>
+                  </button>
+                </div>
+              </div>
+            )
+          },
+          {
+            id: 'CAREER',
+            label: 'CAREER',
+            icon: <GameIcon name="emoji_events" size={20} />,
+            content: (
+              <div className="p-6 space-y-6 overflow-y-auto h-full pb-20 scrollbar-hide">
+                 <h3 className="font-headline text-xl font-black italic slanted uppercase tracking-widest text-primary px-2">Career Outlook</h3>
+                 <div className="space-y-3">
+                    {['Rookie Series', 'Open Regional', 'Global Finals'].map((lvl, i) => (
+                      <div key={i} onClick={onCareerClick} className="p-6 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-between game-tap-feedback cursor-pointer">
+                         <span className="font-headline text-lg font-black italic slanted uppercase text-on-surface">{lvl}</span>
+                         <span className="text-on-surface-variant opacity-40">➔</span>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+            )
+          },
+          {
+            id: 'NETWORK',
+            label: 'NETWORK',
+            icon: <GameIcon name="public" size={20} />,
+            content: (
+              <div className="p-6 space-y-6 overflow-y-auto h-full pb-20 scrollbar-hide">
+                 <h3 className="font-headline text-xl font-black italic slanted uppercase tracking-widest text-secondary px-2">Global Matrix</h3>
+                 <div className="grid grid-cols-2 gap-4">
+                    <button onClick={onSocialClick} className="h-28 rounded-[24px] bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-2 game-tap-feedback">
+                       <span style={{fontSize:'24px'}}>👥</span>
+                       <span className="text-[10px] font-black uppercase text-on-surface-variant">Squad</span>
+                    </button>
+                    <button onClick={onSocialClick} className="h-28 rounded-[24px] bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-2 game-tap-feedback">
+                       <span style={{fontSize:'24px'}}>⚡</span>
+                       <span className="text-[10px] font-black uppercase text-on-surface-variant">Rivals</span>
+                    </button>
+                 </div>
+              </div>
+            )
+          }
+        ]}
       >
+        <div
+          style={{
+            height: '100%',
+            color: swim26Color.text.primary,
+            background: `radial-gradient(circle at 18% 16%, rgba(74, 201, 214, 0.10), transparent 22%), radial-gradient(circle at 78% 18%, rgba(214, 180, 90, 0.10), transparent 18%), linear-gradient(180deg, rgba(9, 21, 30, 0.78) 0%, rgba(7, 19, 28, 0.82) 100%)`,
+            overflowY: 'auto',
+          }}
+        >
+          <div
+            style={{
+              padding: `${swim26Layout.safe.top}px ${swim26Layout.safe.right}px ${swim26Layout.safe.bottom}px`,
+              display: 'grid',
+              gap: swim26Space.md,
+              minHeight: '100%',
+              boxSizing: 'border-box',
+            }}
+          >
         <section
           style={{
             ...shellPanel,
@@ -420,7 +484,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </section>
       </div>
     </div>
-  );
+  </PaneSwitcher>
+</div>
+);
 };
 
 interface HomeRightPanelProps {
@@ -568,8 +634,7 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
           ))}
         </div>
       </div>
-    </div>
-  );
+    );
 };
 
 export default HomeScreen;

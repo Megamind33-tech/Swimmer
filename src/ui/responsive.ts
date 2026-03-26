@@ -102,6 +102,19 @@ export const SPACING = {
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Transitions
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const TRANSITION_DURATIONS = {
+  /** Standard screen-to-screen fade duration */
+  screenFade: 0.3,
+  /** Quick UI hover/tap feedback */
+  quick:      0.14,
+  /** Smooth page entry animations */
+  entry:      0.45,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Focus ring token
 // ─────────────────────────────────────────────────────────────────────────────
 

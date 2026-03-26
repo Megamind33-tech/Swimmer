@@ -85,7 +85,11 @@ const GlobalLeaderboard: LeaderboardEntry[] = [
   { rank: 5, name: 'Luna Santos', level: 43, time: '00:51.87', pb: '+0.64s' },
 ];
 
+import { useIsLandscapeMobile } from '../../hooks/useIsLandscapeMobile';
+import { PaneSwitcher } from '../../ui/PaneSwitcher';
+
 export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimmer' }) => {
+  const isLandscapeMobile = useIsLandscapeMobile();
   const [activeTab, setActiveTab] = useState<SocialTab>('FRIENDS');
 
   const tabs: { id: SocialTab; label: string; icon: React.ReactNode; count: number }[] = [
@@ -379,9 +383,40 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
   };
 
   return (
-    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      {/* Cinematic Header */}
-      <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
+    <div className={`hydro-page-shell flex-1 relative w-full h-full font-body ${isLandscapeMobile ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <PaneSwitcher
+        panes={[
+          {
+            id: 'FRIENDS',
+            label: 'FRIENDS',
+            icon: <span>👥</span>,
+            content: <div className="p-8 h-full overflow-y-auto pb-20 scrollbar-hide">{renderTab()}</div>
+          },
+          {
+            id: 'RIVALS',
+            label: 'RIVALS',
+            icon: <span>⚡</span>,
+            content: <div className="p-8 h-full overflow-y-auto pb-20 scrollbar-hide">{renderTab()}</div>
+          },
+          {
+            id: 'LEADERBOARDS',
+            label: 'RANKINGS',
+            icon: <span>📊</span>,
+            content: <div className="p-8 h-full overflow-y-auto pb-20 scrollbar-hide">{renderTab()}</div>
+          },
+          {
+            id: 'CHAT',
+            label: 'CHAT',
+            icon: <span>💬</span>,
+            content: <div className="p-8 h-full overflow-y-auto pb-20 scrollbar-hide text-sm">{renderTab()}</div>
+          }
+        ]}
+        activePaneId={activeTab}
+        onPaneChange={(id) => setActiveTab(id as SocialTab)}
+      >
+        <div className="flex flex-col flex-1">
+          {/* Cinematic Header */}
+          <div className="p-12 max-[900px]:p-8 bg-gradient-to-b from-primary/15 to-transparent border-b border-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-1/2 w-[1000px] h-[600px] bg-primary/5 blur-[160px] rounded-full pointer-events-none" />
         
         <div className="relative z-10 flex items-center justify-between gap-8 flex-wrap">
@@ -443,6 +478,8 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ playerName = 'Swimme
         {/* Tab Content */}
         <div className="transition-all duration-500">{renderTab()}</div>
       </div>
+        </div>
+      </PaneSwitcher>
     </div>
   );
 };

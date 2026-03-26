@@ -1,9 +1,8 @@
-/**
- * Career Screen - Athlete journey and progression
- * Career ladder, current event, coach notes, media attention, milestones
- */
-
 import React, { useState } from 'react';
+import { useIsLandscapeMobile } from '../../hooks/useIsLandscapeMobile';
+import { PaneSwitcher } from '../../ui/PaneSwitcher';
+import { GameIcon } from '../../ui/GameIcon';
+import { swim26Color, swim26Space, swim26Layout } from '../../theme/swim26DesignSystem';
 import careerMainCardBackdropImage from '../../designs/custom_backgrounds/1UtKXnTbZwj4daOsDHH1HLUgmCfvf81V9.jpg';
 import { HeroBackgroundMedia } from '../ui/MediaPrimitives';
 
@@ -93,6 +92,8 @@ const Milestones = [
 ];
 
 export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => {
+  const isLandscapeMobile = useIsLandscapeMobile();
+  const [activePaneId, setActivePaneId] = useState('JOURNEY');
   const [expandedTier, setExpandedTier] = useState<number>(2);
 
   const completedTiers = 1;
@@ -100,356 +101,224 @@ export const CareerScreen: React.FC<CareerScreenProps> = ({ onEventSelect }) => 
   const totalTiers = 5;
   const progressPercent = ((completedTiers + 0.5) / totalTiers) * 100;
 
-  return (
-    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      {/* Cinematic Header */}
-      <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="h-[1px] w-12 bg-primary/40" />
-            <span className="text-[10px] font-bold text-primary uppercase tracking-[0.4em]">Athlete Dossier</span>
-            <span className="h-[1px] w-12 bg-primary/40" />
-          </div>
-          
-          <h1 className="font-headline text-5xl max-[900px]:text-3xl font-black italic slanted uppercase text-on-surface text-glow mb-2">
-            Career Journey
-          </h1>
-          <p className="text-on-surface-variant text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-            <span style={{fontSize:'16px', lineHeight:1, display:'inline-block'}} className="text-primary">📊</span>
-            Track your ascension through the world rankings
-          </p>
+  const renderJourneyPane = () => (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full scrollbar-hide pb-24">
+      {/* Main Career Card */}
+      <div className="relative rounded-[24px] overflow-hidden border border-primary/25 min-h-[220px] p-8 flex items-end">
+        <HeroBackgroundMedia src={careerMainCardBackdropImage} alt="Career spotlight" className="absolute inset-0 opacity-80" focalPoint="50% 35%" />
+        <div className="absolute inset-0 bg-gradient-to-r from-surface/85 via-surface/45 to-surface/15" />
+        <div className="relative z-10 max-w-2xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3">Main Career Card</p>
+          <h2 className="font-headline text-3xl max-[900px]:text-xl font-black italic slanted uppercase text-on-surface text-glow mb-2">Road To World Championships</h2>
+          <p className="text-xs font-bold uppercase tracking-wider text-on-surface">Follow your national path, complete objectives, and unlock elite contracts.</p>
         </div>
       </div>
 
-      <div className="hydro-page-content page-template-detail p-6 max-w-7xl mx-auto w-full space-y-8 pb-12">
-
-        <div className="relative rounded-[36px] overflow-hidden border border-primary/25 min-h-[250px] p-8 flex items-end">
-          <HeroBackgroundMedia src={careerMainCardBackdropImage} alt="Career spotlight" className="absolute inset-0 opacity-80" focalPoint="50% 35%" />
-          <div className="absolute inset-0 bg-gradient-to-r from-surface/85 via-surface/45 to-surface/15" />
-          <div className="relative z-10 max-w-2xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-3">Main Career Card</p>
-            <h2 className="font-headline text-4xl max-[900px]:text-2xl font-black italic slanted uppercase text-on-surface text-glow mb-2">Road To World Championships</h2>
-            <p className="text-xs font-bold uppercase tracking-wider text-on-surface">Follow your national path, complete objectives, and unlock elite contracts.</p>
+      {/* Season Timeline */}
+      <div className="glass-panel p-6 rounded-2xl border-white/5 relative overflow-hidden">
+        <div className="flex items-center justify-between mb-6 relative z-10">
+          <h2 className="font-headline text-lg font-black italic slanted uppercase text-primary text-glow">Season Timeline</h2>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5">
+            <span className="text-[9px] font-black uppercase tracking-widest text-primary">Season 07</span>
           </div>
         </div>
-
-        {/* Career Management Hub */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Sponsors & Partners Panel */}
-          <div className="glass-panel p-6 rounded-2xl group border-white/5 hover:border-primary/30 transition-all duration-500 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span style={{fontSize:'60px', lineHeight:1, display:'inline-block'}} className="text-primary">🤝</span>
-            </div>
-            
-            <h2 className="font-headline text-xl font-black italic slanted uppercase text-primary mb-6 text-glow">
-              Partnerships & Deals
-            </h2>
-            
-            <div className="grid gap-4">
-              {SponsorshipDeals.map((deal) => (
-                <div key={deal.brand} className="relative p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all group/item">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-on-surface group-hover/item:text-primary transition-colors">{deal.brand}</span>
-                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded border ${
-                      deal.status === 'Active' ? 'border-primary/40 text-primary bg-primary/10' : 'border-white/10 text-on-surface-variant bg-white/5'
-                    }`}>
-                      {deal.status}
-                    </span>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <div className="text-primary font-headline font-bold italic slanted text-glow leading-none">
-                      {deal.value}
-                    </div>
-                    <div className="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">
-                      {deal.term}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Coaching & Fixtures Panel */}
-          <div className="glass-panel p-6 rounded-2xl group border-white/5 hover:border-primary/30 transition-all duration-500">
-            <h2 className="font-headline text-xl font-black italic slanted uppercase text-primary mb-6 text-glow">
-              The Coaching Unit
-            </h2>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {TeamContext.map((item) => (
-                  <div key={item.label} className="p-3 rounded-xl bg-white/5 border border-white/5">
-                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-on-surface-variant mb-1 block">{item.label}</span>
-                    <span className="text-sm font-bold text-on-surface line-clamp-1">{item.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 relative overflow-hidden group/coach">
-                <div className="relative z-10">
-                  <h3 className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Priority Objectives</h3>
-                  <div className="space-y-3">
-                    {UpcomingGames.map((game) => (
-                      <button 
-                        key={game.id} 
-                        onClick={() => onEventSelect?.(game.id)}
-                        className="w-full flex items-center justify-between group/row"
-                      >
-                        <div className="flex flex-col text-left">
-                          <span className="text-sm font-bold text-on-surface group-hover/row:text-primary transition-colors">{game.name}</span>
-                          <span className="text-[9px] font-bold text-on-surface-variant">{game.mode}</span>
-                        </div>
-                        <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className="text-primary opacity-0 group-hover/row:opacity-100 transition-all translate-x-2 group-hover/row:translate-x-0">›</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Career Calendar / Season Timeline */}
-        <div className="glass-panel p-6 rounded-2xl group border-white/5 hover:border-primary/30 transition-all duration-500 overflow-hidden relative">
-          <div className="flex items-center justify-between mb-8 relative z-10">
-            <h2 className="font-headline text-xl font-black italic slanted uppercase text-primary text-glow">
-              Season Timeline
-            </h2>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5">
-              <span className="text-[9px] font-black uppercase tracking-widest text-primary">Season 07</span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 relative z-10">
-            {SeasonCalendar.map((item) => (
-              <div key={item.week} className="relative p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all group/item">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant font-bold">{item.week}</span>
-                  <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${
-                    item.state === 'Current' ? 'border-primary/40 text-primary bg-primary/10' : 'border-white/10 text-on-surface-variant bg-white/5'
-                  }`}>
-                    {item.state}
-                  </span>
-                </div>
-                <div className="text-sm font-bold text-on-surface group-hover/item:text-primary transition-colors mb-1">{item.event}</div>
-                <div className="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">{item.stage}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Overall Progress */}
-        <div className="glass-panel p-8 rounded-2xl group border-white/5 hover:border-primary/20 transition-all duration-500 overflow-hidden relative">
-          <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-8">
-            <div className="flex-1">
-              <div className="flex items-end gap-3 mb-4">
-                <h2 className="font-headline text-4xl font-black italic slanted uppercase text-on-surface text-glow leading-none">
-                  Circuit Status
-                </h2>
-                <span className="text-primary font-headline font-bold italic slanted text-lg pb-1">TIER {currentTier} OF {totalTiers}</span>
-              </div>
-              
-              <div className="relative h-4 w-full bg-white/5 rounded-full border border-white/5 overflow-hidden">
-                <div 
-                  className="h-full bg-primary shadow-[0_0_20px_rgba(129,236,255,0.6)] transition-all duration-1000 ease-out"
-                  style={{ width: `${progressPercent}%` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              {CareerTiers.map((tier) => (
-                <div key={tier.tier} className={`p-3 rounded-xl border transition-all duration-300 ${
-                  tier.tier <= currentTier ? 'bg-primary/10 border-primary/30' : 'bg-white/5 border-white/5 opacity-40'
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+          {SeasonCalendar.map((item) => (
+            <div key={item.week} className="relative p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all group/item">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant font-bold">{item.week}</span>
+                <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${
+                  item.state === 'Current' ? 'border-primary/40 text-primary bg-primary/10' : 'border-white/10 text-on-surface-variant bg-white/5'
                 }`}>
-                  <span className="text-[8px] font-black uppercase tracking-widest text-primary mb-1 block">Tier 0{tier.tier}</span>
-                  <span className="text-[10px] font-bold text-on-surface line-clamp-1">{tier.name}</span>
-                </div>
-              ))}
+                  {item.state}
+                </span>
+              </div>
+              <div className="text-sm font-bold text-on-surface group-hover/item:text-primary transition-colors mb-1">{item.event}</div>
+              <div className="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest">{item.stage}</div>
             </div>
-          </div>
+          ))}
         </div>
+      </div>
 
-        {/* Career Ladder */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
-            <h2 className="font-headline text-2xl font-black italic slanted uppercase text-on-surface ml-2">
-              Tier Challenges
-            </h2>
-            {/* Tier quick-select — compact game selector buttons */}
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-              {CareerTiers.map((tier) => {
-                const isActive = expandedTier === tier.tier;
-                const isCompleted = tier.tier < currentTier;
-                const isCurrent = tier.tier === currentTier;
-                return (
-                  <button
-                    key={tier.tier}
-                    onClick={() => setExpandedTier(isActive ? -1 : tier.tier)}
-                    className={`relative flex-shrink-0 px-3 py-2 rounded-xl border font-headline font-black italic slanted uppercase text-[9px] tracking-widest transition-all duration-300 overflow-hidden ${
-                      isActive
-                        ? 'bg-primary/20 border-primary/50 text-primary text-glow shadow-[0_0_14px_rgba(129,236,255,0.25)]'
-                        : isCompleted
-                        ? 'bg-secondary/10 border-secondary/30 text-secondary hover:border-secondary/50'
-                        : isCurrent
-                        ? 'bg-primary/10 border-primary/20 text-primary hover:border-primary/50'
-                        : 'bg-white/5 border-white/5 text-on-surface-variant hover:border-white/15 hover:text-on-surface'
-                    }`}
-                  >
-                    <span className="flex items-center gap-1">
-                      {isCompleted ? '✦' : isCurrent ? '▶' : '◈'} T{tier.tier}
-                    </span>
-                    {isActive && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          
-          {CareerTiers.map((tier, idx) => {
-            const isExpanded = expandedTier === tier.tier;
-            const isCompleted = idx < completedTiers;
-            const isCurrent = tier.tier === currentTier;
-
-            return (
-              <div
-                key={tier.tier}
-                className={`rounded-2xl border transition-all duration-500 overflow-hidden ${
-                  isExpanded 
-                    ? 'glass-panel border-primary/40 bg-primary/5 shadow-2xl' 
-                    : 'glass-panel border-white/5 hover:border-white/10'
-                }`}
-              >
-                {/* Tier Header */}
-                <button
-                  onClick={() => setExpandedTier(isExpanded ? -1 : tier.tier)}
-                  className={`w-full px-6 py-5 flex items-center justify-between transition-all group/tier ${
-                    isExpanded ? 'bg-primary/5' : 'hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-6">
-                    <div className={`h-12 w-12 rounded-xl border flex items-center justify-center transition-all duration-500 ${
-                      isExpanded ? 'bg-primary/20 border-primary/40' : 'bg-surface-high border-white/5'
-                    }`}>
-                      <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className={isCompleted ? 'text-secondary gold-glow' : isCurrent ? 'text-primary' : 'text-on-surface-variant'}>
-                        {isCompleted ? '✦' : isCurrent ? '🏊' : '🔒'}
-                      </span>
-                    </div>
-                    
-                    <div className="text-left">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Tier 0{tier.tier}</span>
-                        {isCompleted && <span className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded border border-secondary/40 text-secondary bg-secondary/10">Mastered</span>}
-                      </div>
-                      <h3 className="font-headline text-xl font-black italic slanted uppercase text-on-surface group-hover/tier:text-glow transition-all">
-                        {tier.name}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-6">
-                    <div className="text-right hidden sm:block">
-                      <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-widest block mb-0.5">Progression</span>
-                      <span className="text-xs font-bold text-on-surface">5/10 Events</span>
-                    </div>
-                    <span style={{fontSize:'24px', lineHeight:1, display:'inline-block'}} className={`transition-transform duration-500 text-primary ${isExpanded ? 'rotate-180' : ''}`}>▾</span>
-                  </div>
-                </button>
-
-                {/* Events List */}
-                <div 
-                  className={`transition-all duration-500 ease-in-out ${
-                    isExpanded ? 'max-h-[1000px] opacity-100 p-6' : 'max-h-0 opacity-0'
-                  }`}
-                >
-                  <div className="grid gap-3">
-                    {CareerEvents.filter((e) => e.tier === tier.tier).map((event) => (
-                      <button
-                        key={event.id}
-                        onClick={() => onEventSelect?.(event.id)}
-                        className={`relative w-full p-4 rounded-xl border transition-all duration-300 flex items-center justify-between group/event ${
-                          event.status === 'CURRENT'
-                            ? 'bg-primary/10 border-primary/40'
-                            : event.status === 'COMPLETED'
-                            ? 'bg-secondary/10 border-secondary/20 opacity-80'
-                            : 'bg-white/5 border-white/5 opacity-50 grayscale hover:opacity-70 hover:border-white/15'
-                        }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`h-10 w-10 rounded-lg flex items-center justify-center border transition-all ${
-                            event.status === 'CURRENT' ? 'bg-primary/20 border-primary/40' : 'bg-white/5 border-white/5'
-                          }`}>
-                            <span style={{fontSize:'20px', lineHeight:1, display:'inline-block'}}>
-                              {event.status === 'CURRENT' ? '▶' : event.status === 'COMPLETED' ? '✓' : '🔒'}
-                            </span>
-                          </div>
-                          
-                          <div className="text-left">
-                            <span className="text-sm font-bold text-on-surface group-hover/event:text-primary transition-colors block leading-none mb-1">
-                              {event.name}
-                            </span>
-                            <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant">
-                              {event.distance} • Difficulty {event.difficulty}/10
-                            </span>
-                          </div>
-                        </div>
-
-                        {event.reward && (
-                          <div className="flex items-center gap-4 text-right">
-                            <div className="hidden sm:flex flex-col items-end">
-                              <span className="text-[8px] font-black uppercase text-on-surface-variant">Reward Pool</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black text-secondary uppercase italic slanted gold-glow">{event.reward.coins} Coins</span>
-                                <span className="text-[10px] font-black text-primary uppercase italic slanted text-glow">{event.reward.xp} XP</span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {event.status === 'CURRENT' && (
-                          <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-xl" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
+      {/* Tier Challenges */}
+      <div className="space-y-4">
+        <h2 className="font-headline text-xl font-black italic slanted uppercase text-on-surface ml-2">Tier Challenges</h2>
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-1">
+          {CareerTiers.map((tier) => (
+            <button
+              key={tier.tier}
+              onClick={() => setExpandedTier(expandedTier === tier.tier ? -1 : tier.tier)}
+              className={`relative shrink-0 px-4 py-3 rounded-xl border font-headline font-black italic slanted uppercase text-[10px] tracking-widest transition-all duration-300 ${
+                expandedTier === tier.tier 
+                ? 'bg-primary/20 border-primary/50 text-primary' 
+                : 'bg-white/5 border-white/5 text-on-surface-variant'
+              } game-tap-feedback`}
+            >
+              T0{tier.tier}
+            </button>
+          ))}
+        </div>
+        <div className="grid gap-3">
+          {CareerEvents.filter(e => e.tier === expandedTier).map(event => (
+            <button
+              key={event.id}
+              onClick={() => onEventSelect?.(event.id)}
+              className={`relative w-full p-4 rounded-xl border transition-all duration-300 flex items-center justify-between group/event ${
+                event.status === 'CURRENT' ? 'bg-primary/10 border-primary/40' : 'bg-white/5 border-white/5'
+              } game-tap-feedback`}
+            >
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-lg flex items-center justify-center border bg-white/5 border-white/5">
+                  <span className="text-primary">{event.status === 'CURRENT' ? '▶' : '✓'}</span>
+                </div>
+                <div className="text-left">
+                  <span className="text-sm font-bold text-on-surface block leading-none mb-1">{event.name}</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-on-surface-variant">{event.distance} • Difficulty {event.difficulty}/10</span>
                 </div>
               </div>
-            );
-          })}
+            </button>
+          ))}
         </div>
+      </div>
+    </div>
+  );
 
-        {/* Milestones */}
-        <div className="glass-panel p-8 rounded-2xl group border-white/5 hover:border-primary/30 transition-all duration-500 overflow-hidden relative">
-          <h2 className="font-headline text-xl font-black italic slanted uppercase text-primary mb-8 text-glow">
-            Athlete Milestones
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            {Milestones.map((milestone) => (
-              <div
-                key={milestone.id}
-                className={`p-6 rounded-2xl text-center border transition-all duration-500 backdrop-blur-md group/stone ${
-                  milestone.achieved
-                    ? 'bg-secondary/10 border-secondary/30 shadow-lg shadow-secondary/10 hover:border-secondary/60'
-                    : 'bg-white/5 border-white/5 opacity-40 grayscale hover:opacity-60 hover:grayscale-0'
-                }`}
-              >
-                <div className="text-5xl mb-4 group-hover/stone:scale-110 transition-transform duration-500">{milestone.icon}</div>
-                <div className="text-xs font-black uppercase tracking-widest text-on-surface mb-2">{milestone.name}</div>
-                {milestone.achieved ? (
-                  <div className="text-[8px] font-black uppercase tracking-widest text-secondary gold-glow">Unlocked</div>
-                ) : (
-                  <div className="text-[8px] font-black uppercase tracking-widest text-on-surface-variant">Locked</div>
-                )}
+  const renderDossierPane = () => (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full scrollbar-hide pb-24">
+      {/* Circuit Status (Progress) */}
+      <div className="glass-panel p-8 rounded-2xl border-white/5 overflow-hidden relative">
+        <div className="relative z-10 flex flex-col gap-6">
+          <div className="flex items-end gap-3">
+            <h2 className="font-headline text-3xl font-black italic slanted uppercase text-on-surface text-glow leading-none">Circuit Status</h2>
+            <span className="text-primary font-headline font-bold italic slanted text-lg pb-1">TIER {currentTier} OF {totalTiers}</span>
+          </div>
+          <div className="relative h-4 w-full bg-white/5 rounded-full border border-white/5 overflow-hidden">
+            <div className="h-full bg-primary" style={{ width: `${progressPercent}%` }} />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {CareerTiers.map((tier) => (
+              <div key={tier.tier} className={`p-4 rounded-xl border ${tier.tier <= currentTier ? 'bg-primary/10 border-primary/30' : 'bg-white/5 border-white/5 opacity-40'}`}>
+                <span className="text-[8px] font-black uppercase tracking-widest text-primary mb-1 block">Tier 0{tier.tier}</span>
+                <span className="text-[10px] font-bold text-on-surface line-clamp-1">{tier.name}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Athlete Milestones */}
+      <div className="glass-panel p-8 rounded-2xl border-white/5 overflow-hidden relative">
+        <h2 className="font-headline text-xl font-black italic slanted uppercase text-primary mb-8 text-glow">Athlete Milestones</h2>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          {Milestones.map((milestone) => (
+            <div key={milestone.id} className={`p-6 rounded-2xl text-center border transition-all backdrop-blur-md ${milestone.achieved ? 'bg-secondary/10 border-secondary/30' : 'bg-white/5 border-white/5 opacity-40'}`}>
+              <div className="text-5xl mb-4">{milestone.icon}</div>
+              <div className="text-xs font-black uppercase tracking-widest text-on-surface mb-2">{milestone.name}</div>
+              <div className={`text-[8px] font-black uppercase tracking-widest ${milestone.achieved ? 'text-secondary' : 'text-on-surface-variant'}`}>{milestone.achieved ? 'Unlocked' : 'Locked'}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderPartnersPane = () => (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full scrollbar-hide pb-24">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Sponsors & Partners Panel */}
+        <div className="glass-panel p-6 rounded-2xl border-white/5 relative overflow-hidden">
+          <h2 className="font-headline text-xl font-black italic slanted uppercase text-primary mb-6 text-glow">Partnerships & Deals</h2>
+          <div className="grid gap-4">
+            {SponsorshipDeals.map((deal) => (
+              <div key={deal.brand} className="relative p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all game-tap-feedback">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-bold text-on-surface">{deal.brand}</span>
+                  <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded border ${deal.status === 'Active' ? 'border-primary/40 text-primary bg-primary/10' : 'border-white/10 text-on-surface-variant bg-white/5'}`}>{deal.status}</span>
+                </div>
+                <div className="flex items-end justify-between">
+                  <div className="text-primary font-headline font-bold italic slanted text-glow leading-none">{deal.value}</div>
+                  <div className="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">{deal.term}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Coaching Panel */}
+        <div className="glass-panel p-6 rounded-2xl border-white/5">
+          <h2 className="font-headline text-xl font-black italic slanted uppercase text-primary mb-6 text-glow">The Coaching Unit</h2>
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {TeamContext.map((item) => (
+              <div key={item.label} className="p-3 rounded-xl bg-white/5 border border-white/5">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-on-surface-variant mb-1 block">{item.label}</span>
+                <span className="text-sm font-bold text-on-surface line-clamp-1">{item.value}</span>
+              </div>
+            ))}
+          </div>
+          <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+            <h3 className="text-[9px] font-black uppercase tracking-widest text-primary mb-3">Unit Feedback</h3>
+            <p className="text-xs text-on-surface-variant leading-relaxed italic">"Mechanics looking solid. Focus on butterfly drag reduction in the next cycle."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div
+      className={`hydro-page-shell flex-1 relative w-full h-full font-body ${isLandscapeMobile ? 'overflow-hidden' : 'overflow-y-auto'}`}
+      style={{
+        background: `radial-gradient(circle at 20% 10%, rgba(74, 201, 214, 0.05), transparent 25%),
+          linear-gradient(180deg, #060E14 0%, ${swim26Color.bg.app} 100%)`,
+      }}
+    >
+      <PaneSwitcher
+        activePaneId={activePaneId}
+        onPaneChange={setActivePaneId}
+        panes={[
+          {
+            id: 'JOURNEY',
+            label: 'Journey',
+            icon: <GameIcon name="map" size={18} />,
+            content: renderJourneyPane(),
+          },
+          {
+            id: 'DOSSIER',
+            label: 'Dossier',
+            icon: <GameIcon name="person" size={18} />,
+            content: renderDossierPane(),
+          },
+          {
+            id: 'PARTNERS',
+            label: 'Partners',
+            icon: <GameIcon name="groups" size={18} />,
+            content: renderPartnersPane(),
+          },
+        ]}
+      >
+        <div className="flex flex-col h-full">
+          {/* Condensed Page Header */}
+          <header 
+            className="shrink-0 px-8 flex items-center justify-between border-b border-white/5 backdrop-blur-xl"
+            style={{ 
+              height: isLandscapeMobile ? '44px' : '72px',
+              paddingTop: isLandscapeMobile ? 0 : swim26Layout.safe.top,
+              background: 'rgba(6, 14, 20, 0.80)',
+            }}
+          >
+            <div>
+              <h1 className="font-headline text-3xl max-[900px]:text-lg font-black italic slanted uppercase text-white leading-none">Career Journey</h1>
+              {!isLandscapeMobile && <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] mt-1">Athlete Progression Floor</p>}
+            </div>
+          </header>
+
+          <div className="flex-1 overflow-y-auto pb-32">
+            {activePaneId === 'JOURNEY' && renderJourneyPane()}
+            {activePaneId === 'DOSSIER' && renderDossierPane()}
+            {activePaneId === 'PARTNERS' && renderPartnersPane()}
+          </div>
+        </div>
+      </PaneSwitcher>
     </div>
   );
 };

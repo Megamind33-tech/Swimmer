@@ -5,10 +5,13 @@ import { ChevronLeft, Search, SlidersHorizontal } from 'lucide-react';
 import {
   swim26Boundary,
   swim26Color,
+  swim26Layout,
   swim26Space,
   swim26Type,
 } from '../../theme/swim26DesignSystem';
 import { USER_DATA } from '../../utils/gameData';
+import { PaneSwitcher } from '../../ui/PaneSwitcher';
+import { GameIcon } from '../../ui/GameIcon';
 
 type TopCategory = 'RECOMMENDED' | 'SCORES_GEMS' | 'EXCHANGES' | 'GOLD' | 'BRONZE' | 'SILVER';
 type SubCategory = 'FEATURED' | 'MONTHLY_SUPPLY_CARD' | 'RESOURCE' | 'OLYMPIADS_STORY' | 'BEST_SELLER' | 'PREMIUM_PASS' | 'COMMONWEALTH';
@@ -173,385 +176,6 @@ function formatCurrency(n: number): string {
   if (n >= 1_000)     return `${(n / 1_000).toFixed(0)}K`;
   return String(n);
 }
-
-export const StoreScreen: React.FC<StoreScreenProps> = ({
-  playerPremiumCurrency = USER_DATA.currencies.gems,
-  playerCoins = USER_DATA.currencies.coins,
-  onBack,
-}) => {
-  const [activeTopCategory, setActiveTopCategory] = useState<TopCategory>('RECOMMENDED');
-  const [activeSubCategory, setActiveSubCategory] = useState<SubCategory>('FEATURED');
-  const subScrollRef = useRef<HTMLDivElement>(null);
-  const isMobileLandscape = useIsLandscapeMobile();
-
-  const visibleProducts = useMemo(() => {
-    return products.filter((product) => {
-      const topMatches = product.topCategory === activeTopCategory || activeTopCategory === 'RECOMMENDED';
-      const subMatches = product.subCategory === activeSubCategory || activeSubCategory === 'FEATURED';
-      if (activeTopCategory === 'RECOMMENDED' && activeSubCategory === 'FEATURED') return true;
-      return topMatches && subMatches;
-    });
-  }, [activeTopCategory, activeSubCategory]);
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        background: `radial-gradient(circle at 20% 10%, rgba(74, 201, 214, 0.10), transparent 22%),
-          radial-gradient(circle at 78% 8%, rgba(214, 180, 90, 0.10), transparent 18%),
-          linear-gradient(180deg, #09151E 0%, ${swim26Color.bg.app} 54%, #061018 100%)`,
-        color: swim26Color.text.primary,
-        fontFamily: 'Inter, system-ui, sans-serif',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Subtle scanline overlay */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          pointerEvents: 'none',
-          opacity: 0.16,
-          background:
-            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.022) 16%, transparent 16.4%, transparent 38%, rgba(255,255,255,0.016) 38.2%, transparent 39%, transparent 62%, rgba(255,255,255,0.02) 62.4%, transparent 63%, transparent 100%)',
-        }}
-      />
-
-      {/* ── Integrated Store Header ── */}
-      <div
-        style={{
-          flexShrink: 0,
-          position: 'relative',
-          zIndex: 10,
-          background: 'rgba(4, 20, 33, 0.95)',
-          borderBottom: '1px solid rgba(74, 201, 214, 0.18)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          padding: '0 12px',
-          height: '52px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-        }}
-      >
-        {/* Back button */}
-        {onBack && (
-          <motion.button
-            whileTap={{ scale: 0.90 }}
-            onClick={onBack}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '3px',
-              padding: '5px 10px 5px 6px',
-              minHeight: '44px',
-              borderRadius: '8px',
-              background: 'rgba(4,20,33,0.80)',
-              border: '1px solid rgba(56,214,255,0.20)',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
-          >
-            <ChevronLeft size={14} color="rgba(169,211,231,0.80)" />
-            <span style={{
-              fontFamily: "'Rajdhani', system-ui, sans-serif",
-              fontWeight: 700,
-              fontSize: '9px',
-              letterSpacing: '0.12em',
-              color: 'rgba(169,211,231,0.80)',
-              textTransform: 'uppercase',
-            }}>
-              Lobby
-            </span>
-          </motion.button>
-        )}
-
-        {/* Title */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontFamily: "'Rajdhani', system-ui, sans-serif",
-            fontWeight: 900,
-            fontSize: '17px',
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: '#ffffff',
-            lineHeight: 1,
-          }}>
-            Premium Store
-          </div>
-          <div style={{
-            fontSize: '9px',
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            color: swim26Color.accent.primary,
-            lineHeight: 1,
-            marginTop: '2px',
-          }}>
-            PREMIUM RETAIL FLOOR
-          </div>
-        </div>
-
-        {/* Currency badges */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            background: 'rgba(4,20,33,0.65)',
-            border: '1px solid rgba(74,201,214,0.30)',
-            borderRadius: '100px',
-            padding: '3px 8px 3px 6px',
-          }}>
-            <span style={{ fontSize: '12px', lineHeight: 1 }}>💎</span>
-            <span style={{
-              fontFamily: "'Rajdhani', system-ui, sans-serif",
-              fontWeight: 700,
-              fontSize: '11px',
-              color: swim26Color.accent.primary,
-              fontVariantNumeric: 'tabular-nums',
-            }}>
-              {formatCurrency(playerPremiumCurrency)}
-            </span>
-          </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            background: 'rgba(4,20,33,0.65)',
-            border: '1px solid rgba(212,168,67,0.30)',
-            borderRadius: '100px',
-            padding: '3px 8px 3px 6px',
-          }}>
-            <span style={{ fontSize: '12px', lineHeight: 1 }}>🪙</span>
-            <span style={{
-              fontFamily: "'Rajdhani', system-ui, sans-serif",
-              fontWeight: 700,
-              fontSize: '11px',
-              color: '#D4A843',
-              fontVariantNumeric: 'tabular-nums',
-            }}>
-              {formatCurrency(playerCoins)}
-            </span>
-          </div>
-          <motion.button
-            aria-label="Search Store"
-            title="Search Store"
-            whileTap={{ scale: 0.90 }}
-            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38D6FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041421]"
-            style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.10)',
-              background: 'rgba(255,255,255,0.06)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
-          >
-            <Search size={13} color="rgba(169,211,231,0.70)" />
-          </motion.button>
-          <motion.button
-            aria-label="Filter Options"
-            title="Filter Options"
-            whileTap={{ scale: 0.90 }}
-            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38D6FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041421]"
-            style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.10)',
-              background: 'rgba(255,255,255,0.06)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
-          >
-            <SlidersHorizontal size={13} color="rgba(169,211,231,0.70)" />
-          </motion.button>
-        </div>
-      </div>
-
-      {/* ── Top Category Tab Bar ── */}
-      <div
-        style={{
-          flexShrink: 0,
-          position: 'relative',
-          zIndex: 9,
-          background: 'rgba(6, 18, 30, 0.90)',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
-          display: 'flex',
-          gap: 0,
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-          paddingInline: '8px',
-        }}
-      >
-        {topCategories.map((category) => {
-          const active = activeTopCategory === category.id;
-          return (
-            <button
-              key={category.id}
-              onClick={() => setActiveTopCategory(category.id)}
-              style={{
-                position: 'relative',
-                flexShrink: 0,
-                border: 'none',
-                background: 'transparent',
-                color: active ? swim26Color.text.primary : swim26Color.text.secondary,
-                minWidth: 72,
-                minHeight: 44,
-                padding: '0 12px',
-                fontSize: 11,
-                fontWeight: 700,
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                lineHeight: '13px',
-                whiteSpace: 'pre-line',
-                cursor: 'pointer',
-                transition: 'color 0.15s',
-              }}
-            >
-              {/* Active underline */}
-              {active && (
-                <motion.span
-                  layoutId="store-top-tab"
-                  style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: '15%',
-                    right: '15%',
-                    height: 2,
-                    borderRadius: '2px 2px 0 0',
-                    background: swim26Color.accent.primary,
-                    boxShadow: `0 0 8px ${swim26Color.accent.primary}`,
-                  }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                />
-              )}
-              <span style={{ display: 'block' }}>{category.label}</span>
-              {category.badge ? (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: 5,
-                    right: 4,
-                    minWidth: 16,
-                    height: 16,
-                    borderRadius: 999,
-                    background: category.badge === 'NEW' ? swim26Color.feedback.success : swim26Color.feedback.alert,
-                    color: '#fff',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0 3px',
-                    fontSize: 8,
-                    fontWeight: 800,
-                  }}
-                >
-                  {category.badge}
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Sub-category Chip Strip ── */}
-      <div
-        ref={subScrollRef}
-        style={{
-          flexShrink: 0,
-          display: 'flex',
-          gap: '6px',
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-          padding: '7px 10px',
-          background: 'rgba(6, 18, 30, 0.70)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        {subCategories.map((sub) => {
-          const active = activeSubCategory === sub.id;
-          return (
-            <button
-              key={sub.id}
-              onClick={() => setActiveSubCategory(sub.id)}
-              style={{
-                flexShrink: 0,
-                minHeight: 44,
-                padding: '0 11px',
-                borderRadius: swim26Boundary.radius.pill,
-                border: active
-                  ? `1.5px solid rgba(74, 201, 214, 0.80)`
-                  : `1px solid rgba(255,255,255,0.12)`,
-                background: active ? 'rgba(74, 201, 214, 0.12)' : 'rgba(255,255,255,0.04)',
-                color: active ? swim26Color.accent.primary : swim26Color.text.secondary,
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                whiteSpace: 'nowrap',
-                cursor: 'pointer',
-                transition: 'background 0.15s, border-color 0.15s, color 0.15s',
-              }}
-            >
-              {sub.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Product Grid ── */}
-      <div
-        style={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: 'auto',
-          scrollbarWidth: 'none',
-          padding: `${swim26Space.md}px 10px`,
-        }}
-      >
-        {visibleProducts.length === 0 ? (
-          <div
-            style={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: swim26Color.text.secondary,
-              fontSize: 14,
-            }}
-          >
-            No products in this category
-          </div>
-        ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: isMobileLandscape ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))',
-              gap: '10px',
-              alignContent: 'start',
-            }}
-          >
-            {visibleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 // ─── OVR value mapping per kind ───────────────────────────────────────────────
 function kindOvr(product: StoreProduct): number {
@@ -765,6 +389,192 @@ const ProductCard: React.FC<{ product: StoreProduct }> = ({ product }) => {
         )}
       </div>
     </motion.div>
+  );
+};
+
+export const StoreScreen: React.FC<StoreScreenProps> = ({
+  playerPremiumCurrency = USER_DATA.currencies.gems,
+  playerCoins = USER_DATA.currencies.coins,
+  onBack,
+}) => {
+  const isLandscapeMobile = useIsLandscapeMobile();
+  const [activeTopCategory, setActiveTopCategory] = useState<TopCategory>('RECOMMENDED');
+  const [activeSubCategory, setActiveSubCategory] = useState<SubCategory>('FEATURED');
+  const subScrollRef = useRef<HTMLDivElement>(null);
+
+  const getVisibleProducts = (catId: TopCategory) => {
+    return products.filter((product) => {
+      const topMatches = product.topCategory === catId || catId === 'RECOMMENDED';
+      const subMatches = product.subCategory === activeSubCategory || activeSubCategory === 'FEATURED';
+      if (catId === 'RECOMMENDED' && activeSubCategory === 'FEATURED') return true;
+      return topMatches && subMatches;
+    });
+  };
+
+  const renderCategoryContent = (catId: TopCategory) => {
+    const visibleProducts = getVisibleProducts(catId);
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        {/* Sub-category Chip Strip (Inside Pane) */}
+        <div
+          ref={subScrollRef}
+          style={{
+            flexShrink: 0,
+            display: 'flex',
+            gap: '6px',
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            padding: '7px 10px',
+            background: 'rgba(6, 18, 30, 0.40)',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+          }}
+          className="scrollbar-hide"
+        >
+          {subCategories.map((sub) => {
+            const active = activeSubCategory === sub.id;
+            return (
+              <button
+                key={sub.id}
+                onClick={() => setActiveSubCategory(sub.id)}
+                className="game-tap-feedback"
+                style={{
+                  flexShrink: 0,
+                  minHeight: 44,
+                  padding: '0 11px',
+                  borderRadius: swim26Boundary.radius.pill,
+                  border: active
+                    ? `1.5px solid rgba(74, 201, 214, 0.80)`
+                    : `1px solid rgba(255,255,255,0.12)`,
+                  background: active ? 'rgba(74, 201, 214, 0.12)' : 'rgba(255,255,255,0.04)',
+                  color: active ? swim26Color.accent.primary : swim26Color.text.secondary,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s, border-color 0.15s, color 0.15s',
+                }}
+              >
+                {sub.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Product Grid */}
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: 'auto',
+            scrollbarWidth: 'none',
+            padding: `${swim26Space.md}px 10px`,
+          }}
+          className="scrollbar-hide pb-24"
+        >
+          {visibleProducts.length === 0 ? (
+            <div
+              style={{
+                height: '240px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: swim26Color.text.secondary,
+                fontSize: 14,
+              }}
+            >
+              No products found
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 140px), 1fr))',
+                gap: '8px',
+                alignContent: 'start',
+              }}
+            >
+              {visibleProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div
+      className={`hydro-page-shell flex-1 relative w-full h-full font-body ${isLandscapeMobile ? 'overflow-hidden' : 'overflow-y-auto'}`}
+      style={{
+        background: `radial-gradient(circle at 20% 10%, rgba(74, 201, 214, 0.10), transparent 22%),
+          radial-gradient(circle at 78% 8%, rgba(214, 180, 90, 0.10), transparent 18%),
+          linear-gradient(180deg, #09151E 0%, ${swim26Color.bg.app} 54%, #061018 100%)`,
+        color: swim26Color.text.primary,
+        fontFamily: 'Inter, system-ui, sans-serif',
+      }}
+    >
+      <PaneSwitcher
+        activePaneId={activeTopCategory}
+        onPaneChange={(id) => setActiveTopCategory(id as TopCategory)}
+        panes={topCategories.map(cat => ({
+          id: cat.id,
+          label: cat.label.replace('\n', ' '),
+          icon: <GameIcon name={cat.id === 'RECOMMENDED' ? 'star' : cat.id === 'SCORES_GEMS' ? 'diamond' : 'shopping_bag'} size={18} />,
+          content: renderCategoryContent(cat.id)
+        }))}
+      >
+        <div className="flex flex-col h-full">
+          {/* Scanline overlay */}
+          <div className="fixed inset-0 pointer-events-none opacity-10 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.02)_16%,transparent_16.4%,transparent_38%,rgba(255,255,255,0.01)_38.2%,transparent_39%,transparent_62%,rgba(255,255,255,0.02)_62.4%,transparent_63%,transparent_100%)]" />
+
+          {/* ── Condensed Store Header ── */}
+          <header
+            className="shrink-0 relative z-10 px-4 flex items-center gap-3 border-b border-white/5 backdrop-blur-3xl"
+            style={{
+              height: isLandscapeMobile ? '44px' : '64px',
+              background: 'rgba(4, 20, 33, 0.88)',
+              paddingTop: swim26Layout.safe.top,
+            }}
+          >
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="h-10 px-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2 game-tap-feedback"
+              >
+                <ChevronLeft size={16} />
+                {!isLandscapeMobile && <span className="text-[10px] font-black uppercase italic slanted tracking-widest">Lobby</span>}
+              </button>
+            )}
+
+            <div className="flex-1">
+              <h1 className="font-headline text-2xl max-[900px]:text-lg font-black italic slanted uppercase text-on-surface text-glow leading-none">
+                Store
+              </h1>
+              {!isLandscapeMobile && (
+                <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] mt-1">Premium Retail Floor</p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="h-8 px-3 rounded-full bg-primary/10 border border-primary/20 flex items-center gap-2">
+                <span className="text-xs">💎</span>
+                <span className="font-headline font-bold italic slanted text-primary">{formatCurrency(playerPremiumCurrency)}</span>
+              </div>
+              <div className="h-8 px-3 rounded-full bg-secondary/10 border border-secondary/20 flex items-center gap-2">
+                <span className="text-xs">🪙</span>
+                <span className="font-headline font-bold italic slanted text-secondary">{formatCurrency(playerCoins)}</span>
+              </div>
+            </div>
+          </header>
+
+          <div className="flex-1 overflow-y-auto pb-32 pt-2 scrollbar-hide">
+             {renderCategoryContent(activeTopCategory)}
+          </div>
+        </div>
+      </PaneSwitcher>
+    </div>
   );
 };
 

@@ -80,10 +80,11 @@ export function GameShell() {
 
   const navigateTo = useCallback((nextPhase: GamePhase) => {
     setFading(true);
+    /* 300ms transition duration — feels more like a premium game entry */
     setTimeout(() => {
       setPhase(nextPhase);
       requestAnimationFrame(() => requestAnimationFrame(() => setFading(false)));
-    }, 160);
+    }, 300);
   }, []);
 
   const enterModeSelect = () => navigateTo('mode-select');

@@ -5,125 +5,146 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useIsLandscapeMobile } from '../../hooks/useIsLandscapeMobile';
+import { PaneSwitcher } from '../../ui/PaneSwitcher';
+import { GameIcon } from '../../ui/GameIcon';
+import { swim26Color, swim26Space, swim26Layout, swim26Boundary } from '../../theme/swim26DesignSystem';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 
-const AQUA        = 'var(--color-volt)';
-const GOLD        = 'var(--color-volt)';
-const PANEL       = 'rgba(4,20,33,0.76)';
+const AQUA = 'var(--color-volt)';
+const GOLD = 'var(--color-volt)';
+const PANEL = 'rgba(4,20,33,0.76)';
 const PANEL_BORDER = 'rgba(56,214,255,0.13)';
-const PURPLE      = '#A78BFA';
+const PURPLE = '#A78BFA';
 
-type TabName = 'ATTRIBUTES' | 'SKILLS' | 'GEAR' | 'APPEARANCE' | 'RECORDS' | 'BIOGRAPHY';
+type PaneId = 'STATUS' | 'SKILLS' | 'RECORDS' | 'GEAR' | 'BIO';
 
 interface SwimmerScreenProps {
   swimmerName?: string;
   swimmerLevel?: number;
 }
 
-const TABS: { id: TabName; label: string }[] = [
-  { id: 'ATTRIBUTES', label: 'STATS'      },
-  { id: 'SKILLS',     label: 'SKILLS'     },
-  { id: 'GEAR',       label: 'GEAR'       },
-  { id: 'APPEARANCE', label: 'LOOK'       },
-  { id: 'RECORDS',    label: 'RECORDS'    },
-  { id: 'BIOGRAPHY',  label: 'BIO'        },
-];
-
 export const SwimmerScreen: React.FC<SwimmerScreenProps> = ({
   swimmerName = 'Elite Swimmer',
   swimmerLevel = 45,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabName>('ATTRIBUTES');
+  const isLandscapeMobile = useIsLandscapeMobile();
+  const [activePaneId, setActivePaneId] = useState<PaneId>('STATUS');
+
+  const renderStatusPane = () => (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full scrollbar-hide pb-24">
+      {/* Bio Card */}
+      <div className="glass-panel p-6 rounded-2xl border-white/5 flex items-center gap-6 relative overflow-hidden">
+        <div className="relative z-10 h-24 w-24 rounded-2xl border-2 border-primary/30 overflow-hidden bg-primary/5">
+          <img src={miaPhiriAthleteImage} className="w-full h-full object-cover" alt={swimmerName} />
+        </div>
+        <div className="relative z-10 flex-1">
+          <div className="flex items-center gap-3 mb-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Level {swimmerLevel} Elite</span>
+            <span className="h-4 w-4 rounded-full bg-secondary/20 flex items-center justify-center text-[8px] font-bold text-secondary italic slanted">PRO</span>
+          </div>
+          <h2 className="font-headline text-3xl font-black italic slanted uppercase text-white leading-none mb-4">{swimmerName}</h2>
+          <div className="flex gap-4">
+            <div className="flex flex-col">
+              <span className="text-[8px] font-black uppercase text-on-surface-variant">World Rank</span>
+              <span className="text-sm font-bold text-secondary">#4 GLOBAL</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[8px] font-black uppercase text-on-surface-variant">Best Time</span>
+              <span className="text-sm font-bold text-primary">51.23s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <AttributesTab />
+    </div>
+  );
+
+  const renderSkillsPane = () => (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full scrollbar-hide pb-24">
+      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 mb-2">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Skill Tree Progress</span>
+          <span className="text-[10px] font-black text-white">42 / 60 Points</span>
+        </div>
+        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+          <div className="h-full bg-primary" style={{ width: '70%' }} />
+        </div>
+      </div>
+      <SkillsTab />
+    </div>
+  );
+
+  const renderRecordsPane = () => (
+    <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto w-full scrollbar-hide pb-24">
+      <RecordsTab />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GearTab />
+        <BiographyTab swimmerName={swimmerName} swimmerLevel={swimmerLevel} />
+      </div>
+    </div>
+  );
 
   return (
-    <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: '8px', padding: '10px' }}>
-      {/* ── LEFT: Athlete card ── */}
-      <div style={{ width: '160px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', scrollbarWidth: 'none' }}>
-        {/* Profile */}
-        <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <div style={{ position: 'relative' }}>
-            <div style={{ width: '72px', height: '72px', borderRadius: '16px', overflow: 'hidden', border: `2px solid rgba(56,214,255,0.25)`, boxShadow: '0 0 16px rgba(56,214,255,0.15)' }}>
-              <img src={miaPhiriAthleteImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={swimmerName} />
-            </div>
-            <div style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '22px', height: '22px', borderRadius: '7px', background: AQUA, border: '2px solid rgba(4,20,33,0.90)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '10px', color: 'var(--color-carbon)', letterSpacing: '0.02em' }}>{swimmerLevel}</span>
-            </div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: '#F3FBFF', letterSpacing: '0.04em', lineHeight: 1 }}>{swimmerName}</div>
-            <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', fontWeight: 700, color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '3px' }}>Level {swimmerLevel} Elite</div>
-          </div>
-        </div>
-
-        {/* Quick stats */}
-        <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', flexShrink: 0 }}>
-          <QuickStat label="World Rank"  value="#4"       color={GOLD} />
-          <QuickStat label="Season"      value="S4 PRO"   color={AQUA} />
-          <QuickStat label="Best Time"   value="51.23"    color="#F3FBFF" />
-        </div>
-
-        {/* XP bar */}
-        <div style={{ borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '10px 12px', flexShrink: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', fontWeight: 700, color: 'rgba(169,211,231,0.55)', textTransform: 'uppercase', letterSpacing: '0.10em' }}>XP</span>
-            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: AQUA }}>4,850 / 6,000</span>
-          </div>
-          <div style={{ height: '4px', borderRadius: '2px', background: 'rgba(56,214,255,0.10)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: '80%', background: `linear-gradient(90deg, ${AQUA}, rgba(56,214,255,0.70))`, borderRadius: '2px', boxShadow: `0 0 6px rgba(56,214,255,0.50)` }} />
-          </div>
-        </div>
-
-        {/* Tab nav */}
-        <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
-          {TABS.map((tab) => {
-            const active = tab.id === activeTab;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{ width: '100%', minHeight: '44px', borderRadius: '8px', cursor: 'pointer', background: active ? 'rgba(56,214,255,0.14)' : 'rgba(255,255,255,0.02)', border: active ? `1px solid rgba(56,214,255,0.38)` : '1px solid transparent', fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', letterSpacing: '0.10em', color: active ? AQUA : 'rgba(169,211,231,0.45)', textAlign: 'left', paddingInline: '10px', transition: 'all 0.14s', boxShadow: active ? '0 0 8px rgba(56,214,255,0.12)' : 'none' }}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── RIGHT: Tab content ── */}
-      <div style={{ flex: 1, borderRadius: '14px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(12px)', overflow: 'hidden', position: 'relative' }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.16 }}
-            style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: '14px' }}
+    <div
+      className={`hydro-page-shell flex-1 relative w-full h-full font-body ${isLandscapeMobile ? 'overflow-hidden' : 'overflow-y-auto'}`}
+      style={{
+        background: `radial-gradient(circle at 20% 10%, rgba(74, 201, 214, 0.05), transparent 25%),
+          linear-gradient(180deg, #09151E 0%, ${swim26Color.bg.app} 100%)`,
+      }}
+    >
+      <PaneSwitcher
+        activePaneId={activePaneId}
+        onPaneChange={(id) => setActivePaneId(id as PaneId)}
+        panes={[
+          {
+            id: 'STATUS',
+            label: 'Status',
+            icon: <GameIcon name="person" size={18} />,
+            content: renderStatusPane(),
+          },
+          {
+            id: 'SKILLS',
+            label: 'Skills',
+            icon: <GameIcon name="electric_bolt" size={18} />,
+            content: renderSkillsPane(),
+          },
+          {
+            id: 'RECORDS',
+            label: 'History',
+            icon: <GameIcon name="history" size={18} />,
+            content: renderRecordsPane(),
+          },
+        ]}
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <header
+            className="shrink-0 px-8 flex items-center justify-between border-b border-white/5 backdrop-blur-2xl"
+            style={{
+              height: isLandscapeMobile ? '44px' : '72px',
+              paddingTop: isLandscapeMobile ? 0 : swim26Layout.safe.top,
+              background: 'rgba(4, 20, 33, 0.85)',
+            }}
           >
-            {renderTab(activeTab, swimmerName, swimmerLevel)}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+            <div>
+              <h1 className="font-headline text-3xl max-[900px]:text-lg font-black italic slanted uppercase text-white leading-none">Athlete Hub</h1>
+              {!isLandscapeMobile && <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] mt-1">Biometric Management Deck</p>}
+            </div>
+          </header>
+
+          <div className="flex-1 overflow-y-auto pb-32">
+            {activePaneId === 'STATUS' && renderStatusPane()}
+            {activePaneId === 'SKILLS' && renderSkillsPane()}
+            {activePaneId === 'RECORDS' && renderRecordsPane()}
+          </div>
+        </div>
+      </PaneSwitcher>
     </div>
   );
 };
 
-// ─────────────────────────────────────────────────────────
-// Tab renderers
-// ─────────────────────────────────────────────────────────
-
-function renderTab(tab: TabName, swimmerName: string, swimmerLevel: number): React.ReactNode {
-  switch (tab) {
-    case 'ATTRIBUTES': return <AttributesTab />;
-    case 'SKILLS':     return <SkillsTab />;
-    case 'GEAR':       return <GearTab />;
-    case 'APPEARANCE': return <AppearanceTab />;
-    case 'RECORDS':    return <RecordsTab />;
-    case 'BIOGRAPHY':  return <BiographyTab swimmerName={swimmerName} swimmerLevel={swimmerLevel} />;
-    default:           return null;
-  }
-}
 
 // ─────────────────────────────────────────────────────────
 // Attributes

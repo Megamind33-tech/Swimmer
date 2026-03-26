@@ -213,7 +213,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
   return (
     <div className="swim26-shell-frame">
       <header className="hud swim26-hud-shell">
-        <button className="back-btn" onClick={handleBack}>
+        <button className="back-btn game-tap-feedback" onClick={handleBack}>
           <span aria-hidden>‹</span>
           <span>{backLabel}</span>
         </button>
@@ -222,7 +222,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
           {HUD_LINKS.map((link, index) => (
             <React.Fragment key={link.id}>
               <button
-                className={`tab ${currentScreen === link.id ? 'active' : ''}`}
+                className={`tab game-tap-feedback ${currentScreen === link.id ? 'active' : ''}`}
                 role="tab"
                 aria-selected={currentScreen === link.id}
                 onClick={() => setUtilityPage(link.id)}
@@ -236,7 +236,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
 
         <div className="swim26-hud-actions">
           <button
-            className={`swim26-hud-utility ${currentScreen === 'rewards' ? 'is-active' : ''}`}
+            className={`swim26-hud-utility game-tap-feedback ${currentScreen === 'rewards' ? 'is-active' : ''}`}
             onClick={() => setUtilityPage('rewards')}
             aria-label="Rewards"
             title="Rewards"
@@ -244,7 +244,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
             <InlineIcon name="rewards" />
           </button>
           <button
-            className={`swim26-hud-utility ${currentScreen === 'profile' ? 'is-active' : ''}`}
+            className={`swim26-hud-utility game-tap-feedback ${currentScreen === 'profile' ? 'is-active' : ''}`}
             onClick={() => setUtilityPage('profile')}
             aria-label="Profile"
             title="Profile"
@@ -264,7 +264,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
         {RAIL_ITEMS.map((item) => (
           <button
             key={item.id}
-            className={`ri ${activeTab === item.id && utilityPage === null ? 'active' : ''}`}
+            className={`ri game-tap-feedback ${activeTab === item.id && utilityPage === null ? 'active' : ''}`}
             onClick={() => {
               setUtilityPage(null);
               setActiveTab(item.id);
@@ -279,7 +279,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onPlay }) => {
         <div className="swim26-rail-spacer" />
         <div className="swim26-rail-divider" aria-hidden />
         <button
-          className={`ri ${currentScreen === 'settings' ? 'active' : ''}`}
+          className={`ri game-tap-feedback ${currentScreen === 'settings' ? 'active' : ''}`}
           onClick={() => setUtilityPage('settings')}
           aria-label="Settings"
           title="Settings"

@@ -71,6 +71,10 @@ export interface Pane {
 interface PaneSwitcherProps {
   panes:       Pane[];
   children:    React.ReactNode;
+  /** Optional: control the active pane from the parent */
+  activePaneId?: string;
+  /** Optional: callback when the user switches panes */
+  onPaneChange?: (id: string) => void;
   defaultPane?: string;
 }
 
@@ -98,28 +102,31 @@ const TabBtn: React.FC<TabBtnProps> = ({
       role="tab"
       aria-selected={isActive}
       aria-label={pane.label}
-      whileTap={reducedMotion ? undefined : { scale: 0.93 }}
+      whileHover={reducedMotion ? undefined : { scale: 1.02, backgroundColor: 'rgba(204,255,0,0.05)' }}
+      whileTap={reducedMotion ? undefined : { scale: 0.95 }}
       onClick={onClick}
       className="swim26-pane-tab"
       style={{
         flex:           1,
         display:        'flex',
+        flexDirection:  'column',
         alignItems:     'center',
         justifyContent: 'center',
-        gap:            '5px',
+        gap:            '2px',
         height:         '100%',
         border:         'none',
         background:     isActive
-          ? (highContrast ? 'rgba(204,255,0,0.18)' : 'rgba(204,255,0,0.10)')
+          ? (highContrast ? 'rgba(204,255,0,0.18)' : 'rgba(204,255,0,0.08)')
           : 'transparent',
         borderBottom:   isActive
-          ? `2px solid ${VOLT}`
-          : `2px solid ${highContrast ? 'rgba(255,255,255,0.08)' : 'transparent'}`,
+          ? `3px solid ${VOLT}`
+          : `3px solid ${highContrast ? 'rgba(255,255,255,0.08)' : 'transparent'}`,
+        boxShadow:      isActive ? `0 4px 12px -2px ${VOLT}22` : 'none',
         cursor:         'pointer',
         userSelect:     'none',
         WebkitUserSelect:'none',
-        padding:        '0 6px',
-        transition:     reducedMotion ? 'none' : 'background 0.14s, border-color 0.14s',
+        padding:        '4px 6px',
+        transition:     reducedMotion ? 'none' : 'background 0.2s, border-color 0.2s, box-shadow 0.2s',
         outline:        'none',
       }}
     >
@@ -162,12 +169,13 @@ const TabBtn: React.FC<TabBtnProps> = ({
 // PaneSwitcher
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps) {
+export function PaneSwitcher({ panes, children, activePaneId, onPaneChange, defaultPane }: PaneSwitcherProps) {
   const isLandscape  = useIsLandscapeMobile();
   const { settings: a11y } = useA11y();
   const { reducedMotion, highContrast } = a11y;
 
-  const [activeId,  setActiveId]  = useState(defaultPane ?? panes[0]?.id ?? '');
+  const [internalActiveId, setInternalActiveId] = useState(defaultPane ?? panes[0]?.id ?? '');
+  const activeId = activePaneId ?? internalActiveId;
   const [direction, setDirection] = useState<1 | -1>(1);
 
   const activeIdx = panes.findIndex(p => p.id === activeId);
@@ -176,9 +184,13 @@ export function PaneSwitcher({ panes, children, defaultPane }: PaneSwitcherProps
     (id: string) => {
       const nextIdx = panes.findIndex(p => p.id === id);
       setDirection(nextIdx >= activeIdx ? 1 : -1);
-      setActiveId(id);
+      if (onPaneChange) {
+        onPaneChange(id);
+      } else {
+        setInternalActiveId(id);
+      }
     },
-    [panes, activeIdx],
+    [panes, activeIdx, onPaneChange],
   );
 
   const goPrev = () => { if (activeIdx > 0) goTo(panes[activeIdx - 1].id); };

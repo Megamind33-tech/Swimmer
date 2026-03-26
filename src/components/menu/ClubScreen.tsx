@@ -4,6 +4,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useIsLandscapeMobile } from '../../hooks/useIsLandscapeMobile';
+import { PaneSwitcher } from '../../ui/PaneSwitcher';
 import { GameIcon } from '../../ui/GameIcon';
 import miaPhiriAthleteImage from '../../designs/835_mia_phiri_news.png_1/screen.png';
 import staffManagementReferenceImage from '../../designs/staff_management_mentors/screen.png';
@@ -183,8 +185,13 @@ const baseRoutes: { key: ClubSubPage; title: string; description: string; icon: 
   { key: 'FUNDING', title: 'Funding & Finance', description: 'Track team/player earnings and source funding.', icon: 'payments' },
   { key: 'CLUB_COMPETITIONS', title: 'Club Competitions', description: 'Launch arena races for tournaments/leagues.', icon: 'sports_score' },
 ];
+interface ClubScreenProps {
+  clubName?: string;
+  onLaunchArenaRace?: () => void;
+}
 
-export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons', onLaunchArenaRace }) => {
+export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Global Elite SC', onLaunchArenaRace }) => {
+  const isLandscapeMobile = useIsLandscapeMobile();
   const [activeTab, setActiveTab] = useState<ClubTab>('OVERVIEW');
   const [activeSubPage, setActiveSubPage] = useState<ClubSubPage | null>(null);
   const [managerMode, setManagerMode] = useState<ManagerMode | null>('OWNER');
@@ -1069,10 +1076,51 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
   };
 
   return (
-    <div className="hydro-page-shell flex-1 relative w-full h-full overflow-y-auto flex flex-col font-body">
-      <img src={clubBackdropImage} alt="Club background" className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
-      {/* Cinematic Club Header */}
-      <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden z-10">
+    <div className={`hydro-page-shell flex-1 relative w-full h-full font-body ${isLandscapeMobile ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <PaneSwitcher
+        panes={[
+          {
+            id: 'OVERVIEW',
+            label: 'OVERVIEW',
+            icon: <GameIcon name="home" size={20} />,
+            content: <div className="p-6 h-full overflow-y-auto pb-20 scrollbar-hide">{renderTab()}</div>
+          },
+          {
+            id: 'ROSTER',
+            label: 'ROSTER',
+            icon: <GameIcon name="squad" size={20} />,
+            content: <div className="p-6 h-full overflow-y-auto pb-20 scrollbar-hide">{renderTab()}</div>
+          },
+          {
+            id: 'STAFF',
+            label: 'STAFF',
+            icon: <GameIcon name="verified" size={20} />,
+            content: <div className="p-6 h-full overflow-y-auto pb-20 scrollbar-hide">{renderTab()}</div>
+          },
+          {
+            id: 'MANAGEMENT',
+            label: 'MANAGEMENT',
+            icon: <GameIcon name="settings" size={20} />,
+            content: (
+              <div className="p-6 h-full overflow-y-auto pb-20 scrollbar-hide space-y-4">
+                 <h3 className="font-headline text-xl font-black italic slanted uppercase tracking-widest text-primary px-2">Club Operations</h3>
+                 {managementRoutes.map(route => (
+                   <div key={route.key} onClick={() => setActiveTab('OVERVIEW')} className="p-5 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-between game-tap-feedback cursor-pointer">
+                      <span className="font-headline text-lg font-black italic slanted uppercase text-on-surface">{route.title}</span>
+                      <span className="text-primary opacity-40">➔</span>
+                   </div>
+                 ))}
+              </div>
+            )
+          }
+        ]}
+        activePaneId={activeTab === 'ROSTER' || activeTab === 'STAFF' ? activeTab : 'OVERVIEW'}
+        onPaneChange={(id) => setActiveTab(id as ClubTab)}
+      >
+        <div className="flex flex-col flex-1 relative min-h-full">
+          <img src={clubBackdropImage} alt="Club background" className="absolute inset-0 h-full w-full object-cover pointer-events-none" />
+          {/* Cinematic Club Header */}
+          <div className="p-8 max-[900px]:p-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/5 relative overflow-hidden z-10">
         <div className="absolute top-0 right-1/2 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="relative z-10 flex items-end justify-between gap-8 flex-wrap">
@@ -1171,6 +1219,8 @@ export const ClubScreen: React.FC<ClubScreenProps> = ({ clubName = 'Aqua Dragons
           {activeSubPage ? renderSubPage() : renderTab()}
         </div>
       </div>
+        </div>
+      </PaneSwitcher>
     </div>
   );
 };
