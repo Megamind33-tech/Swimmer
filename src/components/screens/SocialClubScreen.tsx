@@ -196,6 +196,9 @@ export const SocialClubScreen: React.FC = () => {
           }}
         >
           <button
+            aria-label="Back"
+            title="Back"
+            className="focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none"
             style={{
               ...iconButtonStyle,
               width: 48,
@@ -272,7 +275,7 @@ export const SocialClubScreen: React.FC = () => {
               { label: 'Alerts', icon: '◉' },
               { label: 'Settings', icon: '⚙' },
             ].map((item, index) => (
-              <button key={item.label} aria-label={item.label} style={{ ...iconButtonStyle, position: 'relative' }}>
+              <button key={item.label} aria-label={item.label} title={item.label} className="focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none" style={{ ...iconButtonStyle, position: 'relative' }}>
                 <span style={{ fontSize: swim26Size.icon.md }}>{item.icon}</span>
                 {index === 1 ? (
                   <span
@@ -632,7 +635,7 @@ export const SocialClubScreen: React.FC = () => {
               padding: swim26Space.sm,
             }}
           >
-            <button style={{ ...iconButtonStyle, width: 52, height: 52, color: swim26Color.text.primary }}>＋</button>
+            <button aria-label="Add" title="Add" className="focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none" style={{ ...iconButtonStyle, width: 52, height: 52, color: swim26Color.text.primary }}>＋</button>
             <div
               style={{
                 minHeight: 52,
