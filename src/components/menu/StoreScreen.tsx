@@ -240,8 +240,11 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({
         {/* Back button */}
         {onBack && (
           <motion.button
+            aria-label="Back to Lobby"
+            title="Back to Lobby"
             whileTap={{ scale: 0.90 }}
             onClick={onBack}
+            className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:ring-offset-2 focus-visible:ring-offset-[#041421]"
             style={{
               display: 'flex',
               alignItems: 'center',
