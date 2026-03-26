@@ -544,51 +544,31 @@ export function TrainingPage() {
   const { selectedDrill, setSelectedDrillId, sessionActive, setSessionActive, cyclePhase, setCyclePhaseId } = useTrainingEngineState();
 
 
-  useEffect(() => {
-    refreshAll();
-  }, [refreshAll]);
+  const drill = selectedDrill;
 
-  useEffect(() => {
-    setMinutes(TRAINING_PROGRAMS[drill.id].recommendedMinutes);
-  }, [drill]);
+  const drillButtons = TRAINING_DRILLS.map((item) => {
+    const active = item.id === drill.id
+    return (
+      <button
+        key={item.id}
+        onClick={() => setSelectedDrillId(item.id)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', marginBottom: '4px', background: active ? `rgba(56,214,255,0.12)` : 'rgba(255,255,255,0.03)', border: active ? `1px solid rgba(56,214,255,0.35)` : '1px solid transparent', transition: 'all 0.14s', boxShadow: active ? `0 0 10px rgba(56,214,255,0.12)` : 'none', textAlign: 'left' }}
+      >
+        <span style={{ color: active ? item.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{item.icon}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.65)', letterSpacing: '0.06em' }}>{item.label}</div>
+          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: active ? item.color : 'rgba(169,211,231,0.35)', marginTop: '1px' }}>{item.delta}</div>
+        </div>
+        {active && <ChevronRightIcon size={12} color={AQUA} />}
+      </button>
+    )
+  })
 
-  const targets = useMemo(() => getTrainingTargets(targetMode, careerPlayer, clubAthletes), [targetMode, careerPlayer, clubAthletes]);
-
-  useEffect(() => {
-    if (!targets.some((target) => target.id === selectedTargetId)) {
-      setSelectedTargetId(targets[0]?.id ?? careerPlayer.id);
-    }
-  }, [targets, selectedTargetId, careerPlayer.id]);
-
-  const activeTarget = targets.find((target) => target.id === selectedTargetId) ?? targets[0];
-  const readinessLabel = activeTarget?.athlete.development ? getReadinessLabel(activeTarget.athlete.development) : 'Unavailable';
-
-  const handleTrain = () => {
-    if (!activeTarget) return;
-
-    if (activeTarget.kind === 'career') {
-      const result = playerManager.applyTrainingBlock(drill.id, minutes);
-      if (result) setLastResult(result);
-    } else {
-      const result = trainSignedAthlete(activeTarget.id, drill.id, minutes);
-      if (result) setLastResult(result);
-    }
-
-    setNpcAthletes(simulateNpcAcademy(Math.max(2, Math.round(minutes / 25))));
-    refreshAll();
-  };
-
-  const handleRecovery = () => {
-    if (!activeTarget) return;
-    if (activeTarget.kind === 'career') {
-      playerManager.recoverPlayer(18);
-    } else {
-      recoverSignedAthlete(activeTarget.id, 18);
-    }
-    setNpcAthletes(simulateNpcAcademy(2));
-    setLastResult(null);
-    refreshAll();
-  };
+  const protocolChips = [
+    { label: 'Sets', value: `${drill.sets}` },
+    { label: 'Reps', value: drill.reps },
+    { label: 'Rest', value: drill.rest },
+  ]
 
   const drillSelector = (
       <div style={{ width: '160px', flexShrink: 0, borderRadius: '16px', border: `1px solid ${PANEL_BORDER}`, background: PANEL, backdropFilter: 'blur(18px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -597,23 +577,7 @@ export function TrainingPage() {
           <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>Select training</div>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '4px 8px 12px' }}>
-          {TRAINING_DRILLS.map((d) => {
-            const active = d.id === drill.id;
-            return (
-              <button
-                key={d.id}
-                onClick={() => setSelectedDrillId(d.id)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '9px 10px', minHeight: '44px', borderRadius: '10px', cursor: 'pointer', marginBottom: '4px', background: active ? `rgba(56,214,255,0.12)` : 'rgba(255,255,255,0.03)', border: active ? `1px solid rgba(56,214,255,0.35)` : '1px solid transparent', transition: 'all 0.14s', boxShadow: active ? `0 0 10px rgba(56,214,255,0.12)` : 'none', textAlign: 'left' }}
-              >
-                <span style={{ color: active ? d.color : 'rgba(169,211,231,0.40)', transition: 'color 0.14s' }}>{d.icon}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '12px', color: active ? '#F3FBFF' : 'rgba(169,211,231,0.65)', letterSpacing: '0.06em' }}>{d.label}</div>
-                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: active ? d.color : 'rgba(169,211,231,0.35)', marginTop: '1px' }}>{d.delta}</div>
-                </div>
-                {active && <ChevronRightIcon size={12} color={AQUA} />}
-              </button>
-            );
-          })}
+          {drillButtons}
         </div>
       </div>
   )
@@ -637,32 +601,13 @@ export function TrainingPage() {
             </div>
           </div>
 
-          <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '12px', color: 'rgba(169,211,231,0.78)', lineHeight: 1.55, marginBottom: '16px', maxWidth: '560px' }}>
-            {drill.desc}
-          </div>
-
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-            {([['Sets', `${drill.sets}`], ['Reps', drill.reps], ['Rest', drill.rest], ['Downside', drill.downside]] as const).map(([label, value]) => (
-              <div key={label} style={{ padding: '7px 12px', borderRadius: '8px', background: 'rgba(56,214,255,0.06)', border: '1px solid rgba(56,214,255,0.15)', maxWidth: label === 'Downside' ? '240px' : 'none' }}>
-                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{label}</div>
-                <div style={{ fontFamily: label === 'Downside' ? "'Rajdhani', sans-serif" : "'Bebas Neue', sans-serif", fontSize: label === 'Downside' ? '10px' : '17px', color: label === 'Downside' ? '#FCA5A5' : AQUA, letterSpacing: '0.04em', lineHeight: 1.35 }}>{value}</div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '18px' }}>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {([
-                { id: 'career', label: 'INDIVIDUAL CAREER', count: 1 },
-                { id: 'club', label: 'CLUB CAREER', count: clubAthletes.length },
-              ] as const).map((mode) => (
-                <button
-                  key={mode.id}
-                  onClick={() => setTargetMode(mode.id)}
-                  style={{ height: '34px', paddingInline: '12px', borderRadius: '9px', border: targetMode === mode.id ? '1px solid rgba(56,214,255,0.35)' : '1px solid rgba(255,255,255,0.08)', background: targetMode === mode.id ? 'rgba(56,214,255,0.12)' : 'rgba(255,255,255,0.03)', color: targetMode === mode.id ? '#F3FBFF' : 'rgba(169,211,231,0.65)', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', fontWeight: 700, letterSpacing: '0.10em', cursor: 'pointer' }}
-                >
-                  {mode.label} {mode.id === 'club' ? `(${mode.count})` : ''}
-                </button>
+            {/* Protocol chips */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              {protocolChips.map(({ label, value }) => (
+                <div key={label} style={{ padding: '7px 14px', borderRadius: '8px', background: 'rgba(56,214,255,0.06)', border: '1px solid rgba(56,214,255,0.15)' }}>
+                  <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '9px', color: 'rgba(169,211,231,0.45)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{label}</div>
+                  <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '17px', color: AQUA, letterSpacing: '0.04em' }}>{value}</div>
+                </div>
               ))}
             </div>
 
