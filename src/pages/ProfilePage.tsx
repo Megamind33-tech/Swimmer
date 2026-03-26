@@ -238,7 +238,7 @@ export function ProfilePage() {
           label: 'PROFILE',
           icon: <UserIcon size={12} />,
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div className="swim26-pane-region" style={{ position: 'absolute', inset: 0, padding: '10px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {leftColumn.props.children}
             </div>
           ),
@@ -248,7 +248,7 @@ export function ProfilePage() {
           label: 'DETAILS',
           icon: <ActivityIcon size={12} />,
           content: (
-            <div style={{ position: 'absolute', inset: 0, padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden' }}>
+            <div className="swim26-pane-region" style={{ position: 'absolute', inset: 0, padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden' }}>
               {/* Tab bar and content — content scrolls internally per tab */}
               {rightColumn.props.children}
             </div>
@@ -260,6 +260,7 @@ export function ProfilePage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
+        className="swim26-game-page swim26-page-pattern swim26-page-pattern--split"
         style={{ position: 'absolute', inset: 0, display: 'flex', gap: '10px', padding: '10px' }}
       >
         {leftColumn}

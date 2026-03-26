@@ -28,8 +28,17 @@ export class PerformanceQualityManager {
   private qualityTier: 'LOW' | 'MEDIUM' | 'HIGH';
   private compatibility = getGraphicsCompatibilityProfile();
 
-  constructor() {
-    this.qualityTier = getDeviceQualityTier();
+  constructor(initialPreset?: QualityPreset) {
+    if (initialPreset) {
+      this.qualityTier =
+        initialPreset === 'high'
+          ? 'HIGH'
+          : initialPreset === 'low'
+            ? 'LOW'
+            : 'MEDIUM';
+    } else {
+      this.qualityTier = getDeviceQualityTier();
+    }
     logger.log(`[PerformanceQualityManager] Device tier detected: ${this.qualityTier}`);
   }
 

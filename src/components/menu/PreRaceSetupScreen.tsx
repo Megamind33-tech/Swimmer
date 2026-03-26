@@ -172,6 +172,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
 
         {/* ← Back button */}
         <button
+          data-testid="pre-race-abort"
           onClick={onCancel}
           style={{
             flexShrink: 0,
@@ -802,6 +803,7 @@ export const PreRaceSetupScreen: React.FC<PreRaceSetupScreenProps> = ({
 
         {/* INITIATE KINETIC RUN — primary CTA */}
         <button
+          data-testid="pre-race-start"
           onClick={handleConfirm}
           disabled={isStarting}
           className="flex-1"

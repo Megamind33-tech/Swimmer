@@ -458,7 +458,7 @@ export function CareerMode() {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className="swim26-page-shell"
+        className="swim26-page-shell swim26-page-pattern swim26-page-pattern--split"
       >
         <div className="swim26-pane-scroll">{overviewPane}</div>
         <div className="swim26-pane-scroll">{racePane}</div>

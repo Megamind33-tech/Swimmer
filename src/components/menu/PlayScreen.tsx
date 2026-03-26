@@ -330,6 +330,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({ onModeSelect }) => {
             return (
               <button
                 key={mode.id}
+                data-testid={`mode-${mode.id}`}
                 className="swim26-mode-card game-card card-highlight"
                 onClick={() => handleSelect(mode.id)}
                 onMouseEnter={() => { if (!isTouch) setHoveredId(mode.id); }}

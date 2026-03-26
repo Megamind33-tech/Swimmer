@@ -63,7 +63,7 @@ export function Championships() {
               </div>
             </div>
           </div>
-          <div className="cta-band"><button className="swim26-btn swim26-btn-primary" onClick={() => enterCompetition(primary.id)}>{primary.entered ? 'ENTERED' : 'ENTER HEAT'}</button></div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-primary primary-cta" onClick={() => enterCompetition(primary.id)}>{primary.entered ? 'ENTERED' : 'ENTER HEAT'}</button></div>
         </section>
       )}
 
@@ -146,7 +146,7 @@ export function Championships() {
         { id: 'upcoming', label: 'UPCOMING', icon: <span aria-hidden>🗓</span>, content: upcomingContent },
       ]}
     >
-      <div className="swim26-page-shell swim26-page-shell--single">
+      <div className="swim26-page-shell swim26-page-shell--single swim26-page-pattern swim26-page-pattern--dual">
         <div className="swim26-pane-scroll swim26-column-stack">{featuredContent}</div>
         <div className="swim26-pane-scroll swim26-column-stack">{upcomingContent}</div>
       </div>

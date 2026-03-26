@@ -7,7 +7,7 @@
  *           split flash, proper event naming, lane assignment
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence }               from 'motion/react';
 import { ArenaManager }                  from '../graphics/ArenaManager';
 import { HUDRoot, CountdownOverlay }     from '../hud/HUDRoot';
@@ -21,7 +21,8 @@ import { useFeedback }                   from '../feedback/useFeedback';
 import { formatRaceTime }                from '../hud/hudTokens';
 import { useRaceState }                  from '../performance/useRaceState';
 import { loadPerformancePreset }         from '../performance/performancePreset';
-import { prewarmCriticalAssets }         from '../performance/optimizationHelpers';
+import { applyPerformancePreset, prewarmCriticalAssets, restoreFullEffects } from '../performance/optimizationHelpers';
+import { detectRuntimePerformanceTier, resolvePerformancePreset } from '../performance/performanceTier';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -163,7 +164,15 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
 
   // Presets
   const preset     = loadPreset();
-  const perfPreset = loadPerformancePreset();
+  const runtimeTier = useMemo(() => detectRuntimePerformanceTier(), []);
+  const isE2E = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('e2e') === '1';
+  }, []);
+  const perfPreset = useMemo(
+    () => resolvePerformancePreset(loadPerformancePreset()),
+    [],
+  );
   const feedback   = useFeedback(preset);
 
   // Phase 6: throttled race state
@@ -250,6 +259,15 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
   }, [raceStarted, raceFinished, sim]);
 
   const handleRestart = useCallback(() => {
+    if (splitFlashTimer.current) {
+      clearTimeout(splitFlashTimer.current);
+      splitFlashTimer.current = null;
+    }
+    setActiveSplit(null);
+    setResultsData(null);
+    setRaceFinished(false);
+    warnedRef.current = false;
+    splitsRef.current.forEach((s) => { s.firedAt = null; });
     setIsPaused(false);
     pausedRef.current = false;
     resetState();
@@ -257,10 +275,25 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
   }, [onRestart, resetState]);
 
   const handleExitToLobby = useCallback(() => {
+    if (splitFlashTimer.current) {
+      clearTimeout(splitFlashTimer.current);
+      splitFlashTimer.current = null;
+    }
+    setActiveSplit(null);
+    setResultsData(null);
+    setRaceFinished(false);
+    warnedRef.current = false;
+    splitsRef.current.forEach((s) => { s.firedAt = null; });
     setIsPaused(false);
     pausedRef.current = false;
     onExitToLobby?.();
   }, [onExitToLobby]);
+
+  const handleContinueFromResults = useCallback(() => {
+    // Result payload is already emitted at race-finish time inside the simulation loop.
+    // Continue should only advance flow out of the results overlay.
+    handleExitToLobby();
+  }, [handleExitToLobby]);
 
   // ── Cleanup ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -268,14 +301,20 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
       destroyInputManager();
       controls.gestureLock.clear();
       if (splitFlashTimer.current) clearTimeout(splitFlashTimer.current);
+      restoreFullEffects();
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Apply DOM performance mode flags ─────────────────────────────────────
+  useEffect(() => {
+    applyPerformancePreset(perfPreset);
+  }, [perfPreset]);
 
   // ── Babylon.js boot ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!canvasRef.current) return;
     let disposed = false;
-    const arena  = new ArenaManager(canvasRef.current);
+    const arena  = new ArenaManager(canvasRef.current, runtimeTier);
     arenaRef.current = arena;
 
     arena.initialize().then(() => {
@@ -283,47 +322,68 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
       arena.setTheme(getVenueTheme(config.venue));
     }).catch((err: Error) => console.error('[RaceScene] ArenaManager init failed:', err));
 
-    const handleResize = () => arena.resize();
+    let resizeRaf: number | null = null;
+    let lastWidth = 0;
+    let lastHeight = 0;
+    const handleResize = () => {
+      if (resizeRaf !== null) return;
+      resizeRaf = window.requestAnimationFrame(() => {
+        resizeRaf = null;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const { clientWidth, clientHeight } = canvas;
+        // Skip expensive resize when browser chrome bounces but size stays effectively same.
+        if (Math.abs(clientWidth - lastWidth) < 2 && Math.abs(clientHeight - lastHeight) < 2) return;
+        lastWidth = clientWidth;
+        lastHeight = clientHeight;
+        arena.resize();
+      });
+    };
     window.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('resize', handleResize);
 
     // ResizeObserver as backup — catches cases window.resize misses on mobile
     // (virtual keyboard, browser chrome show/hide, safe area changes).
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined' && canvasRef.current) {
-      ro = new ResizeObserver(() => arena.resize());
+      ro = new ResizeObserver(handleResize);
       ro.observe(canvasRef.current);
     }
 
     return () => {
       disposed = true;
       window.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('resize', handleResize);
+      if (resizeRaf !== null) window.cancelAnimationFrame(resizeRaf);
       ro?.disconnect();
       arena.dispose();
       arenaRef.current = null;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [config.venue, runtimeTier]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Countdown + prewarm ───────────────────────────────────────────────────
   useEffect(() => {
     prewarmCriticalAssets().catch(() => { /* non-critical */ });
     feedback.playCountdownBeep(false);
-    const t1 = setTimeout(() => { setCountdown(2); feedback.playCountdownBeep(false); }, 1000);
-    const t2 = setTimeout(() => { setCountdown(1); feedback.playCountdownBeep(false); }, 2000);
+    const countdownStepMs = isE2E ? 120 : 1000;
+    const t1 = setTimeout(() => { setCountdown(2); feedback.playCountdownBeep(false); }, countdownStepMs);
+    const t2 = setTimeout(() => { setCountdown(1); feedback.playCountdownBeep(false); }, countdownStepMs * 2);
     const t3 = setTimeout(() => {
       setCountdown(0);
       feedback.playCountdownBeep(true);
       feedback.triggerMediumHaptic();
       startTimeRef.current = performance.now();
       setRaceStarted(true);
-    }, 3000);
+    }, countdownStepMs * 3);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isE2E]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Race simulation loop ──────────────────────────────────────────────────
   useEffect(() => {
     if (!raceStarted || raceFinished) return;
 
-    const SPEED_BASE     = totalDistanceM / 55_000;
+    const raceDurationMs = isE2E ? 4_000 : 55_000;
+    const SPEED_BASE     = totalDistanceM / raceDurationMs;
     const STAMINA_DRAIN  = 0.018;
     const OXYGEN_DRAIN   = 0.013;
     const AI_CATCH_SPEED = 0.000_02;
@@ -421,7 +481,7 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
 
     rafRef.current = requestAnimationFrame(tick);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [raceStarted, raceFinished]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [raceStarted, raceFinished, isE2E]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Derived values ───────────────────────────────────────────────────────
   const totalLaps = Math.max(1, totalDistanceM / 100);
@@ -431,7 +491,14 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
   return (
     <div
       className="fixed inset-0 z-[100] bg-black overflow-hidden"
-      style={{ height: '100dvh' }}
+      style={{
+        width: 'var(--app-vw, 100vw)',
+        height: 'var(--app-vh, 100dvh)',
+        paddingTop: 'max(env(safe-area-inset-top, 0px), var(--vv-offset-top, 0px))',
+        paddingBottom: 'max(env(safe-area-inset-bottom, 0px), var(--vv-offset-bottom, 0px))',
+        paddingLeft: 'max(env(safe-area-inset-left, 0px), var(--vv-offset-left, 0px))',
+        paddingRight: 'max(env(safe-area-inset-right, 0px), var(--vv-offset-right, 0px))',
+      }}
     >
       {/* Babylon.js canvas */}
       <canvas
@@ -484,12 +551,7 @@ export const RaceScene: React.FC<RaceSceneProps> = ({
             key="results"
             data={resultsData}
             onReplay={handleRestart}
-            onContinue={() => onRaceComplete({
-              rank:   resultsData.rank,
-              time:   resultsData.time,
-              xp:     resultsData.xp,
-              coins:  resultsData.coins,
-            })}
+            onContinue={handleContinueFromResults}
             onLobby={handleExitToLobby}
           />
         )}

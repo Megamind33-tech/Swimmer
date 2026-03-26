@@ -14,7 +14,7 @@
  *   racing        → RaceScene (Babylon canvas + HUD)
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { AppShell } from '../app/AppShell';
 import { PlayScreen } from './menu/PlayScreen';
@@ -77,14 +77,29 @@ export function GameShell() {
   });
   const [, setRaceResult] = useState<RaceResult | null>(null);
   const [fading, setFading] = useState(false);
+  const phaseTransitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navigateTo = useCallback((nextPhase: GamePhase) => {
+    if (phaseTransitionTimerRef.current) {
+      clearTimeout(phaseTransitionTimerRef.current);
+      phaseTransitionTimerRef.current = null;
+    }
     setFading(true);
     /* 300ms transition duration — feels more like a premium game entry */
-    setTimeout(() => {
+    phaseTransitionTimerRef.current = setTimeout(() => {
       setPhase(nextPhase);
       requestAnimationFrame(() => requestAnimationFrame(() => setFading(false)));
+      phaseTransitionTimerRef.current = null;
     }, 300);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (phaseTransitionTimerRef.current) {
+        clearTimeout(phaseTransitionTimerRef.current);
+        phaseTransitionTimerRef.current = null;
+      }
+    };
   }, []);
 
   const enterModeSelect = () => navigateTo('mode-select');
@@ -120,8 +135,10 @@ export function GameShell() {
         <OverlayShell key="mode-select" backgroundOpacity={0.28}>
           <button
             onClick={() => navigateTo('menu')}
-            className="absolute top-4 left-4 z-50 flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 text-xs font-bold uppercase tracking-wider active:scale-95 transition-all"
+            className="absolute z-50 flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 text-xs font-bold uppercase tracking-wider active:scale-95 transition-all"
             style={{
+              top: 'max(12px, env(safe-area-inset-top))',
+              left: 'max(12px, env(safe-area-inset-left))',
               background: 'rgba(8,13,26,0.80)',
               border: '1px solid rgba(255,255,255,0.12)',
               backdropFilter: 'blur(8px)',

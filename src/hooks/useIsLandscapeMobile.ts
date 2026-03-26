@@ -16,17 +16,39 @@
 import { useState, useEffect } from 'react';
 
 export function useIsLandscapeMobile(): boolean {
+  const read = () => {
+    const width = window.visualViewport?.width ?? window.innerWidth;
+    const height = window.visualViewport?.height ?? window.innerHeight;
+    return height <= 500 && width > height;
+  };
+
   const [v, setV] = useState(
-    () => window.innerHeight <= 500 && window.innerWidth > window.innerHeight,
+    () => read(),
   );
 
   useEffect(() => {
-    const mq = window.matchMedia(
-      '(max-height: 500px) and (orientation: landscape)',
-    );
-    const handler = (e: MediaQueryListEvent) => setV(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    let rafId: number | null = null;
+    const schedule = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        setV(read());
+      });
+    };
+
+    const mq = window.matchMedia('(orientation: landscape)');
+    mq.addEventListener('change', schedule);
+    window.addEventListener('resize', schedule);
+    window.visualViewport?.addEventListener('resize', schedule);
+    window.visualViewport?.addEventListener('scroll', schedule);
+
+    return () => {
+      mq.removeEventListener('change', schedule);
+      window.removeEventListener('resize', schedule);
+      window.visualViewport?.removeEventListener('resize', schedule);
+      window.visualViewport?.removeEventListener('scroll', schedule);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   return v;

@@ -18,3 +18,18 @@ View your app in AI Studio: https://ai.studio/apps/337815ea-4125-4c5d-8475-e5f24
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Automated release-flow verification (Playwright E2E)
+
+This repo includes executable browser tests for critical ship paths.
+
+1. Install dependencies (and Playwright package):
+   `npm install`
+2. Install Playwright browser binaries (first run only):
+   `npx playwright install chromium`
+3. Run all critical-flow tests:
+   `npm test`
+
+Useful variants:
+- Headed: `npm run test:e2e:headed`
+- Debug: `npm run test:e2e:debug`

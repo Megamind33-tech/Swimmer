@@ -90,10 +90,10 @@ export function detectAndLoadPreset(): PerformancePreset {
 
   return {
     ...DEFAULT_PERFORMANCE_PRESET,
-    // Auto-detect suggestions (only if user hasn't overridden)
-    lowEndMode:      saved.lowEndMode     !== false ? saved.lowEndMode     : (hasTouch && lowRAM),
-    reducedMotion:   saved.reducedMotion  !== false ? saved.reducedMotion  : reducedMotionPref,
-    reducedEffects:  saved.reducedEffects !== false ? saved.reducedEffects : (hasTouch && lowRAM),
+    // Auto-detect suggestions + user overrides
+    lowEndMode:      saved.lowEndMode || (hasTouch && lowRAM),
+    reducedMotion:   saved.reducedMotion || reducedMotionPref,
+    reducedEffects:  saved.reducedEffects || (hasTouch && lowRAM),
     // Merge saved overrides
     ...saved,
   };

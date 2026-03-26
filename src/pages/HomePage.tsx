@@ -12,12 +12,12 @@ interface HomePageProps {
 
 export function HomePage({ onSideMenuSelect, onPlay }: HomePageProps) {
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full relative overflow-hidden">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="swim26-game-page swim26-page-pattern swim26-page-pattern--hero w-full h-full relative overflow-hidden">
       <div className="absolute inset-0 bg-[#0A1628]/70" />
 
       <SideMenu onSelect={onSideMenuSelect} />
 
-      <div className="absolute left-28 right-4 top-16 bottom-18 grid grid-cols-[minmax(0,1fr)_16rem] gap-3 overflow-hidden">
+      <div className="swim26-home-layout absolute left-28 right-4 top-16 bottom-18 grid grid-cols-[minmax(0,1fr)_16rem] gap-3 overflow-hidden">
         <div className="grid grid-rows-[minmax(0,1fr)_minmax(13rem,15rem)] gap-3 min-h-0">
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="relative rounded-2xl overflow-hidden border border-white/10 shadow-lg group cursor-pointer min-h-0">
             <div className="absolute inset-0 bg-gradient-to-r from-[#0A1628] to-[#1B2838]" />
@@ -33,7 +33,7 @@ export function HomePage({ onSideMenuSelect, onPlay }: HomePageProps) {
                 <h2 className="text-3xl font-black text-white italic tracking-tight drop-shadow-lg mb-2">SWIM26 <span className="text-[#D4A843]">SEASON 4</span></h2>
                 <p className="text-white/80 text-sm font-medium mb-4 leading-snug">Compete in live championships, improve your squad, and push your club toward the global finals.</p>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <motion.button onClick={onPlay} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '38px', paddingInline: '18px', borderRadius: '10px', border: 'none', background: 'linear-gradient(140deg, var(--color-volt) 0%, var(--color-primary-dim) 100%)', color: 'var(--color-carbon)', fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', letterSpacing: '0.08em', cursor: 'pointer', boxShadow: '0 0 18px rgba(204,255,0,0.45), 0 3px 10px rgba(0,0,0,0.55)', userSelect: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>GO NOW <ChevronRightIcon size={14} /></motion.button>
+                  <motion.button data-testid="home-go-now" onClick={onPlay} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', height: '38px', paddingInline: '18px', borderRadius: '10px', border: 'none', background: 'linear-gradient(140deg, var(--color-volt) 0%, var(--color-primary-dim) 100%)', color: 'var(--color-carbon)', fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', letterSpacing: '0.08em', cursor: 'pointer', boxShadow: '0 0 18px rgba(204,255,0,0.45), 0 3px 10px rgba(0,0,0,0.55)', userSelect: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>GO NOW <ChevronRightIcon size={14} /></motion.button>
                   <div className="rounded-xl border border-white/10 bg-black/30 px-3 py-2 backdrop-blur-sm min-w-[88px]">
                     <div className="text-[9px] text-white/60 font-bold tracking-[0.2em] uppercase">Club OVR</div>
                     <div className="text-xl font-black text-[#D4A843]">{USER_DATA.clubOvr}</div>

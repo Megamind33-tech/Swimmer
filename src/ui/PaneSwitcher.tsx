@@ -86,6 +86,7 @@ interface TabBtnProps {
   pane: Pane;
   isActive: boolean;
   onClick: () => void;
+  onArrowNav: (direction: 1 | -1) => void;
   reducedMotion: boolean;
   highContrast: boolean;
 }
@@ -94,6 +95,7 @@ const TabBtn: React.FC<TabBtnProps> = ({
   pane,
   isActive,
   onClick,
+  onArrowNav,
   reducedMotion,
   highContrast,
 }) => {
@@ -101,7 +103,19 @@ const TabBtn: React.FC<TabBtnProps> = ({
     <motion.button
       role="tab"
       aria-selected={isActive}
+      aria-controls={`pane-panel-${pane.id}`}
+      id={`pane-tab-${pane.id}`}
+      tabIndex={isActive ? 0 : -1}
       aria-label={pane.label}
+      onKeyDown={(event) => {
+        if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          onArrowNav(1);
+        } else if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          onArrowNav(-1);
+        }
+      }}
       whileHover={reducedMotion ? undefined : { scale: 1.02, backgroundColor: 'rgba(204,255,0,0.05)' }}
       whileTap={reducedMotion ? undefined : { scale: 0.95 }}
       onClick={onClick}
@@ -195,6 +209,15 @@ export function PaneSwitcher({ panes, children, activePaneId, onPaneChange, defa
 
   const goPrev = () => { if (activeIdx > 0) goTo(panes[activeIdx - 1].id); };
   const goNext = () => { if (activeIdx < panes.length - 1) goTo(panes[activeIdx + 1].id); };
+  const goByArrow = (directionDelta: 1 | -1) => {
+    if (panes.length === 0) return;
+    if (activeIdx === -1) {
+      goTo(panes[0].id);
+      return;
+    }
+    const nextIdx = (activeIdx + directionDelta + panes.length) % panes.length;
+    goTo(panes[nextIdx].id);
+  };
 
   // Normal viewport — show caller's layout unchanged
   if (!isLandscape) return <>{children}</>;
@@ -244,7 +267,7 @@ export function PaneSwitcher({ panes, children, activePaneId, onPaneChange, defa
             justifyContent: 'center',
             background:     'transparent',
             border:         'none',
-            borderRight:    `1px solid ${PANEL_BORDER}`,
+            borderRight:    `1px solid ${highContrast ? 'rgba(56,214,255,0.35)' : PANEL_BORDER}`,
             cursor:         activeIdx === 0 ? 'not-allowed' : 'pointer',
             opacity:        activeIdx === 0 ? 0.25 : 1,
             color:          highContrast
@@ -258,16 +281,16 @@ export function PaneSwitcher({ panes, children, activePaneId, onPaneChange, defa
         </motion.button>
 
         {/* Tab buttons */}
-        {panes.map(pane => (
-          <React.Fragment key={pane.id}>
+        {panes.map((pane) => (
           <TabBtn
+            key={pane.id}
             pane={pane}
             isActive={pane.id === activeId}
             onClick={() => goTo(pane.id)}
+            onArrowNav={goByArrow}
             reducedMotion={reducedMotion}
             highContrast={highContrast}
           />
-          </React.Fragment>
         ))}
 
         {/* Next arrow — 44 px wide touch target */}
@@ -285,7 +308,7 @@ export function PaneSwitcher({ panes, children, activePaneId, onPaneChange, defa
             justifyContent: 'center',
             background:     'transparent',
             border:         'none',
-            borderLeft:     `1px solid ${PANEL_BORDER}`,
+            borderLeft:     `1px solid ${highContrast ? 'rgba(56,214,255,0.35)' : PANEL_BORDER}`,
             cursor:         activeIdx === panes.length - 1 ? 'not-allowed' : 'pointer',
             opacity:        activeIdx === panes.length - 1 ? 0.25 : 1,
             color:          highContrast
@@ -335,6 +358,9 @@ export function PaneSwitcher({ panes, children, activePaneId, onPaneChange, defa
           <motion.div
             key={activeId}
             custom={direction}
+            role="tabpanel"
+            id={`pane-panel-${active?.id ?? 'unknown'}`}
+            aria-labelledby={`pane-tab-${active?.id ?? 'unknown'}`}
             initial={reducedMotion ? false : { opacity: 0, x: direction * 24 }}
             animate={{ opacity: 1, x: 0 }}
             exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: direction * -24 }}
