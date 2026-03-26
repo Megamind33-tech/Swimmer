@@ -208,7 +208,7 @@ export function CareerMode() {
   const racePane = (
     <div className="swim26-column-stack">
       {nextEvent && (
-        <section className="race-card swim26-race-card">
+        <section className="race-card swim26-race-card card-with-cta">
           <div className="swim26-img-container landscape env swim26-race-art">
             <img src={poolBackdrop} alt="Championship pool backdrop" />
             <div className="img-overlay-full" />
@@ -247,7 +247,7 @@ export function CareerMode() {
               </div>
             </div>
           </div>
-          <div className="race-card-cta">
+          <div className="race-card-cta cta-band">
             <button className="swim26-btn swim26-btn-primary primary-cta">RACE NOW</button>
           </div>
         </section>
