@@ -279,9 +279,9 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
           height:              `${tabH}px`,
         }}
       >
-        {LEFT_TABS.map(tab => (
-          <React.Fragment key={tab.id}>
+        {LEFT_TABS.map((tab) => (
           <NavTab
+            key={tab.id}
             tab={tab}
             isActive={activeTab === tab.id}
             onChange={onChange}
@@ -289,7 +289,6 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
             reducedMotion={reducedMotion}
             highContrast={highContrast}
           />
-          </React.Fragment>
         ))}
       </div>
 
@@ -370,9 +369,9 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
           height:              `${tabH}px`,
         }}
       >
-        {RIGHT_TABS.map(tab => (
-          <React.Fragment key={tab.id}>
+        {RIGHT_TABS.map((tab) => (
           <NavTab
+            key={tab.id}
             tab={tab}
             isActive={activeTab === tab.id}
             onChange={onChange}
@@ -380,7 +379,6 @@ export const IconTabBar: React.FC<IconTabBarProps> = ({ activeTab, onChange }) =
             reducedMotion={reducedMotion}
             highContrast={highContrast}
           />
-          </React.Fragment>
         ))}
       </div>
     </div>

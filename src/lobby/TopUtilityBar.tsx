@@ -53,6 +53,7 @@ interface CurrencyBadgeProps {
   icon:          string;
   value:         number;
   color:         string;
+  highContrast?: boolean;
   compact?:      boolean;
   'aria-label'?: string;
 }
@@ -61,6 +62,7 @@ const CurrencyBadge: React.FC<CurrencyBadgeProps> = ({
   icon,
   value,
   color,
+  highContrast = false,
   compact = false,
   'aria-label': ariaLabel,
 }) => (
@@ -72,8 +74,10 @@ const CurrencyBadge: React.FC<CurrencyBadgeProps> = ({
       display:     'flex',
       alignItems:  'center',
       gap:         '4px',
-      background:  'rgba(4,20,33,0.65)',
-      border:      '1px solid rgba(255,255,255,0.09)',
+      background:  highContrast ? 'rgba(255,255,255,0.12)' : 'rgba(4,20,33,0.65)',
+      border:      highContrast
+        ? '1px solid rgba(255,255,255,0.26)'
+        : '1px solid rgba(255,255,255,0.09)',
       borderRadius:'100px',
       padding:     compact ? '3px 6px' : '3px 10px 3px 6px',
       flexShrink:  0,
@@ -230,6 +234,7 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({
         icon="🪙"
         value={USER_DATA.currencies.coins}
         color={lobby.gold}
+        highContrast={highContrast}
         compact={isLandscape}
         aria-label={`${USER_DATA.currencies.coins} Coins`}
       />
@@ -237,6 +242,7 @@ export const TopUtilityBar: React.FC<TopUtilityBarProps> = ({
         icon="💎"
         value={USER_DATA.currencies.gems}
         color={lobby.cyanGlow}
+        highContrast={highContrast}
         compact={isLandscape}
         aria-label={`${USER_DATA.currencies.gems} Gems`}
       />

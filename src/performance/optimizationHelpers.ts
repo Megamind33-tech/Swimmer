@@ -8,6 +8,8 @@
 import type React from 'react';
 import type { PerformancePreset } from './performancePreset';
 
+let prewarmPromise: Promise<void> | null = null;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Asset prewarming
 // ─────────────────────────────────────────────────────────────────────────────
@@ -19,9 +21,13 @@ import type { PerformancePreset } from './performancePreset';
  *   - Requests a high-priority animation frame to warm up the compositor
  */
 export async function prewarmCriticalAssets(): Promise<void> {
+  if (prewarmPromise) return prewarmPromise;
+
+  prewarmPromise = (async () => {
   // Unlock AudioContext before first user sound (must be called in a user gesture)
+  let ctx: AudioContext | null = null;
   try {
-    const ctx = new AudioContext();
+    ctx = new AudioContext();
     if (ctx.state === 'suspended') await ctx.resume();
     // Create and immediately stop a silent oscillator to warm up the audio graph
     const osc  = ctx.createOscillator();
@@ -32,12 +38,19 @@ export async function prewarmCriticalAssets(): Promise<void> {
     osc.start();
     osc.stop(ctx.currentTime + 0.001);
   } catch { /* AudioContext not available */ }
+  finally {
+    // Avoid leaking a live context across repeated race entry/exit cycles.
+    try { await ctx?.close(); } catch { /* */ }
+  }
 
   // Wait for web fonts so HUD text doesn't flash unstyled
   try { await document.fonts.ready; } catch { /* */ }
 
   // Warm up compositor with a no-op rAF
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  })();
+
+  return prewarmPromise;
 }
 
 /**

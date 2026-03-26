@@ -32,6 +32,8 @@ import type { PerformancePreset, PostProcessQuality } from '../performance/perfo
 import { loadPerformancePreset, savePerformancePreset, DEFAULT_PERFORMANCE_PRESET } from '../performance/performancePreset'
 import { useTrainingEngineState } from '../hooks/useTrainingEngineState'
 import { TRAINING_CYCLE_PHASES, TRAINING_DRILLS, TRAINING_DRILL_STATS } from '../utils/trainingEngineData'
+import { useClubRoster, trainSignedAthlete, recoverSignedAthlete } from '../utils/clubRoster'
+import { TRAINING_PROGRAMS, simulateNpcAcademy, getReadinessLabel, applyTrainingSession, recoverAthlete, type TrainingFocus } from '../utils/trainingSystem'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design constants
@@ -42,6 +44,16 @@ const CYAN  = 'var(--color-primary-dim)';
 const GOLD  = 'var(--color-volt)';
 const PANEL = 'rgba(4,20,33,0.76)';
 const PANEL_BORDER = 'var(--lobby-panel-border)';
+
+const DRILL_TO_PROGRAM: Record<string, TrainingFocus> = {
+  starts: 'STARTS',
+  turns: 'TURNS',
+  stroke: 'STROKE',
+  endurance: 'ENDURANCE',
+  pace: 'PACE',
+  power: 'POWER',
+  recovery: 'RECOVERY',
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared sub-components (used across Settings + Training)
@@ -115,6 +127,15 @@ function ToggleRow({ label, hint, value, onChange }: ToggleRowProps) {
           <div style={{ position: 'absolute', top: '3px', left: value ? 'calc(100% - 19px)' : '3px', width: '18px', height: '18px', borderRadius: '50%', background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.3)', transition: 'left 0.18s cubic-bezier(0.34,1.56,0.64,1)' }} />
         </div>
       </button>
+    </div>
+  )
+}
+
+function StatLine({ label, value, accent = '#A9D3E7' }: { label: string; value: string; accent?: string }) {
+  return (
+    <div style={{ padding: '8px 10px', borderRadius: '8px', border: '1px solid rgba(56,214,255,0.10)', background: 'rgba(255,255,255,0.02)' }}>
+      <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '9px', color: 'rgba(169,211,231,0.55)', letterSpacing: '0.10em', textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '16px', color: accent, letterSpacing: '0.05em', marginTop: '2px' }}>{value}</div>
     </div>
   )
 }
@@ -542,6 +563,51 @@ export function SettingsPage() {
 
 export function TrainingPage() {
   const { selectedDrill, setSelectedDrillId, sessionActive, setSessionActive, cyclePhase, setCyclePhaseId } = useTrainingEngineState();
+  const drill = selectedDrill as any;
+  const programId = (DRILL_TO_PROGRAM[drill?.id] ?? 'STARTS') as TrainingFocus;
+  const clubAthletes = useClubRoster();
+  const [targetMode, setTargetMode] = useState<'career' | 'club'>('career');
+  const [minutes, setMinutes] = useState<number>(TRAINING_PROGRAMS[programId].recommendedMinutes);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>('career-player');
+  const [lastResult, setLastResult] = useState<any>(null);
+  const [npcAthletes, setNpcAthletes] = useState(() => simulateNpcAcademy(3));
+  const careerPlayer = useMemo(() => ({
+    id: 'career-player',
+    name: 'Career Athlete',
+    age: 21,
+    ovr: 82,
+    stats: { speed: 83, stamina: 79, technique: 81, endurance: 78, mental: 80 },
+    development: {
+      age: 21,
+      energy: 84,
+      fatigue: 22,
+      racePower: 82,
+      sharpness: 79,
+      discipline: 80,
+      momentum: 2,
+      trainingLoad: 32,
+      potential: 91,
+      sessionsCompleted: 28,
+      lastFocus: programId,
+      lastUpdatedAt: Date.now(),
+    },
+  }), [programId]);
+
+  const refreshAll = useCallback(() => {
+    setNpcAthletes(simulateNpcAcademy(3));
+  }, []);
+
+  const getTrainingTargets = useCallback((mode: 'career' | 'club', mainAthlete: typeof careerPlayer, roster: typeof clubAthletes) => {
+    if (mode === 'club') {
+      return roster.map((athlete) => ({ id: athlete.id, kind: 'club' as const, athlete }));
+    }
+    return [{ id: mainAthlete.id, kind: 'career' as const, athlete: mainAthlete }];
+  }, []);
+
+  const playerManager = useMemo(() => ({
+    applyTrainingBlock: (focus: TrainingFocus, duration: number) => applyTrainingSession(careerPlayer as any, focus, duration),
+    recoverPlayer: (hours: number) => recoverAthlete(careerPlayer as any, hours),
+  }), [careerPlayer]);
 
 
   useEffect(() => {
@@ -549,8 +615,8 @@ export function TrainingPage() {
   }, [refreshAll]);
 
   useEffect(() => {
-    setMinutes(TRAINING_PROGRAMS[drill.id].recommendedMinutes);
-  }, [drill]);
+    setMinutes(TRAINING_PROGRAMS[programId].recommendedMinutes);
+  }, [programId]);
 
   const targets = useMemo(() => getTrainingTargets(targetMode, careerPlayer, clubAthletes), [targetMode, careerPlayer, clubAthletes]);
 
@@ -567,10 +633,10 @@ export function TrainingPage() {
     if (!activeTarget) return;
 
     if (activeTarget.kind === 'career') {
-      const result = playerManager.applyTrainingBlock(drill.id, minutes);
+      const result = playerManager.applyTrainingBlock(programId, minutes);
       if (result) setLastResult(result);
     } else {
-      const result = trainSignedAthlete(activeTarget.id, drill.id, minutes);
+      const result = trainSignedAthlete(activeTarget.id, programId, minutes);
       if (result) setLastResult(result);
     }
 
@@ -633,7 +699,7 @@ export function TrainingPage() {
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.50)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{drill.stat}</div>
-              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: drill.color, letterSpacing: '0.06em' }}>{TRAINING_PROGRAMS[drill.id].recommendedMinutes}m</div>
+              <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '20px', color: drill.color, letterSpacing: '0.06em' }}>{TRAINING_PROGRAMS[programId].recommendedMinutes}m</div>
             </div>
           </div>
 
@@ -715,7 +781,7 @@ export function TrainingPage() {
               <div style={{ fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: '10px', color: 'rgba(169,211,231,0.50)', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '10px' }}>Session Design</div>
               <SliderRow label="Minutes" value={minutes} min={20} max={120} step={5} unit="m" onChange={setMinutes} />
               <div style={{ marginTop: '10px', fontFamily: "'Rajdhani', sans-serif", fontSize: '10px', color: 'rgba(169,211,231,0.60)', lineHeight: 1.45 }}>
-                Recommended load is {TRAINING_PROGRAMS[drill.id].recommendedMinutes} minutes. Pushing beyond that increases gains only slightly, but fatigue and power cost rise sharply.
+                Recommended load is {TRAINING_PROGRAMS[programId].recommendedMinutes} minutes. Pushing beyond that increases gains only slightly, but fatigue and power cost rise sharply.
               </div>
             </div>
             <div style={{ padding: '12px 14px', borderRadius: '12px', background: 'rgba(56,214,255,0.04)', border: '1px solid rgba(56,214,255,0.08)' }}>

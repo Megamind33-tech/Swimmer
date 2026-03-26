@@ -205,11 +205,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <div className="p-6 space-y-6 overflow-y-auto h-full pb-20 scrollbar-hide">
                  <h3 className="font-headline text-xl font-black italic slanted uppercase tracking-widest text-primary px-2">Career Outlook</h3>
                  <div className="space-y-3">
-                    {['Rookie Series', 'Open Regional', 'Global Finals'].map((lvl, i) => (
-                      <div key={i} onClick={onCareerClick} className="p-6 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-between game-tap-feedback cursor-pointer">
-                         <span className="font-headline text-lg font-black italic slanted uppercase text-on-surface">{lvl}</span>
-                         <span className="text-on-surface-variant opacity-40">➔</span>
-                      </div>
+                    {['Rookie Series', 'Open Regional', 'Global Finals'].map((lvl) => (
+                      <button
+                        key={lvl}
+                        type="button"
+                        onClick={onCareerClick}
+                        className="w-full p-6 rounded-[24px] bg-white/5 border border-white/10 flex items-center justify-between game-tap-feedback text-left"
+                        aria-label={`Open career milestone ${lvl}`}
+                      >
+                        <span className="font-headline text-lg font-black italic slanted uppercase text-on-surface">{lvl}</span>
+                        <span className="text-on-surface-variant opacity-40">➔</span>
+                      </button>
                     ))}
                  </div>
               </div>
@@ -634,7 +640,8 @@ export const HomeRightPanel: React.FC<HomeRightPanelProps> = () => {
           ))}
         </div>
       </div>
-    );
+    </div>
+  );
 };
 
 export default HomeScreen;

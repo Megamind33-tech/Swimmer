@@ -84,6 +84,7 @@ export function Rankings() {
       initial={{ opacity: 0, scale: 1.03 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.97 }}
+      className="swim26-game-page swim26-page-pattern swim26-page-pattern--data"
       style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px' }}
     >
       {/* Header */}

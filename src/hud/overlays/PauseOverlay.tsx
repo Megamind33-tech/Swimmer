@@ -64,6 +64,7 @@ const PauseBtn: React.FC<PauseBtnProps> = ({ icon, label, onClick, variant = 'gh
 
   return (
     <motion.button
+      data-testid={`pause-${label.toLowerCase()}`}
       variants={staggerChild}
       onClick={onClick}
       whileTap={{ scale: 0.94 }}

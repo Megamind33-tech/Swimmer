@@ -647,6 +647,7 @@ export const ResultsOverlay: React.FC<ResultsOverlayProps> = ({
           >
             {/* REPLAY */}
             <motion.button
+              data-testid="results-replay"
               onClick={onReplay}
               whileTap={{ scale: 0.93 }}
               transition={{ type: 'spring', stiffness: 700, damping: 32 }}
@@ -678,6 +679,7 @@ export const ResultsOverlay: React.FC<ResultsOverlayProps> = ({
 
             {/* CONTINUE (primary) */}
             <motion.button
+              data-testid="results-continue"
               onClick={onContinue}
               whileTap={{ scale: 0.93 }}
               transition={{ type: 'spring', stiffness: 700, damping: 32 }}
@@ -710,6 +712,7 @@ export const ResultsOverlay: React.FC<ResultsOverlayProps> = ({
 
             {/* LOBBY */}
             <motion.button
+              data-testid="results-lobby"
               onClick={onLobby}
               whileTap={{ scale: 0.93 }}
               transition={{ type: 'spring', stiffness: 700, damping: 32 }}

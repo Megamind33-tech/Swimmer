@@ -85,10 +85,10 @@ export const BACK_BTN_ZONE_H =
  *   paddingBottom: safeArea.bottom
  */
 export const safeArea = {
-  top:    'env(safe-area-inset-top,    0px)',
-  bottom: 'env(safe-area-inset-bottom, 0px)',
-  left:   'env(safe-area-inset-left,   0px)',
-  right:  'env(safe-area-inset-right,  0px)',
+  top:    'max(env(safe-area-inset-top, 0px), var(--vv-offset-top, 0px))',
+  bottom: 'max(env(safe-area-inset-bottom, 0px), var(--vv-offset-bottom, 0px))',
+  left:   'max(env(safe-area-inset-left, 0px), var(--vv-offset-left, 0px))',
+  right:  'max(env(safe-area-inset-right, 0px), var(--vv-offset-right, 0px))',
 } as const;
 
 // ─────────────────────────────────────────────────────────────────────────────

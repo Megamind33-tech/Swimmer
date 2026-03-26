@@ -707,6 +707,7 @@ export const PreMatchScreen: React.FC<PreMatchScreenProps> = ({
 
           {/* Skip / Start button */}
           <motion.button
+            data-testid="prematch-start-now"
             whileTap={{ scale: 0.93 }}
             whileHover={{ scale: 1.04 }}
             onClick={handleSkip}

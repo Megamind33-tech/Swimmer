@@ -76,6 +76,7 @@ export class ArenaManager {
   private compatibility = getGraphicsCompatibilityProfile();
 
   private isBroadcastMode = false;
+  private initialQualityPreset?: 'high' | 'medium' | 'low';
 
   // ── Arena configuration (matches original defaults) ──────────────────────
   private arenaConfig: IArenaConfig = {
@@ -88,7 +89,7 @@ export class ArenaManager {
   };
 
   // ────────────────────────────────────────────────────────────────────────
-  constructor(canvasElement: HTMLCanvasElement | string) {
+  constructor(canvasElement: HTMLCanvasElement | string, initialQualityPreset?: 'high' | 'medium' | 'low') {
     if (typeof canvasElement === 'string') {
       this.canvas = document.getElementById(canvasElement) as HTMLCanvasElement;
     } else {
@@ -98,6 +99,7 @@ export class ArenaManager {
     if (!this.canvas) {
       throw new Error('[ArenaManager] Canvas element not found');
     }
+    this.initialQualityPreset = initialQualityPreset;
 
     logger.log(
       `[ArenaManager] Created (mobile: ${isMobileDevice()}, android: ${this.compatibility.isAndroid}, shaderBudget: ${this.compatibility.mobileShaderBudget})`,
@@ -112,7 +114,7 @@ export class ArenaManager {
     if (!this.canvas) throw new Error('[ArenaManager] Canvas not available');
 
     // ── 1. Quality detection ──────────────────────────────────────────────
-    this.qualityMgr = new PerformanceQualityManager();
+    this.qualityMgr = new PerformanceQualityManager(this.initialQualityPreset);
     const qt = this.qualityMgr.getQualityTier();
 
     // ── 2. Engine + Scene ─────────────────────────────────────────────────

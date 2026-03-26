@@ -12,8 +12,11 @@ import { GameShell } from './components/GameShell';
 import { LandscapeGuard } from './ui/LandscapeGuard';
 import { A11yProvider } from './context/AccessibilityContext';
 import { CareerSaveProvider } from './context/CareerSaveContext';
+import { useAndroidViewportSync } from './hooks/useAndroidViewportSync';
 
 export function App() {
+  useAndroidViewportSync();
+
   return (
     <A11yProvider>
       <CareerSaveProvider>

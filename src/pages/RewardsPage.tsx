@@ -130,6 +130,7 @@ export function RewardsPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
+      className="swim26-game-page swim26-page-pattern swim26-page-pattern--list"
       style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px' }}
     >
       {/* ── Header row ── */}

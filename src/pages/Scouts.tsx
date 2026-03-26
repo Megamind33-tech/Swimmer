@@ -582,6 +582,7 @@ export function Scouts() {
 
   return (
     <div
+      className="swim26-game-page swim26-page-pattern swim26-page-pattern--data"
       style={{
         position: 'absolute',
         inset: 0,

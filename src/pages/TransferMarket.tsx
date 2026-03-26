@@ -94,7 +94,7 @@ function AthleteCard({ athlete, affordable, signed, onSign }: { athlete: MarketA
           <div className="swim26-muted-line">{athlete.nationality} · {signed ? 'ALREADY ON YOUR CLUB' : affordable ? 'READY FOR APPROACH' : 'BUDGET TOO LOW'}</div>
         </div>
       </div>
-      <div className="cta-band"><button className={`swim26-btn ${signed ? 'swim26-btn-secondary' : affordable ? 'swim26-btn-primary' : 'swim26-btn-ghost'} swim26-btn--full`} onClick={onSign} disabled={signed || !affordable}>{actionLabel}</button></div>
+      <div className="cta-band"><button className={`swim26-btn ${signed ? 'swim26-btn-secondary' : affordable ? 'swim26-btn-primary' : 'swim26-btn-ghost'} swim26-btn--full primary-cta`} onClick={onSign} disabled={signed || !affordable}>{actionLabel}</button></div>
     </article>
   )
 }
@@ -182,7 +182,7 @@ export function TransferMarket() {
   const signedCount = athletes.filter((athlete) => !athlete.available).length
 
   return (
-    <div className="swim26-market-page swim26-column-stack">
+    <div className="swim26-market-page swim26-column-stack swim26-page-pattern swim26-page-pattern--list">
       <section className="swim26-card swim26-card--gold swim26-market-hero">
         <div className="swim26-card-content swim26-stack-sm">
           <div className="swim26-section-head">

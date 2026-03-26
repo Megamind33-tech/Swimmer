@@ -167,7 +167,7 @@ export function ClubManagement() {
             </div>
           </div>
           <div className="cta-band">
-            <button className="swim26-btn swim26-btn-primary">OPEN CLUB</button>
+            <button className="swim26-btn swim26-btn-primary primary-cta">OPEN CLUB</button>
           </div>
         </section>
       </div>
@@ -237,7 +237,7 @@ export function ClubManagement() {
               </>
             ) : <div className="swim26-muted-line">NO LIVE TARGETS</div>}
           </div>
-          <div className="cta-band"><button className="swim26-btn swim26-btn-primary">SCOUT / SIGN</button></div>
+          <div className="cta-band"><button className="swim26-btn swim26-btn-primary primary-cta">SCOUT / SIGN</button></div>
         </section>
 
         <section className="club-card" style={{ ['--card-accent' as any]: GREEN }}>
@@ -324,7 +324,7 @@ export function ClubManagement() {
                 </div>
                 <div className="swim26-tile-body">
                   <div className="swim26-meta-line"><span>AGE {target.age}</span><span>${Math.round(target.price / 1000)}K</span></div>
-                  <button className="swim26-btn swim26-btn-primary swim26-btn--full">SIGN</button>
+                  <button className="swim26-btn swim26-btn-primary swim26-btn--full primary-cta">SIGN</button>
                 </div>
               </article>
             ))}
@@ -503,7 +503,7 @@ export function ClubManagement() {
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 1.02 }}
-        className="swim26-page-shell"
+        className="swim26-page-shell swim26-page-pattern swim26-page-pattern--split"
       >
         <div className="swim26-pane-scroll">{overviewPane}</div>
         <div className="swim26-pane-scroll">{dynastyPane}</div>
