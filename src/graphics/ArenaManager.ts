@@ -52,6 +52,7 @@ import { CameraSupport }             from './arena/CameraSupport';
 import { UnderwaterEffects }         from './arena/UnderwaterEffects';
 import { ArenaPostProcess }          from './arena/ArenaPostProcess';
 import { ArenaOptimizer }            from './arena/ArenaOptimizer';
+import { LifeguardStands }           from './arena/LifeguardStands';
 
 export class ArenaManager {
   // ── Infrastructure ──────────────────────────────────────────────────────
@@ -66,8 +67,9 @@ export class ArenaManager {
   private poolWater:      PoolWater                   | null = null;
   private poolDeck:       PoolDeck                    | null = null;
   private laneSystem:     LaneSystem                  | null = null;
-  private startingBlocks: StartingBlocks              | null = null;
-  private architecture:   ArenaArchitecture           | null = null;
+  private startingBlocks:  StartingBlocks              | null = null;
+  private lifeguardStands: LifeguardStands             | null = null;
+  private architecture:    ArenaArchitecture           | null = null;
   private lighting:       ArenaLighting               | null = null;
   private cameraSupport:  CameraSupport               | null = null;
   private broadcastCamera: BroadcastCamera            | null = null;
@@ -170,6 +172,11 @@ export class ArenaManager {
       this.startingBlocks = new StartingBlocks();
       this.startingBlocks.build(scene, this.arenaConfig, this.matLib);
       logger.log('[ArenaManager] Step 10/19: Starting blocks built');
+
+      // ── 10b. Lifeguard / official stands ─────────────────────────────────
+      this.lifeguardStands = new LifeguardStands();
+      this.lifeguardStands.build(scene, this.arenaConfig);
+      logger.log('[ArenaManager] Step 10b/19: Lifeguard stands built');
 
       // ── 11. Arena architecture (walls, bleachers, trusses, branding) ─────
       this.architecture = new ArenaArchitecture();
@@ -435,6 +442,7 @@ export class ArenaManager {
     this.underwaterFX?.dispose();
     this.lighting?.dispose();
     this.architecture?.dispose();
+    this.lifeguardStands?.dispose();
     this.startingBlocks?.dispose();
     this.laneSystem?.dispose();
     this.poolDeck?.dispose();

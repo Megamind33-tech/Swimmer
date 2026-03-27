@@ -42,6 +42,10 @@ export class ArenaArchitecture {
   private brandingMeshes:     BABYLON.Mesh[] = [];
   private bannerTexture:      BABYLON.DynamicTexture | null = null;
 
+  // SWIM26 branding — separate disposal list
+  private swim26Textures:     BABYLON.DynamicTexture[] = [];
+  private timingBoardTextures: BABYLON.DynamicTexture[] = [];
+
   // How far the arena envelope extends beyond the deck on each axis
   static readonly ARENA_MARGIN_X = 22;
   static readonly ARENA_MARGIN_Z = 22;
@@ -219,7 +223,8 @@ export class ArenaArchitecture {
     if (qualityTier !== 'LOW') {
       this._buildClerestoryWindows(scene, AW, AL, AH, glassMat);
     }
-    this._buildEventBranding(scene, config);
+    this._buildSWIM26Branding(scene, config);
+    this._buildTimingDisplayBoards(scene, config, steelMat);
 
     logger.log(`[ArenaArchitecture] Built Phase 6 (quality=${qualityTier})`);
     return this.root!;
@@ -483,92 +488,374 @@ export class ArenaArchitecture {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Phase 6: Event branding
+  // SWIM26 Branding — back wall logo (matches reference image exactly)
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Large event banner at the north end wall (finish-line side), visible from
-   * the broadcast side-camera looking down the pool.
-   * A 20 m × 4 m DynamicTexture panel with competition identity text:
-   *   "WORLD AQUATICS" (primary)   "SWIMMING CHAMPIONSHIPS" (secondary)
+   * Builds the prominent SWIM26 logo on the back (north finish) wall,
+   * exactly as shown in the reference image:
+   *   - Light grey/white painted wall surface
+   *   - "SWIM26" dark navy lettering with swimmer silhouette icon
+   *   - Centered, high on the wall, visible from the full pool length
    *
-   * The banner is mounted on the inside face of the north end bleacher/wall,
-   * above head height, facing south (camera direction for finish coverage).
-   *
-   * A matching but slightly smaller banner is placed at the south end (start)
-   * facing north.
+   * Also places a smaller sponsor banner at the south (start) end.
    */
-  private _buildEventBranding(
+  private _buildSWIM26Branding(
     scene:  BABYLON.Scene,
     config: IArenaConfig,
   ): void {
     const { poolLength: L } = config;
     const MARGIN = ArenaArchitecture.ARENA_MARGIN_Z;
 
-    this.bannerTexture = this._makeBannerTexture(scene);
+    // ── Main SWIM26 logo on north (finish) wall ───────────────────────────
+    const logoTex = this._makeSwim26LogoTexture(scene);
+    this.swim26Textures.push(logoTex);
 
-    const bannerMat = new BABYLON.StandardMaterial('bannerMat', scene);
-    bannerMat.emissiveTexture = this.bannerTexture;
-    bannerMat.emissiveColor   = new BABYLON.Color3(1, 1, 1);
-    bannerMat.backFaceCulling = false;
+    const logoMat = new BABYLON.StandardMaterial('swim26LogoMat', scene);
+    logoMat.emissiveTexture = logoTex;
+    logoMat.emissiveColor   = new BABYLON.Color3(1, 1, 1);
+    logoMat.backFaceCulling = false;
+    logoMat.disableLighting = true;
 
-    // North end: finish side — primary broadcast view, full 20 m banner
-    const bannerN = BABYLON.MeshBuilder.CreateBox('eventBannerN', {
-      width:  20.0,
+    // Large logo panel on the north wall — 12 m wide, 4 m tall
+    const logoPanel = BABYLON.MeshBuilder.CreateBox('swim26Logo', {
+      width:  12.0,
       height:  4.0,
-      depth:   0.15,
+      depth:   0.12,
     }, scene);
-    bannerN.position = new BABYLON.Vector3(0, 7.0, L / 2 + MARGIN * 0.55);
-    bannerN.material = bannerMat;
-    bannerN.parent   = this.root;
-    this.brandingMeshes.push(bannerN);
+    logoPanel.position = new BABYLON.Vector3(0, 11.0, L / 2 + MARGIN * 0.55);
+    logoPanel.material = logoMat;
+    logoPanel.parent   = this.root;
+    this.brandingMeshes.push(logoPanel);
 
-    // South end: start side — slightly smaller, mirrors the north
-    const bannerS = BABYLON.MeshBuilder.CreateBox('eventBannerS', {
-      width:  16.0,
-      height:  3.4,
-      depth:   0.15,
+    // ── SWIM26 sponsor strip along the top of the pool side walls ─────────
+    const stripTex = this._makeSwim26StripTexture(scene);
+    this.swim26Textures.push(stripTex);
+
+    const stripMat = new BABYLON.StandardMaterial('swim26StripMat', scene);
+    stripMat.emissiveTexture = stripTex;
+    stripMat.emissiveColor   = new BABYLON.Color3(1, 1, 1);
+    stripMat.backFaceCulling = false;
+    stripMat.disableLighting = true;
+
+    // Lane rope banners along the pool top edge (2 long sides)
+    const { poolWidth: W } = config;
+    const AW = W + ArenaArchitecture.ARENA_MARGIN_X * 2;
+
+    for (const sideZ of [-1, 1]) {
+      const strip = BABYLON.MeshBuilder.CreateBox(`swim26Strip_${sideZ}`, {
+        width:  L * 0.80,
+        height: 0.80,
+        depth:  0.08,
+      }, scene);
+      strip.position = new BABYLON.Vector3(0, 4.2, sideZ * (W / 2 + 0.60));
+      strip.material = stripMat;
+      strip.parent   = this.root;
+      this.brandingMeshes.push(strip);
+    }
+
+    // ── South (start) end — matching smaller brand banner ─────────────────
+    const startBannerTex = this._makeSwim26StartBannerTexture(scene);
+    this.swim26Textures.push(startBannerTex);
+
+    const startBannerMat = new BABYLON.StandardMaterial('swim26StartMat', scene);
+    startBannerMat.emissiveTexture = startBannerTex;
+    startBannerMat.emissiveColor   = new BABYLON.Color3(1, 1, 1);
+    startBannerMat.backFaceCulling = false;
+    startBannerMat.disableLighting = true;
+
+    const startBanner = BABYLON.MeshBuilder.CreateBox('swim26StartBanner', {
+      width:  10.0,
+      height:  3.2,
+      depth:   0.12,
     }, scene);
-    bannerS.position  = new BABYLON.Vector3(0, 6.5, -(L / 2 + MARGIN * 0.55));
-    bannerS.rotation.y = Math.PI; // face inward
-    bannerS.material  = bannerMat;
-    bannerS.parent    = this.root;
-    this.brandingMeshes.push(bannerS);
+    startBanner.position  = new BABYLON.Vector3(0, 10.0, -(L / 2 + MARGIN * 0.55));
+    startBanner.rotation.y = Math.PI;
+    startBanner.material  = startBannerMat;
+    startBanner.parent    = this.root;
+    this.brandingMeshes.push(startBanner);
   }
 
   /**
-   * Competition event banner DynamicTexture.
-   * Dark navy background, bold white/cyan text — instantly reads as elite
-   * competition venue without relying on external assets.
+   * SWIM26 main logo texture.
+   * Recreates the branding from the reference image:
+   *   - White/light-grey background
+   *   - Dark navy "SWIM26" wordmark (bold, wide tracking)
+   *   - Stylised swimmer silhouette between "SWIM" and "26"
    */
-  private _makeBannerTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
+  private _makeSwim26LogoTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
     const W   = 1024;
-    const H   = 204;
-    const tex = new BABYLON.DynamicTexture('bannerTex', { width: W, height: H }, scene, false);
+    const H   = 340;
+    const tex = new BABYLON.DynamicTexture('swim26LogoTex', { width: W, height: H }, scene, false);
     const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
 
-    // Background — dark competition navy
+    // Background — clean white (matches the light arena wall)
+    ctx.fillStyle = '#f0f2f4';
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw swimmer silhouette icon (stylised, matches logo in image)
+    this._drawSwimmerIcon(ctx, W / 2, H / 2 - 20, 64);
+
+    // "SWIM" — left of icon
+    ctx.fillStyle    = '#0a1428';
+    ctx.font         = 'bold 130px "Arial Black", Arial, sans-serif';
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '2px';
+    ctx.fillText('SWIM', W / 2 - 62, H / 2 - 12);
+
+    // "26." — right of icon (slightly different weight)
+    ctx.fillStyle    = '#0a1428';
+    ctx.font         = 'bold 130px "Arial Black", Arial, sans-serif';
+    ctx.textAlign    = 'left';
+    ctx.fillText('26.', W / 2 + 56, H / 2 - 12);
+
+    // Registered trademark symbol
+    ctx.font      = '28px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0a1428';
+    ctx.fillText('™', W / 2 + 240, H / 2 - 72);
+
+    tex.update();
+    return tex;
+  }
+
+  /**
+   * Draw a stylised swimmer silhouette icon (diver/freestyle position)
+   * matching the SWIM26 logo graphic in the reference image.
+   */
+  private _drawSwimmerIcon(
+    ctx:   CanvasRenderingContext2D,
+    cx:    number,
+    cy:    number,
+    size:  number,
+  ): void {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = '#0a1428';
+
+    // Body — elongated ellipse at diving angle
+    ctx.save();
+    ctx.rotate(-0.35);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, size * 0.42, size * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Head — small circle at the front
+    ctx.beginPath();
+    ctx.arc(size * 0.32, -size * 0.28, size * 0.10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Arms — extended forward (two thin arcs)
+    ctx.save();
+    ctx.rotate(-0.30);
+    ctx.beginPath();
+    ctx.moveTo(size * 0.20, -size * 0.04);
+    ctx.bezierCurveTo(size * 0.40, -size * 0.16, size * 0.55, -size * 0.22, size * 0.65, -size * 0.18);
+    ctx.lineWidth = size * 0.07;
+    ctx.strokeStyle = '#0a1428';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+
+    // Legs — trailing behind
+    ctx.save();
+    ctx.rotate(-0.30);
+    ctx.beginPath();
+    ctx.moveTo(-size * 0.35, size * 0.02);
+    ctx.bezierCurveTo(-size * 0.50, size * 0.14, -size * 0.55, size * 0.20, -size * 0.62, size * 0.12);
+    ctx.lineWidth = size * 0.06;
+    ctx.strokeStyle = '#0a1428';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  /**
+   * Long horizontal strip texture for poolside sponsor signage ("SWIM26 | SWIM26 |…")
+   */
+  private _makeSwim26StripTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
+    const W   = 2048;
+    const H   = 128;
+    const tex = new BABYLON.DynamicTexture('swim26StripTex', { width: W, height: H }, scene, false);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    // Navy blue background strip
     ctx.fillStyle = '#04101e';
     ctx.fillRect(0, 0, W, H);
 
-    // Top accent stripe — brand blue
-    ctx.fillStyle = '#0066cc';
-    ctx.fillRect(0, 0, W, 14);
-
-    // Bottom accent stripe
-    ctx.fillRect(0, H - 14, W, 14);
-
-    // Primary text — organisation name
+    // Top + bottom white accent lines
     ctx.fillStyle = '#ffffff';
-    ctx.font      = 'bold 72px Arial, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('WORLD AQUATICS', W / 2, H * 0.38);
+    ctx.fillRect(0, 0,      W, 6);
+    ctx.fillRect(0, H - 6, W, 6);
 
-    // Secondary text — event name
-    ctx.fillStyle = '#55bbff';
-    ctx.font      = 'bold 40px Arial, sans-serif';
-    ctx.fillText('SWIMMING CHAMPIONSHIPS', W / 2, H * 0.72);
+    // Repeating SWIM26 text
+    ctx.fillStyle = '#ffffff';
+    ctx.font      = 'bold 56px Arial, sans-serif';
+    ctx.textBaseline = 'middle';
+    const repeat = 6;
+    const step   = W / repeat;
+    for (let i = 0; i < repeat; i++) {
+      ctx.textAlign = 'center';
+      ctx.fillText('SWIM26', step * (i + 0.5), H / 2);
+    }
+
+    tex.update();
+    return tex;
+  }
+
+  /**
+   * South-end start banner ("SWIM26" on dark navy — matches competitor banners in image)
+   */
+  private _makeSwim26StartBannerTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
+    const W   = 1024;
+    const H   = 320;
+    const tex = new BABYLON.DynamicTexture('swim26StartBannerTex', { width: W, height: H }, scene, false);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    ctx.fillStyle = '#04101e';
+    ctx.fillRect(0, 0, W, H);
+
+    // Accent stripes
+    ctx.fillStyle = '#1155cc';
+    ctx.fillRect(0, 0,      W, 12);
+    ctx.fillRect(0, H - 12, W, 12);
+
+    ctx.fillStyle    = '#ffffff';
+    ctx.font         = 'bold 120px "Arial Black", Arial, sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SWIM26', W / 2, H * 0.42);
+
+    ctx.font      = 'bold 36px Arial, sans-serif';
+    ctx.fillStyle = '#55aaff';
+    ctx.fillText('COMPETITION SWIMMING', W / 2, H * 0.76);
+
+    tex.update();
+    return tex;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Timing Display Boards (above starting blocks)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Per-lane timing display boards mounted above the starting block end,
+   * exactly as visible in the reference image:
+   *   - Blue rectangular panels, one per lane
+   *   - Shows lane number ("26" styling) and "SWIM26" branding
+   *   - Mounted on stainless steel frames about 2.2 m above deck level
+   *
+   * These are the white/blue boards visible just behind the starting blocks.
+   */
+  private _buildTimingDisplayBoards(
+    scene:    BABYLON.Scene,
+    config:   IArenaConfig,
+    steelMat: BABYLON.PBRMaterial,
+  ): void {
+    const { poolLength: L, poolWidth: W, laneCount: LC } = config;
+    const laneWidth = W / LC;
+
+    // Display board dimensions — matches image proportions
+    const BOARD_W  = laneWidth * 0.82;
+    const BOARD_H  = 0.50;
+    const BOARD_D  = 0.08;
+    const BOARD_Y  = 2.40;   // height above deck
+    const BOARD_Z  = -L / 2 - 0.30;  // just behind starting block
+
+    // Support post height
+    const POST_H   = BOARD_Y + BOARD_H / 2;
+    const POST_DIAM = 0.04;
+
+    for (let lane = 0; lane < LC; lane++) {
+      const laneX = -W / 2 + (lane + 0.5) * laneWidth;
+
+      // ── Support post ──────────────────────────────────────────────────
+      const post = BABYLON.MeshBuilder.CreateCylinder(
+        `timingPost_${lane}`,
+        { diameter: POST_DIAM, height: POST_H, tessellation: 8 },
+        scene,
+      );
+      post.position = new BABYLON.Vector3(laneX, POST_H / 2, BOARD_Z);
+      post.material = steelMat;
+      post.parent   = this.root;
+      this.meshes.push(post);
+
+      // ── Display board panel ───────────────────────────────────────────
+      const boardTex = this._makeTimingBoardTexture(scene, lane + 1);
+      this.timingBoardTextures.push(boardTex);
+
+      const boardMat = new BABYLON.StandardMaterial(`timingBoardMat_${lane}`, scene);
+      boardMat.emissiveTexture = boardTex;
+      boardMat.emissiveColor   = new BABYLON.Color3(1, 1, 1);
+      boardMat.disableLighting = true;
+
+      const board = BABYLON.MeshBuilder.CreateBox(`timingBoard_${lane}`, {
+        width:  BOARD_W,
+        height: BOARD_H,
+        depth:  BOARD_D,
+      }, scene);
+      board.position = new BABYLON.Vector3(laneX, BOARD_Y, BOARD_Z);
+      board.material = boardMat;
+      board.parent   = this.root;
+      this.meshes.push(board);
+
+      // Horizontal cross-bar connecting post to board edges
+      const bar = BABYLON.MeshBuilder.CreateBox(`timingBar_${lane}`, {
+        width:  BOARD_W,
+        height: POST_DIAM,
+        depth:  POST_DIAM,
+      }, scene);
+      bar.position = new BABYLON.Vector3(laneX, BOARD_Y - BOARD_H / 2 - POST_DIAM / 2, BOARD_Z);
+      bar.material = steelMat;
+      bar.parent   = this.root;
+      this.meshes.push(bar);
+    }
+  }
+
+  /**
+   * Per-lane timing board texture — matches the blue SWIM26-branded boards
+   * visible above starting blocks in the reference image.
+   */
+  private _makeTimingBoardTexture(scene: BABYLON.Scene, laneNum: number): BABYLON.DynamicTexture {
+    const TW = 512;
+    const TH = 256;
+    const tex = new BABYLON.DynamicTexture(
+      `timingBoardTex_${laneNum}`, { width: TW, height: TH }, scene, false,
+    );
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    // Navy blue background
+    ctx.fillStyle = '#04101e';
+    ctx.fillRect(0, 0, TW, TH);
+
+    // Top accent stripe — bright blue
+    ctx.fillStyle = '#1a5aee';
+    ctx.fillRect(0, 0, TW, 18);
+    ctx.fillRect(0, TH - 18, TW, 18);
+
+    // SWIM26 brand (top small text)
+    ctx.fillStyle    = '#aaccff';
+    ctx.font         = 'bold 32px Arial, sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('SWIM26', TW / 2, 26);
+
+    // Large lane number — bright white, bold
+    ctx.fillStyle    = '#ffffff';
+    ctx.font         = 'bold 150px "Arial Black", Arial, sans-serif';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(laneNum), TW / 2, TH / 2 + 14);
+
+    // Lane label at bottom
+    ctx.fillStyle    = '#6699cc';
+    ctx.font         = 'bold 26px Arial, sans-serif';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('LANE', TW / 2, TH - 24);
 
     tex.update();
     return tex;
@@ -668,6 +955,8 @@ export class ArenaArchitecture {
   public dispose(): void {
     this.scoreboardTexture?.dispose();
     this.bannerTexture?.dispose();
+    this.swim26Textures.forEach(t => t.dispose());
+    this.timingBoardTextures.forEach(t => t.dispose());
     this.meshes.forEach(m => m.dispose());
     this.trussBeams.forEach(m => m.dispose());
     this.lightHousings.forEach(m => m.dispose());

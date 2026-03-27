@@ -82,23 +82,24 @@ export class ArenaMaterialLibrary {
     this._textures.push(tileTex);
 
     // ── Pool basin ────────────────────────────────────────────────────────────
-    // Olympic pool floor: high-gloss ceramic tiles that catch and reflect light
-    // through the water, creating that distinctive televised sparkle effect
+    // SWIM26-style pool: light aqua/cyan ceramic tiles matching the reference
+    // image — bright crystal-clear tiles under LED floodlights, very smooth
+    // glazed surface with tight grout lines creating the grid pattern.
     this.poolFloor = this._pbr('poolFloor', scene, {
       albedoTexture:        tileTex,
-      albedoColor:          new BABYLON.Color3(1, 1, 1),
+      albedoColor:          new BABYLON.Color3(0.78, 0.94, 0.99),  // light aqua tile tint
       metallic:             0.00,
-      roughness:            0.08,  // Very smooth - almost mirror-like underwater
+      roughness:            0.05,   // Very smooth glazed ceramic — near-mirror reflections
       bumpTexture:          tileNorm,
-      environmentIntensity: 0.12, // Glazed tile: noticeable gloss from overhead lights
+      environmentIntensity: 0.20,  // Glazed tile: strong gloss from overhead LED floodlights
     });
     // uScale / vScale are applied by PoolStructure on the texture itself
 
     this.poolWall = this._pbr('poolWall', scene, {
-      albedoColor:          new BABYLON.Color3(0.04, 0.32, 0.72), // OLYMPIC default
+      albedoColor:          new BABYLON.Color3(0.68, 0.90, 0.97),  // light cyan wall tile
       metallic:             0.00,
-      roughness:            0.18,
-      environmentIntensity: 0.04, // wet submerged tiles catch slight reflection
+      roughness:            0.12,
+      environmentIntensity: 0.10, // wet submerged tiles — visible sheen
     });
 
     this.coping = this._pbr('coping', scene, {
@@ -168,23 +169,24 @@ export class ArenaMaterialLibrary {
       roughness:   0.95,
     });
 
-    // ── Lane ropes ────────────────────────────────────────────────────────────
-    this.ropeGreen = this._pbr('ropeGreen', scene, {
-      albedoColor: new BABYLON.Color3(0.08, 0.65, 0.15),
+    // ── Lane ropes — SWIM26 pool colour scheme ────────────────────────────────
+    // ropeGreen slot is repurposed as the outer-lane BLUE rope (matches image)
+    this.ropeGreen = this._pbr('ropeBlue', scene, {
+      albedoColor: new BABYLON.Color3(0.08, 0.38, 0.92),  // bright competition blue
       metallic:    0.00,
-      roughness:   0.65,
+      roughness:   0.58,
     });
 
     this.ropeRed = this._pbr('ropeRed', scene, {
-      albedoColor: new BABYLON.Color3(0.88, 0.12, 0.12),
+      albedoColor: new BABYLON.Color3(0.92, 0.10, 0.10),  // vibrant competition red
       metallic:    0.00,
-      roughness:   0.65,
+      roughness:   0.58,
     });
 
     this.ropeYellow = this._pbr('ropeYellow', scene, {
-      albedoColor: new BABYLON.Color3(1.00, 0.82, 0.00),
+      albedoColor: new BABYLON.Color3(1.00, 0.84, 0.00),  // bright competition yellow
       metallic:    0.00,
-      roughness:   0.65,
+      roughness:   0.58,
     });
 
     this.flagPole = this._pbr('flagPole', scene, {

@@ -28,13 +28,16 @@ const WATER_COLORS: Record<PoolTheme, BABYLON.Color3> = {
   CUSTOM:       new BABYLON.Color3(0.25, 0.42, 0.62),
 };
 
-// Per-theme sky/ambient background (affects clear colour + fog)
+// Per-theme sky/ambient background (affects clear colour + fog).
+// SWIM26 venue: bright indoor natatorium with large clerestory windows.
+// Background is a pale cool white-blue (like looking at a white concrete
+// ceiling under bright LED floodlights) — matches reference image brightness.
 const CLEAR_COLORS: Record<PoolTheme, BABYLON.Color4> = {
-  OLYMPIC:      new BABYLON.Color4(0.06, 0.08, 0.14, 1),
-  CHAMPIONSHIP: new BABYLON.Color4(0.04, 0.06, 0.12, 1),
-  NEON:         new BABYLON.Color4(0.00, 0.04, 0.12, 1),
-  SUNSET:       new BABYLON.Color4(0.16, 0.07, 0.03, 1),
-  CUSTOM:       new BABYLON.Color4(0.07, 0.09, 0.12, 1),
+  OLYMPIC:      new BABYLON.Color4(0.72, 0.80, 0.88, 1),  // light indoor sky
+  CHAMPIONSHIP: new BABYLON.Color4(0.65, 0.72, 0.84, 1),
+  NEON:         new BABYLON.Color4(0.60, 0.76, 0.90, 1),
+  SUNSET:       new BABYLON.Color4(0.80, 0.72, 0.60, 1),
+  CUSTOM:       new BABYLON.Color4(0.70, 0.78, 0.86, 1),
 };
 
 // Fog density per quality tier — above-water natatorium haze.
