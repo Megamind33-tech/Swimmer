@@ -98,14 +98,29 @@ export class ArenaRoot {
         return;
       }
 
-      for (const cb of this.onRenderCallbacks) cb(dt);
-      this.scene.render();
+      try {
+        for (const cb of this.onRenderCallbacks) cb(dt);
+        this.scene.render();
+      } catch (error) {
+        logger.error('[ArenaRoot] Render error:', error);
+        // Continue rendering even if there's an error
+      }
 
       this.renderLoopId = requestAnimationFrame(loop);
     };
 
     loop();
     logger.log('[ArenaRoot] Render loop started');
+
+    // Log initial render confirmation after first frame
+    if (this.engine) {
+      const canvas = this.engine.getRenderingCanvas();
+      logger.log('[ArenaRoot] Rendering canvas:', {
+        width: canvas?.width,
+        height: canvas?.height,
+        webGLVersion: this.engine.webGLVersion,
+      });
+    }
   }
 
   public stopRenderLoop(): void {
