@@ -13,9 +13,11 @@ export default function App() {
     const arena = new ArenaManager(canvasRef.current, tier);
     arenaRef.current = arena;
 
-    arena.initialize().catch((err: Error) =>
-      console.error('[App] ArenaManager init failed:', err),
-    );
+    arena.initialize()
+      .then(() => arena.resize())
+      .catch((err: Error) =>
+        console.error('[App] ArenaManager init failed:', err),
+      );
 
     let resizeRaf: number | null = null;
     const handleResize = () => {

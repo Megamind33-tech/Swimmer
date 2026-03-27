@@ -129,6 +129,12 @@ export class ArenaManager {
     this.matLib = new ArenaMaterialLibrary();
     this.matLib.build(scene, this.arenaConfig, qt);
 
+    // ── 4b. Start render loop early so the clear-colour fills the canvas
+    //       immediately while the rest of the scene is still being built.
+    //       This prevents the "black screen" flash on slow / mobile devices.
+    //       startRenderLoop() is idempotent — the call at step 19 is a no-op.
+    this.arenaRoot.startRenderLoop();
+
     // ── 5. Lighting (before geometry so shadow casters can be registered) ─
     this.lighting = new ArenaLighting();
     this.lighting.build(scene, this.arenaConfig, qt);
