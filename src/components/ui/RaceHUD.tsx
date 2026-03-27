@@ -173,7 +173,6 @@ export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
               </button>
             </div>
           </div>
-        </div>
 
         {/* Right stack: micro actions + primary stroke ring */}
         <div className="pointer-events-auto flex flex-col items-end gap-2">
