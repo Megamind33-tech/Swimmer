@@ -113,136 +113,161 @@ export class ArenaManager {
   public async initialize(): Promise<void> {
     if (!this.canvas) throw new Error('[ArenaManager] Canvas not available');
 
-    // ── 1. Quality detection ──────────────────────────────────────────────
-    this.qualityMgr = new PerformanceQualityManager(this.initialQualityPreset);
-    const qt = this.qualityMgr.getQualityTier();
+    try {
+      // ── 1. Quality detection ──────────────────────────────────────────────
+      this.qualityMgr = new PerformanceQualityManager(this.initialQualityPreset);
+      const qt = this.qualityMgr.getQualityTier();
+      logger.log(`[ArenaManager] Step 1/19: Quality tier → ${qt}`);
 
-    // ── 2. Engine + Scene ─────────────────────────────────────────────────
-    this.arenaRoot = new ArenaRoot(this.canvas, qt);
-    const scene    = this.arenaRoot.getScene();
+      // ── 2. Engine + Scene ─────────────────────────────────────────────────
+      this.arenaRoot = new ArenaRoot(this.canvas, qt);
+      const scene    = this.arenaRoot.getScene();
+      logger.log('[ArenaManager] Step 2/19: Engine + Scene created');
 
-    // ── 3. Atmosphere (clear colour + fog) ───────────────────────────────
-    this.atmosphere = new ArenaAtmosphere();
-    this.atmosphere.build(scene, this.arenaConfig, qt);
+      // ── 3. Atmosphere (clear colour + fog) ───────────────────────────────
+      this.atmosphere = new ArenaAtmosphere();
+      this.atmosphere.build(scene, this.arenaConfig, qt);
+      logger.log('[ArenaManager] Step 3/19: Atmosphere built');
 
-    // ── 4. Material library (PBR materials + procedural textures) ────────
-    this.matLib = new ArenaMaterialLibrary();
-    this.matLib.build(scene, this.arenaConfig, qt);
+      // ── 4. Material library (PBR materials + procedural textures) ────────
+      this.matLib = new ArenaMaterialLibrary();
+      this.matLib.build(scene, this.arenaConfig, qt);
+      logger.log('[ArenaManager] Step 4/19: Material library built');
 
-    // ── 4b. Start render loop early so the clear-colour fills the canvas
-    //       immediately while the rest of the scene is still being built.
-    //       This prevents the "black screen" flash on slow / mobile devices.
-    //       startRenderLoop() is idempotent — the call at step 19 is a no-op.
-    this.arenaRoot.startRenderLoop();
+      // ── 4b. Start render loop early so the clear-colour fills the canvas
+      //       immediately while the rest of the scene is still being built.
+      //       This prevents the "black screen" flash on slow / mobile devices.
+      //       startRenderLoop() is idempotent — the call at step 19 is a no-op.
+      this.arenaRoot.startRenderLoop();
+      logger.log('[ArenaManager] Step 4b/19: Render loop started');
 
-    // ── 5. Lighting (before geometry so shadow casters can be registered) ─
-    this.lighting = new ArenaLighting();
-    this.lighting.build(scene, this.arenaConfig, qt);
+      // ── 5. Lighting (before geometry so shadow casters can be registered) ─
+      this.lighting = new ArenaLighting();
+      this.lighting.build(scene, this.arenaConfig, qt);
+      logger.log('[ArenaManager] Step 5/19: Lighting built');
 
-    // ── 6. Pool structure ─────────────────────────────────────────────────
-    this.poolStructure = new PoolStructure();
-    this.poolStructure.build(scene, this.arenaConfig, this.matLib);
+      // ── 6. Pool structure ─────────────────────────────────────────────────
+      this.poolStructure = new PoolStructure();
+      this.poolStructure.build(scene, this.arenaConfig, this.matLib);
+      logger.log('[ArenaManager] Step 6/19: Pool structure built');
 
-    // ── 7. Water surface ──────────────────────────────────────────────────
-    this.poolWater = new PoolWater();
-    this.poolWater.build(scene, this.arenaConfig, qt);
+      // ── 7. Water surface ──────────────────────────────────────────────────
+      this.poolWater = new PoolWater();
+      this.poolWater.build(scene, this.arenaConfig, qt);
+      logger.log('[ArenaManager] Step 7/19: Water surface built');
 
-    // ── 8. Deck ───────────────────────────────────────────────────────────
-    this.poolDeck = new PoolDeck();
-    this.poolDeck.build(scene, this.arenaConfig, this.matLib);
+      // ── 8. Deck ───────────────────────────────────────────────────────────
+      this.poolDeck = new PoolDeck();
+      this.poolDeck.build(scene, this.arenaConfig, this.matLib);
+      logger.log('[ArenaManager] Step 8/19: Deck built');
 
-    // ── 9. Lane system ────────────────────────────────────────────────────
-    this.laneSystem = new LaneSystem();
-    this.laneSystem.build(scene, this.arenaConfig, this.matLib);
+      // ── 9. Lane system ────────────────────────────────────────────────────
+      this.laneSystem = new LaneSystem();
+      this.laneSystem.build(scene, this.arenaConfig, this.matLib);
+      logger.log('[ArenaManager] Step 9/19: Lane system built');
 
-    // ── 10. Starting blocks ───────────────────────────────────────────────
-    this.startingBlocks = new StartingBlocks();
-    this.startingBlocks.build(scene, this.arenaConfig, this.matLib);
+      // ── 10. Starting blocks ───────────────────────────────────────────────
+      this.startingBlocks = new StartingBlocks();
+      this.startingBlocks.build(scene, this.arenaConfig, this.matLib);
+      logger.log('[ArenaManager] Step 10/19: Starting blocks built');
 
-    // ── 11. Arena architecture (walls, bleachers, trusses, branding) ─────
-    this.architecture = new ArenaArchitecture();
-    this.architecture.build(scene, this.arenaConfig, this.matLib, qt);
+      // ── 11. Arena architecture (walls, bleachers, trusses, branding) ─────
+      this.architecture = new ArenaArchitecture();
+      this.architecture.build(scene, this.arenaConfig, this.matLib, qt);
+      logger.log('[ArenaManager] Step 11/19: Arena architecture built');
 
-    // ── 12. Post-build scene configuration (needs full scene.meshes) ─────
-    //   a) Water render targets: reflection + refraction lists populated
-    this.poolWater?.setupRenderTargets(scene);
+      // ── 12. Post-build scene configuration (needs full scene.meshes) ─────
+      //   a) Water render targets: reflection + refraction lists populated
+      this.poolWater?.setupRenderTargets(scene);
 
-    //   b) Shadow casters + receivers: scan scene meshes by name pattern
-    this.lighting?.configureShadowsForScene(scene);
+      //   b) Shadow casters + receivers: scan scene meshes by name pattern
+      this.lighting?.configureShadowsForScene(scene);
 
-    //   c) Environment probe: one-shot IBL cube capture for metallic surfaces.
-    //      Exclude water + caustic meshes to prevent render target feedback.
-    const waterMesh   = this.poolWater?.getMesh() ?? null;
-    const excludeMeshes: BABYLON.AbstractMesh[] = waterMesh ? [waterMesh] : [];
-    // Also exclude any mesh named 'causticOverlay'
-    scene.meshes
-      .filter(m => m.name === 'causticOverlay')
-      .forEach(m => excludeMeshes.push(m));
+      //   c) Environment probe: one-shot IBL cube capture for metallic surfaces.
+      //      Exclude water + caustic meshes to prevent render target feedback.
+      const waterMesh   = this.poolWater?.getMesh() ?? null;
+      const excludeMeshes: BABYLON.AbstractMesh[] = waterMesh ? [waterMesh] : [];
+      // Also exclude any mesh named 'causticOverlay'
+      scene.meshes
+        .filter(m => m.name === 'causticOverlay')
+        .forEach(m => excludeMeshes.push(m));
 
-    const envTex = this.lighting?.buildEnvironmentProbe(scene, excludeMeshes) ?? null;
-    if (envTex && this.matLib) {
-      this.matLib.applyEnvironmentTexture(scene, envTex);
-    }
-
-    //   d) Underwater volume effects: depth fog transition + caustic depth light
-    //      + bubble particles. Snapshot above-water state as baseline for lerp.
-    this.underwaterFX = new UnderwaterEffects();
-    this.underwaterFX.build(scene, this.arenaConfig, qt);
-    this.underwaterFX.syncAboveWaterState(scene);
-
-    //   e) Static scene optimization — freeze transforms, pickability, and
-    //      (LOW only) merge high-count detail mesh groups.
-    //      Run AFTER all geometry + post-build passes so scene.meshes is final.
-    ArenaOptimizer.optimize(scene, qt);
-
-    // ── 13. Static cameras ────────────────────────────────────────────────
-    this.cameraSupport = new CameraSupport();
-    this.cameraSupport.build(scene, this.canvas, this.arenaConfig);
-
-    // ── 14. Post-processing pipeline ─────────────────────────────────────
-    // Built AFTER cameras so all camera instances can be attached.
-    // imageProcessing (contrast/exposure) applies globally; FXAA and bloom
-    // attach per-camera through the DefaultRenderingPipeline.
-    this.postProcess = new ArenaPostProcess();
-    this.postProcess.build(scene, this.cameraSupport.getCameras(), qt);
-
-    // ── 15. Broadcast camera (dormant until enableBroadcastMode) ─────────
-    this.broadcastCamera = new BroadcastCamera(scene, this.canvas);
-    this.broadcastCamera.initialize();
-    const broadcastCameraInstance = this.broadcastCamera.getCameraInstance();
-    if (broadcastCameraInstance) {
-      this.postProcess.addCamera(broadcastCameraInstance);
-    }
-
-    // ── 16. Apply initial theme ───────────────────────────────────────────
-    this._applyThemeInternal(this.arenaConfig.theme);
-
-    // ── 17. Freeze static PBR materials ──────────────────────────────────
-    // Must run AFTER _applyThemeInternal() has set poolWall.albedoColor so the
-    // correct theme colour is baked into the frozen material state.
-    this.matLib?.freezeStaticMaterials();
-
-    // ── 18. Register water update in render loop ─────────────────────────
-    this.arenaRoot.onRender((dt) => {
-      this.poolWater?.update(dt);
-
-      // Underwater volume: transition fog/clearColor based on active camera Y
-      if (this.underwaterFX && this.arenaRoot) {
-        const cam  = this.arenaRoot.getScene().activeCamera;
-        const camY = cam ? (cam as BABYLON.ArcRotateCamera).position.y : 10;
-        this.underwaterFX.update(this.arenaRoot.getScene(), camY, dt);
+      const envTex = this.lighting?.buildEnvironmentProbe(scene, excludeMeshes) ?? null;
+      if (envTex && this.matLib) {
+        this.matLib.applyEnvironmentTexture(scene, envTex);
       }
 
-      if (this.isBroadcastMode && this.broadcastCamera) {
-        this.broadcastCamera.update(dt);
+      //   d) Underwater volume effects: depth fog transition + caustic depth light
+      //      + bubble particles. Snapshot above-water state as baseline for lerp.
+      this.underwaterFX = new UnderwaterEffects();
+      this.underwaterFX.build(scene, this.arenaConfig, qt);
+      this.underwaterFX.syncAboveWaterState(scene);
+
+      //   e) Static scene optimization — freeze transforms, pickability, and
+      //      (LOW only) merge high-count detail mesh groups.
+      //      Run AFTER all geometry + post-build passes so scene.meshes is final.
+      ArenaOptimizer.optimize(scene, qt);
+      logger.log('[ArenaManager] Step 12/19: Post-build configuration complete');
+
+      // ── 13. Static cameras ────────────────────────────────────────────────
+      this.cameraSupport = new CameraSupport();
+      this.cameraSupport.build(scene, this.canvas, this.arenaConfig);
+      logger.log('[ArenaManager] Step 13/19: Static cameras built');
+
+      // ── 14. Post-processing pipeline ─────────────────────────────────────
+      // Built AFTER cameras so all camera instances can be attached.
+      // imageProcessing (contrast/exposure) applies globally; FXAA and bloom
+      // attach per-camera through the DefaultRenderingPipeline.
+      this.postProcess = new ArenaPostProcess();
+      this.postProcess.build(scene, this.cameraSupport.getCameras(), qt);
+      logger.log('[ArenaManager] Step 14/19: Post-processing built');
+
+      // ── 15. Broadcast camera (dormant until enableBroadcastMode) ─────────
+      this.broadcastCamera = new BroadcastCamera(scene, this.canvas);
+      this.broadcastCamera.initialize();
+      const broadcastCameraInstance = this.broadcastCamera.getCameraInstance();
+      if (broadcastCameraInstance) {
+        this.postProcess.addCamera(broadcastCameraInstance);
       }
-    });
+      logger.log('[ArenaManager] Step 15/19: Broadcast camera initialized');
 
-    // ── 19. Start render loop ────────────────────────────────────────────
-    this.arenaRoot.setFrameSkipInterval(this.qualityMgr.getFrameSkipInterval());
-    this.arenaRoot.startRenderLoop();
+      // ── 16. Apply initial theme ───────────────────────────────────────────
+      this._applyThemeInternal(this.arenaConfig.theme);
+      logger.log('[ArenaManager] Step 16/19: Theme applied');
 
-    logger.log('[ArenaManager] Initialized successfully');
+      // ── 17. Freeze static PBR materials ──────────────────────────────────
+      // Must run AFTER _applyThemeInternal() has set poolWall.albedoColor so the
+      // correct theme colour is baked into the frozen material state.
+      this.matLib?.freezeStaticMaterials();
+      logger.log('[ArenaManager] Step 17/19: Materials frozen');
+
+      // ── 18. Register water update in render loop ─────────────────────────
+      this.arenaRoot.onRender((dt) => {
+        this.poolWater?.update(dt);
+
+        // Underwater volume: transition fog/clearColor based on active camera Y
+        if (this.underwaterFX && this.arenaRoot) {
+          const cam  = this.arenaRoot.getScene().activeCamera;
+          const camY = cam ? (cam as BABYLON.ArcRotateCamera).position.y : 10;
+          this.underwaterFX.update(this.arenaRoot.getScene(), camY, dt);
+        }
+
+        if (this.isBroadcastMode && this.broadcastCamera) {
+          this.broadcastCamera.update(dt);
+        }
+      });
+      logger.log('[ArenaManager] Step 18/19: Render callbacks registered');
+
+      // ── 19. Start render loop ────────────────────────────────────────────
+      this.arenaRoot.setFrameSkipInterval(this.qualityMgr.getFrameSkipInterval());
+      this.arenaRoot.startRenderLoop();
+      logger.log('[ArenaManager] Step 19/19: Render loop re-confirmed');
+
+      logger.log('[ArenaManager] Initialized successfully - all 19 steps completed');
+    } catch (error) {
+      logger.error('[ArenaManager] Initialization failed:', error);
+      throw error;
+    }
   }
 
   // ============================================================================
