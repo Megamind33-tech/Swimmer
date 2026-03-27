@@ -1,31 +1,45 @@
-/**
- * App — root component
- *
- * All screens (lobby, mode-select, pre-race, pre-match, race) are responsive
- * and fully interactive in both portrait and landscape on all target devices.
- * LandscapeGuard is disabled: portrait is no longer blocked at the CSS or JS
- * level so menus and the race scene can adapt to any orientation.
- */
+import React, { useEffect, useRef } from 'react';
+import { ArenaManager } from './graphics/ArenaManager';
+import { detectRuntimePerformanceTier } from './performance/performanceTier';
 
-import React from 'react';
-import { GameShell } from './components/GameShell';
-import { LandscapeGuard } from './ui/LandscapeGuard';
-import { A11yProvider } from './context/AccessibilityContext';
-import { CareerSaveProvider } from './context/CareerSaveContext';
-import { useAndroidViewportSync } from './hooks/useAndroidViewportSync';
+export default function App() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const arenaRef = useRef<ArenaManager | null>(null);
 
-export function App() {
-  useAndroidViewportSync();
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    let disposed = false;
+    const tier = detectRuntimePerformanceTier();
+    const arena = new ArenaManager(canvasRef.current, tier);
+    arenaRef.current = arena;
+
+    arena.initialize().catch((err: Error) =>
+      console.error('[App] ArenaManager init failed:', err),
+    );
+
+    let resizeRaf: number | null = null;
+    const handleResize = () => {
+      if (resizeRaf !== null) return;
+      resizeRaf = window.requestAnimationFrame(() => {
+        resizeRaf = null;
+        if (!disposed) arena.resize();
+      });
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      disposed = true;
+      window.removeEventListener('resize', handleResize);
+      if (resizeRaf !== null) window.cancelAnimationFrame(resizeRaf);
+      arena.dispose();
+      arenaRef.current = null;
+    };
+  }, []);
 
   return (
-    <A11yProvider>
-      <CareerSaveProvider>
-        <LandscapeGuard disabled>
-          <GameShell />
-        </LandscapeGuard>
-      </CareerSaveProvider>
-    </A11yProvider>
+    <canvas
+      ref={canvasRef}
+      style={{ display: 'block', width: '100vw', height: '100dvh', touchAction: 'none' }}
+    />
   );
 }
-
-export default App;
