@@ -126,6 +126,22 @@ export class BroadcastCamera {
    */
   public activate(): void {
     if (!this.scene || !this.currentCamera) return;
+
+    // Ensure first activation always starts from a valid in-arena race shot.
+    // This prevents falling back to ArcRotate defaults that can point into fog
+    // or exterior walls before race-state sequencing kicks in.
+    if (!this.currentCameraId) {
+      const openingCamera = this.packageManager.getCameraOrFallback('CAM_07_START_FINISH_MASTER');
+      if (openingCamera) {
+        const spec = CAMERA_SPECS[openingCamera];
+        this.currentCamera.position = spec.position.clone();
+        this.currentCamera.target = spec.target.clone();
+        this.currentCamera.fov = BABYLON.Tools.ToRadians(spec.fov.suggested);
+        this.currentCameraId = openingCamera;
+        this.isTransitioning = false;
+      }
+    }
+
     this.currentCamera.detachControl();
     this.scene.activeCamera = this.currentCamera;
   }
@@ -188,6 +204,10 @@ export class BroadcastCamera {
     this.targetTarget = spec.target.clone();
     this.currentCameraId = availableCamera;
     this.transitionEasing = spec.easing;
+
+    if (this.currentCamera) {
+      this.currentCamera.fov = BABYLON.Tools.ToRadians(spec.fov.suggested);
+    }
 
     const distance = this.currentCamera ? BABYLON.Vector3.Distance(this.currentCamera.position, this.targetPosition) : 0;
 
