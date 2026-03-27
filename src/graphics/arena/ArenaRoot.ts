@@ -25,17 +25,12 @@ export class ArenaRoot {
 
     // Debug: Log canvas dimensions on Android
     if (compatibility.isAndroid) {
-      logger.log(`[ArenaRoot] Android detected. Canvas: ${canvas.width}x${canvas.height}, Parent: ${canvas.parentElement?.getBoundingClientRect().width}x${canvas.parentElement?.getBoundingClientRect().height}`);
+      logger.log(`[ArenaRoot] Android detected. Canvas: ${canvas.width}x${canvas.height} (size check)`);
     }
 
-    // Ensure canvas has valid dimensions before creating engine
+    // Validate canvas has been properly sized by the caller
     if (canvas.width === 0 || canvas.height === 0) {
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      if (rect && rect.width > 0 && rect.height > 0) {
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        logger.log(`[ArenaRoot] Resized canvas to ${canvas.width}x${canvas.height}`);
-      }
+      logger.warn(`[ArenaRoot] Canvas has 0 dimensions - this will cause rendering issues!`);
     }
 
     this.engine = new BABYLON.Engine(canvas, true, {
@@ -58,10 +53,6 @@ export class ArenaRoot {
     // value immediately after.  Set a fallback here so the first frame before
     // ArenaAtmosphere runs isn't a default grey flash.
     this.scene.clearColor = new BABYLON.Color4(0.06, 0.08, 0.12, 1);
-
-    // Force initial resize to ensure canvas dimensions are synced
-    // This is critical on Android where CSS-only sizing can cause 0x0 canvas
-    this.engine.resize();
 
     // Fog is owned entirely by ArenaAtmosphere (Phase 7: sets FOGMODE_EXP2 +
     // density + colour at build time and when the theme changes).
@@ -107,14 +98,29 @@ export class ArenaRoot {
         return;
       }
 
-      for (const cb of this.onRenderCallbacks) cb(dt);
-      this.scene.render();
+      try {
+        for (const cb of this.onRenderCallbacks) cb(dt);
+        this.scene.render();
+      } catch (error) {
+        logger.error('[ArenaRoot] Render error:', error);
+        // Continue rendering even if there's an error
+      }
 
       this.renderLoopId = requestAnimationFrame(loop);
     };
 
     loop();
     logger.log('[ArenaRoot] Render loop started');
+
+    // Log initial render confirmation after first frame
+    if (this.engine) {
+      const canvas = this.engine.getRenderingCanvas();
+      logger.log('[ArenaRoot] Rendering canvas:', {
+        width: canvas?.width,
+        height: canvas?.height,
+        webGLVersion: this.engine.webGLVersion,
+      });
+    }
   }
 
   public stopRenderLoop(): void {

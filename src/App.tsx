@@ -33,60 +33,98 @@ function GameApp() {
   useEffect(() => {
     if (!canvasRef.current) return;
     let disposed = false;
-
-    // Ensure canvas has proper dimensions before arena initialization
-    // This prevents 0x0 canvas issues on Android 12+ that cause black screens
-    const ensureCanvasSize = () => {
-      if (!canvasRef.current) return;
-      const rect = canvasRef.current.parentElement?.getBoundingClientRect();
-      if (rect && (rect.width > 0 || rect.height > 0)) {
-        canvasRef.current.width = rect.width;
-        canvasRef.current.height = rect.height;
-      }
-    };
-
-    ensureCanvasSize();
-
-    const tier = detectRuntimePerformanceTier();
-    const arena = new ArenaManager(canvasRef.current, tier);
-    arenaRef.current = arena;
-
-    arena.initialize()
-      .then(() => {
-        if (disposed) return;
-        arena.resize();
-        arena.setCamera('DEFAULT');
-      })
-      .catch((err: Error) => {
-        if (disposed) return;
-        console.error('[App] ArenaManager init failed:', err);
-        // On Android, provide specific debug info
-        if (/Android/i.test(navigator.userAgent)) {
-          console.error('[App] Android debug:', {
-            canvasWidth: canvasRef.current?.width,
-            canvasHeight: canvasRef.current?.height,
-            parentWidth: canvasRef.current?.parentElement?.offsetWidth,
-            parentHeight: canvasRef.current?.parentElement?.offsetHeight,
-          });
-        }
-      });
-
+    let initTimer: ReturnType<typeof setTimeout> | null = null;
     let resizeRaf: number | null = null;
-    const handleResize = () => {
-      if (resizeRaf !== null) return;
-      resizeRaf = window.requestAnimationFrame(() => {
-        resizeRaf = null;
-        if (!disposed) arena.resize();
-      });
-    };
-    window.addEventListener('resize', handleResize);
+
+    // Delay initialization slightly to ensure DOM is fully laid out
+    // This is crucial on Android where layout calculations can be async
+    initTimer = setTimeout(() => {
+      if (disposed || !canvasRef.current) return;
+
+      // Ensure canvas has proper dimensions before arena initialization
+      const canvas = canvasRef.current;
+      const parent = canvas.parentElement;
+
+      // Try multiple methods to get the canvas size
+      // 1. Try scrollWidth/scrollHeight (actual element size)
+      // 2. Try getBoundingClientRect (CSS-based size)
+      // 3. Fall back to window dimensions
+      let width = parent?.scrollWidth || 0;
+      let height = parent?.scrollHeight || 0;
+
+      if (width === 0 || height === 0) {
+        const rect = parent?.getBoundingClientRect();
+        width = rect?.width || 0;
+        height = rect?.height || 0;
+      }
+
+      if (width === 0 || height === 0) {
+        width = window.innerWidth;
+        height = window.innerHeight;
+      }
+
+      // Ensure minimum dimensions
+      width = Math.max(width, 320);
+      height = Math.max(height, 480);
+
+      canvas.width = width;
+      canvas.height = height;
+      console.log('[App] Canvas sized to:', width, 'x', height, '(parent:', parent?.offsetWidth, 'x', parent?.offsetHeight, ')');
+
+
+      const tier = detectRuntimePerformanceTier();
+      const arena = new ArenaManager(canvas, tier);
+      arenaRef.current = arena;
+
+      arena.initialize()
+        .then(() => {
+          if (disposed) return;
+          arena.resize();
+          arena.setCamera('DEFAULT');
+        })
+        .catch((err: Error) => {
+          if (disposed) return;
+          console.error('[App] ArenaManager init failed:', err);
+          // On Android, provide specific debug info
+          if (/Android/i.test(navigator.userAgent)) {
+            console.error('[App] Android debug:', {
+              canvasWidth: canvas.width,
+              canvasHeight: canvas.height,
+              parentWidth: canvas.parentElement?.offsetWidth,
+              parentHeight: canvas.parentElement?.offsetHeight,
+              windowWidth: window.innerWidth,
+              windowHeight: window.innerHeight,
+              error: err.message,
+            });
+          }
+        });
+
+      // Setup resize handler
+      const handleResize = () => {
+        if (resizeRaf !== null) return;
+        resizeRaf = window.requestAnimationFrame(() => {
+          resizeRaf = null;
+          if (!disposed) arena.resize();
+        });
+      };
+      window.addEventListener('resize', handleResize);
+
+      // Store cleanup in arenaRef for the return function
+      arenaRef.current = arena;
+      (arenaRef.current as any)._resizeHandler = handleResize;
+    }, 50); // 50ms delay to allow layout to complete
 
     return () => {
       disposed = true;
-      window.removeEventListener('resize', handleResize);
+      if (initTimer) clearTimeout(initTimer);
       if (resizeRaf !== null) window.cancelAnimationFrame(resizeRaf);
-      arena.dispose();
-      arenaRef.current = null;
+
+      if (arenaRef.current) {
+        const handler = (arenaRef.current as any)._resizeHandler;
+        if (handler) window.removeEventListener('resize', handler);
+        arenaRef.current.dispose();
+        arenaRef.current = null;
+      }
     };
   }, []);
 
