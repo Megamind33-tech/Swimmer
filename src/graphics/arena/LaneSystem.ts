@@ -84,34 +84,42 @@ export class LaneSystem {
       const ropeX  = -W / 2 + i * laneWidth;
       const ropeMat = ropeMatForIndex(i);
 
+      // ── Main rope cable (thin inner line) ───────────────────────────────
       const rope = BABYLON.MeshBuilder.CreateTube(`laneRope${i}`, {
         path: [
           new BABYLON.Vector3(ropeX, 0.04, -L / 2),
           new BABYLON.Vector3(ropeX, 0.04,  L / 2),
         ],
-        radius:      0.025,
+        radius:      0.015,  // Thinner inner cable
         tessellation: 6,
         updatable:   false,
       }, scene);
-      rope.material = ropeMat;
+      rope.material = matLib.flagLine;  // Dark thin cable
       rope.parent   = this.root;
       this.meshes.push(rope);
 
-      // ── Float discs every ~2 m for segmented appearance ─────────────────
-      const floatSpacing = 2.0;
-      const floatCount   = Math.max(1, Math.floor((L - 2) / floatSpacing));
+      // ── Float discs with FINA color pattern ─────────────────────────────
+      // Each disc alternates color for visibility
+      const floatSpacing = 0.5;  // 0.5m spacing for more detailed appearance
+      const floatCount   = Math.floor(L / floatSpacing);
 
       for (let f = 0; f < floatCount; f++) {
-        const fz = -L / 2 + (f + 1) * (L / (floatCount + 1));
+        const fz = -L / 2 + (f + 0.5) * floatSpacing;
+        
+        // Skip 15m marker positions (will be added separately)
+        if (Math.abs(Math.abs(fz) - (L / 2 - 15)) < 0.5) continue;
 
+        // Disc with alternating colors per segment
+        const discMat = this._getFloatMaterial(scene, i, f, matLib);
+        
         const disc = BABYLON.MeshBuilder.CreateCylinder(`disc${i}_${f}`, {
-          diameter:    0.14,
-          height:      0.08,
-          tessellation: 8,
+          diameter:    0.12,  // 12cm diameter (FINA standard)
+          height:      0.10,  // 10cm thick
+          tessellation: 12,
         }, scene);
         disc.rotation.z = Math.PI / 2;
         disc.position   = new BABYLON.Vector3(ropeX, 0.04, fz);
-        disc.material   = ropeMat;
+        disc.material   = discMat;
         disc.parent     = this.root;
         this.meshes.push(disc);
       }
@@ -248,6 +256,36 @@ export class LaneSystem {
         marker.parent     = this.root;
         this.meshes.push(marker);
       }
+    }
+  }
+
+  // ─── Float material helper ──────────────────────────────────────────────────
+
+  /**
+   * Returns the appropriate material for a float disc based on its position.
+   * Creates alternating color patterns for better visibility.
+   */
+  private _getFloatMaterial(
+    scene:  BABYLON.Scene,
+    ropeIndex: number,
+    floatIndex: number,
+    matLib: ArenaMaterialLibrary,
+  ): BABYLON.Material {
+    // Determine base color from rope position
+    const c = ROPE_COLORS[Math.min(ropeIndex - 1, ROPE_COLORS.length - 1)];
+    
+    // Create segments: 5m of each color alternating
+    // This creates the distinctive FINA lane rope appearance
+    const segmentLength = 5;  // 5m segments
+    const segmentIndex = Math.floor(floatIndex / 10);  // 10 floats per segment
+    
+    // Every other segment is white for visibility
+    if (segmentIndex % 2 === 0) {
+      return matLib.ropeRed;    // Red floats
+    } else if (segmentIndex % 4 === 1) {
+      return matLib.ropeYellow; // Yellow floats
+    } else {
+      return matLib.ropeGreen;  // Green floats
     }
   }
 

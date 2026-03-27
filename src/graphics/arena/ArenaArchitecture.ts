@@ -60,13 +60,15 @@ export class ArenaArchitecture {
     this.root = new BABYLON.TransformNode('ArenaArchitecture', scene);
 
     // ── Materials (from shared library) ───────────────────────────────────
-    const ceilingMat  = matLib.arenaCeiling;
-    const wallMat     = matLib.arenaWall;
-    const columnMat   = matLib.column;
-    const bleacherMat = matLib.bleacher;
-    const seatMat     = matLib.seat;
-    const steelMat    = matLib.arenaSteel;  // Phase 6
-    const glassMat    = matLib.arenaGlass;  // Phase 6
+    const ceilingMat   = matLib.arenaCeiling;
+    const wallMat      = matLib.arenaWall;
+    const wallLowerMat = matLib.arenaWallLower;  // Dark wainscoting
+    const stripeMat    = matLib.arenaStripe;     // Olympic blue accent
+    const columnMat    = matLib.column;
+    const bleacherMat  = matLib.bleacher;
+    const seatMat      = matLib.seat;
+    const steelMat     = matLib.arenaSteel;  // Phase 6
+    const glassMat     = matLib.arenaGlass;  // Phase 6
 
     // ── Ceiling ───────────────────────────────────────────────────────────
     const ceiling = BABYLON.MeshBuilder.CreateBox('arenaCeiling', {
@@ -77,21 +79,50 @@ export class ArenaArchitecture {
     ceiling.parent     = this.root;
     this.meshes.push(ceiling);
 
-    // ── Perimeter walls ───────────────────────────────────────────────────
+    // ── Perimeter walls with wainscoting and accent stripes ─────────────────
+    const WALL_LOWER_H = 2.4;  // Wainscoting height
+    const STRIPE_H     = 0.25; // Accent stripe thickness
+    
     const wallDefs = [
-      { name: 'arenaWallN', w: AW,  h: AH, d: 1.2, px: 0,       pz:  AL / 2 },
-      { name: 'arenaWallS', w: AW,  h: AH, d: 1.2, px: 0,       pz: -AL / 2 },
-      { name: 'arenaWallE', w: 1.2, h: AH, d: AL,  px:  AW / 2, pz: 0       },
-      { name: 'arenaWallW', w: 1.2, h: AH, d: AL,  px: -AW / 2, pz: 0       },
+      { name: 'arenaWallN', w: AW,  h: AH, d: 1.2, px: 0,       pz:  AL / 2,  side: 'N' },
+      { name: 'arenaWallS', w: AW,  h: AH, d: 1.2, px: 0,       pz: -AL / 2,  side: 'S' },
+      { name: 'arenaWallE', w: 1.2, h: AH, d: AL,  px:  AW / 2, pz: 0,        side: 'E' },
+      { name: 'arenaWallW', w: 1.2, h: AH, d: AL,  px: -AW / 2, pz: 0,        side: 'W' },
     ];
+    
     for (const def of wallDefs) {
-      const wall = BABYLON.MeshBuilder.CreateBox(def.name, {
-        width: def.w, height: def.h, depth: def.d,
+      // Main upper wall (painted light color)
+      const upperH = def.h - WALL_LOWER_H;
+      const upper = BABYLON.MeshBuilder.CreateBox(`${def.name}_upper`, {
+        width: def.w, height: upperH, depth: def.d,
       }, scene);
-      wall.position = new BABYLON.Vector3(def.px, def.h / 2, def.pz);
-      wall.material = wallMat;
-      wall.parent   = this.root;
-      this.meshes.push(wall);
+      upper.position = new BABYLON.Vector3(def.px, WALL_LOWER_H + upperH / 2, def.pz);
+      upper.material = wallMat;
+      upper.parent   = this.root;
+      this.meshes.push(upper);
+
+      // Lower wainscoting (dark band)
+      const lower = BABYLON.MeshBuilder.CreateBox(`${def.name}_lower`, {
+        width: def.w, height: WALL_LOWER_H, depth: def.d * 0.5,
+      }, scene);
+      lower.position = new BABYLON.Vector3(def.px, WALL_LOWER_H / 2, def.pz);
+      lower.material = wallLowerMat;
+      lower.parent   = this.root;
+      this.meshes.push(lower);
+
+      // Accent stripe at wainscoting top
+      const stripe = BABYLON.MeshBuilder.CreateBox(`${def.name}_stripe`, {
+        width: def.w * 1.001, height: STRIPE_H, depth: def.d * 0.6,
+      }, scene);
+      stripe.position = new BABYLON.Vector3(def.px, WALL_LOWER_H + STRIPE_H / 2, def.pz);
+      stripe.material = stripeMat;
+      stripe.parent   = this.root;
+      this.meshes.push(stripe);
+
+      // Lane number signage on side walls (E and W)
+      if (def.side === 'E' || def.side === 'W') {
+        this._buildLaneSignage(scene, def, AW, AL, config, stripeMat);
+      }
     }
 
     // ── Support columns along both long sides ─────────────────────────────
@@ -365,6 +396,90 @@ export class ArenaArchitecture {
         this.windowPanels.push(panel);
       }
     }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Lane number signage on side walls
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Builds lane number signage on the East and West arena walls.
+   * Creates large visible numbers 1-8 corresponding to the pool lanes,
+   * positioned to be visible from broadcast cameras and spectators.
+   */
+  private _buildLaneSignage(
+    scene:     BABYLON.Scene,
+    wallDef:   { name: string; w: number; h: number; d: number; px: number; pz: number; side: string },
+    AW:        number,
+    AL:        number,
+    config:    IArenaConfig,
+    accentMat: BABYLON.PBRMaterial,
+  ): void {
+    const { poolWidth: W, laneCount: LC } = config;
+    const laneWidth = W / LC;
+    const SIGN_H = 1.8;   // Sign height
+    const SIGN_W = 1.2;   // Sign width
+    const SIGN_Y = 4.5;   // Height on wall
+
+    // Calculate the wall offset (how far the wall is from pool center)
+    const wallX = wallDef.px;
+    const signDepth = wallDef.side === 'E' ? -0.3 : 0.3; // Offset slightly inward from wall
+
+    // Create lane number signs
+    for (let lane = 0; lane < LC; lane++) {
+      const laneX = -W / 2 + (lane + 0.5) * laneWidth;
+      
+      // Create textured sign with lane number
+      const signTex = this._createLaneNumberTexture(scene, lane + 1);
+      const signMat = new BABYLON.StandardMaterial(`laneSignMat_${lane}`, scene);
+      signMat.emissiveTexture = signTex;
+      signMat.emissiveColor = new BABYLON.Color3(0.9, 0.95, 1.0);
+      signMat.backFaceCulling = false;
+
+      const sign = BABYLON.MeshBuilder.CreateBox(`laneSign_${wallDef.side}_${lane + 1}`, {
+        width: SIGN_W,
+        height: SIGN_H,
+        depth: 0.08,
+      }, scene);
+
+      sign.position = new BABYLON.Vector3(wallX + signDepth, SIGN_Y, laneX);
+      sign.material = signMat;
+      sign.parent = this.root;
+      this.brandingMeshes.push(sign);
+    }
+  }
+
+  /**
+   * Creates a dynamic texture with the lane number displayed prominently.
+   * Olympic-style design with bold white numbers on dark blue background.
+   */
+  private _createLaneNumberTexture(scene: BABYLON.Scene, laneNum: number): BABYLON.DynamicTexture {
+    const tex = new BABYLON.DynamicTexture(`laneNumTex_${laneNum}`, { width: 128, height: 192 }, scene, false);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    // Dark Olympic blue background
+    ctx.fillStyle = '#0a2540';
+    ctx.fillRect(0, 0, 128, 192);
+
+    // White border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, 116, 180);
+
+    // Lane number - large bold white text
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 100px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(laneNum), 64, 96);
+
+    // "LANE" label at bottom
+    ctx.font = 'bold 18px Arial, sans-serif';
+    ctx.fillStyle = '#55aaff';
+    ctx.fillText('LANE', 64, 170);
+
+    tex.update();
+    return tex;
   }
 
   // ─────────────────────────────────────────────────────────────────────────

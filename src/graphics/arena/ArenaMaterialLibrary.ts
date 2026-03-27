@@ -45,6 +45,8 @@ export class ArenaMaterialLibrary {
 
   // ── Arena architecture ─────────────────────────────────────────────────────
   public arenaWall!:    BABYLON.PBRMaterial;
+  public arenaWallLower!: BABYLON.PBRMaterial; // Dark wainscoting band
+  public arenaStripe!:  BABYLON.PBRMaterial;   // Olympic blue accent stripe
   public arenaCeiling!: BABYLON.PBRMaterial;
   public column!:       BABYLON.PBRMaterial;
   public bleacher!:     BABYLON.PBRMaterial;
@@ -80,13 +82,15 @@ export class ArenaMaterialLibrary {
     this._textures.push(tileTex);
 
     // ── Pool basin ────────────────────────────────────────────────────────────
+    // Olympic pool floor: high-gloss ceramic tiles that catch and reflect light
+    // through the water, creating that distinctive televised sparkle effect
     this.poolFloor = this._pbr('poolFloor', scene, {
       albedoTexture:        tileTex,
       albedoColor:          new BABYLON.Color3(1, 1, 1),
       metallic:             0.00,
-      roughness:            0.10,
+      roughness:            0.08,  // Very smooth - almost mirror-like underwater
       bumpTexture:          tileNorm,
-      environmentIntensity: 0.06, // glazed tile: subtle gloss under overhead lights
+      environmentIntensity: 0.12, // Glazed tile: noticeable gloss from overhead lights
     });
     // uScale / vScale are applied by PoolStructure on the texture itself
 
@@ -207,11 +211,35 @@ export class ArenaMaterialLibrary {
     );
 
     // ── Arena architecture ────────────────────────────────────────────────────
+    // Create realistic painted wall texture
+    const wallPaintTex  = this._makePaintedWallTexture(scene);
+    const wallPaintNorm = useBump ? this._makePaintedWallNormal(scene) : null;
+    if (wallPaintNorm) this._textures.push(wallPaintNorm);
+    this._textures.push(wallPaintTex);
+
     this.arenaWall = this._pbr('arenaWall', scene, {
-      albedoColor:  new BABYLON.Color3(0.78, 0.80, 0.82),
-      metallic:     0.00,
-      roughness:    0.78,
-      bumpTexture:  concNorm,
+      albedoTexture:  wallPaintTex,
+      albedoColor:    new BABYLON.Color3(0.92, 0.94, 0.96),
+      metallic:       0.00,
+      roughness:      0.72,
+      bumpTexture:    wallPaintNorm,
+      backFaceCulling: false,
+    });
+
+    // Lower wall wainscoting material (darker accent band)
+    this.arenaWallLower = this._pbr('arenaWallLower', scene, {
+      albedoColor:    new BABYLON.Color3(0.18, 0.22, 0.28),
+      metallic:       0.02,
+      roughness:      0.65,
+      bumpTexture:    concNorm,
+      backFaceCulling: false,
+    });
+
+    // Accent stripe material (Olympic blue band)
+    this.arenaStripe = this._pbr('arenaStripe', scene, {
+      albedoColor:    new BABYLON.Color3(0.02, 0.35, 0.65),
+      metallic:       0.00,
+      roughness:      0.55,
       backFaceCulling: false,
     });
 
@@ -317,54 +345,104 @@ export class ArenaMaterialLibrary {
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * 128×128 single ceramic pool tile — light blue-white body, grout border,
-   * inner bevel highlight.  UV-tiled via uScale/vScale by PoolStructure.
+   * 256×256 Olympic-style pool tile — pristine white ceramic with subtle blue tint,
+   * thin dark grout lines, realistic depth variation for light refraction.
+   * UV-tiled via uScale/vScale by PoolStructure.
    */
   private _makeTileAlbedoTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
-    const S   = 128;
+    const S   = 256;
     const tex = new BABYLON.DynamicTexture('poolTileTex', { width: S, height: S }, scene, true);
     const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
 
-    ctx.fillStyle = '#c4e0f0';
+    // Olympic pool tile base - slightly cool white
+    ctx.fillStyle = '#f0f4f8';
     ctx.fillRect(0, 0, S, S);
 
-    // Subtle top-left bevel highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    ctx.fillRect(3, 3, S / 2, S / 2);
+    // Subtle blue tint gradient (simulates pool water influence)
+    const gradient = ctx.createLinearGradient(0, 0, S, S);
+    gradient.addColorStop(0, 'rgba(200, 220, 240, 0.08)');
+    gradient.addColorStop(0.5, 'rgba(180, 210, 235, 0.05)');
+    gradient.addColorStop(1, 'rgba(200, 220, 240, 0.08)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, S, S);
 
-    // Grout border — 3 px ≈ 2.3 cm at 1 m tile
-    const GROUT = 3;
-    ctx.fillStyle = '#4a7890';
-    ctx.fillRect(0,         0,         S,     GROUT);
-    ctx.fillRect(0,         S - GROUT, S,     GROUT);
-    ctx.fillRect(0,         0,         GROUT, S);
-    ctx.fillRect(S - GROUT, 0,         GROUT, S);
+    // Subtle top-left corner highlight (tile surface bevel)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(S * 0.3, 0);
+    ctx.lineTo(0, S * 0.3);
+    ctx.closePath();
+    ctx.fill();
+
+    // Thin dark grout lines (2px ≈ 1.5 cm at 1m tile - Olympic standard)
+    const GROUT = 2;
+    ctx.fillStyle = '#1a3a4a';  // Dark blue-grey grout
+    ctx.fillRect(0, 0, S, GROUT);
+    ctx.fillRect(0, S - GROUT, S, GROUT);
+    ctx.fillRect(0, 0, GROUT, S);
+    ctx.fillRect(S - GROUT, 0, GROUT, S);
+
+    // Inner grout shadow for depth
+    ctx.fillStyle = 'rgba(10, 30, 50, 0.3)';
+    ctx.fillRect(GROUT, GROUT, S - GROUT * 2, 1);
+    ctx.fillRect(GROUT, GROUT, 1, S - GROUT * 2);
+
+    // Subtle surface variation for realism
+    for (let i = 0; i < 50; i++) {
+      const x = Math.random() * S;
+      const y = Math.random() * S;
+      const r = Math.random() * 3 + 1;
+      const alpha = Math.random() * 0.03 + 0.01;
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     tex.update();
     return tex;
   }
 
   /**
-   * 128×128 normal map for ceramic tile.
+   * 256×256 normal map for Olympic ceramic tile - subtle depth and surface detail.
    */
   private _makeTileNormalTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
-    const S   = 128;
+    const S   = 256;
     const tex = new BABYLON.DynamicTexture('poolTileNorm', { width: S, height: S }, scene, false);
     const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
 
     const imageData = ctx.createImageData(S, S);
     const d = imageData.data;
-    const GROUT = 4;
+    const GROUT = 3;
 
     for (let y = 0; y < S; y++) {
       for (let x = 0; x < S; x++) {
         const idx = (y * S + x) * 4;
         let nx = 128, ny = 128, nz = 255;
 
-        if (x < GROUT)           nx = 128 + Math.round(28 * (1 - x / GROUT));
-        if (x >= S - GROUT)      nx = 128 - Math.round(28 * (1 - (S - 1 - x) / GROUT));
-        if (y < GROUT)           ny = 128 + Math.round(28 * (1 - y / GROUT));
-        if (y >= S - GROUT)      ny = 128 - Math.round(28 * (1 - (S - 1 - y) / GROUT));
+        // Grout edges - beveled normal direction
+        if (x < GROUT) {
+          const t = x / GROUT;
+          nx = 128 + Math.round(35 * (1 - t) * (1 - t));
+        }
+        if (x >= S - GROUT) {
+          const t = (S - 1 - x) / GROUT;
+          nx = 128 - Math.round(35 * (1 - t) * (1 - t));
+        }
+        if (y < GROUT) {
+          const t = y / GROUT;
+          ny = 128 + Math.round(35 * (1 - t) * (1 - t));
+        }
+        if (y >= S - GROUT) {
+          const t = (S - 1 - y) / GROUT;
+          ny = 128 - Math.round(35 * (1 - t) * (1 - t));
+        }
+
+        // Subtle surface micro-variation
+        const micro = Math.sin(x * 0.3) * Math.cos(y * 0.3) * 2;
+        nx = Math.max(0, Math.min(255, nx + Math.round(micro)));
+        ny = Math.max(0, Math.min(255, ny + Math.round(micro * 0.5)));
 
         d[idx]     = nx;
         d[idx + 1] = ny;
@@ -438,6 +516,113 @@ export class ArenaMaterialLibrary {
   private _hash(ix: number, iy: number): number {
     const s = Math.sin(ix * 12.9898 + iy * 78.233) * 43758.5453;
     return s - Math.floor(s);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Painted Wall Texture Generator
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Creates a realistic painted indoor wall texture with subtle variations,
+   * brush marks, and slight imperfections that make it look like a real
+   * painted venue surface rather than a flat color.
+   */
+  private _makePaintedWallTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
+    const S = 256;
+    const tex = new BABYLON.DynamicTexture('wallPaintTex', { width: S, height: S }, scene, true);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    // Base off-white paint color (like a real indoor sports venue)
+    ctx.fillStyle = '#e8ecf0';
+    ctx.fillRect(0, 0, S, S);
+
+    // Add subtle color variation (roller marks, slight unevenness)
+    for (let i = 0; i < 80; i++) {
+      const x = Math.random() * S;
+      const y = Math.random() * S;
+      const w = Math.random() * 60 + 20;
+      const h = Math.random() * 8 + 2;
+      const alpha = Math.random() * 0.03 + 0.01;
+      
+      // Slightly lighter or darker bands (roller strokes)
+      const lighter = Math.random() > 0.5;
+      ctx.fillStyle = lighter 
+        ? `rgba(255, 255, 255, ${alpha})`
+        : `rgba(200, 210, 220, ${alpha})`;
+      
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.random() * 0.1 - 0.05);
+      ctx.fillRect(-w/2, -h/2, w, h);
+      ctx.restore();
+    }
+
+    // Add very subtle speckles (paint pigment texture)
+    for (let i = 0; i < 200; i++) {
+      const x = Math.random() * S;
+      const y = Math.random() * S;
+      const r = Math.random() * 1.5 + 0.5;
+      const alpha = Math.random() * 0.04 + 0.01;
+      
+      ctx.fillStyle = `rgba(180, 195, 210, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Subtle vertical shadow lines (wall panel seams)
+    ctx.strokeStyle = 'rgba(160, 175, 190, 0.08)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < S; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, S);
+      ctx.stroke();
+    }
+
+    tex.update();
+    return tex;
+  }
+
+  /**
+   * Normal map for painted wall - subtle surface bumps and imperfections
+   */
+  private _makePaintedWallNormal(scene: BABYLON.Scene): BABYLON.DynamicTexture {
+    const S = 128;
+    const tex = new BABYLON.DynamicTexture('wallPaintNorm', { width: S, height: S }, scene, false);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+    const imageData = ctx.createImageData(S, S);
+    const d = imageData.data;
+
+    for (let y = 0; y < S; y++) {
+      for (let x = 0; x < S; x++) {
+        const idx = (y * S + x) * 4;
+        
+        // Base flat normal
+        let nx = 128;
+        let ny = 128;
+        
+        // Add subtle noise for paint texture
+        const noise = Math.sin(x * 0.5) * Math.cos(y * 0.5) * 3;
+        nx += noise;
+        ny += noise * 0.7;
+        
+        // Panel seam indentations
+        if (x < 2 || x > S - 3) {
+          const t = x < 2 ? x / 2 : (S - x) / 3;
+          nx -= 15 * (1 - t);
+        }
+        
+        d[idx]     = Math.max(0, Math.min(255, Math.round(nx)));
+        d[idx + 1] = Math.max(0, Math.min(255, Math.round(ny)));
+        d[idx + 2] = 255;
+        d[idx + 3] = 255;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    tex.update();
+    return tex;
   }
 
   // ─────────────────────────────────────────────────────────────────────────

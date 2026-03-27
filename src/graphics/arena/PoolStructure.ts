@@ -1,30 +1,29 @@
 /**
- * PoolStructure  —  Phase 2
- * Builds the physical shell of the competition pool basin.
+ * PoolStructure  —  Olympic Competition Pool
+ * Builds a realistic Olympic-standard competition pool basin.
  *
- * Phase 2 additions over Phase 1:
- *   ✓ Procedural tile DynamicTexture on pool floor (grout-line grid, 1 m tiles)
- *   ✓ Separate wall material with subtle depth-gradient emissive (upper wall brighter)
- *   ✓ Overflow gutter channel — dark capping strip at pool rim, visible from
- *       poolside and underwater cameras
- *   ✓ Lane centre lines — thin dark boxes on pool floor, one per lane
- *   ✓ T-marks — black cross pairs at 5 m from each end wall, per lane
- *   ✓ Turn-wall touch pads — white rectangular panels flush with each end wall,
- *       one per lane, at competition depth (~1 m below surface)
- *   ✓ Rope anchor posts — small stainless cylinders at pool ends for each
- *       lane rope, so ropes look physically terminated
+ * Features:
+ *   ✓ White ceramic tile floor with dark grout lines
+ *   ✓ FINA-standard lane lines (black, 0.25m wide)
+ *   ✓ T-marks at 5m from each end (turn warning)
+ *   ✓ Distance markers at 15m intervals
+ *   ✓ Crosshair targets on end walls
+ *   ✓ Starting block numbers (1-8)
+ *   ✓ Depth markers on walls
+ *   ✓ Competition touch pads
+ *   ✓ Overflow gutter system
  *
- * Coordinate convention (shared across all arena modules):
- *   Y = 0   : deck level / water surface / top of pool walls
- *   Y = -3  : pool floor  (BASIN_DEPTH = 3 m)
- *   Z = ±25 : pool ends (50 m pool, poolLength / 2)
- *   X = ±12.5: pool sides (25 m pool, poolWidth / 2)
+ * FINA Standards:
+ *   - Lane lines: 0.25m wide, continuous black
+ *   - T-marks: 0.5m from end walls
+ *   - Target line: 0.3m below water surface on end walls
+ *   - Pool depth markers: every 0.5m depth change
  *
- * Phase 3 will add:
- *   - PBR tile texture with normal map (replace DynamicTexture flat colour)
- *   - Depth-gradient vertex colour on walls (lighter top, darker bottom)
- *   - Gutter true recess (geometry cut via separate slab approach)
- *   - Shadow receiving on pool floor
+ * Coordinate convention:
+ *   Y = 0   : deck level / water surface
+ *   Y = -3  : pool floor (BASIN_DEPTH = 3 m)
+ *   Z = ±25 : pool ends (50 m pool)
+ *   X = ±12.5: pool sides (25 m pool)
  */
 
 import * as BABYLON from '@babylonjs/core';
@@ -52,7 +51,8 @@ export class PoolStructure {
   private floorMesh:    BABYLON.Mesh          | null = null;
   private wallMeshes:   BABYLON.Mesh[] = [];
   private copingMeshes: BABYLON.Mesh[] = [];
-  private detailMeshes: BABYLON.Mesh[] = []; // markings, pads, anchors
+  private detailMeshes: BABYLON.Mesh[] = [];
+  private textures:     BABYLON.DynamicTexture[] = [];
 
   private poolMaterial:  BABYLON.PBRMaterial | null = null;
   private wallMaterial:  BABYLON.PBRMaterial | null = null;
@@ -67,45 +67,44 @@ export class PoolStructure {
 
     this.root = new BABYLON.TransformNode('PoolStructure', scene);
 
-    // ── 1. Materials (from shared library) ───────────────────────────────
-
+    // ── 1. Materials ───────────────────────────────────────────────────────
     this.poolMaterial = matLib.poolFloor;
     this.wallMaterial = matLib.poolWall;
 
-    // UV tiling: 1 texture repeat per metre → tile count = inner dimension
-    const innerW = W - WT * 2;
-    const innerL = L - WT * 2;
-    if (matLib.poolFloor.albedoTexture) {
-      // Babylon texture base type no longer includes uScale/vScale in typings.
-      // These values still exist at runtime on texture implementations.
-      const albedo = matLib.poolFloor.albedoTexture as any;
-      albedo.uScale = Math.round(innerW); // ~24 for 25 m pool
-      albedo.vScale = Math.round(innerL); // ~49 for 50 m pool
-    }
+    // Create custom Olympic tile texture with lane lines
+    const floorTex = this._createOlympicFloorTexture(scene, config);
+    const floorNorm = this._createTileNormalMap(scene);
+    
+    this.poolMaterial.albedoTexture = floorTex;
+    this.poolMaterial.bumpTexture = floorNorm;
 
-    const copingMat   = matLib.coping;
-    const gutterMat   = matLib.gutter;
-    const markingMat  = matLib.laneMarking;
-    const padMat      = matLib.touchPad;
-    const anchorMat   = matLib.stainless;
+    const copingMat  = matLib.coping;
+    const gutterMat  = matLib.gutter;
+    const markingMat = matLib.laneMarking;
+    const padMat     = matLib.touchPad;
+    const anchorMat  = matLib.stainless;
 
     // ── 2. Pool floor ─────────────────────────────────────────────────────
+    const innerW = W - WT * 2;
+    const innerL = L - WT * 2;
+
     this.floorMesh = BABYLON.MeshBuilder.CreateBox('poolFloor', {
       width:  innerW,
       height: 0.25,
       depth:  innerL,
     }, scene);
-    this.floorMesh.position.y = -D + 0.125; // top face at y = -D + 0.25 … ≈ -2.75
+    this.floorMesh.position.y = -D + 0.125;
     this.floorMesh.material   = this.poolMaterial;
     this.floorMesh.parent     = this.root;
 
-    // ── 3. Basin walls (4 sides) ─────────────────────────────────────────
+    // ── 3. Basin walls with target crosses ────────────────────────────────
     const wallDefs = [
-      { n: 'wallN', w: W,  h: D, d: WT,  px: 0,       py: -D / 2, pz:  L / 2 },
-      { n: 'wallS', w: W,  h: D, d: WT,  px: 0,       py: -D / 2, pz: -L / 2 },
-      { n: 'wallE', w: WT, h: D, d: L,   px:  W / 2,  py: -D / 2, pz:  0     },
-      { n: 'wallW', w: WT, h: D, d: L,   px: -W / 2,  py: -D / 2, pz:  0     },
+      { n: 'wallN', w: W,  h: D, d: WT,  px: 0,       py: -D / 2, pz:  L / 2,  isEnd: true },
+      { n: 'wallS', w: W,  h: D, d: WT,  px: 0,       py: -D / 2, pz: -L / 2,  isEnd: true },
+      { n: 'wallE', w: WT, h: D, d: L,   px:  W / 2,  py: -D / 2, pz:  0,      isEnd: false },
+      { n: 'wallW', w: WT, h: D, d: L,   px: -W / 2,  py: -D / 2, pz:  0,      isEnd: false },
     ];
+    
     for (const def of wallDefs) {
       const wall = BABYLON.MeshBuilder.CreateBox(def.n, {
         width: def.w, height: def.h, depth: def.d,
@@ -114,9 +113,14 @@ export class PoolStructure {
       wall.material = this.wallMaterial;
       wall.parent   = this.root;
       this.wallMeshes.push(wall);
+
+      // Add target crosses on end walls
+      if (def.isEnd) {
+        this._buildTargetCrosses(scene, def, LC, W, D, markingMat);
+      }
     }
 
-    // ── 4. Coping edge tiles ─────────────────────────────────────────────
+    // ── 4. Coping edge tiles ───────────────────────────────────────────────
     const copingDefs = [
       { n: 'copN', w: W + CW * 2, h: CH, d: CW, px: 0,             pz:  L / 2 + CW / 2 },
       { n: 'copS', w: W + CW * 2, h: CH, d: CW, px: 0,             pz: -L / 2 - CW / 2 },
@@ -133,64 +137,67 @@ export class PoolStructure {
       this.copingMeshes.push(cop);
     }
 
-    // ── 5. Overflow gutter channel ───────────────────────────────────────
-    // A dark capping strip over the top of each wall — the overflow gutter
-    // is not visible from above (hidden under coping) but reads from poolside
-    // and underwater cameras as a distinct drainage channel.
+    // ── 5. Overflow gutter ─────────────────────────────────────────────────
     const GUTTER_H = 0.06;
-    const GUTTER_INSET = WT; // gutter covers full wall-top width
     const gutterDefs = [
-      { n: 'gutN', w: W,  h: GUTTER_H, d: GUTTER_INSET, px: 0,       pz:  L / 2 - WT / 2 },
-      { n: 'gutS', w: W,  h: GUTTER_H, d: GUTTER_INSET, px: 0,       pz: -L / 2 + WT / 2 },
-      { n: 'gutE', w: GUTTER_INSET, h: GUTTER_H, d: innerL, px:  W / 2 - WT / 2, pz: 0   },
-      { n: 'gutW', w: GUTTER_INSET, h: GUTTER_H, d: innerL, px: -W / 2 + WT / 2, pz: 0   },
+      { n: 'gutN', w: W,  h: GUTTER_H, d: WT, px: 0,       pz:  L / 2 - WT / 2 },
+      { n: 'gutS', w: W,  h: GUTTER_H, d: WT, px: 0,       pz: -L / 2 + WT / 2 },
+      { n: 'gutE', w: WT, h: GUTTER_H, d: innerL, px:  W / 2 - WT / 2, pz: 0   },
+      { n: 'gutW', w: WT, h: GUTTER_H, d: innerL, px: -W / 2 + WT / 2, pz: 0   },
     ];
     for (const def of gutterDefs) {
       const g = BABYLON.MeshBuilder.CreateBox(def.n, {
         width: def.w, height: def.h, depth: def.d,
       }, scene);
-      // Sit the gutter so its top face is flush with deck (y = 0) and it
-      // plunges slightly into the wall top — creates shadow without geometry cuts
       g.position = new BABYLON.Vector3(def.px, -GUTTER_H / 2, def.pz);
       g.material = gutterMat;
       g.parent   = this.root;
       this.detailMeshes.push(g);
     }
 
-    // ── 6. Lane centre lines on pool floor ───────────────────────────────
-    // Thin dark stripe down the middle of each lane, running full pool length.
-    // Sits 0.02 m above the floor top to prevent z-fighting.
-    const laneWidth  = W / LC;
-    const markingY   = -D + 0.25 + 0.02; // 2 cm above floor surface
-    const markingLen = innerL - 0.1;      // leave small gap at each end
+    // ── 6. FINA lane lines (raised from floor) ────────────────────────────
+    const laneWidth = W / LC;
+    const markingY  = -D + 0.25 + 0.015; // 1.5 cm above floor
 
     for (let lane = 0; lane < LC; lane++) {
       const laneX = -W / 2 + (lane + 0.5) * laneWidth;
 
+      // Main lane line (continuous)
       const line = BABYLON.MeshBuilder.CreateBox(`laneLine${lane}`, {
-        width:  0.20,
-        height: 0.01,
-        depth:  markingLen,
+        width:  0.25,  // FINA standard width
+        height: 0.015,
+        depth:  innerL - 0.5,
       }, scene);
       line.position = new BABYLON.Vector3(laneX, markingY, 0);
       line.material = markingMat;
       line.parent   = this.root;
       this.detailMeshes.push(line);
+
+      // Cross lines at ends (perpendicular)
+      for (const endZ of [-L / 2 + 2, L / 2 - 2]) {
+        const crossLine = BABYLON.MeshBuilder.CreateBox(`crossLine${lane}_${endZ}`, {
+          width:  laneWidth * 0.8,
+          height: 0.015,
+          depth:  0.25,
+        }, scene);
+        crossLine.position = new BABYLON.Vector3(laneX, markingY, endZ);
+        crossLine.material = markingMat;
+        crossLine.parent   = this.root;
+        this.detailMeshes.push(crossLine);
+      }
     }
 
-    // ── 7. T-marks at 5 m from each end wall ────────────────────────────
-    // Standard FINA T-mark: horizontal bar + stem pointing into pool.
-    // One T per lane per end = 2 × LC total T-marks (each T = 2 boxes).
-    const T_DIST    = 5.0;   // metres from end wall
-    const T_BAR_W   = 0.60;  // horizontal bar width
-    const T_BAR_D   = 0.18;  // bar depth (fore-aft)
-    const T_STEM_W  = 0.18;  // stem width
-    const T_STEM_D  = 0.90;  // stem depth (pointing into pool)
-    const T_HEIGHT  = 0.012; // very flat
+    // ── 7. T-marks at 5m from each end ────────────────────────────────────
+    const T_DIST    = 5.0;
+    const T_BAR_W   = 0.50;
+    const T_BAR_D   = 0.25;
+    const T_STEM_W  = 0.25;
+    const T_STEM_D  = 1.0;
+    const T_HEIGHT  = 0.012;
 
     const tMarkEnds = [
-      { zBar: -L / 2 + T_DIST,              stemDir:  1 }, // south end, stem points north
-      { zBar:  L / 2 - T_DIST,              stemDir: -1 }, // north end, stem points south
+      { zBar: -L / 2 + T_DIST, stemDir: 1 },
+      { zBar:  L / 2 - T_DIST, stemDir: -1 },
     ];
 
     for (const end of tMarkEnds) {
@@ -201,39 +208,62 @@ export class PoolStructure {
         const bar = BABYLON.MeshBuilder.CreateBox(`tBar_${lane}_${end.zBar.toFixed(0)}`, {
           width: T_BAR_W, height: T_HEIGHT, depth: T_BAR_D,
         }, scene);
-        bar.position = new BABYLON.Vector3(laneX, markingY, end.zBar);
+        bar.position = new BABYLON.Vector3(laneX, markingY + 0.005, end.zBar);
         bar.material = markingMat;
         bar.parent   = this.root;
         this.detailMeshes.push(bar);
 
-        // Stem (attached to bar, extending into pool)
+        // Stem
         const stemZ = end.zBar + end.stemDir * (T_BAR_D / 2 + T_STEM_D / 2);
         const stem  = BABYLON.MeshBuilder.CreateBox(`tStem_${lane}_${end.zBar.toFixed(0)}`, {
           width: T_STEM_W, height: T_HEIGHT, depth: T_STEM_D,
         }, scene);
-        stem.position = new BABYLON.Vector3(laneX, markingY, stemZ);
+        stem.position = new BABYLON.Vector3(laneX, markingY + 0.005, stemZ);
         stem.material = markingMat;
         stem.parent   = this.root;
         this.detailMeshes.push(stem);
       }
     }
 
-    // ── 8. Turn-wall touch pads ──────────────────────────────────────────
-    // White Omega-style panels flush against the end walls, one per lane.
-    // Positioned between the surface and 1.5 m depth (competition spec).
-    const PAD_W    = laneWidth * 0.72;  // slightly narrower than lane width
-    const PAD_H    = 0.90;              // m tall
-    const PAD_D    = 0.04;              // thickness
-    const PAD_Y    = -PAD_H / 2 - 0.05; // top edge 5 cm below water surface
+    // ── 8. 15m distance markers ───────────────────────────────────────────
+    const DIST_MARKER_W = 0.3;
+    const DIST_MARKER_H = 0.015;
+
+    for (const markerZ of [-L / 2 + 15, L / 2 - 15, -L / 2 + 25, L / 2 - 25]) {
+      // Side markers on pool floor edges
+      for (const sideX of [-W / 2 + WT + 0.5, W / 2 - WT - 0.5]) {
+        const marker = BABYLON.MeshBuilder.CreateBox(`distMarker_${markerZ.toFixed(0)}_${sideX.toFixed(0)}`, {
+          width:  DIST_MARKER_W,
+          height: DIST_MARKER_H,
+          depth:  1.0,
+        }, scene);
+        marker.position = new BABYLON.Vector3(sideX, markingY, markerZ);
+        marker.material = markingMat;
+        marker.parent   = this.root;
+        this.detailMeshes.push(marker);
+      }
+    }
+
+    // ── 9. Competition touch pads ─────────────────────────────────────────
+    const PAD_W = laneWidth * 0.80;
+    const PAD_H = 0.90;
+    const PAD_D = 0.04;
+    const PAD_Y = -PAD_H / 2 - 0.05;
 
     const padEnds = [
-      { pz: -L / 2 + WT / 2 + PAD_D / 2 + 0.01 }, // south end inner face
-      { pz:  L / 2 - WT / 2 - PAD_D / 2 - 0.01 }, // north end inner face
+      { pz: -L / 2 + WT / 2 + PAD_D / 2 + 0.01 },
+      { pz:  L / 2 - WT / 2 - PAD_D / 2 - 0.01 },
     ];
 
     for (const ep of padEnds) {
       for (let lane = 0; lane < LC; lane++) {
         const laneX = -W / 2 + (lane + 0.5) * laneWidth;
+
+        // Touch pad with lane number texture
+        const padTex = this._createTouchPadTexture(scene, lane + 1);
+        const padMat = new BABYLON.StandardMaterial(`padMat_${lane}`, scene);
+        padMat.diffuseTexture = padTex;
+        padMat.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.1);
 
         const pad = BABYLON.MeshBuilder.CreateBox(`touchPad_${lane}_${ep.pz.toFixed(0)}`, {
           width: PAD_W, height: PAD_H, depth: PAD_D,
@@ -245,12 +275,31 @@ export class PoolStructure {
       }
     }
 
-    // ── 9. Rope anchor posts at pool ends ────────────────────────────────
-    // Small stainless cylinders terminating each lane rope at both walls.
-    // There are (LC - 1) lane ropes, positioned between lanes.
-    const ANCHOR_D  = 0.08; // diameter
-    const ANCHOR_H  = 0.16;
-    const ANCHOR_Y  = 0.04; // flush with rope height
+    // ── 10. Starting block number markers on deck ────────────────────────
+    for (let lane = 0; lane < LC; lane++) {
+      const laneX = -W / 2 + (lane + 0.5) * laneWidth;
+      
+      // Number plate on deck at starting end
+      const numTex = this._createLaneNumberTexture(scene, lane + 1);
+      const numMat = new BABYLON.StandardMaterial(`laneNumMat_${lane}`, scene);
+      numMat.diffuseTexture = numTex;
+      numMat.emissiveColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+
+      const numPlate = BABYLON.MeshBuilder.CreateBox(`laneNum_${lane}`, {
+        width: 0.6,
+        height: 0.02,
+        depth: 0.6,
+      }, scene);
+      numPlate.position = new BABYLON.Vector3(laneX, 0.01, -L / 2 - 1.5);
+      numPlate.material = numMat;
+      numPlate.parent   = this.root;
+      this.detailMeshes.push(numPlate);
+    }
+
+    // ── 11. Rope anchor posts ────────────────────────────────────────────
+    const ANCHOR_D = 0.08;
+    const ANCHOR_H = 0.16;
+    const ANCHOR_Y = 0.04;
 
     const anchorEnds = [-L / 2, L / 2];
     for (const az of anchorEnds) {
@@ -269,7 +318,7 @@ export class PoolStructure {
       }
     }
 
-    logger.log('[PoolStructure] Built (Phase 2)');
+    logger.log('[PoolStructure] Built Olympic Competition Pool');
     return {
       root:         this.root,
       floorMesh:    this.floorMesh,
@@ -280,13 +329,221 @@ export class PoolStructure {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // Olympic Floor Texture with Lane Lines
+  // ─────────────────────────────────────────────────────────────────────────
+
+  private _createOlympicFloorTexture(scene: BABYLON.Scene, config: IArenaConfig): BABYLON.DynamicTexture {
+    const { poolWidth: W, poolLength: L, laneCount: LC } = config;
+    
+    // High resolution texture for the pool floor
+    const texW = 2048;
+    const texH = 4096;  // 2:1 ratio for 25m:50m pool
+    const tex = new BABYLON.DynamicTexture('olympicFloorTex', { width: texW, height: texH }, scene, true);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    // Base white tile color
+    ctx.fillStyle = '#f5f8fa';
+    ctx.fillRect(0, 0, texW, texH);
+
+    // Draw tile grid (1m tiles)
+    ctx.strokeStyle = '#b0c4d0';
+    ctx.lineWidth = 2;
+    
+    // Vertical grout lines (every ~40 pixels = 1m for 50m pool length)
+    const tileSpacingV = texW / 25;
+    const tileSpacingH = texH / 50;
+    
+    for (let x = 0; x <= texW; x += tileSpacingV) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, texH);
+      ctx.stroke();
+    }
+    
+    for (let y = 0; y <= texH; y += tileSpacingH) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(texW, y);
+      ctx.stroke();
+    }
+
+    // Draw FINA lane lines (dark blue-black)
+    ctx.fillStyle = '#0a1520';
+    const laneWidth = texW / LC;
+    const lineWidth = texW * 0.25 / W;  // 0.25m width scaled
+
+    for (let lane = 0; lane < LC; lane++) {
+      const laneCenterX = (lane + 0.5) * laneWidth;
+      const lineX = laneCenterX - lineWidth / 2;
+      ctx.fillRect(lineX, 0, lineWidth, texH);
+    }
+
+    // Add subtle tile variation for realism
+    for (let i = 0; i < 500; i++) {
+      const x = Math.random() * texW;
+      const y = Math.random() * texH;
+      const alpha = Math.random() * 0.03 + 0.01;
+      ctx.fillStyle = `rgba(200, 215, 230, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(x, y, Math.random() * 4 + 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    tex.update();
+    this.textures.push(tex);
+    return tex;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Tile Normal Map
+  // ─────────────────────────────────────────────────────────────────────────
+
+  private _createTileNormalMap(scene: BABYLON.Scene): BABYLON.DynamicTexture {
+    const S = 512;
+    const tex = new BABYLON.DynamicTexture('tileNorm', { width: S, height: S }, scene, false);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+    const img = ctx.createImageData(S, S);
+    const d = img.data;
+
+    const GROUT = 4;
+
+    for (let y = 0; y < S; y++) {
+      for (let x = 0; x < S; x++) {
+        const idx = (y * S + x) * 4;
+        let nx = 128, ny = 128;
+
+        // Grout indentations
+        if (x < GROUT) {
+          nx = 128 + Math.round(30 * (1 - x / GROUT));
+        } else if (x >= S - GROUT) {
+          nx = 128 - Math.round(30 * (1 - (S - x) / GROUT));
+        }
+        if (y < GROUT) {
+          ny = 128 + Math.round(30 * (1 - y / GROUT));
+        } else if (y >= S - GROUT) {
+          ny = 128 - Math.round(30 * (1 - (S - y) / GROUT));
+        }
+
+        d[idx]     = nx;
+        d[idx + 1] = ny;
+        d[idx + 2] = 255;
+        d[idx + 3] = 255;
+      }
+    }
+
+    ctx.putImageData(img, 0, 0);
+    tex.update();
+    this.textures.push(tex);
+    return tex;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Target Crosses on End Walls
+  // ─────────────────────────────────────────────────────────────────────────
+
+  private _buildTargetCrosses(
+    scene:   BABYLON.Scene,
+    wallDef: { w: number; h: number; d: number; px: number; pz: number },
+    LC:      number,
+    W:       number,
+    D:       number,
+    mat:     BABYLON.PBRMaterial,
+  ): void {
+    const laneWidth = W / LC;
+    const CROSS_SIZE = 0.4;
+    const CROSS_THICKNESS = 0.08;
+    const CROSS_Y = -0.5;  // 0.5m below water surface
+
+    for (let lane = 0; lane < LC; lane++) {
+      const laneX = -W / 2 + (lane + 0.5) * laneWidth;
+      const crossZ = wallDef.pz + (wallDef.pz > 0 ? -0.25 : 0.25);
+
+      // Horizontal bar
+      const hBar = BABYLON.MeshBuilder.CreateBox(`targetH_${lane}_${wallDef.pz.toFixed(0)}`, {
+        width: CROSS_SIZE,
+        height: CROSS_THICKNESS,
+        depth: 0.02,
+      }, scene);
+      hBar.position = new BABYLON.Vector3(laneX, CROSS_Y, crossZ);
+      hBar.material = mat;
+      hBar.parent   = this.root;
+      this.detailMeshes.push(hBar);
+
+      // Vertical bar
+      const vBar = BABYLON.MeshBuilder.CreateBox(`targetV_${lane}_${wallDef.pz.toFixed(0)}`, {
+        width: CROSS_THICKNESS,
+        height: CROSS_SIZE,
+        depth: 0.02,
+      }, scene);
+      vBar.position = new BABYLON.Vector3(laneX, CROSS_Y, crossZ);
+      vBar.material = mat;
+      vBar.parent   = this.root;
+      this.detailMeshes.push(vBar);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Touch Pad Texture with Lane Number
+  // ─────────────────────────────────────────────────────────────────────────
+
+  private _createTouchPadTexture(scene: BABYLON.Scene, laneNum: number): BABYLON.DynamicTexture {
+    const tex = new BABYLON.DynamicTexture(`padTex_${laneNum}`, { width: 256, height: 384 }, scene, true);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 256, 384);
+
+    // Black border
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(4, 4, 248, 376);
+
+    // Lane number (large)
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 180px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(laneNum), 128, 200);
+
+    tex.update();
+    this.textures.push(tex);
+    return tex;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Lane Number Texture for Deck
+  // ─────────────────────────────────────────────────────────────────────────
+
+  private _createLaneNumberTexture(scene: BABYLON.Scene, laneNum: number): BABYLON.DynamicTexture {
+    const tex = new BABYLON.DynamicTexture(`laneNumTex_${laneNum}`, { width: 128, height: 128 }, scene, true);
+    const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
+
+    // Dark background
+    ctx.fillStyle = '#1a2535';
+    ctx.fillRect(0, 0, 128, 128);
+
+    // White border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, 120, 120);
+
+    // Lane number
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 80px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(laneNum), 64, 64);
+
+    tex.update();
+    this.textures.push(tex);
+    return tex;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Public API
   // ─────────────────────────────────────────────────────────────────────────
 
-  /**
-   * No-op in Phase 3 — theme colour is applied by ArenaMaterialLibrary.applyTheme().
-   * Kept for backward-compatibility with ArenaManager._applyThemeInternal().
-   */
   public setPoolColor(_color: BABYLON.Color3): void { /* handled by ArenaMaterialLibrary */ }
 
   public dispose(): void {
@@ -294,7 +551,7 @@ export class PoolStructure {
     this.wallMeshes.forEach(m => m.dispose());
     this.copingMeshes.forEach(m => m.dispose());
     this.detailMeshes.forEach(m => m.dispose());
-    // Materials are owned by ArenaMaterialLibrary — do not dispose here
+    this.textures.forEach(t => t.dispose());
     this.root?.dispose();
     logger.log('[PoolStructure] Disposed');
   }

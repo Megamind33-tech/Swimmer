@@ -1,35 +1,76 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="Swimmer Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Swimmer - 3D Swimming Simulator
 
-This contains everything you need to run your app locally.
+A realistic 3D swimming simulation game built with Babylon.js and React.
 
-View your app in AI Studio: https://ai.studio/apps/337815ea-4125-4c5d-8475-e5f2425d1178
+## Features
+
+- 🏊 Realistic swimming physics and mechanics
+- 🎮 Multiple game modes (Career, Training, Racing)
+- 🏟️ Detailed 3D swimming arena with realistic water effects
+- 📱 Touch controls for mobile support
+- 🎥 Replay system for races
+- 🏆 Rival system and career progression
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js 18+
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
 
-## Automated release-flow verification (Playwright E2E)
+2. Run the app:
+   ```bash
+   npm run dev
+   ```
 
-This repo includes executable browser tests for critical ship paths.
+3. Open http://localhost:3000 in your browser
 
-1. Install dependencies (and Playwright package):
-   `npm install`
+## Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run TypeScript type checking |
+| `npm test` | Run E2E tests |
+
+## E2E Testing (Playwright)
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
 2. Install Playwright browser binaries (first run only):
-   `npx playwright install chromium`
+   ```bash
+   npx playwright install chromium
+   ```
+
 3. Run all critical-flow tests:
-   `npm test`
+   ```bash
+   npm test
+   ```
 
 Useful variants:
 - Headed: `npm run test:e2e:headed`
 - Debug: `npm run test:e2e:debug`
+
+## Tech Stack
+
+- **Frontend:** React 19, TypeScript
+- **3D Engine:** Babylon.js
+- **Styling:** Tailwind CSS 4
+- **Animation:** Motion
+- **Build Tool:** Vite
+- **Testing:** Playwright
+
+## License
+
+MIT
