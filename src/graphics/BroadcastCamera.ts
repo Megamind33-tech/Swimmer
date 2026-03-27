@@ -86,6 +86,10 @@ export class BroadcastCamera {
     smoothingFactor: 0.08,
   };
 
+  // Live swimmer position — updated every frame by the race loop
+  private playerDistance: number = 0;
+  private playerLane: number = 4;
+
   constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, packageTier: CameraPackage = 'MVP') {
     this.scene = scene;
     this.canvas = canvas;
@@ -171,22 +175,31 @@ export class BroadcastCamera {
   public update(deltaTime: number): void {
     if (!this.currentCamera) return;
 
-    // Handle transitions
-    if (this.isTransitioning) {
-      this.updateTransition(deltaTime);
+    const isPoolsideFollow = this.currentCameraId === 'CAM_10_POOLSIDE_TRACKING';
+    const isOverheadFollow = this.currentCameraId === 'CAM_16_OVERHEAD_TRACKING';
+    const isFollowCamera   = isPoolsideFollow || isOverheadFollow;
+
+    if (isFollowCamera) {
+      // Follow cameras own the camera transform every frame.
+      // Cancel any pending transition so it doesn't fight the follow lerp.
+      this.isTransitioning = false;
+      if (!this.isInInputWindow) {
+        if (isOverheadFollow) {
+          this.updateOverheadFollow(deltaTime);
+        } else {
+          this.updatePlayerFollow(deltaTime);
+        }
+      }
+    } else {
+      // Non-follow cameras: run transitions then idle motion
+      if (this.isTransitioning) {
+        this.updateTransition(deltaTime);
+      } else if (!this.isInInputWindow) {
+        this.applyCinematicIdleMotion(deltaTime);
+      }
     }
 
-    // Handle player following during race
-    if (this.currentCameraId?.includes('POOLSIDE_TRACKING') && this.playerSwimmer && !this.isInInputWindow) {
-      this.updatePlayerFollow(deltaTime);
-      return;
-    }
-
-    if (!this.isTransitioning && !this.isInInputWindow) {
-      this.applyCinematicIdleMotion(deltaTime);
-    }
-
-    // Handle shot sequence progress
+    // Shot sequence always progresses during a race
     if (this.raceState === 'RACING' && this.currentShotSequence.length > 0) {
       this.updateShotSequence(deltaTime);
     }
@@ -264,44 +277,147 @@ export class BroadcastCamera {
     }
   }
 
+  // ── Swimmer world-space helpers ──────────────────────────────────────────
+
   /**
-   * Update player follow camera
+   * Convert race distance (0-100 m) to world-space Z coordinate.
+   * Pool runs from Z = -25 (start/blocks) to Z = +25 (far wall).
+   * Lap 0 goes forward (+Z), lap 1 comes back (-Z), etc.
+   */
+  private distanceToWorldZ(distance: number): number {
+    const halfPool  = 25;   // pool is 50 m centred at origin
+    const posInLap  = distance % 50;
+    const lap       = Math.floor(distance / 50);
+    return lap % 2 === 0
+      ? -halfPool + posInLap   // heading toward far wall
+      : halfPool  - posInLap;  // heading back to start
+  }
+
+  /**
+   * Returns +1 when swimmer is heading toward far wall, -1 heading back.
+   */
+  private getSwimmerDirection(distance: number): number {
+    return Math.floor(distance / 50) % 2 === 0 ? 1 : -1;
+  }
+
+  /**
+   * Convert lane number (0-7) to pool-side X world coordinate.
+   * Pool is 25 m wide (-12.5 → +12.5), using the same formula as the rest
+   * of the codebase: -12.5 + lane * (25/7).
+   */
+  private laneToWorldX(lane: number): number {
+    return -12.5 + lane * (25 / 7);
+  }
+
+  // ── TV-style follow camera implementations ────────────────────────────────
+
+  /**
+   * Poolside dolly/tracking camera (CAM_10).
+   *
+   * Replicates the signature Olympic broadcast shot:
+   *  • Camera sits on the right-side pool deck (~20 m from pool centre),
+   *    elevated ~5 m on a camera platform.
+   *  • Slides longitudinally (Z axis) with the swimmer — trails slightly
+   *    so the swimmer appears in the leading third of the frame.
+   *  • Camera target is pointed well ahead of the swimmer so the viewer
+   *    always sees where the swimmer is going.
+   *  • Subtle micro-bob simulates the handheld/dolly organic feel.
    */
   private updatePlayerFollow(deltaTime: number): void {
-    if (!this.currentCamera || !this.playerSwimmer) return;
+    if (!this.currentCamera) return;
 
-    const playerZ = this.playerSwimmer.position;
-    const playerX = this.playerLaneX;
-    const waterSurfaceY = 0.5;
+    const distance    = this.playerSwimmer?.position ?? this.playerDistance;
+    const lane        = this.playerSwimmer?.lane      ?? this.playerLane;
 
-    // Camera positioning - slightly back and elevated
-    const cameraZ = playerZ - this.playerFollowConfig.followDistance;
-    const cameraY = waterSurfaceY + this.playerFollowConfig.followHeight;
+    const swimmerZ    = this.distanceToWorldZ(distance);
+    const swimmerDir  = this.getSwimmerDirection(distance);
+    const swimmerX    = this.laneToWorldX(lane);
 
-    // Vary horizontal position for cinematic effect
-    const timeSeconds = Date.now() / 1000;
-    const sideOffset = Math.sin((timeSeconds * 1000) / this.playerFollowConfig.sideSwaySpeed) * this.playerFollowConfig.sideSwayAmount;
-    const cameraX = playerX + sideOffset;
+    // ── Camera position ────────────────────────────────────────────────────
+    // Right-side pool deck, elevated platform.  Camera trails the swimmer
+    // slightly so the athlete sits in the leading portion of the frame.
+    const DECK_X      =  20.5;   // right-side pool deck
+    const DECK_Y      =   4.8;   // camera platform height (m)
+    const TRAIL_Z     =  -4.5 * swimmerDir;   // trail behind swimmer
 
-    const newCameraPos = new BABYLON.Vector3(cameraX, cameraY, cameraZ);
+    // Subtle vertical micro-bob — organic dolly feel
+    const bob         = Math.sin(Date.now() / 2200) * 0.07;
 
-    // Look ahead of player
-    const lookAheadZ = playerZ + this.playerFollowConfig.followLead;
-    const lookAtX = playerX + Math.cos((timeSeconds * 1000) / this.playerFollowConfig.sideSwaySpeed) * 3;
-    const newTarget = new BABYLON.Vector3(lookAtX, waterSurfaceY + 2, lookAheadZ);
+    const targetPos = new BABYLON.Vector3(
+      DECK_X,
+      DECK_Y + bob,
+      swimmerZ + TRAIL_Z,
+    );
 
-    // Smooth movement
-    if (this.playerFollowConfig.enableSmoothing) {
-      this.currentCamera.position = BABYLON.Vector3.Lerp(
-        this.currentCamera.position,
-        newCameraPos,
-        this.playerFollowConfig.smoothingFactor
-      );
-      this.currentCamera.target = BABYLON.Vector3.Lerp(this.currentCamera.target, newTarget, this.playerFollowConfig.smoothingFactor);
-    } else {
-      this.currentCamera.position = newCameraPos;
-      this.currentCamera.target = newTarget;
-    }
+    // ── Camera target (look-at point) ──────────────────────────────────────
+    // Aim well ahead of the swimmer in the direction of travel.
+    // This keeps open water in the leading part of the frame — exactly
+    // how broadcast directors frame it on TV.
+    const LOOK_AHEAD  = 10 * swimmerDir;
+
+    const targetLookAt = new BABYLON.Vector3(
+      swimmerX,
+      0.25,                    // just above the water line
+      swimmerZ + LOOK_AHEAD,
+    );
+
+    // ── Smooth dt-based exponential lerp ──────────────────────────────────
+    // Responsive enough to never visibly lose the swimmer; smooth enough
+    // to feel like a real dolly rig rather than a snapping cut.
+    const dtSec   = Math.min(deltaTime / 1000, 0.1);
+    const posAlpha = 1.0 - Math.exp(-dtSec * 9.0);
+    const tgtAlpha = 1.0 - Math.exp(-dtSec * 11.0);
+
+    this.currentCamera.position = BABYLON.Vector3.Lerp(
+      this.currentCamera.position, targetPos,    posAlpha,
+    );
+    this.currentCamera.target = BABYLON.Vector3.Lerp(
+      this.currentCamera.target,   targetLookAt, tgtAlpha,
+    );
+  }
+
+  /**
+   * Overhead tracking camera (CAM_16).
+   *
+   * High crane-style shot looking directly down the pool at the swimmer.
+   * Gives the viewer tactical clarity of lane separation and race order.
+   */
+  private updateOverheadFollow(deltaTime: number): void {
+    if (!this.currentCamera) return;
+
+    const distance   = this.playerSwimmer?.position ?? this.playerDistance;
+    const lane       = this.playerSwimmer?.lane      ?? this.playerLane;
+
+    const swimmerZ   = this.distanceToWorldZ(distance);
+    const swimmerDir = this.getSwimmerDirection(distance);
+    const swimmerX   = this.laneToWorldX(lane);
+
+    // Camera: high above the pool, slightly behind the swimmer
+    const CRANE_Y    = 38;
+    const TRAIL_Z    = -6 * swimmerDir;
+
+    const targetPos = new BABYLON.Vector3(
+      swimmerX * 0.25,      // slight X offset to keep framing balanced
+      CRANE_Y,
+      swimmerZ + TRAIL_Z,
+    );
+
+    // Look at a point slightly ahead at water level
+    const targetLookAt = new BABYLON.Vector3(
+      swimmerX,
+      0,
+      swimmerZ + 10 * swimmerDir,
+    );
+
+    const dtSec    = Math.min(deltaTime / 1000, 0.1);
+    const alpha    = 1.0 - Math.exp(-dtSec * 7.0);
+
+    this.currentCamera.position = BABYLON.Vector3.Lerp(
+      this.currentCamera.position, targetPos,    alpha,
+    );
+    this.currentCamera.target = BABYLON.Vector3.Lerp(
+      this.currentCamera.target,   targetLookAt, alpha,
+    );
   }
 
   /**
@@ -542,6 +658,20 @@ export class BroadcastCamera {
 
   public onSwimmerFinished(_data: { swimmerId?: string; position?: number; name?: string; rank?: number }): void {
     this.onRaceFinish();
+  }
+
+  /**
+   * Receive live swimmer position every race tick.
+   * Called by the game loop so the follow cameras always have fresh data.
+   */
+  public updateSwimmerPosition(distance: number, lane: number): void {
+    this.playerDistance = distance;
+    this.playerLane     = lane;
+    // Also keep the legacy playerSwimmer.position in sync if present
+    if (this.playerSwimmer) {
+      this.playerSwimmer.position = distance;
+      this.playerSwimmer.lane     = lane;
+    }
   }
 
   /**

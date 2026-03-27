@@ -31,5 +31,21 @@ export function useGameEngine(arenaRef: MutableRefObject<ArenaManager | null>) {
     arenaRef.current?.updateScoreboard(leaderboard);
   }, [arenaRef]);
 
-  return { setCamera, setTheme, setQualityPreset, enableBroadcast, disableBroadcast, updateScoreboard };
+  const updatePlayerRacePosition = useCallback((distance: number, lane: number) => {
+    arenaRef.current?.updatePlayerRacePosition(distance, lane);
+  }, [arenaRef]);
+
+  const notifyRaceStarted = useCallback(() => {
+    arenaRef.current?.notifyRaceStarted();
+  }, [arenaRef]);
+
+  const notifyRaceFinished = useCallback(() => {
+    arenaRef.current?.notifyRaceFinished();
+  }, [arenaRef]);
+
+  return {
+    setCamera, setTheme, setQualityPreset,
+    enableBroadcast, disableBroadcast, updateScoreboard,
+    updatePlayerRacePosition, notifyRaceStarted, notifyRaceFinished,
+  };
 }
