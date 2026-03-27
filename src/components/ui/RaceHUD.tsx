@@ -3,7 +3,7 @@ import { useGameStore } from '../../hooks/useGameStore';
 import { Waves, Activity, Zap } from 'lucide-react';
 
 export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
-  const { state, dispatch, stroke, breathe, surge } = useGameStore();
+  const { state, dispatch, stroke, breathe, surge, setPitch } = useGameStore();
   const race = state.race;
   const tickRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
@@ -42,7 +42,11 @@ export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
   ].sort((a, b) => b.distance - a.distance);
 
   const playerRank = allSwimmers.findIndex(s => s.isPlayer) + 1;
-  const leader = allSwimmers[0];
+  const pitchLevel = Math.max(1, Math.min(5, Math.floor((race.bodyPitch + 10) / 20) + 1));
+  const adjustPitch = (delta: number) => {
+    const next = Math.max(0, Math.min(100, race.bodyPitch + delta));
+    setPitch(next);
+  };
 
   return (
     <div className="fixed inset-0 z-[200] bg-transparent animate-slide overflow-hidden pointer-events-none">
@@ -99,77 +103,108 @@ export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
         </div>
       </div>
 
-      {/* CENTER: Distance + Stamina HUD */}
-      <div className="absolute left-1/2 top-[25%] landscape:top-[20%] -translate-x-1/2 pointer-events-none z-30 flex flex-col items-center">
-         <div className="flex items-center gap-3 bg-[#020b14]/60 backdrop-blur-md px-4 py-1.5 border-y border-[#1E3A57]/50">
-            <span className="font-bebas text-3xl landscape:text-4xl text-[#F3F7FC] tracking-widest">{race.distance.toFixed(1)}<span className="text-lg text-[#71859C]">m</span></span>
-            <div className="w-[1px] h-6 bg-[#1E3A57]" />
-            <div className="flex flex-col w-[90px] landscape:w-[110px]">
-               <div className="flex justify-between text-[8px] font-bold uppercase tracking-[0.15em] mb-0.5">
-                 <span className={race.stamina < 30 ? "text-[#FF5A5F]" : "text-[#18C8F0]"}>O2 LEVEL</span>
-                 <span className="text-[#F3F7FC]">{Math.round(race.stamina)}%</span>
-               </div>
-               <div className="h-1.5 w-full bg-[#112240] overflow-hidden">
-                 <div className={`h-full transition-all duration-200 ${race.stamina < 30 ? 'bg-[#FF5A5F]' : race.surgeActive ? 'bg-[#C8FF00]' : 'bg-[#18C8F0]'}`} style={{ width: `${race.stamina}%` }} />
-               </div>
+      {/* CENTER UPRIGHT: distance + stamina + breathe (single non-overlapping cluster) */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-3 bg-[#020b14]/75 backdrop-blur-md px-4 py-2 border border-[#1E3A57]/70 min-w-[230px]">
+          <span className="font-bebas text-3xl landscape:text-4xl text-[#F3F7FC] tracking-widest">{race.distance.toFixed(1)}<span className="text-lg text-[#71859C]">m</span></span>
+          <div className="w-[1px] h-7 bg-[#1E3A57]" />
+          <div className="flex flex-col w-[110px]">
+            <div className="flex justify-between text-[8px] font-bold uppercase tracking-[0.15em] mb-0.5">
+              <span className={race.stamina < 30 ? "text-[#FF5A5F]" : "text-[#18C8F0]"}>O2 LEVEL</span>
+              <span className="text-[#F3F7FC]">{Math.round(race.stamina)}%</span>
             </div>
-         </div>
-         {race.surgeActive && (
-           <div className="mt-1 px-3 py-0.5 bg-[#C8FF00]/20 border border-[#C8FF00]/40 animate-pulse">
-             <span className="font-barlow text-[10px] font-extrabold text-[#C8FF00] tracking-[0.2em] uppercase">⚡ SURGE ACTIVE</span>
-           </div>
-         )}
+            <div className="h-1.5 w-full bg-[#112240] overflow-hidden">
+              <div className={`h-full transition-all duration-200 ${race.stamina < 30 ? 'bg-[#FF5A5F]' : race.surgeActive ? 'bg-[#C8FF00]' : 'bg-[#18C8F0]'}`} style={{ width: `${race.stamina}%` }} />
+            </div>
+          </div>
+        </div>
+
+        <button onClick={breathe} className="pointer-events-auto flex flex-col items-center group btn-mech">
+          <div className="w-[46px] h-[46px] rounded-full bg-[#112240]/92 border-2 border-[#1E3A57] flex items-center justify-center shadow-lg group-active:border-[#18C8F0] group-active:scale-95 transition-all">
+            <Activity size={18} className="text-[#18C8F0]" />
+          </div>
+          <span className="mt-1 font-barlow text-[8px] font-extrabold text-[#18C8F0] tracking-widest uppercase bg-[#020b14]/70 px-1.5 py-0.5 rounded-sm border border-[#1E3A57]">Breathe</span>
+        </button>
+
+        {race.surgeActive && (
+          <div className="px-3 py-0.5 bg-[#C8FF00]/20 border border-[#C8FF00]/40 animate-pulse">
+            <span className="font-barlow text-[10px] font-extrabold text-[#C8FF00] tracking-[0.2em] uppercase">⚡ SURGE ACTIVE</span>
+          </div>
+        )}
+      </div>
+
+      {/* Independent L-level badge under timer (separate from stroke ring) */}
+      <div className="absolute top-[36px] right-3 z-35 pointer-events-none">
+        <div className="rounded-full min-w-[40px] h-[40px] px-2 bg-[#112240]/95 border-2 border-[#18C8F0]/45 flex items-center justify-center shadow-[0_8px_20px_rgba(0,0,0,0.45)]">
+          <span className="font-barlow text-[15px] font-extrabold text-[#18C8F0] tracking-wide">L{pitchLevel}</span>
+        </div>
       </div>
 
       {/* BOTTOM CONTROLS */}
       <div className="absolute bottom-3 landscape:bottom-2 left-3 right-3 flex justify-between items-end z-40 pointer-events-none">
         
-        {/* Rank indicator */}
-        <div className="pointer-events-none flex flex-col items-center">
-          <div className="bg-[#020b14]/80 backdrop-blur-md border border-[#1E3A57] px-3 py-2 flex flex-col items-center">
-            <span className="text-[8px] uppercase font-bold text-[#71859C] tracking-widest">POSITION</span>
-            <span className={`font-bebas text-4xl leading-none ${playerRank === 1 ? 'text-[#FFB800]' : 'text-[#F3F7FC]'}`}>{playerRank}</span>
-            <span className="text-[8px] uppercase font-bold text-[#71859C] tracking-widest">OF {allSwimmers.length}</span>
+        {/* Left stack: body pitch controls only (position card removed by request) */}
+        <div className="pointer-events-none flex flex-col items-start gap-2">
+          <div className="pointer-events-auto bg-[#020b14]/85 backdrop-blur-md border border-[#1E3A57] p-2 min-w-[132px]">
+            <div className="flex items-center justify-between">
+              <span className="font-barlow text-[9px] font-extrabold text-[#18C8F0] tracking-widest uppercase">Body Pitch</span>
+              <span className="font-rajdhani text-[11px] font-bold text-[#F3F7FC]">{Math.round(race.bodyPitch)}%</span>
+            </div>
+            <div className="mt-1.5 flex items-center gap-1.5">
+              <button
+                onClick={() => adjustPitch(-8)}
+                className="w-7 h-7 rounded-sm border border-[#1E3A57] bg-[#112240]/90 text-[#9EB2C7] text-base leading-none btn-mech"
+              >
+                −
+              </button>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={race.bodyPitch}
+                onChange={(e) => setPitch(Number(e.target.value))}
+                className="w-[72px] accent-[#18C8F0]"
+              />
+              <button
+                onClick={() => adjustPitch(8)}
+                className="w-7 h-7 rounded-sm border border-[#1E3A57] bg-[#112240]/90 text-[#9EB2C7] text-base leading-none btn-mech"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-end gap-2 landscape:gap-4 pointer-events-auto">
-          
-          {/* BREATHE */}
-          <button onClick={breathe} className="flex flex-col items-center group btn-mech mb-4 landscape:mb-8">
-            <div className="w-[44px] h-[44px] landscape:w-[52px] landscape:h-[52px] rounded-full bg-[#112240]/90 border-2 border-[#1E3A57] flex items-center justify-center shadow-lg group-active:border-[#18C8F0] group-active:scale-95 transition-all">
-              <Activity size={20} className="text-[#18C8F0]" />
-            </div>
-            <span className="mt-1 font-barlow text-[8px] font-extrabold text-[#18C8F0] tracking-widest uppercase bg-[#020b14]/70 px-1.5 py-0.5 rounded-sm border border-[#1E3A57]">BREATHE</span>
-          </button>
+        {/* Right stack: micro actions + primary stroke ring */}
+        <div className="pointer-events-auto flex flex-col items-end gap-2">
+          <div className="flex items-end gap-2">
+            {/* SURGE */}
+            <button onClick={surge} disabled={race.surgeActive || race.surgeCooldown > 0 || race.stamina < 25}
+              className="flex flex-col items-center group btn-mech disabled:opacity-30">
+              <div className={`w-[42px] h-[42px] landscape:w-[48px] landscape:h-[48px] rounded-full bg-[#112240]/90 border-2 flex items-center justify-center shadow-lg transition-all ${
+                race.surgeActive ? 'border-[#C8FF00] shadow-[0_0_15px_rgba(200,255,0,0.4)]' : 'border-[#1E3A57] group-active:border-[#C8FF00]'
+              } group-active:scale-95`}>
+                <Zap size={18} className="text-[#C8FF00] fill-current opacity-80" />
+              </div>
+              <span className="mt-1 font-barlow text-[8px] font-extrabold text-[#C8FF00] tracking-widest uppercase bg-[#020b14]/70 px-1.5 py-0.5 rounded-sm border border-[#C8FF00]/30">Surge</span>
+            </button>
+          </div>
 
-          {/* STROKE CYCLE — Main Action */}
+          {/* STROKE CYCLE — Main Action (anchored right for mobile) */}
           <button onClick={stroke} className="flex flex-col items-center group active:scale-[0.97] transition-transform">
-            <div className="relative w-[90px] h-[90px] landscape:w-[110px] landscape:h-[110px] rounded-full border-[3px] border-[#112240] bg-[#020b14]/80 backdrop-blur-md flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+            <div className="relative w-[84px] h-[84px] landscape:w-[102px] landscape:h-[102px] rounded-full border-[3px] border-[#112240] bg-[#020b14]/80 backdrop-blur-md flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
                <div className="absolute inset-2 rounded-full border-[6px] border-[#1E3A57] pointer-events-none" />
                <svg className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] transform pointer-events-none" style={{ transform: `rotate(${race.strokeCount * 30}deg)` }}>
                   <circle cx="50%" cy="50%" r="44%" stroke="#F3F7FC" strokeWidth="6" fill="none" strokeDasharray="80 300" strokeLinecap="round" className="drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
                </svg>
-               <div className="w-[40px] h-[40px] landscape:w-[48px] landscape:h-[48px] rounded-full bg-gradient-to-t from-[#112240] to-[#1E3A57] border border-[#9EB2C7]/30 flex items-center justify-center shadow-inner group-active:bg-[#1E3A57]">
-                 <Waves size={20} className="text-[#F3F7FC]" />
+               <div className="w-[38px] h-[38px] landscape:w-[44px] landscape:h-[44px] rounded-full bg-gradient-to-t from-[#112240] to-[#1E3A57] border border-[#9EB2C7]/30 flex items-center justify-center shadow-inner group-active:bg-[#1E3A57]">
+                 <Waves size={18} className="text-[#F3F7FC]" />
                </div>
             </div>
-            <div className="mt-1.5 flex flex-col items-center">
-              <span className="font-barlow text-[11px] landscape:text-[13px] font-extrabold text-[#F3F7FC] tracking-[0.15em] uppercase">STROKE</span>
+            <div className="mt-1 flex flex-col items-center">
+              <span className="font-barlow text-[11px] landscape:text-[12px] font-extrabold text-[#F3F7FC] tracking-[0.15em] uppercase">Stroke</span>
               <span className="font-rajdhani text-[8px] font-bold text-[#C8FF00] tracking-widest uppercase">×{race.strokeCount}</span>
             </div>
-          </button>
-
-          {/* SURGE */}
-          <button onClick={surge} disabled={race.surgeActive || race.surgeCooldown > 0 || race.stamina < 25}
-            className="flex flex-col items-center group btn-mech mb-4 landscape:mb-8 disabled:opacity-30">
-            <div className={`w-[44px] h-[44px] landscape:w-[52px] landscape:h-[52px] rounded-full bg-[#112240]/90 border-2 flex items-center justify-center shadow-lg transition-all ${
-              race.surgeActive ? 'border-[#C8FF00] shadow-[0_0_15px_rgba(200,255,0,0.4)]' : 'border-[#1E3A57] group-active:border-[#C8FF00]'
-            } group-active:scale-95`}>
-              <Zap size={20} className="text-[#C8FF00] fill-current opacity-80" />
-            </div>
-            <span className="mt-1 font-barlow text-[8px] font-extrabold text-[#C8FF00] tracking-widest uppercase bg-[#020b14]/70 px-1.5 py-0.5 rounded-sm border border-[#C8FF00]/30">SURGE</span>
           </button>
         </div>
       </div>
