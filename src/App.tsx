@@ -33,18 +33,43 @@ function GameApp() {
   useEffect(() => {
     if (!canvasRef.current) return;
     let disposed = false;
+
+    // Ensure canvas has proper dimensions before arena initialization
+    // This prevents 0x0 canvas issues on Android 12+ that cause black screens
+    const ensureCanvasSize = () => {
+      if (!canvasRef.current) return;
+      const rect = canvasRef.current.parentElement?.getBoundingClientRect();
+      if (rect && (rect.width > 0 || rect.height > 0)) {
+        canvasRef.current.width = rect.width;
+        canvasRef.current.height = rect.height;
+      }
+    };
+
+    ensureCanvasSize();
+
     const tier = detectRuntimePerformanceTier();
     const arena = new ArenaManager(canvasRef.current, tier);
     arenaRef.current = arena;
 
     arena.initialize()
       .then(() => {
+        if (disposed) return;
         arena.resize();
         arena.setCamera('DEFAULT');
       })
-      .catch((err: Error) =>
-        console.error('[App] ArenaManager init failed:', err),
-      );
+      .catch((err: Error) => {
+        if (disposed) return;
+        console.error('[App] ArenaManager init failed:', err);
+        // On Android, provide specific debug info
+        if (/Android/i.test(navigator.userAgent)) {
+          console.error('[App] Android debug:', {
+            canvasWidth: canvasRef.current?.width,
+            canvasHeight: canvasRef.current?.height,
+            parentWidth: canvasRef.current?.parentElement?.offsetWidth,
+            parentHeight: canvasRef.current?.parentElement?.offsetHeight,
+          });
+        }
+      });
 
     let resizeRaf: number | null = null;
     const handleResize = () => {
