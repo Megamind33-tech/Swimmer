@@ -22,11 +22,31 @@ export class ArenaRoot {
 
   constructor(canvas: HTMLCanvasElement, qualityTier: 'LOW' | 'MEDIUM' | 'HIGH') {
     const compatibility = getGraphicsCompatibilityProfile();
+
+    // Debug: Log canvas dimensions on Android
+    if (compatibility.isAndroid) {
+      logger.log(`[ArenaRoot] Android detected. Canvas: ${canvas.width}x${canvas.height}, Parent: ${canvas.parentElement?.getBoundingClientRect().width}x${canvas.parentElement?.getBoundingClientRect().height}`);
+    }
+
+    // Ensure canvas has valid dimensions before creating engine
+    if (canvas.width === 0 || canvas.height === 0) {
+      const rect = canvas.parentElement?.getBoundingClientRect();
+      if (rect && rect.width > 0 && rect.height > 0) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        logger.log(`[ArenaRoot] Resized canvas to ${canvas.width}x${canvas.height}`);
+      }
+    }
+
     this.engine = new BABYLON.Engine(canvas, true, {
       antialias: qualityTier === 'HIGH' && compatibility.antialias,
       adaptToDeviceRatio: true,
       preserveDrawingBuffer: false,
     });
+
+    if (!this.engine) {
+      throw new Error('[ArenaRoot] Failed to create Babylon.js Engine - WebGL may not be supported');
+    }
 
     if (compatibility.isAndroid && compatibility.mobileShaderBudget !== 'full') {
       this.engine.setHardwareScalingLevel(qualityTier === 'LOW' ? 1.4 : 1.15);
@@ -38,6 +58,10 @@ export class ArenaRoot {
     // value immediately after.  Set a fallback here so the first frame before
     // ArenaAtmosphere runs isn't a default grey flash.
     this.scene.clearColor = new BABYLON.Color4(0.06, 0.08, 0.12, 1);
+
+    // Force initial resize to ensure canvas dimensions are synced
+    // This is critical on Android where CSS-only sizing can cause 0x0 canvas
+    this.engine.resize();
 
     // Fog is owned entirely by ArenaAtmosphere (Phase 7: sets FOGMODE_EXP2 +
     // density + colour at build time and when the theme changes).

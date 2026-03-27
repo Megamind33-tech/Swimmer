@@ -203,8 +203,24 @@ export function getGraphicsCompatibilityProfile(): GraphicsCompatibilityProfile 
 
   const isAndroid = /Android/i.test(navigator.userAgent);
   const canvas = document.createElement('canvas');
-  const webgl2 = canvas.getContext('webgl2');
-  const webgl1 = webgl2 ?? canvas.getContext('webgl');
+
+  // Try WebGL2 first, with error handling for Android 12+
+  let webgl2;
+  try {
+    webgl2 = canvas.getContext('webgl2', { failIfMajorPerformanceCaveat: false });
+  } catch (e) {
+    logger.warn('[GraphicsCompat] WebGL2 context creation failed:', e);
+    webgl2 = null;
+  }
+
+  // Fall back to WebGL 1.0
+  let webgl1;
+  try {
+    webgl1 = webgl2 ?? canvas.getContext('webgl', { failIfMajorPerformanceCaveat: false });
+  } catch (e) {
+    logger.warn('[GraphicsCompat] WebGL 1.0 context creation failed:', e);
+    webgl1 = null;
+  }
 
   if (!webgl1) {
     cachedGraphicsProfile = {
