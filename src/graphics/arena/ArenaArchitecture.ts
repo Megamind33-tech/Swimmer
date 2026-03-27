@@ -488,14 +488,13 @@ export class ArenaArchitecture {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // SWIM26 Branding — back wall logo (matches reference image exactly)
+  // Venue branding — back wall logo (neutral, non-SWIM26)
   // ─────────────────────────────────────────────────────────────────────────
 
   /**
-   * Builds the prominent SWIM26 logo on the back (north finish) wall,
-   * exactly as shown in the reference image:
+   * Builds the prominent venue logo on the back (north finish) wall:
    *   - Light grey/white painted wall surface
-   *   - "SWIM26" dark navy lettering with swimmer silhouette icon
+   *   - Neutral "AQUA DOME" dark navy lettering with swimmer silhouette icon
    *   - Centered, high on the wall, visible from the full pool length
    *
    * Also places a smaller sponsor banner at the south (start) end.
@@ -507,7 +506,7 @@ export class ArenaArchitecture {
     const { poolLength: L } = config;
     const MARGIN = ArenaArchitecture.ARENA_MARGIN_Z;
 
-    // ── Main SWIM26 logo on north (finish) wall ───────────────────────────
+    // ── Main venue logo on north (finish) wall ─────────────────────────────
     const logoTex = this._makeSwim26LogoTexture(scene);
     this.swim26Textures.push(logoTex);
 
@@ -528,7 +527,7 @@ export class ArenaArchitecture {
     logoPanel.parent   = this.root;
     this.brandingMeshes.push(logoPanel);
 
-    // ── SWIM26 sponsor strip along the top of the pool side walls ─────────
+    // ── Sponsor strip along the top of the pool side walls ─────────────────
     const stripTex = this._makeSwim26StripTexture(scene);
     this.swim26Textures.push(stripTex);
 
@@ -577,10 +576,10 @@ export class ArenaArchitecture {
   }
 
   /**
-   * SWIM26 main logo texture.
-   * Recreates the branding from the reference image:
+   * Main venue logo texture.
+   * Uses a neutral tournament identity:
    *   - White/light-grey background
-   *   - Dark navy "SWIM26" wordmark (bold, wide tracking)
+   *   - Dark navy "AQUA DOME" wordmark (bold, wide tracking)
    *   - Stylised swimmer silhouette between "SWIM" and "26"
    */
   private _makeSwim26LogoTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
@@ -596,25 +595,19 @@ export class ArenaArchitecture {
     // Draw swimmer silhouette icon (stylised, matches logo in image)
     this._drawSwimmerIcon(ctx, W / 2, H / 2 - 20, 64);
 
-    // "SWIM" — left of icon
+    // "AQUA" — left of icon
     ctx.fillStyle    = '#0a1428';
     ctx.font         = 'bold 130px "Arial Black", Arial, sans-serif';
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'middle';
     ctx.letterSpacing = '2px';
-    ctx.fillText('SWIM', W / 2 - 62, H / 2 - 12);
+    ctx.fillText('AQUA', W / 2 - 76, H / 2 - 12);
 
-    // "26." — right of icon (slightly different weight)
+    // "DOME" — right of icon
     ctx.fillStyle    = '#0a1428';
     ctx.font         = 'bold 130px "Arial Black", Arial, sans-serif';
     ctx.textAlign    = 'left';
-    ctx.fillText('26.', W / 2 + 56, H / 2 - 12);
-
-    // Registered trademark symbol
-    ctx.font      = '28px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#0a1428';
-    ctx.fillText('™', W / 2 + 240, H / 2 - 72);
+    ctx.fillText('DOME', W / 2 + 56, H / 2 - 12);
 
     tex.update();
     return tex;
@@ -675,7 +668,7 @@ export class ArenaArchitecture {
   }
 
   /**
-   * Long horizontal strip texture for poolside sponsor signage ("SWIM26 | SWIM26 |…")
+   * Long horizontal strip texture for poolside sponsor signage ("AQUA DOME | ...")
    */
   private _makeSwim26StripTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
     const W   = 2048;
@@ -692,7 +685,7 @@ export class ArenaArchitecture {
     ctx.fillRect(0, 0,      W, 6);
     ctx.fillRect(0, H - 6, W, 6);
 
-    // Repeating SWIM26 text
+    // Repeating neutral event text
     ctx.fillStyle = '#ffffff';
     ctx.font      = 'bold 56px Arial, sans-serif';
     ctx.textBaseline = 'middle';
@@ -700,7 +693,7 @@ export class ArenaArchitecture {
     const step   = W / repeat;
     for (let i = 0; i < repeat; i++) {
       ctx.textAlign = 'center';
-      ctx.fillText('SWIM26', step * (i + 0.5), H / 2);
+      ctx.fillText('AQUA DOME', step * (i + 0.5), H / 2);
     }
 
     tex.update();
@@ -708,7 +701,7 @@ export class ArenaArchitecture {
   }
 
   /**
-   * South-end start banner ("SWIM26" on dark navy — matches competitor banners in image)
+   * South-end start banner (neutral event identity on dark navy)
    */
   private _makeSwim26StartBannerTexture(scene: BABYLON.Scene): BABYLON.DynamicTexture {
     const W   = 1024;
@@ -728,7 +721,7 @@ export class ArenaArchitecture {
     ctx.font         = 'bold 120px "Arial Black", Arial, sans-serif';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('SWIM26', W / 2, H * 0.42);
+    ctx.fillText('AQUA DOME', W / 2, H * 0.42);
 
     ctx.font      = 'bold 36px Arial, sans-serif';
     ctx.fillStyle = '#55aaff';
@@ -746,7 +739,7 @@ export class ArenaArchitecture {
    * Per-lane timing display boards mounted above the starting block end,
    * exactly as visible in the reference image:
    *   - Blue rectangular panels, one per lane
-   *   - Shows lane number ("26" styling) and "SWIM26" branding
+   *   - Shows lane number and neutral event branding
    *   - Mounted on stainless steel frames about 2.2 m above deck level
    *
    * These are the white/blue boards visible just behind the starting blocks.
@@ -817,7 +810,7 @@ export class ArenaArchitecture {
   }
 
   /**
-   * Per-lane timing board texture — matches the blue SWIM26-branded boards
+   * Per-lane timing board texture — neutral blue competition boards
    * visible above starting blocks in the reference image.
    */
   private _makeTimingBoardTexture(scene: BABYLON.Scene, laneNum: number): BABYLON.DynamicTexture {
@@ -837,12 +830,12 @@ export class ArenaArchitecture {
     ctx.fillRect(0, 0, TW, 18);
     ctx.fillRect(0, TH - 18, TW, 18);
 
-    // SWIM26 brand (top small text)
+    // Event brand (top small text)
     ctx.fillStyle    = '#aaccff';
     ctx.font         = 'bold 32px Arial, sans-serif';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText('SWIM26', TW / 2, 26);
+    ctx.fillText('AQUA DOME', TW / 2, 26);
 
     // Large lane number — bright white, bold
     ctx.fillStyle    = '#ffffff';

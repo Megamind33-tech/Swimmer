@@ -143,13 +143,16 @@ export class ArenaPostProcess {
       // that create natural halation — especially on the water surface and
       // bright lane rope floats.  Slightly more pronounced than before to
       // match the photorealistic reference image glow.
-      this._pipeline.bloomEnabled = true; // enabled for both MEDIUM and HIGH
+      const allowBloom =
+        qualityTier === 'HIGH' ||
+        (qualityTier === 'MEDIUM' && this._compatibility.mobileShaderBudget === 'full');
+      this._pipeline.bloomEnabled = allowBloom;
       if (qualityTier === 'HIGH') {
         this._pipeline.bloomWeight    = 0.14;  // subtle but perceptible LED halation
         this._pipeline.bloomThreshold = 0.60;  // activates on aqua tiles + water glints
         this._pipeline.bloomKernel    = 32;    // slightly wider — soft photorealistic glow
         this._pipeline.bloomScale     = 0.50;
-      } else if (qualityTier === 'MEDIUM') {
+      } else if (qualityTier === 'MEDIUM' && allowBloom) {
         this._pipeline.bloomWeight    = 0.08;
         this._pipeline.bloomThreshold = 0.68;
         this._pipeline.bloomKernel    = 16;
