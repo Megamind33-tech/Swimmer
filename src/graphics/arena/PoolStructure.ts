@@ -275,27 +275,6 @@ export class PoolStructure {
       }
     }
 
-    // ── 10. Starting block number markers on deck ────────────────────────
-    for (let lane = 0; lane < LC; lane++) {
-      const laneX = -W / 2 + (lane + 0.5) * laneWidth;
-      
-      // Number plate on deck at starting end
-      const numTex = this._createLaneNumberTexture(scene, lane + 1);
-      const numMat = new BABYLON.StandardMaterial(`laneNumMat_${lane}`, scene);
-      numMat.diffuseTexture = numTex;
-      numMat.emissiveColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-
-      const numPlate = BABYLON.MeshBuilder.CreateBox(`laneNum_${lane}`, {
-        width: 0.6,
-        height: 0.02,
-        depth: 0.6,
-      }, scene);
-      numPlate.position = new BABYLON.Vector3(laneX, 0.01, -L / 2 - 1.5);
-      numPlate.material = numMat;
-      numPlate.parent   = this.root;
-      this.detailMeshes.push(numPlate);
-    }
-
     // ── 11. Rope anchor posts ────────────────────────────────────────────
     const ANCHOR_D = 0.08;
     const ANCHOR_H = 0.16;
