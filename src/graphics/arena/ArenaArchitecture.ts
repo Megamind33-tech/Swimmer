@@ -430,10 +430,10 @@ export class ArenaArchitecture {
     const wallX = wallDef.px;
     const signDepth = wallDef.side === 'E' ? -0.3 : 0.3; // Offset slightly inward from wall
 
-    // Create lane number signs
+    // Create lane number signs — evenly spaced along pool length (Z axis)
     for (let lane = 0; lane < LC; lane++) {
-      const laneX = -W / 2 + (lane + 0.5) * laneWidth;
-      
+      const signZ = -config.poolLength / 2 + (lane + 0.5) * (config.poolLength / LC);
+
       // Create textured sign with lane number
       const signTex = this._createLaneNumberTexture(scene, lane + 1);
       const signMat = new BABYLON.StandardMaterial(`laneSignMat_${lane}`, scene);
@@ -442,12 +442,12 @@ export class ArenaArchitecture {
       signMat.backFaceCulling = false;
 
       const sign = BABYLON.MeshBuilder.CreateBox(`laneSign_${wallDef.side}_${lane + 1}`, {
-        width: SIGN_W,
+        width: 0.08,
         height: SIGN_H,
-        depth: 0.08,
+        depth: SIGN_W,
       }, scene);
 
-      sign.position = new BABYLON.Vector3(wallX + signDepth, SIGN_Y, laneX);
+      sign.position = new BABYLON.Vector3(wallX + signDepth, SIGN_Y, signZ);
       sign.material = signMat;
       sign.parent = this.root;
       this.brandingMeshes.push(sign);
@@ -542,13 +542,13 @@ export class ArenaArchitecture {
     const { poolWidth: W } = config;
     const AW = W + ArenaArchitecture.ARENA_MARGIN_X * 2;
 
-    for (const sideZ of [-1, 1]) {
-      const strip = BABYLON.MeshBuilder.CreateBox(`swim26Strip_${sideZ}`, {
-        width:  L * 0.80,
+    for (const sideX of [-1, 1]) {
+      const strip = BABYLON.MeshBuilder.CreateBox(`swim26Strip_${sideX}`, {
+        width:  0.08,
         height: 0.80,
-        depth:  0.08,
+        depth:  L * 0.80,
       }, scene);
-      strip.position = new BABYLON.Vector3(0, 4.2, sideZ * (W / 2 + 0.60));
+      strip.position = new BABYLON.Vector3(sideX * (W / 2 + 0.60), 4.2, 0);
       strip.material = stripMat;
       strip.parent   = this.root;
       this.brandingMeshes.push(strip);
@@ -764,7 +764,7 @@ export class ArenaArchitecture {
     const BOARD_H  = 0.50;
     const BOARD_D  = 0.08;
     const BOARD_Y  = 2.40;   // height above deck
-    const BOARD_Z  = -L / 2 - 0.30;  // just behind starting block
+    const BOARD_Z  = -L / 2 - 1.80;  // behind starting blocks (blocks are at -L/2 - 0.55)
 
     // Support post height
     const POST_H   = BOARD_Y + BOARD_H / 2;
