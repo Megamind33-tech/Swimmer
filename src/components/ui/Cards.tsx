@@ -20,7 +20,7 @@ export const RaceCard = ({ onRace, arenaBg }: { onRace: () => void, arenaBg: str
   };
 
   return (
-    <div className="relative bg-[#0a192f] border border-[#1E3A57] rounded-sm min-h-[160px] landscape:min-h-[140px] p-3 grid grid-rows-[auto_1fr_auto] overflow-hidden group shadow-lg">
+    <div className="relative bg-[#0a192f] border border-[#1E3A57] rounded-sm min-h-[112px] landscape:min-h-[98px] p-2 grid grid-rows-[auto_1fr_auto] overflow-hidden group shadow-lg">
       <div className="absolute inset-0 z-0">
         {arenaBg ? (
           <img src={arenaBg} className="w-full h-full object-cover opacity-20 mix-blend-screen" alt="Arena bg"/>
@@ -31,44 +31,44 @@ export const RaceCard = ({ onRace, arenaBg }: { onRace: () => void, arenaBg: str
         <div className="absolute inset-0 lane-stripes pointer-events-none" />
       </div>
 
-      <div className="absolute right-[-10px] bottom-[10px] font-bebas text-[100px] landscape:text-[80px] text-[#18C8F0] opacity-5 pointer-events-none z-0 leading-none">100M</div>
+      <div className="absolute right-[-10px] bottom-[8px] font-bebas text-[70px] landscape:text-[55px] text-[#18C8F0] opacity-5 pointer-events-none z-0 leading-none">100M</div>
 
-      <div className="relative z-10 flex flex-wrap justify-between items-start mb-2 gap-2">
+      <div className="relative z-10 flex flex-wrap justify-between items-start mb-1 gap-1">
         <div>
-          <span className="flex items-center gap-1 text-[10px] font-extrabold text-[#18C8F0] tracking-[0.2em] uppercase">
-            <Timer size={10}/> NEXT EVENT
+          <span className="flex items-center gap-1 text-[9px] font-extrabold text-[#18C8F0] tracking-[0.2em] uppercase">
+            <Timer size={9}/> NEXT EVENT
           </span>
-          <h2 className="font-bebas text-2xl landscape:text-3xl leading-none text-[#F3F7FC] mt-0.5 tracking-wide drop-shadow-md">100M FREE — ELITE OPEN</h2>
+          <h2 className="font-bebas text-xl landscape:text-2xl leading-none text-[#F3F7FC] mt-0.5 tracking-wide drop-shadow-md">100M FREE — ELITE OPEN</h2>
         </div>
         <button onClick={generateBriefing} disabled={isAiLoading}
-          className="bg-[#112240] border border-[#18C8F0]/30 px-2 py-1.5 flex items-center gap-1.5 btn-mech rounded-sm text-[#18C8F0] hover:bg-[#18C8F0]/10 shrink-0">
-          {isAiLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-          <span className="font-barlow text-[10px] font-extrabold tracking-widest uppercase">COACH INTEL</span>
+          className="bg-[#112240] border border-[#18C8F0]/30 px-2 py-1 flex items-center gap-1.5 btn-mech rounded-sm text-[#18C8F0] hover:bg-[#18C8F0]/10 shrink-0">
+          {isAiLoading ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
+          <span className="font-barlow text-[9px] font-extrabold tracking-widest uppercase">COACH INTEL</span>
         </button>
       </div>
 
       <div className="relative z-10 flex flex-col">
         {aiBriefing && (
-          <div className="mb-2 bg-[#020b14]/80 border-l-2 border-[#18C8F0] p-2 animate-slide backdrop-blur-sm rounded-r-sm">
-            <p className="font-rajdhani text-[11px] font-bold text-[#F3F7FC] italic tracking-wide">{aiBriefing}</p>
+          <div className="mb-1 bg-[#020b14]/80 border-l-2 border-[#18C8F0] p-1.5 animate-slide backdrop-blur-sm rounded-r-sm">
+            <p className="font-rajdhani text-[10px] font-bold text-[#F3F7FC] italic tracking-wide">{aiBriefing}</p>
           </div>
         )}
-        <div className="flex flex-wrap gap-4 mb-auto pb-2 border-b border-[#1E3A57]/40">
+        <div className="flex flex-wrap gap-3 mb-auto pb-1.5 border-b border-[#1E3A57]/40">
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-[#9EB2C7] uppercase tracking-wider">Personal Best</span>
-            <span className="font-rajdhani text-xl font-bold text-[#F3F7FC]">00:47.88</span>
+            <span className="text-[8px] font-bold text-[#9EB2C7] uppercase tracking-wider">PB</span>
+            <span className="font-rajdhani text-base font-bold text-[#F3F7FC]">00:47.88</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-[#9EB2C7] uppercase tracking-wider">Meet Record</span>
-            <span className="font-rajdhani text-xl font-bold text-[#FFB800]">00:46.91</span>
+            <span className="text-[8px] font-bold text-[#9EB2C7] uppercase tracking-wider">REC</span>
+            <span className="font-rajdhani text-base font-bold text-[#FFB800]">00:46.91</span>
           </div>
         </div>
       </div>
 
-      <div className="relative z-20 mt-2 flex items-end">
+      <div className="relative z-20 mt-1.5 flex items-end">
         <button onClick={onRace}
-          className="bg-[#F3F7FC] text-[#0a192f] btn-primary-clip h-[44px] w-full sm:w-auto px-6 flex items-center justify-center gap-2 uppercase font-extrabold text-[14px] font-barlow tracking-[0.1em] btn-mech shadow-[0_4px_15px_rgba(243,247,252,0.2)]">
-          <Zap size={16} fill="currentColor"/> ENTER HEAT
+          className="bg-[#F3F7FC] text-[#0a192f] btn-primary-clip h-[36px] w-full px-5 flex items-center justify-center gap-2 uppercase font-extrabold text-[12px] font-barlow tracking-[0.1em] btn-mech shadow-[0_4px_15px_rgba(243,247,252,0.2)]">
+          <Zap size={14} fill="currentColor"/> ENTER HEAT
         </button>
       </div>
     </div>
