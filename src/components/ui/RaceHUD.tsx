@@ -123,6 +123,7 @@ export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
           </div>
         )}
       </div>
+      </div>
 
       {/* Upper-right lane level control (under timer, non-overlapping) */}
       <div className="absolute top-[42px] right-3 z-40 pointer-events-auto">
