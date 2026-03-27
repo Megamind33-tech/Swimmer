@@ -140,6 +140,28 @@ function GameApp() {
     }
   }, [gameState, engine]);
 
+  // Notify broadcast camera when race becomes active
+  useEffect(() => {
+    if (gameState !== 'race') return;
+    if (state.race.active && !state.race.finished) {
+      engine.notifyRaceStarted();
+    }
+  }, [state.race.active, state.race.finished, gameState, engine]);
+
+  // Notify broadcast camera when race finishes
+  useEffect(() => {
+    if (gameState !== 'race') return;
+    if (state.race.finished) {
+      engine.notifyRaceFinished();
+    }
+  }, [state.race.finished, gameState, engine]);
+
+  // Feed live swimmer position to the broadcast camera every tick
+  useEffect(() => {
+    if (gameState !== 'race' || !state.race.active) return;
+    engine.updatePlayerRacePosition(state.race.distance, state.race.lanePosition);
+  }, [state.race.distance, state.race.lanePosition, state.race.active, gameState, engine]);
+
   const handleEnterRace = () => {
     setGameState('race');
   };

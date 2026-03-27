@@ -375,6 +375,38 @@ export class ArenaManager {
     return this.broadcastCamera;
   }
 
+  /**
+   * Push the swimmer's live race distance + lane to the broadcast camera
+   * so the follow cameras always know where to point.
+   * Call this every race tick (e.g. from a useEffect watching race.distance).
+   */
+  public updatePlayerRacePosition(distance: number, lane: number): void {
+    this.broadcastCamera?.updateSwimmerPosition(distance, lane);
+  }
+
+  /**
+   * Notify the broadcast camera that the race has started (RACING state).
+   */
+  public notifyRaceStarted(): void {
+    // Build a minimal ISwimmerRaceState so the follow cameras have lane info
+    const playerState = {
+      id: 'player', name: 'YOU', lane: 4,
+      stats: { speed: 2, stamina: 100, technique: 80, endurance: 80, mental: 80 },
+      position: 0, velocity: 2, stamina: 100, oxygen: 100,
+      diveTime: 0, isUnderwater: false, rotationAngle: 0,
+      currentStrokePhase: 0, lapCount: 0, splitsTime: [], lapTimes: [],
+      isDNF: false, finishTime: 0, finishRank: 0,
+    };
+    this.broadcastCamera?.onRaceStateChange('RACING', playerState);
+  }
+
+  /**
+   * Notify the broadcast camera that the race is finished.
+   */
+  public notifyRaceFinished(): void {
+    this.broadcastCamera?.onRaceStateChange('FINISHED');
+  }
+
   // ============================================================================
   // QUALITY PRESET (runtime)
   // ============================================================================

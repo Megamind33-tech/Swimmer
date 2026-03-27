@@ -503,9 +503,10 @@ export const EVENT_SHOT_SEQUENCES: Record<RaceEventType, Record<RacePhase, IShot
       cameras: ['CAM_07_START_FINISH_MASTER', 'CAM_13_UNDERWATER_START', 'CAM_10_POOLSIDE_TRACKING'],
       durations: [1000, 750, 1500],
     },
+    // 50 M is very short — spend most of it on the tracking shot
     MID_RACE: {
-      cameras: ['CAM_10_POOLSIDE_TRACKING', 'CAM_07_START_FINISH_MASTER'],
-      durations: [3000, 1500],
+      cameras: ['CAM_10_POOLSIDE_TRACKING', 'CAM_07_START_FINISH_MASTER', 'CAM_10_POOLSIDE_TRACKING'],
+      durations: [5000, 2000, 5000],
     },
     TURN: {
       cameras: [],
@@ -529,13 +530,14 @@ export const EVENT_SHOT_SEQUENCES: Record<RaceEventType, Record<RacePhase, IShot
       cameras: ['CAM_07_START_FINISH_MASTER', 'CAM_13_UNDERWATER_START', 'CAM_10_POOLSIDE_TRACKING'],
       durations: [1000, 750, 2000],
     },
+    // Poolside tracking is the dominant shot; wide master for context; overhead for variety
     MID_RACE: {
-      cameras: ['CAM_10_POOLSIDE_TRACKING', 'CAM_07_START_FINISH_MASTER'],
-      durations: [2500, 1500],
+      cameras: ['CAM_10_POOLSIDE_TRACKING', 'CAM_07_START_FINISH_MASTER', 'CAM_10_POOLSIDE_TRACKING', 'CAM_16_OVERHEAD_TRACKING', 'CAM_10_POOLSIDE_TRACKING'],
+      durations: [4500, 2000, 4500, 2000, 4500],
     },
     TURN: {
       cameras: ['CAM_09_TURN_MASTER', 'CAM_14_UNDERWATER_TURN', 'CAM_10_POOLSIDE_TRACKING'],
-      durations: [800, 750, 2000],
+      durations: [800, 750, 2500],
     },
     FINISH: {
       cameras: ['CAM_18_FINISH_COMPRESSION', 'CAM_07_START_FINISH_MASTER'],
@@ -556,12 +558,12 @@ export const EVENT_SHOT_SEQUENCES: Record<RaceEventType, Record<RacePhase, IShot
       durations: [1000, 500, 2500],
     },
     MID_RACE: {
-      cameras: ['CAM_07_START_FINISH_MASTER', 'CAM_10_POOLSIDE_TRACKING', 'CAM_16_OVERHEAD_TRACKING', 'CAM_15_UNDERWATER_TRACKING'],
-      durations: [2000, 2500, 1500, 1000],
+      cameras: ['CAM_10_POOLSIDE_TRACKING', 'CAM_07_START_FINISH_MASTER', 'CAM_10_POOLSIDE_TRACKING', 'CAM_16_OVERHEAD_TRACKING', 'CAM_10_POOLSIDE_TRACKING', 'CAM_15_UNDERWATER_TRACKING', 'CAM_10_POOLSIDE_TRACKING'],
+      durations: [4000, 2000, 4000, 1800, 4000, 1200, 4000],
     },
     TURN: {
       cameras: ['CAM_09_TURN_MASTER', 'CAM_14_UNDERWATER_TURN', 'CAM_10_POOLSIDE_TRACKING'],
-      durations: [900, 700, 2500],
+      durations: [900, 700, 3000],
     },
     FINISH: {
       cameras: ['CAM_18_FINISH_COMPRESSION', 'CAM_07_START_FINISH_MASTER'],
@@ -582,12 +584,12 @@ export const EVENT_SHOT_SEQUENCES: Record<RaceEventType, Record<RacePhase, IShot
       durations: [1000, 500, 2000],
     },
     MID_RACE: {
-      cameras: ['CAM_10_POOLSIDE_TRACKING', 'CAM_07_START_FINISH_MASTER'],
-      durations: [2500, 1500],
+      cameras: ['CAM_10_POOLSIDE_TRACKING', 'CAM_07_START_FINISH_MASTER', 'CAM_10_POOLSIDE_TRACKING', 'CAM_16_OVERHEAD_TRACKING', 'CAM_10_POOLSIDE_TRACKING'],
+      durations: [4500, 2000, 4500, 1800, 4500],
     },
     TURN: {
       cameras: ['CAM_16_OVERHEAD_TRACKING', 'CAM_09_TURN_MASTER', 'CAM_14_UNDERWATER_TURN', 'CAM_10_POOLSIDE_TRACKING'],
-      durations: [1000, 800, 700, 2000],
+      durations: [1000, 800, 700, 2500],
     },
     FINISH: {
       cameras: ['CAM_18_FINISH_COMPRESSION'],
