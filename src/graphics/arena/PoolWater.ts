@@ -252,7 +252,10 @@ export class PoolWater {
     scene: BABYLON.Scene,
     tier:  'MEDIUM' | 'HIGH',
   ): void {
-    const rtRes = tier === 'HIGH' ? 512 : 256;
+    const rtRes =
+      this._compatibility.mobileShaderBudget === 'strict' ? 192
+      : this._compatibility.mobileShaderBudget === 'balanced' ? 256
+      : tier === 'HIGH' ? 512 : 320;
 
     // Primary wave normal map
     this._waveBumpTex = this._createWaveNormalMap(scene, tier === 'HIGH' ? 256 : 192);
@@ -274,19 +277,20 @@ export class PoolWater {
     // ═══════════════════════════════════════════════════════════════════════
     
     // Very gentle movement - indoor competition pool
-    water.windForce = 0.18;
+    water.windForce = this._compatibility.mobileShaderBudget === 'strict' ? 0.12 : 0.18;
     water.waveHeight = 0.0;  // Flat surface - all motion from normals
     water.windDirection = new BABYLON.Vector2(0.6, 0.4);
     
     // SWIM26 crystal clear water — very transparent so the light aqua tiles
     // below are clearly visible through the surface (matches reference image)
     water.waterColor = this._themeColor.clone();
-    water.colorBlendFactor = 0.05;  // 95% see-through — very clear competition water
+    water.colorBlendFactor =
+      this._compatibility.mobileShaderBudget === 'strict' ? 0.08 : 0.05;  // keep clarity but reduce overdraw on low-end
 
     // Very subtle ripple distortion — calm indoor competition pool
-    water.bumpHeight = tier === 'HIGH' ? 0.08 : 0.05;
+    water.bumpHeight = tier === 'HIGH' && this._compatibility.mobileShaderBudget === 'full' ? 0.08 : 0.05;
     water.waveLength = 0.50;
-    water.waveSpeed  = 0.18;
+    water.waveSpeed  = this._compatibility.mobileShaderBudget === 'strict' ? 0.14 : 0.18;
     
     // Multi-layer bump for realistic ripple interference
     water.bumpSuperimpose = true;

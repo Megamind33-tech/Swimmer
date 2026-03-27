@@ -28,6 +28,12 @@ function GameApp() {
   const [gameState, setGameState] = useState('boot'); 
   const [activeTab, setActiveTab] = useState('hub');
   const [assets, setAssets] = useState({ arenaBg: null, avatarImg: null });
+  const [preRaceCinematic, setPreRaceCinematic] = useState<{
+    active: boolean;
+    durationMs: number;
+    endsAt: number;
+  }>({ active: false, durationMs: 0, endsAt: 0 });
+  const [introNowMs, setIntroNowMs] = useState<number>(Date.now());
 
   // Initialize 3D engine
   useEffect(() => {
@@ -143,10 +149,34 @@ function GameApp() {
   // Notify broadcast camera when race becomes active
   useEffect(() => {
     if (gameState !== 'race') return;
-    if (state.race.active && !state.race.finished) {
+    if (!preRaceCinematic.active && state.race.active && !state.race.finished) {
       engine.notifyRaceStarted();
     }
-  }, [state.race.active, state.race.finished, gameState, engine]);
+  }, [state.race.active, state.race.finished, preRaceCinematic.active, gameState, engine]);
+
+  // During pre-race cinematic, keep the broadcast system in countdown mode
+  // so it cycles arena-wide establishing shots.
+  useEffect(() => {
+    if (gameState !== 'race' || !preRaceCinematic.active) return;
+    engine.notifyRaceCountdown();
+  }, [gameState, preRaceCinematic.active, engine]);
+
+  // Start race automatically once the cinematic window has elapsed.
+  useEffect(() => {
+    if (!preRaceCinematic.active) return;
+    const remaining = Math.max(0, preRaceCinematic.endsAt - Date.now());
+    const timer = window.setTimeout(() => {
+      setPreRaceCinematic((prev) => ({ ...prev, active: false }));
+    }, remaining);
+    return () => window.clearTimeout(timer);
+  }, [preRaceCinematic]);
+
+  useEffect(() => {
+    if (!preRaceCinematic.active) return;
+    setIntroNowMs(Date.now());
+    const interval = window.setInterval(() => setIntroNowMs(Date.now()), 250);
+    return () => window.clearInterval(interval);
+  }, [preRaceCinematic.active]);
 
   // Notify broadcast camera when race finishes
   useEffect(() => {
@@ -163,13 +193,24 @@ function GameApp() {
   }, [state.race.distance, state.race.lanePosition, state.race.active, gameState, engine]);
 
   const handleEnterRace = () => {
+    const durationMs = 30000 + Math.floor(Math.random() * 40001); // 30s..70s
+    setPreRaceCinematic({
+      active: true,
+      durationMs,
+      endsAt: Date.now() + durationMs,
+    });
     setGameState('race');
   };
 
   const handleExitRace = () => {
+    setPreRaceCinematic({ active: false, durationMs: 0, endsAt: 0 });
     resetRace();
     setGameState('menu');
   };
+
+  const remainingIntroSeconds = preRaceCinematic.active
+    ? Math.max(0, Math.ceil((preRaceCinematic.endsAt - introNowMs) / 1000))
+    : 0;
 
   return (
     <div className="h-[100dvh] w-screen relative overflow-hidden bg-[#020b14]">
@@ -213,7 +254,29 @@ function GameApp() {
           </div>
         )}
 
-        {gameState === 'race' && (
+        {gameState === 'race' && preRaceCinematic.active && (
+          <div className="pointer-events-auto w-full h-full bg-transparent">
+            <div className="absolute inset-0 flex items-start justify-center pt-6 px-3">
+              <div className="bg-[#020b14]/78 border border-[#1E3A57] backdrop-blur-md px-5 py-3 rounded-sm shadow-[0_12px_30px_rgba(0,0,0,0.55)] text-center">
+                <p className="font-barlow text-[10px] text-[#18C8F0] tracking-[0.2em] uppercase font-extrabold">
+                  Arena Broadcast
+                </p>
+                <h2 className="font-bebas text-3xl text-[#F3F7FC] tracking-widest leading-none mt-1">
+                  Pre-Race Presentation
+                </h2>
+                <p className="font-rajdhani text-base text-[#9EB2C7] mt-1">
+                  Full arena fly-through in progress — race starts in
+                  <span className="text-[#C8FF00] font-bold"> {remainingIntroSeconds}s</span>
+                </p>
+                <p className="font-rajdhani text-xs text-[#71859C] mt-1">
+                  Broadcast window: {Math.round(preRaceCinematic.durationMs / 1000)}s
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {gameState === 'race' && !preRaceCinematic.active && (
           <div className="pointer-events-auto w-full h-full bg-transparent">
              <RaceHUD onBack={handleExitRace} />
           </div>
