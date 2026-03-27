@@ -51,6 +51,9 @@ export class BroadcastCamera {
   private transitionDuration: number = 1000;
   private transitionStartTime: number = 0;
   private transitionEasing: 'linear' | 'easeInOutQuad' | 'easeInQuad' | 'easeOutQuad' = 'easeInOutQuad';
+  private shotBasePosition: BABYLON.Vector3 | null = null;
+  private shotBaseTarget: BABYLON.Vector3 | null = null;
+  private shotMotionTime: number = 0;
 
   // Racing state
   private raceState: RaceState | null = null;
@@ -126,6 +129,23 @@ export class BroadcastCamera {
    */
   public activate(): void {
     if (!this.scene || !this.currentCamera) return;
+
+    // Ensure first activation always starts from a valid in-arena race shot.
+    // This prevents falling back to ArcRotate defaults that can point into fog
+    // or exterior walls before race-state sequencing kicks in.
+    if (!this.currentCameraId) {
+      const openingCamera = this.packageManager.getCameraOrFallback('CAM_10_POOLSIDE_TRACKING');
+      if (openingCamera) {
+        const spec = CAMERA_SPECS[openingCamera];
+        this.currentCamera.position = spec.position.clone();
+        this.currentCamera.target = spec.target.clone();
+        this.currentCamera.fov = BABYLON.Tools.ToRadians(spec.fov.suggested);
+        this.currentCameraId = openingCamera;
+        this.isTransitioning = false;
+        this.captureShotBase(this.currentCamera.position, this.currentCamera.target);
+      }
+    }
+
     this.currentCamera.detachControl();
     this.scene.activeCamera = this.currentCamera;
   }
@@ -159,6 +179,11 @@ export class BroadcastCamera {
     // Handle player following during race
     if (this.currentCameraId?.includes('POOLSIDE_TRACKING') && this.playerSwimmer && !this.isInInputWindow) {
       this.updatePlayerFollow(deltaTime);
+      return;
+    }
+
+    if (!this.isTransitioning && !this.isInInputWindow) {
+      this.applyCinematicIdleMotion(deltaTime);
     }
 
     // Handle shot sequence progress
@@ -189,6 +214,10 @@ export class BroadcastCamera {
     this.currentCameraId = availableCamera;
     this.transitionEasing = spec.easing;
 
+    if (this.currentCamera) {
+      this.currentCamera.fov = BABYLON.Tools.ToRadians(spec.fov.suggested);
+    }
+
     const distance = this.currentCamera ? BABYLON.Vector3.Distance(this.currentCamera.position, this.targetPosition) : 0;
 
     if (distance < 1) {
@@ -196,6 +225,7 @@ export class BroadcastCamera {
       if (this.currentCamera) {
         this.currentCamera.position = this.targetPosition;
         this.currentCamera.target = this.targetTarget;
+        this.captureShotBase(this.currentCamera.position, this.currentCamera.target);
       }
       this.isTransitioning = false;
     } else {
@@ -230,6 +260,7 @@ export class BroadcastCamera {
 
     if (this.transitionProgress >= 1) {
       this.isTransitioning = false;
+      this.captureShotBase(this.targetPosition, this.targetTarget);
     }
   }
 
@@ -528,6 +559,37 @@ export class BroadcastCamera {
       default:
         return t;
     }
+  }
+
+  /**
+   * Snapshot the base framing whenever we land on a new shot.
+   */
+  private captureShotBase(position: BABYLON.Vector3, target: BABYLON.Vector3): void {
+    this.shotBasePosition = position.clone();
+    this.shotBaseTarget = target.clone();
+    this.shotMotionTime = 0;
+  }
+
+  /**
+   * Subtle drift to avoid static-photo feeling on broadcast wide shots.
+   */
+  private applyCinematicIdleMotion(deltaTime: number): void {
+    if (!this.currentCamera || !this.shotBasePosition || !this.shotBaseTarget) return;
+    if (this.currentCameraId?.includes('UNDERWATER')) return;
+
+    this.shotMotionTime += Math.max(deltaTime, 0) / 1000;
+    const t = this.shotMotionTime;
+
+    this.currentCamera.position = new BABYLON.Vector3(
+      this.shotBasePosition.x + Math.sin(t * 0.40) * 0.65,
+      this.shotBasePosition.y + Math.sin(t * 0.72) * 0.16,
+      this.shotBasePosition.z + Math.cos(t * 0.30) * 0.55,
+    );
+    this.currentCamera.target = new BABYLON.Vector3(
+      this.shotBaseTarget.x + Math.sin(t * 0.48) * 0.35,
+      this.shotBaseTarget.y + Math.cos(t * 0.65) * 0.10,
+      this.shotBaseTarget.z + Math.sin(t * 0.34) * 0.30,
+    );
   }
 
   /**
