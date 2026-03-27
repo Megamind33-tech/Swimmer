@@ -124,24 +124,23 @@ export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
         )}
       </div>
 
-      {/* LEFT-SIDE CONTROLS (kept off center swim area) */}
-      <div className="absolute bottom-3 landscape:bottom-2 left-3 z-40 pointer-events-none">
-        <div className="pointer-events-auto flex flex-col items-start gap-2">
-          {/* L-level circular joystick (replaces pitch meter) */}
-          <button onClick={cyclePitchLevel} className="flex flex-col items-center group active:scale-[0.97] transition-transform">
-            <div className="relative w-[90px] h-[90px] landscape:w-[110px] landscape:h-[110px] rounded-full border-[3px] border-[#112240] bg-[#020b14]/80 backdrop-blur-md flex items-center justify-center shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
-              <div className="absolute inset-2 rounded-full border-[6px] border-[#1E3A57] pointer-events-none" />
-              <svg className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] pointer-events-none">
-                <circle cx="50%" cy="50%" r="44%" stroke="#18C8F0" strokeWidth="6" fill="none" strokeDasharray={`${70 + pitchLevel * 22} 300`} strokeLinecap="round" className="drop-shadow-[0_0_8px_rgba(24,200,240,0.6)]" />
-              </svg>
-              <div className="w-[40px] h-[40px] landscape:w-[48px] landscape:h-[48px] rounded-full bg-gradient-to-t from-[#112240] to-[#1E3A57] border border-[#18C8F0]/40 flex items-center justify-center shadow-inner group-active:bg-[#1E3A57]">
-                <span className="font-barlow text-[14px] landscape:text-[16px] font-extrabold text-[#18C8F0]">L{pitchLevel}</span>
-              </div>
+      {/* Upper-right lane level control (under timer, non-overlapping) */}
+      <div className="absolute top-[42px] right-3 z-40 pointer-events-auto">
+        <button onClick={cyclePitchLevel} className="flex flex-col items-center group active:scale-[0.97] transition-transform">
+          <div className="relative w-[58px] h-[58px] rounded-full border-[2px] border-[#112240] bg-[#020b14]/88 backdrop-blur-md flex items-center justify-center shadow-[0_8px_20px_rgba(0,0,0,0.55)]">
+            <svg className="absolute inset-1.5 w-[calc(100%-12px)] h-[calc(100%-12px)] pointer-events-none">
+              <circle cx="50%" cy="50%" r="43%" stroke="#18C8F0" strokeWidth="4.5" fill="none" strokeDasharray={`${56 + pitchLevel * 16} 260`} strokeLinecap="round" className="drop-shadow-[0_0_6px_rgba(24,200,240,0.6)]" />
+            </svg>
+            <div className="w-[28px] h-[28px] rounded-full bg-gradient-to-t from-[#112240] to-[#1E3A57] border border-[#18C8F0]/40 flex items-center justify-center shadow-inner group-active:bg-[#1E3A57]">
+              <span className="font-barlow text-[10px] font-extrabold text-[#18C8F0]">L{pitchLevel}</span>
             </div>
-            <span className="mt-1 font-barlow text-[8px] font-extrabold text-[#18C8F0] tracking-widest uppercase bg-[#020b14]/70 px-1.5 py-0.5 rounded-sm border border-[#1E3A57]">PITCH</span>
-          </button>
+          </div>
+        </button>
+      </div>
 
-          <div className="flex items-end gap-2 landscape:gap-3">
+      {/* RIGHT-SIDE CONTROLS */}
+      <div className="absolute bottom-3 landscape:bottom-2 right-3 z-40 pointer-events-none">
+        <div className="pointer-events-auto flex items-end gap-2 landscape:gap-3">
             {/* BREATHE */}
             <button onClick={breathe} className="flex flex-col items-center group btn-mech mb-4 landscape:mb-8">
               <div className="w-[44px] h-[44px] landscape:w-[52px] landscape:h-[52px] rounded-full bg-[#112240]/90 border-2 border-[#1E3A57] flex items-center justify-center shadow-lg group-active:border-[#18C8F0] group-active:scale-95 transition-all">
@@ -177,7 +176,6 @@ export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
               </div>
               <span className="mt-1 font-barlow text-[8px] font-extrabold text-[#C8FF00] tracking-widest uppercase bg-[#020b14]/70 px-1.5 py-0.5 rounded-sm border border-[#C8FF00]/30">SURGE</span>
             </button>
-          </div>
         </div>
       </div>
     </div>
