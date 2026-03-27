@@ -42,17 +42,35 @@ function GameApp() {
       if (disposed || !canvasRef.current) return;
 
       // Ensure canvas has proper dimensions before arena initialization
-      // Use window dimensions as fallback if parent is still 0x0
       const canvas = canvasRef.current;
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      const width = rect?.width || window.innerWidth;
-      const height = rect?.height || window.innerHeight;
+      const parent = canvas.parentElement;
 
-      if (width > 0 && height > 0) {
-        canvas.width = width;
-        canvas.height = height;
-        console.log('[App] Canvas sized to:', width, 'x', height);
+      // Try multiple methods to get the canvas size
+      // 1. Try scrollWidth/scrollHeight (actual element size)
+      // 2. Try getBoundingClientRect (CSS-based size)
+      // 3. Fall back to window dimensions
+      let width = parent?.scrollWidth || 0;
+      let height = parent?.scrollHeight || 0;
+
+      if (width === 0 || height === 0) {
+        const rect = parent?.getBoundingClientRect();
+        width = rect?.width || 0;
+        height = rect?.height || 0;
       }
+
+      if (width === 0 || height === 0) {
+        width = window.innerWidth;
+        height = window.innerHeight;
+      }
+
+      // Ensure minimum dimensions
+      width = Math.max(width, 320);
+      height = Math.max(height, 480);
+
+      canvas.width = width;
+      canvas.height = height;
+      console.log('[App] Canvas sized to:', width, 'x', height, '(parent:', parent?.offsetWidth, 'x', parent?.offsetHeight, ')');
+
 
       const tier = detectRuntimePerformanceTier();
       const arena = new ArenaManager(canvas, tier);
