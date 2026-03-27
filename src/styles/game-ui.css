@@ -1,0 +1,41 @@
+/* SWIM26 AAA UI - Tactical & Immersive Additions */
+
+/* Tactical Game Buttons */
+.btn-primary-clip { clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+.btn-secondary-clip { clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+
+.btn-mech {
+  transition: transform 0.05s ease-out, filter 0.05s ease-out, background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.btn-mech:active {
+  transform: scale(0.97) translateY(2px);
+  filter: brightness(0.9);
+}
+
+/* Sports / Aquatic Textures */
+.lane-stripes {
+  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 20px, rgba(24, 200, 240, 0.05) 20px, rgba(24, 200, 240, 0.05) 22px);
+}
+
+.water-caustics {
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(24, 200, 240, 0.15), transparent 60%),
+    radial-gradient(circle at 80% 70%, rgba(24, 200, 240, 0.08), transparent 50%);
+  animation: waterDrift 20s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes waterDrift {
+  0% { transform: scale(1) translate(0px, 0px); }
+  100% { transform: scale(1.1) translate(-20px, 10px); }
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Animations */
+@keyframes bootFade { 0% { opacity: 0; transform: scale(0.95); } 10% { opacity: 1; transform: scale(1); } 90% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.05); } }
+.animate-boot { animation: bootFade 2.5s ease-in-out forwards; }
+
+@keyframes uiSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-slide { animation: uiSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
