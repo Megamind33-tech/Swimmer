@@ -113,12 +113,14 @@ export class ArenaRoot {
     logger.log('[ArenaRoot] Render loop started');
 
     // Log initial render confirmation after first frame
-    if (this.engine) {
+    if (this.engine && this.scene) {
       const canvas = this.engine.getRenderingCanvas();
       logger.log('[ArenaRoot] Rendering canvas:', {
         width: canvas?.width,
         height: canvas?.height,
         webGLVersion: this.engine.webGLVersion,
+        sceneMeshCount: this.scene.meshes.length,
+        sceneActiveCam: this.scene.activeCamera?.name,
       });
     }
   }

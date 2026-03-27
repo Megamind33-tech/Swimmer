@@ -48,10 +48,14 @@ export class CameraSupport {
    * becomes a fisheye on extremely narrow viewports.
    */
   public static responsiveFOV(canvas: HTMLCanvasElement): number {
-    const w = canvas.clientWidth  || 1;
-    const h = canvas.clientHeight || 1;
+    // Use canvas width/height attributes first (what Babylon.js actually renders to)
+    // Fall back to clientWidth/clientHeight if attributes are not set
+    const w = canvas.width || canvas.clientWidth  || 1;
+    const h = canvas.height || canvas.clientHeight || 1;
     const aspect = w / h;
     const refAspect = 16 / 9;
+
+    logger.log('[CameraSupport] FOV calculation:', { canvasW: w, canvasH: h, aspect: aspect.toFixed(2) });
 
     if (aspect >= refAspect) return CameraSupport.BASE_FOV;
 
@@ -163,7 +167,12 @@ export class CameraSupport {
     scene.activeCamera = next;
     this.currentView   = view;
 
-    logger.log('[CameraSupport] Active camera →', view);
+    logger.log('[CameraSupport] Active camera →', view, {
+      position: `[${next.position.x.toFixed(1)}, ${next.position.y.toFixed(1)}, ${next.position.z.toFixed(1)}]`,
+      target: `[${next.target.x.toFixed(1)}, ${next.target.y.toFixed(1)}, ${next.target.z.toFixed(1)}]`,
+      fov: next.fov.toFixed(3),
+      meshCount: scene.meshes.length,
+    });
   }
 
   public getCamera(view: CameraView): BABYLON.ArcRotateCamera | undefined {
