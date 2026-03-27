@@ -34,16 +34,17 @@ export const WATER_SURFACE_Y = 0.02;
 // ============================================================================
 
 const OLYMPIC_WATER_COLORS = {
-  // Classic Olympic blue - slightly greenish tint for that televised look
-  OLYMPIC:    new BABYLON.Color3(0.08, 0.38, 0.52),
-  // Darker championship pool blue
-  CHAMPIONSHIP: new BABYLON.Color3(0.05, 0.32, 0.48),
-  // Neon-lit evening pool
-  NEON:       new BABYLON.Color3(0.12, 0.42, 0.55),
+  // SWIM26 competition pool — light aqua matching the reference image.
+  // Very light, almost turquoise — crystal-clear LED-lit competition water.
+  OLYMPIC:    new BABYLON.Color3(0.15, 0.58, 0.72),
+  // Championship: slightly deeper blue for drama
+  CHAMPIONSHIP: new BABYLON.Color3(0.08, 0.44, 0.62),
+  // Neon-lit evening pool — vivid aqua
+  NEON:       new BABYLON.Color3(0.10, 0.68, 0.80),
   // Warm sunset-lit pool
-  SUNSET:     new BABYLON.Color3(0.18, 0.40, 0.48),
+  SUNSET:     new BABYLON.Color3(0.22, 0.44, 0.58),
   // Custom (fallback)
-  CUSTOM:     new BABYLON.Color3(0.10, 0.40, 0.55),
+  CUSTOM:     new BABYLON.Color3(0.15, 0.52, 0.68),
 };
 
 export class PoolWater {
@@ -277,14 +278,15 @@ export class PoolWater {
     water.waveHeight = 0.0;  // Flat surface - all motion from normals
     water.windDirection = new BABYLON.Vector2(0.6, 0.4);
     
-    // Crystal clear water - mostly transparent to see tiles
+    // SWIM26 crystal clear water — very transparent so the light aqua tiles
+    // below are clearly visible through the surface (matches reference image)
     water.waterColor = this._themeColor.clone();
-    water.colorBlendFactor = 0.08;  // 92% see-through
-    
-    // Subtle ripple distortion
-    water.bumpHeight = tier === 'HIGH' ? 0.10 : 0.07;
-    water.waveLength = 0.45;
-    water.waveSpeed = 0.20;
+    water.colorBlendFactor = 0.05;  // 95% see-through — very clear competition water
+
+    // Very subtle ripple distortion — calm indoor competition pool
+    water.bumpHeight = tier === 'HIGH' ? 0.08 : 0.05;
+    water.waveLength = 0.50;
+    water.waveSpeed  = 0.18;
     
     // Multi-layer bump for realistic ripple interference
     water.bumpSuperimpose = true;

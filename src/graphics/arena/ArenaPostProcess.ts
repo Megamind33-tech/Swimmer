@@ -70,37 +70,35 @@ export class ArenaPostProcess {
     const ip = scene.imageProcessingConfiguration;
     ip.isEnabled = true;
 
-    // Contrast: competition arena benefits from a small lift.
-    // 1.00 = neutral.  1.08 separates dark/mid tones for HIGH clarity.
-    ip.contrast = qualityTier === 'HIGH' ? 1.08
-                : qualityTier === 'MEDIUM' ? 1.04
+    // Contrast: SWIM26 pool tiles are very light (aqua/white) — slight contrast
+    // lift separates the navy lane lines from the aqua tiles for photorealism.
+    ip.contrast = qualityTier === 'HIGH'   ? 1.10
+                : qualityTier === 'MEDIUM' ? 1.05
                 : 1.02;
 
-    // Exposure: indoor venue with high-output LED floods — compensate for
-    // Babylon's default dark-ish output.
-    ip.exposure = 1.06;
+    // Exposure: SWIM26 venue uses high-output LED floods — bright, punchy.
+    // Boost slightly to match the reference image brightness level.
+    ip.exposure = qualityTier === 'HIGH' ? 1.12 : 1.08;
 
-    // ACES tone mapping (HIGH only) — maps HDR linear radiance into a
-    // pleasing S-curve that preserves mid-tone detail and rolls off highlights
-    // rather than clipping.  On LDR (no HDR pipeline) it still adds the
-    // characteristic shoulder that makes the scene feel "film-like".
+    // ACES tone mapping (HIGH only) — S-curve that prevents highlight clipping
+    // on the bright aqua tiles and water surface while keeping mid-tones clean.
     ip.toneMappingEnabled = qualityTier === 'HIGH';
     if (qualityTier === 'HIGH') {
-      // TONEMAPPING_ACES = 1 in Babylon.js ImageProcessingConfiguration
       ip.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
     }
 
-    // Saturation boost — competition venue: vivid FINA rope colours, punchy
-    // pool blue without going into arcade territory.
+    // Saturation boost — vivid lane rope colours (blue/red/yellow), punchy aqua
+    // pool tiles.  SWIM26 palette is more vivid than classic Olympic grey pools.
     ip.colorCurvesEnabled = qualityTier !== 'LOW';
     if (qualityTier !== 'LOW') {
       const curves = ip.colorCurves ?? new BABYLON.ColorCurves();
-      // globalSaturation: range −100 to +100, 0 = neutral.
-      // +10 (MED) / +14 (HIGH) — noticeably more vivid but not garish.
-      curves.globalSaturation = qualityTier === 'HIGH' ? 14 : 10;
-      // globalHue: slight +2 warmth takes the cool-white LEDs from clinical
-      // fluorescent to proper competition-grade tungsten-halogen feel.
-      curves.globalHue = 2;
+      // +12 (MED) / +18 (HIGH) — vivid competition colours without neon look
+      curves.globalSaturation = qualityTier === 'HIGH' ? 18 : 12;
+      // Slight cool shift (+1.5) to reinforce the aqua/blue water palette
+      curves.globalHue = -1.5;
+      // Shadows: slight blue lift (like light bouncing off the water surface)
+      curves.shadowsHue        = 220;
+      curves.shadowsSaturation = qualityTier === 'HIGH' ? 8 : 4;
       ip.colorCurves = curves;
     }
 
@@ -140,16 +138,22 @@ export class ArenaPostProcess {
       // surface and tile grout lines that hardware MSAA cannot reach.
       this._pipeline.fxaaEnabled = true;
 
-      // ── Bloom (HIGH only) ────────────────────────────────────────────
-      // Very restrained settings.  Goal: the LED flood housings and the
-      // water surface specular should have a barely-perceptible halation —
-      // enough to feel like real light scatter, not a neon sign.
-      this._pipeline.bloomEnabled = qualityTier === 'HIGH';
+      // ── Bloom (HIGH + MEDIUM) ─────────────────────────────────────────
+      // SWIM26 pool has very bright LED floodlights and light aqua tiles
+      // that create natural halation — especially on the water surface and
+      // bright lane rope floats.  Slightly more pronounced than before to
+      // match the photorealistic reference image glow.
+      this._pipeline.bloomEnabled = true; // enabled for both MEDIUM and HIGH
       if (qualityTier === 'HIGH') {
-        this._pipeline.bloomWeight    = 0.10;  // 10% contribution — subtle
-        this._pipeline.bloomThreshold = 0.64;  // activates on bright surfaces only
-        this._pipeline.bloomKernel    = 24;    // tight kernel: no spreading halos
-        this._pipeline.bloomScale     = 0.50;  // half-resolution bloom texture
+        this._pipeline.bloomWeight    = 0.14;  // subtle but perceptible LED halation
+        this._pipeline.bloomThreshold = 0.60;  // activates on aqua tiles + water glints
+        this._pipeline.bloomKernel    = 32;    // slightly wider — soft photorealistic glow
+        this._pipeline.bloomScale     = 0.50;
+      } else if (qualityTier === 'MEDIUM') {
+        this._pipeline.bloomWeight    = 0.08;
+        this._pipeline.bloomThreshold = 0.68;
+        this._pipeline.bloomKernel    = 16;
+        this._pipeline.bloomScale     = 0.50;
       }
     }
 

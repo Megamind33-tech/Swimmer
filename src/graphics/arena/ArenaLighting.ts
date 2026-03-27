@@ -45,46 +45,46 @@ interface TimeConfig {
 }
 
 // ── Time-of-day configurations ────────────────────────────────────────────────
-// Indoor arena: flood fixtures always on at competition level.
-// Hemi/key represent daylight through high clerestory windows.
-// NIGHT = no window contribution, full artificial (drama + maximum contrast).
+// SWIM26 competition arena uses high-output LED floodlights.
+// Intensities tuned to match the reference image: bright, punchy, neutral-white
+// overhead lighting producing clean, photorealistic tile reflections.
 const TIME_CONFIGS: Record<TimeOfDay, TimeConfig> = {
   MORNING: {
-    ambientDiffuse:   new BABYLON.Color3(1.00, 0.96, 0.88), // warm morning window
-    ambientGround:    new BABYLON.Color3(0.50, 0.52, 0.54), // concrete floor bounce
-    ambientIntensity: 0.54,
-    keyColor:         new BABYLON.Color3(0.88, 0.93, 1.00), // cool morning overhead
-    keyIntensity:     0.68,
-    floodColor:       new BABYLON.Color3(1.00, 0.97, 0.93),
-    floodIntensity:   0.52,
+    ambientDiffuse:   new BABYLON.Color3(1.00, 0.97, 0.92), // warm morning window light
+    ambientGround:    new BABYLON.Color3(0.55, 0.58, 0.62),
+    ambientIntensity: 0.70,
+    keyColor:         new BABYLON.Color3(0.92, 0.96, 1.00), // cool blue morning sky
+    keyIntensity:     0.90,
+    floodColor:       new BABYLON.Color3(1.00, 0.98, 0.95), // warm LED morning
+    floodIntensity:   0.80,
   },
   AFTERNOON: {
     ambientDiffuse:   new BABYLON.Color3(1.00, 1.00, 1.00), // full neutral daylight
-    ambientGround:    new BABYLON.Color3(0.54, 0.56, 0.58),
-    ambientIntensity: 0.68,
-    keyColor:         new BABYLON.Color3(0.98, 1.00, 1.00), // neutral overhead
-    keyIntensity:     0.88,
-    floodColor:       new BABYLON.Color3(1.00, 0.98, 0.94),
-    floodIntensity:   0.58,
+    ambientGround:    new BABYLON.Color3(0.60, 0.62, 0.65),
+    ambientIntensity: 0.80,  // strong ambient from large clerestory windows
+    keyColor:         new BABYLON.Color3(1.00, 1.00, 1.00), // perfect neutral white LED
+    keyIntensity:     1.10,  // bright competition-grade LED floods
+    floodColor:       new BABYLON.Color3(1.00, 0.99, 0.96),
+    floodIntensity:   0.90,  // bright overhead — matches reference image brightness
   },
   EVENING: {
-    ambientDiffuse:   new BABYLON.Color3(0.95, 0.82, 0.62), // warm late light tint
-    ambientGround:    new BABYLON.Color3(0.46, 0.44, 0.42),
-    ambientIntensity: 0.40,
-    keyColor:         new BABYLON.Color3(0.98, 0.98, 0.96), // artificial dominant
-    keyIntensity:     0.92,
-    floodColor:       new BABYLON.Color3(1.00, 0.97, 0.90), // warm stadium lamps
-    floodIntensity:   0.65,
+    ambientDiffuse:   new BABYLON.Color3(0.95, 0.85, 0.68), // warm late light
+    ambientGround:    new BABYLON.Color3(0.50, 0.48, 0.46),
+    ambientIntensity: 0.52,
+    keyColor:         new BABYLON.Color3(1.00, 0.99, 0.97), // artificial dominant
+    keyIntensity:     1.05,
+    floodColor:       new BABYLON.Color3(1.00, 0.98, 0.92), // warm stadium LEDs
+    floodIntensity:   0.85,
   },
   NIGHT: {
-    // No daylight — pure artificial. Cool exterior sky bleeds in through windows.
-    ambientDiffuse:   new BABYLON.Color3(0.58, 0.70, 0.90),
-    ambientGround:    new BABYLON.Color3(0.38, 0.42, 0.46),
-    ambientIntensity: 0.26,
-    keyColor:         new BABYLON.Color3(0.98, 0.98, 0.96), // pure white LED
-    keyIntensity:     0.96,
-    floodColor:       new BABYLON.Color3(1.00, 0.98, 0.92), // high-CRI stadium LEDs
-    floodIntensity:   0.72,
+    // Pure artificial — high-output LED competition lighting (no daylight)
+    ambientDiffuse:   new BABYLON.Color3(0.60, 0.72, 0.92),
+    ambientGround:    new BABYLON.Color3(0.40, 0.44, 0.50),
+    ambientIntensity: 0.35,
+    keyColor:         new BABYLON.Color3(1.00, 1.00, 0.98), // pure white LED
+    keyIntensity:     1.15,  // maximum competition illumination
+    floodColor:       new BABYLON.Color3(1.00, 0.99, 0.94), // high-CRI 6500K LEDs
+    floodIntensity:   1.00,
   },
 };
 

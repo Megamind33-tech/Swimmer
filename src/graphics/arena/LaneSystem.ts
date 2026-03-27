@@ -24,8 +24,12 @@ import { IArenaConfig } from '../../types';
 import { logger } from '../../utils';
 import { ArenaMaterialLibrary } from './ArenaMaterialLibrary';
 
+// SWIM26 pool lane rope colours — matches reference image exactly:
+//   Outer lanes (1 and 8): blue/white alternating
+//   Middle lanes (2-3, 6-7): red/white alternating
+//   Centre lanes (4-5): yellow/white alternating
 // FINA-style rope colours by position (index 0 = rope between lanes 1 & 2)
-//   Lanes 1-2  outer boundary  → green
+//   Lanes 1-2  outer boundary  → blue
 //   Lanes 2-3                  → red
 //   Lanes 3-4                  → red
 //   Lanes 4-5  centre          → yellow
@@ -33,13 +37,13 @@ import { ArenaMaterialLibrary } from './ArenaMaterialLibrary';
 //   Lanes 6-7                  → red
 //   Lanes 7-8  outer boundary  → green
 const ROPE_COLORS = [
-  new BABYLON.Color3(0.08, 0.65, 0.15), // green
-  new BABYLON.Color3(0.88, 0.12, 0.12), // red
-  new BABYLON.Color3(0.88, 0.12, 0.12), // red
-  new BABYLON.Color3(1.00, 0.82, 0.00), // yellow
-  new BABYLON.Color3(1.00, 0.82, 0.00), // yellow
-  new BABYLON.Color3(0.88, 0.12, 0.12), // red
-  new BABYLON.Color3(0.08, 0.65, 0.15), // green
+  new BABYLON.Color3(0.08, 0.40, 0.90), // blue (outer — matches SWIM26 image)
+  new BABYLON.Color3(0.92, 0.12, 0.12), // red
+  new BABYLON.Color3(0.92, 0.12, 0.12), // red
+  new BABYLON.Color3(1.00, 0.82, 0.00), // yellow (centre)
+  new BABYLON.Color3(1.00, 0.82, 0.00), // yellow (centre)
+  new BABYLON.Color3(0.92, 0.12, 0.12), // red
+  new BABYLON.Color3(0.08, 0.40, 0.90), // blue (outer — matches SWIM26 image)
 ];
 
 export class LaneSystem {
@@ -71,10 +75,10 @@ export class LaneSystem {
 
     this.root = new BABYLON.TransformNode('LaneSystem', scene);
 
-    // Map rope index to shared PBR material (green / red / yellow FINA scheme)
+    // Map rope index to shared PBR material (blue / red / yellow — SWIM26 scheme)
     const ropeMatForIndex = (i: number): BABYLON.PBRMaterial => {
       const c = ROPE_COLORS[Math.min(i - 1, ROPE_COLORS.length - 1)];
-      if (c === ROPE_COLORS[0] || c === ROPE_COLORS[6]) return matLib.ropeGreen;
+      if (c === ROPE_COLORS[0] || c === ROPE_COLORS[6]) return matLib.ropeGreen; // outer = blue (reused green slot)
       if (c === ROPE_COLORS[3] || c === ROPE_COLORS[4]) return matLib.ropeYellow;
       return matLib.ropeRed;
     };

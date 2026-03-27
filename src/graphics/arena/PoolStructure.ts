@@ -333,61 +333,71 @@ export class PoolStructure {
   // ─────────────────────────────────────────────────────────────────────────
 
   private _createOlympicFloorTexture(scene: BABYLON.Scene, config: IArenaConfig): BABYLON.DynamicTexture {
-    const { poolWidth: W, poolLength: L, laneCount: LC } = config;
-    
-    // High resolution texture for the pool floor
+    const { poolWidth: W, laneCount: LC } = config;
+
+    // High resolution texture for the pool floor — matches SWIM26 reference image
+    // Light aqua/cyan tiles, dark navy lane lines, visible grout grid
     const texW = 2048;
-    const texH = 4096;  // 2:1 ratio for 25m:50m pool
+    const texH = 4096;  // 2:1 ratio for 25m wide × 50m long pool
     const tex = new BABYLON.DynamicTexture('olympicFloorTex', { width: texW, height: texH }, scene, true);
     const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
 
-    // Base white tile color
-    ctx.fillStyle = '#f5f8fa';
+    // Base tile colour — light aqua (matching SWIM26 pool image)
+    ctx.fillStyle = '#b8e8f4';
     ctx.fillRect(0, 0, texW, texH);
 
-    // Draw tile grid (1m tiles)
-    ctx.strokeStyle = '#b0c4d0';
-    ctx.lineWidth = 2;
-    
-    // Vertical grout lines (every ~40 pixels = 1m for 50m pool length)
-    const tileSpacingV = texW / 25;
-    const tileSpacingH = texH / 50;
-    
-    for (let x = 0; x <= texW; x += tileSpacingV) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, texH);
-      ctx.stroke();
-    }
-    
-    for (let y = 0; y <= texH; y += tileSpacingH) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(texW, y);
-      ctx.stroke();
+    // Subtle tile colour variation (lighter centre of each tile, gives glossy feel)
+    const TILE_PX_W = texW / 25;   // 1m tiles across 25m width
+    const TILE_PX_H = texH / 50;   // 1m tiles across 50m length
+
+    for (let tx = 0; tx < 25; tx++) {
+      for (let ty = 0; ty < 50; ty++) {
+        const x0 = Math.round(tx * TILE_PX_W);
+        const y0 = Math.round(ty * TILE_PX_H);
+        const tw  = Math.round(TILE_PX_W);
+        const th  = Math.round(TILE_PX_H);
+        const grad = ctx.createRadialGradient(
+          x0 + tw * 0.45, y0 + th * 0.38, tw * 0.05,
+          x0 + tw * 0.50, y0 + th * 0.50, tw * 0.65,
+        );
+        grad.addColorStop(0,   'rgba(220, 248, 255, 0.28)');
+        grad.addColorStop(0.6, 'rgba(184, 232, 244, 0.00)');
+        grad.addColorStop(1,   'rgba(150, 210, 228, 0.10)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x0, y0, tw, th);
+      }
     }
 
-    // Draw FINA lane lines (dark blue-black)
-    ctx.fillStyle = '#0a1520';
+    // Grout lines — thin dark lines between tiles
+    ctx.strokeStyle = '#6ab0c4';
+    ctx.lineWidth = 3;
+    for (let x = 0; x <= texW; x += TILE_PX_W) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, texH); ctx.stroke();
+    }
+    for (let y = 0; y <= texH; y += TILE_PX_H) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(texW, y); ctx.stroke();
+    }
+
+    // ── FINA lane lines (dark navy blue, 0.25 m wide) ──────────────────
     const laneWidth = texW / LC;
-    const lineWidth = texW * 0.25 / W;  // 0.25m width scaled
+    const lineWidth = Math.max(8, texW * 0.25 / W);  // 0.25m wide
 
+    ctx.fillStyle = '#05102a';
     for (let lane = 0; lane < LC; lane++) {
       const laneCenterX = (lane + 0.5) * laneWidth;
-      const lineX = laneCenterX - lineWidth / 2;
-      ctx.fillRect(lineX, 0, lineWidth, texH);
+      ctx.fillRect(laneCenterX - lineWidth / 2, 0, lineWidth, texH);
     }
 
-    // Add subtle tile variation for realism
-    for (let i = 0; i < 500; i++) {
-      const x = Math.random() * texW;
-      const y = Math.random() * texH;
-      const alpha = Math.random() * 0.03 + 0.01;
-      ctx.fillStyle = `rgba(200, 215, 230, ${alpha})`;
-      ctx.beginPath();
-      ctx.arc(x, y, Math.random() * 4 + 1, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    // ── Dark edge borders (pool wall boundary lines) ────────────────────
+    ctx.fillStyle = '#05102a';
+    ctx.fillRect(0, 0, lineWidth * 0.6, texH);
+    ctx.fillRect(texW - lineWidth * 0.6, 0, lineWidth * 0.6, texH);
+
+    // ── T-mark cross lines at 5m from each end ──────────────────────────
+    const T_DIST_PX = texH * 5 / 50;
+    ctx.fillStyle = '#05102a';
+    ctx.fillRect(0, texH - T_DIST_PX - lineWidth / 2, texW, lineWidth * 0.8);
+    ctx.fillRect(0,              T_DIST_PX - lineWidth / 2, texW, lineWidth * 0.8);
 
     tex.update();
     this.textures.push(tex);
