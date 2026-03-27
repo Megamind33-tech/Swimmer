@@ -116,6 +116,7 @@ export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
               <div className={`h-full transition-all duration-200 ${race.stamina < 30 ? 'bg-[#FF5A5F]' : race.surgeActive ? 'bg-[#C8FF00]' : 'bg-[#18C8F0]'}`} style={{ width: `${race.stamina}%` }} />
             </div>
           </div>
+        </div>
 
         {race.surgeActive && (
           <div className="px-3 py-0.5 bg-[#C8FF00]/20 border border-[#C8FF00]/40 animate-pulse">
