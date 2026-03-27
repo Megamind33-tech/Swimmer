@@ -39,6 +39,10 @@ export function useGameEngine(arenaRef: MutableRefObject<ArenaManager | null>) {
     arenaRef.current?.notifyRaceStarted();
   }, [arenaRef]);
 
+  const notifyRaceCountdown = useCallback(() => {
+    arenaRef.current?.notifyRaceCountdown();
+  }, [arenaRef]);
+
   const notifyRaceFinished = useCallback(() => {
     arenaRef.current?.notifyRaceFinished();
   }, [arenaRef]);
@@ -46,6 +50,6 @@ export function useGameEngine(arenaRef: MutableRefObject<ArenaManager | null>) {
   return {
     setCamera, setTheme, setQualityPreset,
     enableBroadcast, disableBroadcast, updateScoreboard,
-    updatePlayerRacePosition, notifyRaceStarted, notifyRaceFinished,
+    updatePlayerRacePosition, notifyRaceCountdown, notifyRaceStarted, notifyRaceFinished,
   };
 }

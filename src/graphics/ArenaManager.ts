@@ -401,6 +401,21 @@ export class ArenaManager {
   }
 
   /**
+   * Notify the broadcast camera that pre-race arena presentation is active.
+   */
+  public notifyRaceCountdown(): void {
+    const playerState = {
+      id: 'player', name: 'YOU', lane: 4,
+      stats: { speed: 2, stamina: 100, technique: 80, endurance: 80, mental: 80 },
+      position: 0, velocity: 0, stamina: 100, oxygen: 100,
+      diveTime: 0, isUnderwater: false, rotationAngle: 0,
+      currentStrokePhase: 0, lapCount: 0, splitsTime: [], lapTimes: [],
+      isDNF: false, finishTime: 0, finishRank: 0,
+    };
+    this.broadcastCamera?.onRaceStateChange('COUNTDOWN', playerState);
+  }
+
+  /**
    * Notify the broadcast camera that the race is finished.
    */
   public notifyRaceFinished(): void {

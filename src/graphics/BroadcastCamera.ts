@@ -199,8 +199,13 @@ export class BroadcastCamera {
       }
     }
 
-    // Shot sequence always progresses during a race
-    if (this.raceState === 'RACING' && this.currentShotSequence.length > 0) {
+    // Shot sequence progresses during countdown + race.
+    // Countdown keeps rotating "entrance" shots so players can appreciate
+    // full-arena scale before the race starts.
+    if (
+      (this.raceState === 'RACING' || this.raceState === 'COUNTDOWN') &&
+      this.currentShotSequence.length > 0
+    ) {
       this.updateShotSequence(deltaTime);
     }
   }
@@ -439,8 +444,13 @@ export class BroadcastCamera {
         const nextCamera = this.currentShotSequence[this.currentSequenceIndex];
         this.transitionToCamera(nextCamera);
         this.sequenceTimer = 0;
+      } else if (this.raceState === 'COUNTDOWN' && this.currentShotSequence.length > 0) {
+        // During pre-race countdown we continuously loop wide/hero shots.
+        this.currentSequenceIndex = 0;
+        this.transitionToCamera(this.currentShotSequence[0]);
+        this.sequenceTimer = 0;
       } else {
-        // Sequence complete, switch back to default
+        // Sequence complete, switch back to default for non-countdown states.
         this.currentShotSequence = [];
         this.currentSequenceIndex = 0;
       }
