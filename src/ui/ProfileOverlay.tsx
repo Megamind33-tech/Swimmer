@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameStore } from '../../hooks/useGameStore';
+import { useGameStore } from '../gameplay/useGameStore';
 import { X, User, Trophy, Calendar, Waves } from 'lucide-react';
 
 export const ProfileOverlay = () => {

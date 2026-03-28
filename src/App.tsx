@@ -1,23 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArenaManager } from './graphics/ArenaManager';
+import { ArenaManager } from './world/WorldScene';
 import { detectRuntimePerformanceTier } from './performance/performanceTier';
-import { GameProvider, useGameStore } from './hooks/useGameStore';
-import { useGameEngine } from './hooks/useGameEngine';
+import { GameProvider, useGameStore } from './gameplay/useGameStore';
+import { useGameEngine } from './gameplay/useGameEngine';
 
-import { BootScreen } from './components/ui/BootScreen';
-import { LoadingScreen } from './components/ui/LoadingScreen';
-import { TopHUD } from './components/ui/TopHUD';
-import { Navigation } from './components/ui/Navigation';
-import { HubScreen } from './components/ui/HubScreen';
-import { SquadScreen } from './components/ui/SquadScreen';
-import { MarketScreen } from './components/ui/MarketScreen';
-import { SettingsScreen } from './components/ui/SettingsScreen';
-import { RaceHUD } from './components/ui/RaceHUD';
-import { NotificationToast } from './components/ui/NotificationToast';
-import { AthleteDetailOverlay } from './components/ui/AthleteDetailOverlay';
-import { ProspectNegotiateOverlay } from './components/ui/ProspectNegotiateOverlay';
-import { ProfileOverlay } from './components/ui/ProfileOverlay';
-import { RaceResultOverlay } from './components/ui/RaceResultOverlay';
+import { BootScreen } from './ui/BootScreen';
+import { LoadingScreen } from './ui/LoadingScreen';
+import { TopHUD } from './ui/TopHUD';
+import { Navigation } from './ui/Navigation';
+import { HubScreen } from './ui/HubScreen';
+import { SquadScreen } from './ui/SquadScreen';
+import { MarketScreen } from './ui/MarketScreen';
+import { SettingsScreen } from './ui/SettingsScreen';
+import { RaceHUD } from './ui/RaceHUD';
+import { NotificationToast } from './ui/NotificationToast';
+import { AthleteDetailOverlay } from './ui/AthleteDetailOverlay';
+import { ProspectNegotiateOverlay } from './ui/ProspectNegotiateOverlay';
+import { ProfileOverlay } from './ui/ProfileOverlay';
+import { RaceResultOverlay } from './ui/RaceResultOverlay';
 
 function GameApp() {
   const canvasRef = useRef<HTMLCanvasElement>(null);

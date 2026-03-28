@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameStore } from '../../hooks/useGameStore';
+import { useGameStore } from '../gameplay/useGameStore';
 import { Search, Lock, User } from 'lucide-react';
 
 export const MarketScreen = () => {
