@@ -1,5 +1,5 @@
 import { useCallback, MutableRefObject } from 'react';
-import { ArenaManager } from '../graphics/ArenaManager';
+import { ArenaManager } from '../world/WorldScene';
 import type { CameraView } from '../types';
 
 /**

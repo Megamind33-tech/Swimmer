@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameStore } from '../../hooks/useGameStore';
+import { useGameStore } from '../gameplay/useGameStore';
 import { Trophy, Medal, X } from 'lucide-react';
 
 export const RaceResultOverlay = ({ onExit }: { onExit: () => void }) => {

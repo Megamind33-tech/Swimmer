@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameStore, GameSettings } from '../../hooks/useGameStore';
+import { useGameStore, GameSettings } from '../gameplay/useGameStore';
 import { Volume2, Monitor, Gamepad2 } from 'lucide-react';
 
 export const SettingsScreen = ({ onEngineQuality }: { onEngineQuality?: (preset: 'high' | 'medium' | 'low') => void }) => {

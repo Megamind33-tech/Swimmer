@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameStore } from '../../hooks/useGameStore';
+import { useGameStore } from '../gameplay/useGameStore';
 import { RaceCard, ClubCard } from './Cards';
 import { Medal, Activity, TrendingUp } from 'lucide-react';
 

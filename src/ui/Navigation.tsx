@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameStore } from '../../hooks/useGameStore';
+import { useGameStore } from '../gameplay/useGameStore';
 import { Monitor, Users, Globe, Sliders } from 'lucide-react';
 
 export const Navigation = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: string) => void }) => {

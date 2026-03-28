@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useGameStore } from '../../hooks/useGameStore';
+import { useGameStore } from '../gameplay/useGameStore';
 import { Waves, Activity, Zap } from 'lucide-react';
 
 export const RaceHUD = ({ onBack }: { onBack: () => void }) => {
