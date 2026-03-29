@@ -1,0 +1,3 @@
+## 2024-05-24 - Icon-Only Button Accessibility Pattern
+**Learning:** In this application, many icon-only utility buttons (such as top navigation elements and overlay close buttons) lacked both screen-reader descriptions and visible focus states for keyboard users.
+**Action:** When adding or maintaining icon-only buttons, always ensure they have `aria-label` and `title` attributes, and apply the standardized focus styles (`focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none`) to guarantee they are discoverable via keyboard navigation.
