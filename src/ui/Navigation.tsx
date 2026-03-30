@@ -18,7 +18,9 @@ export const Navigation = ({ activeTab, setActiveTab }: { activeTab: string, set
           const isActive = activeTab === item.id;
           return (
             <button key={item.id} onClick={() => setActiveTab(item.id)}
-              className={`w-[40px] h-[40px] flex flex-col items-center justify-center transition-all rounded-lg relative btn-mech ${
+              aria-label={item.label}
+              title={item.label}
+              className={`w-[40px] h-[40px] flex flex-col items-center justify-center transition-all rounded-lg relative btn-mech focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none ${
                 isActive ? 'text-[#18C8F0] bg-[#112240]' : 'text-[#71859C] hover:text-[#F3F7FC] hover:bg-[#112240]/50'
               }`}>
               {isActive && <div className="absolute left-[-8px] w-[3px] h-6 rounded-r-md bg-[#18C8F0] shadow-[0_0_10px_rgba(24,200,240,0.6)]" />}
@@ -34,7 +36,9 @@ export const Navigation = ({ activeTab, setActiveTab }: { activeTab: string, set
           const isActive = activeTab === item.id;
           return (
             <button key={item.id} onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center justify-center w-full h-full transition-all btn-mech relative ${
+              aria-label={item.label}
+              title={item.label}
+              className={`flex flex-col items-center justify-center w-full h-full transition-all btn-mech relative focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none ${
                 isActive ? 'text-[#18C8F0]' : 'text-[#71859C]'
               }`}>
               <item.icon size={18} className={isActive ? 'mb-0.5' : 'mb-0.5'} />
