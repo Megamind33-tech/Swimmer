@@ -1,0 +1,3 @@
+## 2024-05-16 - Icon Button Accessibility
+**Learning:** Found a recurring pattern where icon-only buttons (like navigation tabs, profile avatars, and toast dismiss buttons) lack semantic `aria-label`s, `title` attributes, and visual focus states (`focus-visible:ring-2`) necessary for keyboard navigation and screen reader users.
+**Action:** When building or modifying custom UI components, explicitly test keyboard tab navigation to ensure every interactive element has a clear focus indicator and semantic label, leveraging the project's standard `focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none` classes.
