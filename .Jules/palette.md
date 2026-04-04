@@ -1,0 +1,3 @@
+## 2025-03-01 - Navigation and HUD Accessibility Enhancements
+**Learning:** Icon-only navigation and HUD buttons lacking text labels, titles, and visual focus rings significantly impede accessibility for both screen reader users and those navigating via keyboard, making core features of the interface difficult to discover and interact with.
+**Action:** Consistently apply `aria-label` and `title` to icon-only interactive elements, use `aria-current="page"` to indicate active states contextually, and always apply the project's standard focus ring (`focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none`) to ensure clear keyboard navigability.
