@@ -1,0 +1,3 @@
+## 2025-05-18 - Missing ARIA Labels on Icon-Only Dismiss Buttons
+**Learning:** Standard interactive overlays and toasts in this codebase's design system consistently missed `aria-label` or `title` attributes on their icon-only dismiss/action buttons. This pattern of omitting accessible names creates a poor experience for screen reader users and those who rely on tooltips to identify icon actions.
+**Action:** When working on new or modifying existing overlays/toasts, always ensure icon-only buttons include descriptive `aria-label` and `title` attributes (e.g., `aria-label="Dismiss notification"` or `aria-label="Close"`).
