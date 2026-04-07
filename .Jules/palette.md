@@ -1,0 +1,3 @@
+## 2025-02-28 - Icon Button Accessibility
+**Learning:** Icon-only buttons across multiple components (TopHUD, AthleteDetailOverlay, NotificationToast) lacked screen reader labels and visible keyboard focus states.
+**Action:** Added `aria-label`, `title`, and custom focus ring (`focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none`) to ensure accessibility standards are met consistently across the application.
