@@ -19,7 +19,12 @@ export const NotificationToast = () => {
           }`}
         >
           <span className="font-rajdhani text-[12px] font-bold uppercase tracking-widest flex-1">{n.message}</span>
-          <button onClick={() => dispatch({ type: 'DISMISS_NOTIFICATION', id: n.id })} className="opacity-60 hover:opacity-100 btn-mech shrink-0">
+          <button
+            onClick={() => dispatch({ type: 'DISMISS_NOTIFICATION', id: n.id })}
+            className="opacity-60 hover:opacity-100 btn-mech shrink-0 focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none"
+            aria-label="Dismiss notification"
+            title="Dismiss notification"
+          >
             <X size={14} />
           </button>
         </div>
