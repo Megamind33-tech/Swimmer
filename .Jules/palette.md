@@ -1,0 +1,3 @@
+## 2025-02-14 - Accessibility & Focus States on Overlays
+**Learning:** Icon-only close buttons within interactive overlays (`ProfileOverlay`, `AthleteDetailOverlay`, etc.) in the `src/ui/` directory frequently lacked `aria-label`, `title`, and keyboard navigation focus states, which breaks screen reader support and keyboard usability. This pattern was seen across 4 different overlay components in the app.
+**Action:** Always ensure that `<X />` or other icon-only buttons receive descriptive `aria-label` attributes (e.g., "Close profile"), a `title` tooltip, and consistent tailwind focus states like `focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none`.
