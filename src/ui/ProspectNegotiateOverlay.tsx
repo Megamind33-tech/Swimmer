@@ -16,7 +16,12 @@ export const ProspectNegotiateOverlay = () => {
         
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#C8FF00] z-10" />
         
-        <button onClick={closeOverlay} className="absolute top-3 right-3 z-30 w-8 h-8 flex items-center justify-center bg-[#112240] border border-[#1E3A57] rounded-sm btn-mech hover:bg-[#1E3A57] transition-colors">
+        <button
+          onClick={closeOverlay}
+          className="absolute top-3 right-3 z-30 w-8 h-8 flex items-center justify-center bg-[#112240] border border-[#1E3A57] rounded-sm btn-mech hover:bg-[#1E3A57] transition-colors focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none"
+          aria-label="Close negotiation"
+          title="Close negotiation"
+        >
           <X size={16} className="text-[#9EB2C7]" />
         </button>
 
