@@ -1,0 +1,3 @@
+## 2024-05-15 - Icon-Only Button Accessibility Pattern
+**Learning:** Found multiple instances where overlay "close" buttons (using the Lucide `X` icon) lacked screen reader context (`aria-label`, `title`) and clear keyboard navigation cues, which impacts a11y for modal dialogs.
+**Action:** Enforce the convention of always adding `aria-label`, `title`, and gold-ring focus styles (`focus-visible:ring-2 focus-visible:ring-[#D4A843] focus-visible:outline-none`) to any icon-only button to guarantee accessibility and keyboard navigability.
