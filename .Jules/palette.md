@@ -1,0 +1,3 @@
+## 2024-04-15 - Pervasive Missing Accessible Labels on Overlay Closers and Utility Icons
+**Learning:** Found a systemic pattern where numerous icon-only buttons (like toast dismissals, profile triggers, and overlay closers) rely exclusively on Lucide React icons (`<X />`, etc.) without any accessible text (`aria-label`) or visual tooltips (`title`). This prevents screen readers from understanding the button's purpose and leaves desktop users without hover context.
+**Action:** Always verify icon-only buttons have both an `aria-label` for screen readers and a `title` for visual users, especially in custom UI overlays and HUD elements.

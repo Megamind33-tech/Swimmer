@@ -12,7 +12,12 @@ export const ProfileOverlay = () => {
         
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#18C8F0] z-10" />
         
-        <button onClick={closeOverlay} className="absolute top-3 right-3 z-30 w-8 h-8 flex items-center justify-center bg-[#112240] border border-[#1E3A57] rounded-sm btn-mech">
+        <button
+          onClick={closeOverlay}
+          className="absolute top-3 right-3 z-30 w-8 h-8 flex items-center justify-center bg-[#112240] border border-[#1E3A57] rounded-sm btn-mech hover:bg-[#1E3A57] transition-colors"
+          aria-label="Close profile overlay"
+          title="Close profile overlay"
+        >
           <X size={16} className="text-[#9EB2C7]" />
         </button>
 
