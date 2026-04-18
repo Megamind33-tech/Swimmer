@@ -20,7 +20,8 @@ export const Navigation = ({ activeTab, setActiveTab }: { activeTab: string, set
             <button key={item.id} onClick={() => setActiveTab(item.id)}
               className={`w-[40px] h-[40px] flex flex-col items-center justify-center transition-all rounded-lg relative btn-mech ${
                 isActive ? 'text-[#18C8F0] bg-[#112240]' : 'text-[#71859C] hover:text-[#F3F7FC] hover:bg-[#112240]/50'
-              }`}>
+              }`}
+              aria-label={item.label} title={item.label}>
               {isActive && <div className="absolute left-[-8px] w-[3px] h-6 rounded-r-md bg-[#18C8F0] shadow-[0_0_10px_rgba(24,200,240,0.6)]" />}
               <item.icon size={18} className={isActive ? 'drop-shadow-[0_0_8px_rgba(24,200,240,0.4)]' : ''} />
             </button>
