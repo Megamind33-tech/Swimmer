@@ -18,6 +18,8 @@ export const Navigation = ({ activeTab, setActiveTab }: { activeTab: string, set
           const isActive = activeTab === item.id;
           return (
             <button key={item.id} onClick={() => setActiveTab(item.id)}
+              aria-label={item.label}
+              title={item.label}
               className={`w-[40px] h-[40px] flex flex-col items-center justify-center transition-all rounded-lg relative btn-mech ${
                 isActive ? 'text-[#18C8F0] bg-[#112240]' : 'text-[#71859C] hover:text-[#F3F7FC] hover:bg-[#112240]/50'
               }`}>
