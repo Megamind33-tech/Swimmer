@@ -53,9 +53,14 @@ export const SettingsScreen = ({ onEngineQuality }: { onEngineQuality?: (preset:
             </div>
             <div className="grid gap-2">
               {section.items.map((setting) => (
-                <button key={setting.key} onClick={() => handleToggle(setting.key)} 
+                <button
+                  key={setting.key}
+                  onClick={() => handleToggle(setting.key)}
+                  role="switch"
+                  aria-checked={setting.state}
+                  aria-labelledby={`setting-label-${setting.key}`}
                   className="bg-[#0a192f] border border-[#1E3A57] p-3 flex justify-between items-center rounded-sm hover:bg-[#112240] transition-colors cursor-pointer btn-mech w-full text-left">
-                  <span className="font-rajdhani text-xs font-bold text-[#F3F7FC] uppercase tracking-wider">{setting.label}</span>
+                  <span id={`setting-label-${setting.key}`} className="font-rajdhani text-xs font-bold text-[#F3F7FC] uppercase tracking-wider">{setting.label}</span>
                   <div className={`w-10 h-5 rounded-full p-0.5 transition-colors shrink-0 ml-3 ${setting.state ? `bg-[${section.color}]` : 'bg-[#1E3A57]'}`}
                     style={{ backgroundColor: setting.state ? section.color : '#1E3A57' }}>
                     <div className={`w-4 h-4 rounded-full bg-[#0a192f] transition-transform ${setting.state ? 'translate-x-5' : 'translate-x-0'}`} />
