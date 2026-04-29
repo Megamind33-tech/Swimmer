@@ -1,0 +1,3 @@
+## 2025-05-18 - Settings Screen Toggle Switch Accessibility
+**Learning:** Generic `<button>` elements styled as visual toggle switches (with sliding indicators) are read simply as buttons by screen readers, failing to convey their binary toggle state or current value, making the settings menu fundamentally inaccessible.
+**Action:** Always add `role="switch"` and dynamically bound `aria-checked={state}` attributes to any button functioning as a toggle switch, and use `aria-hidden="true"` on inner div structures that strictly serve as visual state indicators to reduce redundant or confusing auditory feedback.
