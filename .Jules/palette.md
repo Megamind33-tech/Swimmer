@@ -1,0 +1,1 @@
+## 2024-04-30 - Added ARIA switch role to Settings Toggles\n**Learning:** Custom UI toggles using `button` elements need explicit `role="switch"` and `aria-checked` attributes to properly communicate their on/off state to screen readers.\n**Action:** Always add `role="switch"` and `aria-checked={boolean}` when building custom toggle switches instead of native checkboxes.
