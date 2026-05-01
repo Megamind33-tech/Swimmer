@@ -18,11 +18,12 @@ export const Navigation = ({ activeTab, setActiveTab }: { activeTab: string, set
           const isActive = activeTab === item.id;
           return (
             <button key={item.id} onClick={() => setActiveTab(item.id)}
+              aria-label={item.label} title={item.label}
               className={`w-[40px] h-[40px] flex flex-col items-center justify-center transition-all rounded-lg relative btn-mech ${
                 isActive ? 'text-[#18C8F0] bg-[#112240]' : 'text-[#71859C] hover:text-[#F3F7FC] hover:bg-[#112240]/50'
               }`}>
-              {isActive && <div className="absolute left-[-8px] w-[3px] h-6 rounded-r-md bg-[#18C8F0] shadow-[0_0_10px_rgba(24,200,240,0.6)]" />}
-              <item.icon size={18} className={isActive ? 'drop-shadow-[0_0_8px_rgba(24,200,240,0.4)]' : ''} />
+              {isActive && <div aria-hidden="true" className="absolute left-[-8px] w-[3px] h-6 rounded-r-md bg-[#18C8F0] shadow-[0_0_10px_rgba(24,200,240,0.6)]" />}
+              <item.icon aria-hidden="true" size={18} className={isActive ? 'drop-shadow-[0_0_8px_rgba(24,200,240,0.4)]' : ''} />
             </button>
           );
         })}
@@ -37,9 +38,9 @@ export const Navigation = ({ activeTab, setActiveTab }: { activeTab: string, set
               className={`flex flex-col items-center justify-center w-full h-full transition-all btn-mech relative ${
                 isActive ? 'text-[#18C8F0]' : 'text-[#71859C]'
               }`}>
-              <item.icon size={18} className={isActive ? 'mb-0.5' : 'mb-0.5'} />
+              <item.icon aria-hidden="true" size={18} className={isActive ? 'mb-0.5' : 'mb-0.5'} />
               <span className={`text-[8px] font-bold uppercase tracking-wider ${isActive ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>{item.label}</span>
-              {isActive && <div className="absolute bottom-0 w-6 h-[3px] rounded-t-md bg-[#18C8F0]" />}
+              {isActive && <div aria-hidden="true" className="absolute bottom-0 w-6 h-[3px] rounded-t-md bg-[#18C8F0]" />}
             </button>
           );
         })}

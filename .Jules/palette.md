@@ -1,0 +1,3 @@
+## 2024-05-01 - Custom Switch and Icon Button Accessibility
+**Learning:** Custom UI toggles (like those in `SettingsScreen`) lack native semantics and need explicit `role="switch"` and `aria-checked` attributes for screen reader support. Icon-only buttons (like `TopHUD` profile and `Navigation` tabs) frequently miss `aria-label`/`title` while exposing decorative elements (`div` shapes or internal SVG icons) to screen readers.
+**Action:** Always add `aria-label` and `title` to icon-only buttons, explicitly hide internal decorative elements with `aria-hidden="true"`, and apply `role="switch"` with an accurate `aria-checked` state to any generic `button` or `div` acting as a toggle.
