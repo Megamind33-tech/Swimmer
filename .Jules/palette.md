@@ -1,0 +1,3 @@
+## 2024-05-06 - Custom Switch Accessibility and Icon-only Button ARIA Labels
+**Learning:** Custom UI toggles built with generic `button` or `div` elements require `role="switch"` and `aria-checked` to be announced correctly by screen readers as interactive switch elements. Furthermore, icon-only buttons need `aria-label` or `title` for context, while nested SVG icons within these elements should have `aria-hidden="true"` to prevent redundant screen reader announcements.
+**Action:** Always add `role="switch"` and an accurate `aria-checked` property to custom toggle components. Ensure all icon-only buttons have descriptive `aria-label` attributes and explicitly set nested decorative SVGs to `aria-hidden="true"`.
