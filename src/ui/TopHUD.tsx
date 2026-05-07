@@ -32,11 +32,11 @@ export const TopHUD = ({ avatarImg }: { avatarImg: string | null }) => {
           <span className="font-rajdhani font-bold text-[#F3F7FC] text-xs">{state.points.toLocaleString()} PTS</span>
         </div>
         
-        <button onClick={() => openOverlay('profile')} className="w-[36px] h-[36px] border-2 border-[#18C8F0] p-0.5 cursor-pointer rounded-full overflow-hidden btn-mech shrink-0">
+        <button onClick={() => openOverlay('profile')} aria-label="Player Profile" title="Player Profile" className="w-[36px] h-[36px] border-2 border-[#18C8F0] p-0.5 cursor-pointer rounded-full overflow-hidden btn-mech shrink-0">
           {avatarImg ? (
             <img src={avatarImg} alt="Player" className="w-full h-full object-cover rounded-full" />
           ) : (
-            <div className="w-full h-full bg-[#112240] flex items-center justify-center rounded-full"><User size={16} className="text-[#18C8F0]"/></div>
+            <div className="w-full h-full bg-[#112240] flex items-center justify-center rounded-full"><User size={16} className="text-[#18C8F0]" aria-hidden="true" /></div>
           )}
         </button>
       </div>
