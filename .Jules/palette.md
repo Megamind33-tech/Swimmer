@@ -1,0 +1,3 @@
+## 2026-05-10 - Generic Button Toggles
+**Learning:** In this application, standard custom `<button>` elements are often used alongside visual `<div>` elements to simulate toggle switches without native `<input type="checkbox">` elements. This pattern requires manual implementation of `role="switch"` and `aria-checked` to be recognized by screen readers correctly.
+**Action:** Always ensure that custom switch implementations using `<button>` include `role="switch"`, an accurate `aria-checked` state, and hide decorative elements such as nested pill/track divs using `aria-hidden="true"`.
