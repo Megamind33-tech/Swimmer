@@ -1,0 +1,3 @@
+## 2024-05-18 - Missing toggle ARIA labels and `role="switch"` in custom interactive elements
+**Learning:** React component `<button>` tags specifically styled as switches or toggles are frequently missing the required accessibility attributes (`role="switch"` and `aria-checked`). They often use dynamic Tailwind classnames to display the visual state. This causes screen readers to ignore the state or treat them as generic buttons. Also, side navigation buttons may lack generic `aria-label`s.
+**Action:** Always add `role="switch"` and dynamically set `aria-checked={booleanValue}` to toggle buttons, and verify `aria-label` strings are present on icon-only navigation buttons.
