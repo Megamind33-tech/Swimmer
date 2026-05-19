@@ -1,0 +1,3 @@
+## 2026-05-19 - Accessible Icon-Only Buttons
+**Learning:** Found that key navigation and profile buttons were lacking `aria-label`s and `title`s, leaving screen reader users without proper context for the primary actions of the application. Also, active tabs did not have `aria-current="page"`.
+**Action:** Implemented a reusable pattern to always include `aria-label` and `title` attributes on icon-only buttons. Added `aria-current="page"` to active navigation tabs to properly convey state. Additionally, added `aria-hidden="true"` to nested decorative icons to prevent redundant screen reader announcements.
